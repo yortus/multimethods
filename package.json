@@ -1,0 +1,48 @@
+{
+  "name": "multimethods",
+  "description": "Multimethods for Node.js",
+  "version": "0.0.1",
+  "keywords": [
+    "multimethod",
+    "multi method",
+    "polymorphic",
+    "dynamic",
+    "dispatch",
+    "function",
+    "method",
+    "override"
+  ],
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/yortus/multimethods.git"
+  },
+  "bugs": {
+    "url": "http://github.com/yortus/multimethods/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Troy Gerwien",
+    "email": "yortus@gmail.com",
+    "url": "http://github.com/yortus/"
+  },
+  "readmeFilename": "README.md",
+  "scripts": {
+    "test": "grunt test",
+    "prepublish": "grunt build"
+  },
+  "dependencies": {
+    "bluebird": "~2.0.2",
+    "lodash": "~2.4.1",
+    "asyncawait": "~0.7.1"
+  },
+  "devDependencies": {
+    "mocha": "~1.18.2",
+    "chai": "~1.9.1",
+    "grunt": "~0.4.4",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-mocha-test": "~0.10.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-typescript": "~0.3.6"
+  }
+}
