@@ -1,7 +1,5 @@
-*.suo
-*.sln
-*.user
-*.js.map
-obj/
+built/
 node_modules/
-.tscache/
+*.js.map
+*.log
+*.sln

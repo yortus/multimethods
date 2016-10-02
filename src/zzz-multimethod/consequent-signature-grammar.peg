@@ -1,0 +1,40 @@
+
+
+
+
+
+// ================================================================================
+Start
+=   Function
+/   ArrowFunction
+
+Function
+=   ASYNC?   WS   FUNCTION   WS   Identifier?   WS   "("   WS   p:ParameterList?   WS   ")"   .*   { return p||[]; }
+
+ArrowFunction
+=   ASYNC?   WS   "("   WS   p:ParameterList?   WS   ")"   .*   { return p || []; }
+/   ASYNC?   WS   id:Identifier   WS   "=>"   .*   { return [id]; }
+
+ParameterList
+=   head:Parameter   tail:(WS   ","   WS   Parameter)*
+    { return [head].concat(tail.map(el => el[3])); }
+
+Parameter
+=   Identifier
+/   DestructuredParameter
+
+DestructuredParameter
+=   "{"   WS   p:ParameterList?   WS   "}"   { return p || []; }
+
+Identifier
+=   (!WS_ELEM   !PUNCTUATION   .)+   { return text(); }
+
+ASYNC       =   "async"   &(WS_ELEM / EOS)
+COMMENT     =   ("//" (!EOL .)*)   /   ("/*" (!"*/" .)* "*/")
+EOL         =   [\n\r\u2028\u2029]
+EOS         =   !.
+FUNCTION    =   "function"   &(WS_ELEM / EOS)
+PUNCTUATION =   [(){}[\]=,:.]  // TODO: more chars possible here?
+WS          =   WS_ELEM*
+WS_ELEM     =   [ \t]   /   EOL   /   COMMENT
+// ================================================================================

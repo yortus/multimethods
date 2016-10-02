@@ -1,0 +1,10 @@
+﻿{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "lib": ["es6"],
+        "removeComments": false,
+        "sourceMap": true,
+        "outDir": "../built/test"
+    }
+}

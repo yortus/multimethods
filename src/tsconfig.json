@@ -1,0 +1,19 @@
+﻿{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "lib": ["es6"],
+        "removeComments": false,
+        "sourceMap": true,
+        "declaration": true,
+        "outDir": "../built",
+
+        // Static checks
+        "strictNullChecks": false,
+        "noUnusedLocals": false,
+        "noImplicitAny": false,
+        "noImplicitThis": false,
+        "noImplicitReturns": false,
+        "noFallthroughCasesInSwitch": false
+    }
+}

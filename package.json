@@ -1,7 +1,25 @@
 {
   "name": "multimethods",
-  "description": "Multimethods for Node.js",
-  "version": "0.0.1",
+  "version": "0.2.0",
+  "description": "multimethods",
+  "readmeFilename": "README.md",
+  "main": "built/index.js",
+  "typings": "built/index.d.ts",
+  "scripts": {
+    "build": "tsc -p src && tsc -p test && pegjs src/pattern/pattern-source-grammar.peg built/pattern/pattern-source-grammar.js && pegjs src/zzz-multimethod/consequent-signature-grammar.peg built/zzz-multimethod/consequent-signature-grammar.js",
+    "clean": "rimraf built/",
+    "prepublish": "npm run self-ref && npm run build",
+    "test": "node ./scripts/run-unit-tests",
+    "perf": "node ./scripts/run-perf-tests",
+    "self-ref": "node ./scripts/enable-self-reference"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/yortus/multimethods.git"
+  },
+  "bugs": {
+    "url": "http://github.com/yortus/multimethods/issues"
+  },
   "keywords": [
     "multimethod",
     "multi method",
@@ -12,37 +30,24 @@
     "method",
     "override"
   ],
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/yortus/multimethods.git"
-  },
-  "bugs": {
-    "url": "http://github.com/yortus/multimethods/issues"
-  },
+  "contributors": [
+    {
+      "name": "Troy Gerwien",
+      "email": "yortus@gmail.com",
+      "url": "http://github.com/yortus/"
+    }
+  ],
   "license": "MIT",
-  "author": {
-    "name": "Troy Gerwien",
-    "email": "yortus@gmail.com",
-    "url": "http://github.com/yortus/"
-  },
-  "readmeFilename": "README.md",
-  "scripts": {
-    "test": "grunt test",
-    "prepublish": "grunt build"
-  },
-  "dependencies": {
-    "bluebird": "~2.0.2",
-    "lodash": "~2.4.1",
-    "asyncawait": "~0.7.1"
-  },
+  "homepage": "https://github.com/yortus/multimethods#readme",
+  "dependencies": {},
   "devDependencies": {
-    "mocha": "~1.18.2",
-    "chai": "~1.9.1",
-    "grunt": "~0.4.4",
-    "grunt-contrib-copy": "~0.5.0",
-    "grunt-mocha-test": "~0.10.2",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-typescript": "~0.3.6"
+    "@types/chai": "^3.4.31",
+    "@types/mocha": "^2.2.30",
+    "@types/node": "^6.0.37",
+    "chai": "^3.2.0",
+    "mocha": "^2.2.5",
+    "pegjs": "^0.9.0",
+    "rimraf": "^2.5.2",
+    "typescript": "^2.1.0-dev.20161001"
   }
 }
