@@ -1,3 +1,4 @@
+import {MultimethodError} from '../util';
 
 
 
@@ -15,7 +16,7 @@ export interface UnaryMultimethod<T0, TR> extends Multimethod {
     add(methods: {[predicate: string]: UnaryMethod<T0, TR>}): this;
     add(predicate: string, consequent: UnaryMethod<T0, TR>): this;
 }
-export const UnaryMultimethod: UnaryMultimethodConstructor = createMultimethodClass(1);
+export const UnaryMultimethod: UnaryMultimethodConstructor = class UnaryMultimethod extends createMultimethodClass(1) { };
 export interface UnaryMultimethodOptions<T0, TR> extends MultimethodOptions {
     toDiscriminant?: ($0: T0) => string;
     methods?: {[predicate: string]: UnaryMethod<T0, TR>};
@@ -192,40 +193,50 @@ export default Multimethod;
 
 export type Arity = 1 | 2 | 3 | 'variadic';
 
-function createMultimethodClass(arity?: Arity) {
+
+const CTOR = Symbol('ctor');
+
+
+function createMultimethodClass(staticArity?: Arity) {
 
     // TODO: ...
-    function patchOptions(options: MultimethodOptions): MultimethodOptions {
-        return Object.assign({}, options, {arity});
-    }
+    // function patchOptions(options: MultimethodOptions): MultimethodOptions {
+    //     return Object.assign({}, options, {staticArity});
+    // }
 
 
     // TODO: what to do with arity === undefined?
     // if (arity === undefined) {
     //     throw new Error('not implemented...');
     // }
-    const _arity = arity || 'variadic';
     
 
+    return class Multimethod {
+        constructor(options: MultimethodOptions) {
 
-    // TODO: base multimethod hasInstance must return true for all subclasses (but not vice-versa)
+            // If *both* arities given, they must match
+            if (staticArity && options.arity && staticArity !== options.arity) {
+                throw new MultimethodError(`arity mismatch`); // TODO: improve diagnostic message
+            }
 
-    let className = getClassNameForArity(arity);
-    let instances = new WeakSet();
+            // Use whichever arity is given. If neither arity is given, default to 'variadic'.
+            let arity = staticArity || options.arity || 'variadic';
 
-    let Class: any = class $NAME {
-        constructor(options: MultimethodOptions & {arity: Arity, async: true | false | 'mixed'}) {
-            let instance = createMultimethod(_arity, options);
-            instances.add(instance);
+            // TODO: ...
+            let instance = createMultimethod(arity, options);
+            instance[CTOR] = Multimethod;
             return instance;
         }
-        static [Symbol.hasInstance](value: any) {
-            return instances.has(value);
-        }
-    };
 
-    Class = eval(`(${Class.toString().replace('$NAME', className)})`);
-    return Class;
+        static [Symbol.hasInstance](value: any) {
+            if (staticArity) {
+                return value && value[CTOR] === Multimethod;
+            }
+            else {
+                return value && value.hasOwnProperty(CTOR); // TODO: works for symbols?
+            }
+        }
+    }
 }
 
 
