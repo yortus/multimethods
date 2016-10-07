@@ -1,5 +1,5 @@
 import Options, {WarningsOptions} from './options';
-import {warn, setWarnBehaviour, RoutistError} from '../util';
+import {warn, setWarnBehaviour, MultimethodError} from '../util';
 
 
 
@@ -28,7 +28,7 @@ function getWarnBehaviour(options: WarningsOptions) {
         case 'default':
         case 'console': return message => console.warn(message);
         case 'off':     return message => {};
-        case 'throw':   return message => { throw new RoutistError(message); }
-        default:        throw new RoutistError(`Invalid value for 'warnings': ${options}`);
+        case 'throw':   return message => { throw new MultimethodError(message); }
+        default:        throw new MultimethodError(`Invalid value for 'warnings': ${options}`);
     }
 }

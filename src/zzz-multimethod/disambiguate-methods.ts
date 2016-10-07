@@ -1,4 +1,4 @@
-import {warn, RoutistError} from '../util';
+import {warn, MultimethodError} from '../util';
 import {inspect} from 'util';
 import Method from './method';
 // TODO: `tieBreakFn` should be passed in or somehow provided from outside, with builtin fallback/default impl as below.
@@ -30,7 +30,7 @@ function methodComparator(methodA: Method, methodB: Method) {
 
     // TODO: if with curlies...
     let message = `Ambiguous method ordering - which is more specific of A and B? ${methodDiagnostics}`;
-    if (moreSpecificMethod !== methodA && moreSpecificMethod !== methodB) throw new RoutistError(message);
+    if (moreSpecificMethod !== methodA && moreSpecificMethod !== methodB) throw new MultimethodError(message);
 
     // TODO: if with curlies...
     // TODO: error or warning?...

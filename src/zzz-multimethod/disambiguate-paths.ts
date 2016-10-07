@@ -1,4 +1,4 @@
-import {getLongestCommonPrefix, RoutistError} from '../util';
+import {getLongestCommonPrefix, MultimethodError} from '../util';
 import Pattern from '../pattern';
 import Method from './method';
 // TODO: better explain how/why this works in external documentation (esp. the synthesized 'crasher' method).
@@ -29,12 +29,12 @@ export default function disambiguatePaths(pattern: Pattern, alternateMethodLists
         let nonCommonMethods: Method[] = cand.slice(prefix.length, -suffix.length);
         let noDecorators = nonCommonMethods.every(method => !method.isDecorator);
         // TODO: remove double-negative...
-        if (!noDecorators) throw new RoutistError(`Multiple paths to '${pattern}' with different decorators`);
+        if (!noDecorators) throw new MultimethodError(`Multiple paths to '${pattern}' with different decorators`);
     });
 
     // Synthesize a 'crasher' method that throws an 'ambiguous' error.
     let ambiguousFallbacks = alternateMethodLists.map(cand => cand[cand.length - suffix.length - 1]);
-    let ambiguousError = new RoutistError(`Multiple possible fallbacks from '${pattern}: ${ambiguousFallbacks}`); // TODO: what does this print? use 'inspect' like in disambiguate-methods.ts?
+    let ambiguousError = new MultimethodError(`Multiple possible fallbacks from '${pattern}: ${ambiguousFallbacks}`); // TODO: what does this print? use 'inspect' like in disambiguate-methods.ts?
     function _ambiguous() { throw ambiguousError; }
     let crasher = new Method(pattern.toString(), _ambiguous);
 

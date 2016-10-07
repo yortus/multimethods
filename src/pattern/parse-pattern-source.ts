@@ -1,4 +1,4 @@
-import {RoutistError} from '../util';
+import {MultimethodError} from '../util';
 const patternSourceGrammar: { parse(text: string): PatternAST; } = require('./pattern-source-grammar');
 
 
@@ -21,7 +21,7 @@ export default function parsePatternSource(patternSource: string): PatternAST {
         let endCol = ex.location.end.column;
         if (endCol <= startCol) endCol = startCol + 1;
         let indicator = Array(startCol).join(' ') + Array(endCol - startCol + 1).join('^');
-        throw new RoutistError(`${ex.message}:\n${patternSource}\n${indicator}`);
+        throw new MultimethodError(`${ex.message}:\n${patternSource}\n${indicator}`);
     }
 }
 
