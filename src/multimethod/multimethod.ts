@@ -7,7 +7,6 @@ import {MultimethodError} from '../util';
 
 
 
-// ================================================================================
 // TODO: Base case...
 export interface MultimethodConstructor {
     new<T0, TR>(options: {arity: 1, async?: 'mixed'} & UnaryMultimethodOptions<T0, TR | Promise<TR>>): UnaryMultimethod<T0, TR | Promise<TR>>;
@@ -26,15 +25,14 @@ export interface MultimethodConstructor {
 }
 export const Multimethod: MultimethodConstructor = createMultimethodClass(undefined);
 export interface Multimethod extends Function {
-    (...args: any[]): any;
     add(methods: {[predicate: string]: Function}): this;
     add(predicate: string, consequent: Function): this;
 }
 export interface MultimethodOptions {
     arity?: Arity;
     async?: true | false | 'mixed';
-    toDiscriminant?: Function; // TODO: ...
-    methods?: {[predicate: string]: Function}; // TODO: ...
+    toDiscriminant?: Function;
+    methods?: {[predicate: string]: Function};
 }
 export default Multimethod;
 
@@ -42,7 +40,6 @@ export default Multimethod;
 
 
 
-// ================================================================================
 // TODO: Unary case...
 export interface UnaryMultimethodConstructor {
     new<T0, TR>(options: UnaryMultimethodOptions<T0, TR | Promise<TR>> & {async?: 'mixed'}): UnaryMultimethod<T0, TR | Promise<TR>>;
@@ -50,12 +47,12 @@ export interface UnaryMultimethodConstructor {
     new<T0, TR>(options: UnaryMultimethodOptions<T0, TR> & {async?: false}): UnaryMultimethod<T0, TR>;
     new(): UnaryMultimethod<any, any>;
 }
-export interface UnaryMultimethod<T0, TR> extends Multimethod {
+export interface UnaryMultimethod<T0, TR> {
     ($0: T0): TR;
     add(methods: {[predicate: string]: UnaryMethod<T0, TR>}): this;
     add(predicate: string, consequent: UnaryMethod<T0, TR>): this;
 }
-export const UnaryMultimethod: UnaryMultimethodConstructor = class UnaryMultimethod extends createMultimethodClass(1) { };
+export const UnaryMultimethod = <UnaryMultimethodConstructor> class UnaryMultimethod extends createMultimethodClass(1) { };
 export interface UnaryMultimethodOptions<T0, TR> extends MultimethodOptions {
     arity?: 1;
     toDiscriminant?: ($0: T0) => string;
@@ -66,7 +63,9 @@ export interface UnaryMethod<T0, TR> {
 }
 
 
-// ================================================================================
+
+
+
 // TODO: Binary case...
 export interface BinaryMultimethodConstructor {
     new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, TR | Promise<TR>> & {async?: 'mixed'}): BinaryMultimethod<T0, T1, TR | Promise<TR>>;
@@ -79,7 +78,7 @@ export interface BinaryMultimethod<T0, T1, TR> extends Multimethod {
     add(methods: {[predicate: string]: BinaryMethod<T0, T1, TR>}): this;
     add(predicate: string, consequent: BinaryMethod<T0, T1, TR>): this;
 }
-export const BinaryMultimethod: BinaryMultimethodConstructor = class BinaryMultimethod extends createMultimethodClass(2) { };
+export const BinaryMultimethod = <BinaryMultimethodConstructor> class BinaryMultimethod extends createMultimethodClass(2) { };
 export interface BinaryMultimethodOptions<T0, T1, TR> extends MultimethodOptions {
     arity?: 2;
     toDiscriminant?: ($0: T0, $1: T1) => string;
@@ -90,7 +89,9 @@ export interface BinaryMethod<T0, T1, TR> {
 }
 
 
-// ================================================================================
+
+
+
 // TODO: Ternary case...
 export interface TernaryMultimethodConstructor {
     new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, TR | Promise<TR>> & {async?: 'mixed'}): TernaryMultimethod<T0, T1, T2, TR | Promise<TR>>;
@@ -103,7 +104,7 @@ export interface TernaryMultimethod<T0, T1, T2, TR> extends Multimethod {
     add(methods: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>}): this;
     add(predicate: string, consequent: TernaryMethod<T0, T1, T2, TR>): this;
 }
-export const TernaryMultimethod: TernaryMultimethodConstructor = class TernaryMultimethod extends createMultimethodClass(3) { };
+export const TernaryMultimethod = <TernaryMultimethodConstructor> class TernaryMultimethod extends createMultimethodClass(3) { };
 export interface TernaryMultimethodOptions<T0, T1, T2, TR> extends MultimethodOptions {
     arity?: 3;
     toDiscriminant?: ($0: T0, $1: T1, $2: T2) => string;
@@ -114,7 +115,9 @@ export interface TernaryMethod<T0, T1, T2, TR> {
 }
 
 
-// ================================================================================
+
+
+
 // TODO: Variadic case...
 export interface VariadicMultimethodConstructor {
     new<T, TR>(options: VariadicMultimethodOptions<T, TR | Promise<TR>> & {async?: 'mixed'}): VariadicMultimethod<T, TR | Promise<TR>>;
@@ -127,7 +130,7 @@ export interface VariadicMultimethod<T, TR> extends Multimethod {
     add(methods: {[predicate: string]: VariadicMethod<T, TR>}): this;
     add(predicate: string, consequent: VariadicMethod<T, TR>): this;
 }
-export const VariadicMultimethod: VariadicMultimethodConstructor = class VariadicMultimethod extends createMultimethodClass('variadic') { };
+export const VariadicMultimethod = <VariadicMultimethodConstructor> class VariadicMultimethod extends createMultimethodClass('variadic') { };
 export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
     arity?: 'variadic';
     toDiscriminant?: (args: T[]) => string;
@@ -283,16 +286,10 @@ function test() {
         }
     });
     let result5 = mm5('foo', 'bar', 'baz');
-    let result51 = mm5('foo');  // <==== TODO: should NOT typecheck! (wrong arity), but falling back to inherited call signature from Multimethod interface
 
 
     let mm = new Multimethod({}); // untyped
     mm(42, 24);
-    
-
-
-
-
 }
 
 
@@ -308,7 +305,7 @@ namespace ns {
     let r3 = m3(42, 24);
 
     let m4 = new TernaryMultimethod();
-    let r4 = m4(42, 24); // TODO: should NOT typecheck!
+    let r4 = m4(42, 24, 2);
 
     let m5 = new VariadicMultimethod();
     let r5 = m5(42, 24); // TODO: should NOT typecheck!
