@@ -5,7 +5,47 @@ import {Multimethod, UnaryMultimethod, BinaryMultimethod, TernaryMultimethod, Va
 
 
 // TODO: ...
-describe('Constructing a Multimethod instance', () => {
+describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Constructing a Multimethod instance', () => {
+
+    let arities: Array<1|2|3|'variadic'> = [undefined, 1, 2, 3, 'variadic'];
+    let timings: Array<'mixed'|'async'|'sync'> = [undefined, 'mixed', 'async', 'sync'];
+
+
+    arities.forEach(arity => {
+        timings.forEach(timing => {
+
+            it(`{arity: ${JSON.stringify(arity)}, timing: ${JSON.stringify(timing)}}`, () => {
+
+
+                let mm = new Multimethod({
+                    arity,
+                    timing
+                });
+
+                // instanceof checks
+                expect(mm).instanceof(Function);
+                expect(mm).instanceof(Multimethod);
+                switch (arity) {
+                    case 1:
+                        expect(mm).instanceof(UnaryMultimethod);
+                        expect(mm instanceof UnaryMultimethod).to.be.true;
+                        break;
+                    case 2: expect(mm).instanceof(BinaryMultimethod); break;
+                    case 3: expect(mm).instanceof(TernaryMultimethod); break;
+                    case 'variadic': expect(mm).instanceof(VariadicMultimethod); break;
+                }
+
+                // Function checks
+
+
+// TODO: ...
+//                expect(mm.length).equals(typeof arity === 'number' ? arity : 0);
+
+            });
+        });
+    });
+
+
 
     // TODO: ...
     let tests = [
@@ -16,7 +56,7 @@ describe('Constructing a Multimethod instance', () => {
 
 
     // TODO: ...
-    it('..', () => {
+    it('...', () => {
 
 
 

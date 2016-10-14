@@ -1,6 +1,8 @@
 // TODO: where to put the following note?
 // NB: Multimethod classes are defined as decomposed static-side and instance-side interfaces. They are defined
 //     this way to achieve type-parameterization in the constructor (class decls don't allow this, see TS #10860).
+import Arity from './arity';
+import createMultimethod from './create-multimethod';
 import {MultimethodError} from '../util';
 
 
@@ -145,16 +147,9 @@ export interface VariadicMethod<T, TR> {
 
 
 // TODO: ...
-export type Arity = 1 | 2 | 3 | 'variadic';
-
-
-
-
-
-// TODO: ...
 function createMultimethodClass(staticArity?: Arity): MultimethodConstructor {
 
-    return <any> class Multimethod {
+    return <any> class $MM {
         constructor(options?: {arity?: Arity}) {
             options = options || {};
 
@@ -168,29 +163,19 @@ function createMultimethodClass(staticArity?: Arity): MultimethodConstructor {
 
             // TODO: ...
             let instance = createMultimethod(arity, options);
-            instance[CTOR] = Multimethod;
+            instance[CTOR] = $MM;
             return instance;
         }
 
         static [Symbol.hasInstance](value: any) {
             if (staticArity) {
-                return value && value[CTOR] === Multimethod;
+                return value && value[CTOR] === $MM;
             }
             else {
                 return value && value.hasOwnProperty(CTOR); // TODO: works for symbols?
             }
         }
     }
-}
-
-
-
-
-
-// TODO: ...
-function createMultimethod(arity: Arity, options: {}) {
-    // TODO: ...
-    return <any> {};
 }
 
 
