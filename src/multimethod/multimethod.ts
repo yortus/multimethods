@@ -9,18 +9,18 @@ import {MultimethodError} from '../util';
 
 // TODO: Base case...
 export interface MultimethodConstructor {
-    new<T0, TR>(options: {arity: 1, async?: 'mixed'} & UnaryMultimethodOptions<T0, TR | Promise<TR>>): UnaryMultimethod<T0, TR | Promise<TR>>;
-    new<T0, TR>(options: {arity: 1, async?: true} & UnaryMultimethodOptions<T0, Promise<TR>>): UnaryMultimethod<T0, Promise<TR>>;
-    new<T0, TR>(options: {arity: 1, async?: false} & UnaryMultimethodOptions<T0, TR>): UnaryMultimethod<T0, TR>;
-    new<T0, T1, TR>(options: {arity: 2, async?: 'mixed'} & BinaryMultimethodOptions<T0, T1, TR | Promise<TR>>): BinaryMultimethod<T0, T1, TR | Promise<TR>>;
-    new<T0, T1, TR>(options: {arity: 2, async?: true} & BinaryMultimethodOptions<T0, T1, Promise<TR>>): BinaryMultimethod<T0, T1, Promise<TR>>;
-    new<T0, T1, TR>(options: {arity: 2, async?: false} & BinaryMultimethodOptions<T0, T1, TR>): BinaryMultimethod<T0, T1, TR>;
-    new<T0, T1, T2, TR>(options: {arity: 3, async?: 'mixed'} & TernaryMultimethodOptions<T0, T1, T2, TR | Promise<TR>>): TernaryMultimethod<T0, T1, T2, TR | Promise<TR>>;
-    new<T0, T1, T2, TR>(options: {arity: 3, async?: true} & TernaryMultimethodOptions<T0, T1, T2, Promise<TR>>): TernaryMultimethod<T0, T1, T2, Promise<TR>>;
-    new<T0, T1, T2, TR>(options: {arity: 3, async?: false} & TernaryMultimethodOptions<T0, T1, T2, TR>): TernaryMultimethod<T0, T1, T2, TR>;
-    new<T, TR>(options: {arity: 'variadic', async?: 'mixed'} & VariadicMultimethodOptions<T, TR | Promise<TR>>): VariadicMultimethod<T, TR | Promise<TR>>;
-    new<T, TR>(options: {arity: 'variadic', async?: true} & VariadicMultimethodOptions<T, Promise<TR>>): VariadicMultimethod<T, Promise<TR>>;
-    new<T, TR>(options: {arity: 'variadic', async?: false} & VariadicMultimethodOptions<T, TR>): VariadicMultimethod<T, TR>;
+    new<T0, TR>(options: {arity: 1, timing?: 'mixed'} & UnaryMultimethodOptions<T0, TR | Promise<TR>>): UnaryMultimethod<T0, TR | Promise<TR>>;
+    new<T0, TR>(options: {arity: 1, timing?: 'async'} & UnaryMultimethodOptions<T0, Promise<TR>>): UnaryMultimethod<T0, Promise<TR>>;
+    new<T0, TR>(options: {arity: 1, timing?: 'sync'} & UnaryMultimethodOptions<T0, TR>): UnaryMultimethod<T0, TR>;
+    new<T0, T1, TR>(options: {arity: 2, timing?: 'mixed'} & BinaryMultimethodOptions<T0, T1, TR | Promise<TR>>): BinaryMultimethod<T0, T1, TR | Promise<TR>>;
+    new<T0, T1, TR>(options: {arity: 2, timing?: 'async'} & BinaryMultimethodOptions<T0, T1, Promise<TR>>): BinaryMultimethod<T0, T1, Promise<TR>>;
+    new<T0, T1, TR>(options: {arity: 2, timing?: 'sync'} & BinaryMultimethodOptions<T0, T1, TR>): BinaryMultimethod<T0, T1, TR>;
+    new<T0, T1, T2, TR>(options: {arity: 3, timing?: 'mixed'} & TernaryMultimethodOptions<T0, T1, T2, TR | Promise<TR>>): TernaryMultimethod<T0, T1, T2, TR | Promise<TR>>;
+    new<T0, T1, T2, TR>(options: {arity: 3, timing?: 'async'} & TernaryMultimethodOptions<T0, T1, T2, Promise<TR>>): TernaryMultimethod<T0, T1, T2, Promise<TR>>;
+    new<T0, T1, T2, TR>(options: {arity: 3, timing?: 'sync'} & TernaryMultimethodOptions<T0, T1, T2, TR>): TernaryMultimethod<T0, T1, T2, TR>;
+    new<T, TR>(options: {arity: 'variadic', timing?: 'mixed'} & VariadicMultimethodOptions<T, TR | Promise<TR>>): VariadicMultimethod<T, TR | Promise<TR>>;
+    new<T, TR>(options: {arity: 'variadic', timing?: 'async'} & VariadicMultimethodOptions<T, Promise<TR>>): VariadicMultimethod<T, Promise<TR>>;
+    new<T, TR>(options: {arity: 'variadic', timing?: 'sync'} & VariadicMultimethodOptions<T, TR>): VariadicMultimethod<T, TR>;
     new(options?: MultimethodOptions): Multimethod;
 }
 export const Multimethod: MultimethodConstructor = createMultimethodClass(undefined);
@@ -30,7 +30,7 @@ export interface Multimethod extends Function {
 }
 export interface MultimethodOptions {
     arity?: Arity;
-    async?: true | false | 'mixed';
+    timing?: 'mixed' | 'async' | 'sync';
     toDiscriminant?: Function;
     methods?: {[predicate: string]: Function};
 }
@@ -42,9 +42,9 @@ export default Multimethod;
 
 // TODO: Unary case...
 export interface UnaryMultimethodConstructor {
-    new<T0, TR>(options: UnaryMultimethodOptions<T0, TR | Promise<TR>> & {async?: 'mixed'}): UnaryMultimethod<T0, TR | Promise<TR>>;
-    new<T0, TR>(options: UnaryMultimethodOptions<T0, Promise<TR>> & {async?: true}): UnaryMultimethod<T0, Promise<TR>>;
-    new<T0, TR>(options: UnaryMultimethodOptions<T0, TR> & {async?: false}): UnaryMultimethod<T0, TR>;
+    new<T0, TR>(options: UnaryMultimethodOptions<T0, TR | Promise<TR>> & {timing?: 'mixed'}): UnaryMultimethod<T0, TR | Promise<TR>>;
+    new<T0, TR>(options: UnaryMultimethodOptions<T0, Promise<TR>> & {timing?: 'async'}): UnaryMultimethod<T0, Promise<TR>>;
+    new<T0, TR>(options: UnaryMultimethodOptions<T0, TR> & {timing?: 'sync'}): UnaryMultimethod<T0, TR>;
     new(): UnaryMultimethod<any, any>;
 }
 export interface UnaryMultimethod<T0, TR> {
@@ -68,9 +68,9 @@ export interface UnaryMethod<T0, TR> {
 
 // TODO: Binary case...
 export interface BinaryMultimethodConstructor {
-    new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, TR | Promise<TR>> & {async?: 'mixed'}): BinaryMultimethod<T0, T1, TR | Promise<TR>>;
-    new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, Promise<TR>> & {async?: true}): BinaryMultimethod<T0, T1, Promise<TR>>;
-    new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, TR> & {async?: false}): BinaryMultimethod<T0, T1, TR>;
+    new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, TR | Promise<TR>> & {timing?: 'mixed'}): BinaryMultimethod<T0, T1, TR | Promise<TR>>;
+    new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, Promise<TR>> & {timing?: 'async'}): BinaryMultimethod<T0, T1, Promise<TR>>;
+    new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, TR> & {timing?: 'sync'}): BinaryMultimethod<T0, T1, TR>;
     new(): BinaryMultimethod<any, any, any>;
 }
 export interface BinaryMultimethod<T0, T1, TR> extends Multimethod {
@@ -94,9 +94,9 @@ export interface BinaryMethod<T0, T1, TR> {
 
 // TODO: Ternary case...
 export interface TernaryMultimethodConstructor {
-    new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, TR | Promise<TR>> & {async?: 'mixed'}): TernaryMultimethod<T0, T1, T2, TR | Promise<TR>>;
-    new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, Promise<TR>> & {async?: true}): TernaryMultimethod<T0, T1, T2, Promise<TR>>;
-    new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, TR> & {async?: false}): TernaryMultimethod<T0, T1, T2, TR>;
+    new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, TR | Promise<TR>> & {timing?: 'mixed'}): TernaryMultimethod<T0, T1, T2, TR | Promise<TR>>;
+    new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, Promise<TR>> & {timing?: 'async'}): TernaryMultimethod<T0, T1, T2, Promise<TR>>;
+    new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, TR> & {timing?: 'sync'}): TernaryMultimethod<T0, T1, T2, TR>;
     new(): TernaryMultimethod<any, any, any, any>;
 }
 export interface TernaryMultimethod<T0, T1, T2, TR> extends Multimethod {
@@ -120,9 +120,9 @@ export interface TernaryMethod<T0, T1, T2, TR> {
 
 // TODO: Variadic case...
 export interface VariadicMultimethodConstructor {
-    new<T, TR>(options: VariadicMultimethodOptions<T, TR | Promise<TR>> & {async?: 'mixed'}): VariadicMultimethod<T, TR | Promise<TR>>;
-    new<T, TR>(options: VariadicMultimethodOptions<T, Promise<TR>> & {async?: true}): VariadicMultimethod<T, Promise<TR>>;
-    new<T, TR>(options: VariadicMultimethodOptions<T, TR> & {async?: false}): VariadicMultimethod<T, TR>;
+    new<T, TR>(options: VariadicMultimethodOptions<T, TR | Promise<TR>> & {timing?: 'mixed'}): VariadicMultimethod<T, TR | Promise<TR>>;
+    new<T, TR>(options: VariadicMultimethodOptions<T, Promise<TR>> & {timing?: 'async'}): VariadicMultimethod<T, Promise<TR>>;
+    new<T, TR>(options: VariadicMultimethodOptions<T, TR> & {timing?: 'sync'}): VariadicMultimethod<T, TR>;
     new(): VariadicMultimethod<any, any>;
 }
 export interface VariadicMultimethod<T, TR> extends Multimethod {
