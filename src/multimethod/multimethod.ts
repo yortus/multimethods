@@ -1,3 +1,6 @@
+// TODO: where to put the following note?
+// NB: Multimethod classes are defined as decomposed static-side and instance-side interfaces. They are defined
+//     this way to achieve type-parameterization in the constructor (class decls don't allow this, see TS #10860).
 import {MultimethodError} from '../util';
 
 
@@ -19,10 +22,10 @@ export interface MultimethodConstructor {
     new<T, TR>(options: {arity: 'variadic', async?: 'mixed'} & VariadicMultimethodOptions<T, TR | Promise<TR>>): VariadicMultimethod<T, TR | Promise<TR>>;
     new<T, TR>(options: {arity: 'variadic', async?: true} & VariadicMultimethodOptions<T, Promise<TR>>): VariadicMultimethod<T, Promise<TR>>;
     new<T, TR>(options: {arity: 'variadic', async?: false} & VariadicMultimethodOptions<T, TR>): VariadicMultimethod<T, TR>;
-    new(options: MultimethodOptions): Multimethod;
+    new(options?: MultimethodOptions): Multimethod;
 }
 export const Multimethod: MultimethodConstructor = createMultimethodClass(undefined);
-export interface Multimethod {
+export interface Multimethod extends Function {
     (...args: any[]): any;
     add(methods: {[predicate: string]: Function}): this;
     add(predicate: string, consequent: Function): this;
@@ -45,6 +48,7 @@ export interface UnaryMultimethodConstructor {
     new<T0, TR>(options: UnaryMultimethodOptions<T0, TR | Promise<TR>> & {async?: 'mixed'}): UnaryMultimethod<T0, TR | Promise<TR>>;
     new<T0, TR>(options: UnaryMultimethodOptions<T0, Promise<TR>> & {async?: true}): UnaryMultimethod<T0, Promise<TR>>;
     new<T0, TR>(options: UnaryMultimethodOptions<T0, TR> & {async?: false}): UnaryMultimethod<T0, TR>;
+    new(): UnaryMultimethod<any, any>;
 }
 export interface UnaryMultimethod<T0, TR> extends Multimethod {
     ($0: T0): TR;
@@ -68,6 +72,7 @@ export interface BinaryMultimethodConstructor {
     new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, TR | Promise<TR>> & {async?: 'mixed'}): BinaryMultimethod<T0, T1, TR | Promise<TR>>;
     new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, Promise<TR>> & {async?: true}): BinaryMultimethod<T0, T1, Promise<TR>>;
     new<T0, T1, TR>(options: BinaryMultimethodOptions<T0, T1, TR> & {async?: false}): BinaryMultimethod<T0, T1, TR>;
+    new(): BinaryMultimethod<any, any, any>;
 }
 export interface BinaryMultimethod<T0, T1, TR> extends Multimethod {
     ($0: T0, $1: T1): TR;
@@ -91,6 +96,7 @@ export interface TernaryMultimethodConstructor {
     new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, TR | Promise<TR>> & {async?: 'mixed'}): TernaryMultimethod<T0, T1, T2, TR | Promise<TR>>;
     new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, Promise<TR>> & {async?: true}): TernaryMultimethod<T0, T1, T2, Promise<TR>>;
     new<T0, T1, T2, TR>(options: TernaryMultimethodOptions<T0, T1, T2, TR> & {async?: false}): TernaryMultimethod<T0, T1, T2, TR>;
+    new(): TernaryMultimethod<any, any, any, any>;
 }
 export interface TernaryMultimethod<T0, T1, T2, TR> extends Multimethod {
     ($0: T0, $1: T1, $2: T2): TR;
@@ -114,6 +120,7 @@ export interface VariadicMultimethodConstructor {
     new<T, TR>(options: VariadicMultimethodOptions<T, TR | Promise<TR>> & {async?: 'mixed'}): VariadicMultimethod<T, TR | Promise<TR>>;
     new<T, TR>(options: VariadicMultimethodOptions<T, Promise<TR>> & {async?: true}): VariadicMultimethod<T, Promise<TR>>;
     new<T, TR>(options: VariadicMultimethodOptions<T, TR> & {async?: false}): VariadicMultimethod<T, TR>;
+    new(): VariadicMultimethod<any, any>;
 }
 export interface VariadicMultimethod<T, TR> extends Multimethod {
     (...args: T[]): TR;
@@ -129,15 +136,6 @@ export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
 export interface VariadicMethod<T, TR> {
     (args: T[], captures: Captures, next: Next): TR;
 }
-
-
-
-
-
-// ================================================================================
-// Multimethod class defined as decomposed static-side and instance-side interfaces.
-// NB: defined this way to achieve type-parameterization in the constructor (class decls don;t allow this, see TS #10860).
-// TODO: default arity === 1 - how to express safely in type system?
 
 
 
@@ -285,8 +283,33 @@ function test() {
         }
     });
     let result5 = mm5('foo', 'bar', 'baz');
+    let result51 = mm5('foo');  // <==== TODO: should NOT typecheck! (wrong arity), but falling back to inherited call signature from Multimethod interface
 
 
     let mm = new Multimethod({}); // untyped
     mm(42, 24);
+    
+
+
+
+
+}
+
+
+namespace ns {
+
+    let m1 = new Multimethod(); // untyped
+    let r1 = m1(42, 24);
+    
+    let m2 = new UnaryMultimethod();
+    let r2 = m2(43);
+
+    let m3 = new BinaryMultimethod();
+    let r3 = m3(42, 24);
+
+    let m4 = new TernaryMultimethod();
+    let r4 = m4(42, 24); // TODO: should NOT typecheck!
+
+    let m5 = new VariadicMultimethod();
+    let r5 = m5(42, 24); // TODO: should NOT typecheck!
 }
