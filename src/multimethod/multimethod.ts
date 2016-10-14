@@ -149,7 +149,7 @@ export interface VariadicMethod<T, TR> {
 // TODO: ...
 function createMultimethodClass(staticArity?: Arity): MultimethodConstructor {
 
-    return <any> class $MM {
+    let result: any = class $MM {
         constructor(options?: {arity?: Arity}) {
             options = options || {};
 
@@ -169,13 +169,35 @@ function createMultimethodClass(staticArity?: Arity): MultimethodConstructor {
 
         static [Symbol.hasInstance](value: any) {
             if (staticArity) {
+
+
+// TODO: temp testing...
+debugger;
+let v = value && value[CTOR];
+let result = value && v === $MM;
+
+
+
                 return value && value[CTOR] === $MM;
             }
             else {
-                return value && value.hasOwnProperty(CTOR); // TODO: works for symbols?
+                return value && value.hasOwnProperty(CTOR); // TODO: works for symbols? TEST it...
             }
         }
     }
+
+// TODO: temp testing...
+let name = 'MM';
+switch (staticArity) {
+    case 1: name = 'UnaryMM'; break;
+    case 2: name = 'BinaryMM'; break;
+    case 3: name = 'TernaryMM'; break;
+}
+let temp = `(${result.toString().replace(/\$MM/g, name)})`;
+result = eval(`(${result.toString().replace(/\$MM/g, name)})`);
+
+
+    return result;
 }
 
 
