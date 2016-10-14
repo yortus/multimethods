@@ -1,1 +1,1 @@
-export {default} from './multimethod';
+export {default, Multimethod, UnaryMultimethod, BinaryMultimethod, TernaryMultimethod, VariadicMultimethod} from './multimethod';

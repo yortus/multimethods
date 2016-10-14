@@ -10,7 +10,7 @@ export {default as Taxonomy, TaxonomyNode} from './taxonomy';
 
 // TODO: temp testing...
 export {default as OldMultimethod, Method, UNHANDLED} from './zzz-multimethod';
-export {default as Multimethod} from './multimethod';
+export * from './multimethod';
 
 
 
