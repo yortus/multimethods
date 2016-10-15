@@ -236,6 +236,7 @@ export type Context = {[name: string]: string} & {next: Function};
                 methods: {
                     '/foo': async (_, x) => 42,
                     '/bar': async (_, x) => 42,
+                    '/baz': async (_, x, y, z, w) => 42,
                 }
             });
             let result0 = mm0('foo');
@@ -252,8 +253,8 @@ export type Context = {[name: string]: string} & {next: Function};
             });
             mm1.add('/foo', async ({n, next}, x) => '42');
             let result1 = mm1('foo');
-            result1 = mm1(); // ERROR arity
-            result1 = mm1('foo', 'bar'); // ERROR arity
+            result1 = mm1();                                                    // ERROR arity
+            result1 = mm1('foo', 'bar');                                        // ERROR arity
 
 
             let mm2 = new UnaryMultimethod({ // sync unary
@@ -266,8 +267,8 @@ export type Context = {[name: string]: string} & {next: Function};
             });
             mm2.add({'/baz': (_, a) => '42'});
             let result2 = mm2('foo');
-            result2 = mm2(); // ERROR arity
-            result2 = mm2('foo', 'bar'); // ERROR arity
+            result2 = mm2();                                                    // ERROR arity
+            result2 = mm2('foo', 'bar');                                        // ERROR arity
 
 
             let mm3 = new Multimethod({ // async unary
@@ -280,7 +281,7 @@ export type Context = {[name: string]: string} & {next: Function};
             });
             let result3 = mm3('foo');
             result3 = mm3(); // ERROR arity
-            result3 = mm3('foo', 'bar'); // ERROR arity
+            result3 = mm3('foo', 'bar');                                        // ERROR arity
 
 
             let mm4 = new BinaryMultimethod({ // mixed binary
@@ -292,9 +293,9 @@ export type Context = {[name: string]: string} & {next: Function};
                 }
             });
             let result4 = mm4('foo', 720);
-            result4 = mm4(); // ERROR arity
-            result4 = mm4('foo', 'bar'); // ERROR type
-            result4 = mm4('foo', 11, 'bar'); // ERROR arity
+            result4 = mm4();                                                    // ERROR arity
+            result4 = mm4('foo', 'bar');                                        // ERROR type
+            result4 = mm4('foo', 11, 'bar');                                    // ERROR arity
 
 
             let mm5 = new Multimethod({ // mixed ternary
@@ -306,8 +307,8 @@ export type Context = {[name: string]: string} & {next: Function};
                 }
             });
             let result5 = mm5('foo', 'bar', 'baz');
-            result5 = mm5('foo', 'bar');  // ERROR arity
-            result5 = mm5('foo', 'bar', 'baz', 'quux');  // ERROR arity
+            result5 = mm5('foo', 'bar');                                        // ERROR arity
+            result5 = mm5('foo', 'bar', 'baz', 'quux');                         // ERROR arity
 
 
             let mm = new Multimethod({}); // untyped
@@ -323,7 +324,7 @@ export type Context = {[name: string]: string} & {next: Function};
             
             let m2 = new UnaryMultimethod();
             let r2 = m2(43);
-            r2 = m2(43, true); // ERROR arity
+            r2 = m2(43, true);                                                  // ERROR arity
 
             let m3 = new BinaryMultimethod();
             let r3 = m3(42, 24);
