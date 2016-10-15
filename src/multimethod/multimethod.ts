@@ -61,7 +61,7 @@ export interface UnaryMultimethodOptions<T0, TR> extends MultimethodOptions {
     methods?: {[predicate: string]: UnaryMethod<T0, TR>};
 }
 export interface UnaryMethod<T0, TR> {
-    ($0: T0, captures: Captures, next: Next): TR;
+    (ctx: Context, $0: T0): TR;
 }
 
 
@@ -87,7 +87,7 @@ export interface BinaryMultimethodOptions<T0, T1, TR> extends MultimethodOptions
     methods?: {[predicate: string]: BinaryMethod<T0, T1, TR>};
 }
 export interface BinaryMethod<T0, T1, TR> {
-    ($0: T0, $1: T1, captures: Captures, next: Next): TR;
+    (ctx: Context, $0: T0, $1: T1): TR;
 }
 
 
@@ -113,7 +113,7 @@ export interface TernaryMultimethodOptions<T0, T1, T2, TR> extends MultimethodOp
     methods?: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>};
 }
 export interface TernaryMethod<T0, T1, T2, TR> {
-    ($0: T0, $1: T1, $2: T2, captures: Captures, next: Next): TR;
+    (ctx: Context, $0: T0, $1: T1, $2: T2): TR;
 }
 
 
@@ -135,11 +135,11 @@ export interface VariadicMultimethod<T, TR> extends Multimethod {
 export const VariadicMultimethod = <VariadicMultimethodConstructor> class VariadicMultimethod extends createMultimethodClass('variadic') { };
 export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
     arity?: 'variadic';
-    toDiscriminant?: (args: T[]) => string;
+    toDiscriminant?: (...args: T[]) => string;
     methods?: {[predicate: string]: VariadicMethod<T, TR>};
 }
 export interface VariadicMethod<T, TR> {
-    (args: T[], captures: Captures, next: Next): TR;
+    (ctx: Context, ...args: T[]): TR;
 }
 
 
@@ -212,5 +212,111 @@ const CTOR = Symbol('ctor');
 
 
 // TODO: doc...
-export type Captures = {[name: string]: string;};
-export type Next = Function; // TODO: type this properly...
+export type Context = {[name: string]: string} & {next: Function};
+
+// TODO: was... remove...
+// export type Captures = {[name: string]: string;};
+// export type Next = Function; // TODO: type this properly...
+
+
+
+
+
+
+
+
+// TODO: temp testing remove...
+        function test() {
+
+
+            let mm0 = new Multimethod({ // mixed variadic
+                arity: 'variadic',
+                timing: 'mixed',
+                toDiscriminant: ([$0]) => '',
+                methods: {
+                    '/foo': async (_, x) => 42,
+                    '/bar': async (_, x) => 42,
+                }
+            });
+            let result0 = mm0('foo');
+
+
+            let mm1 = new Multimethod<string, string>({ // async unary
+                arity: 1,
+                timing: 'async',
+                methods: {
+                    '/foo': async ({n, next}, x) => '42',
+                    '/bar': async (_, x) => '42',
+                }
+            });
+            mm1.add('/foo', async ({n, next}, x) => '42');
+            let result1 = mm1('foo');
+
+
+            let mm2 = new UnaryMultimethod({ // sync unary
+                //arity: 1,
+                timing: 'sync',
+                methods: {
+                    '/foo': (_, x: string) => '42',
+                    '/bar': (_, x: string) => '42'
+                }
+            });
+            mm2.add({'/baz': (_, a) => '42'});
+            let result2 = mm2('foo');
+
+
+            let mm3 = new Multimethod({ // async unary
+                arity: 1,
+                timing: 'async',
+                methods: {
+                    '/foo': async (_, x: string) => '42',
+                    '/bar': async (_, x: string) => '42',
+                }
+            });
+            let result3 = mm3('foo');
+
+
+            let mm4 = new BinaryMultimethod({ // mixed binary
+                //arity: 2,
+                //timing: 'async',
+                methods: {
+                    '/foo': async ({}, x: string, y: number) => '42',
+                    '/bar': async ({next}, x: string, y: number) => '42',
+                }
+            });
+            let result4 = mm4('foo', 720);
+
+
+            let mm5 = new Multimethod({ // mixed ternary
+                arity: 3,
+                //timing: 'async',
+                methods: {
+                    '/foo': ({n}, x, y, z) => '42',
+                    '/bar': async ({n}, x, y, z) => '42',
+                }
+            });
+            let result5 = mm5('foo', 'bar', 'baz');
+
+
+            let mm = new Multimethod({}); // untyped
+            mm(42, 24);
+        }
+
+
+        function test2() {
+
+            let m1 = new Multimethod(); // untyped
+            let r1 = m1(42, 24);
+            
+            let m2 = new UnaryMultimethod();
+            let r2 = m2(43);
+
+            let m3 = new BinaryMultimethod();
+            let r3 = m3(42, 24);
+
+            let m4 = new TernaryMultimethod();
+            let r4 = m4(42, 24, 2);
+
+            let m5 = new VariadicMultimethod();
+            let r5 = m5(42, 24); // TODO: should NOT typecheck!
+        }

@@ -72,8 +72,8 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 timing: 'mixed',
                 toDiscriminant: ([$0]) => '',
                 methods: {
-                    '/foo': async ([x]) => 42,
-                    '/bar': async ([x]) => 42,
+                    '/foo': async (_, x) => 42,
+                    '/bar': async (_, x) => 42,
                 }
             });
             let result0 = mm0('foo');
@@ -83,11 +83,11 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 arity: 1,
                 timing: 'async',
                 methods: {
-                    '/foo': async (x, {n}, next) => '42',
-                    '/bar': async (x) => '42',
+                    '/foo': async ({n, next}, x) => '42',
+                    '/bar': async (_, x) => '42',
                 }
             });
-            mm1.add('/foo', async (x, {n}, next) => '42');
+            mm1.add('/foo', async ({n, next}, x) => '42');
             let result1 = mm1('foo');
 
 
@@ -95,11 +95,11 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //arity: 1,
                 timing: 'sync',
                 methods: {
-                    '/foo': (x: string) => '42',
-                    '/bar': (x: string) => '42'
+                    '/foo': (_, x: string) => '42',
+                    '/bar': (_, x: string) => '42'
                 }
             });
-            mm2.add({'/baz': (a) => '42'});
+            mm2.add({'/baz': (_, a) => '42'});
             let result2 = mm2('foo');
 
 
@@ -107,8 +107,8 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 arity: 1,
                 timing: 'async',
                 methods: {
-                    '/foo': async (x: string) => '42',
-                    '/bar': async (x: string) => '42',
+                    '/foo': async (_, x: string) => '42',
+                    '/bar': async (_, x: string) => '42',
                 }
             });
             let result3 = mm3('foo');
@@ -118,8 +118,8 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //arity: 2,
                 //timing: 'async',
                 methods: {
-                    '/foo': async (x: string, y: number, {}) => '42',
-                    '/bar': async (x: string, y: number, {}, next: any) => '42',
+                    '/foo': async ({}, x: string, y: number) => '42',
+                    '/bar': async ({next}, x: string, y: number) => '42',
                 }
             });
             let result4 = mm4('foo', 720);
@@ -129,8 +129,8 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 arity: 3,
                 //timing: 'async',
                 methods: {
-                    '/foo': (x, y, z, {n}) => '42',
-                    '/bar': async (x, y, z, {n}) => '42',
+                    '/foo': ({n}, x, y, z) => '42',
+                    '/bar': async ({n}, x, y, z) => '42',
                 }
             });
             let result5 = mm5('foo', 'bar', 'baz');
