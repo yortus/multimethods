@@ -20,9 +20,9 @@ export interface MultimethodConstructor {
     new<T0, T1, T2, TR>(options: {arity: 3, timing?: 'mixed'} & TernaryMultimethodOptions<T0, T1, T2, TR | Promise<TR>>): TernaryMultimethod<T0, T1, T2, TR | Promise<TR>>;
     new<T0, T1, T2, TR>(options: {arity: 3, timing?: 'async'} & TernaryMultimethodOptions<T0, T1, T2, Promise<TR>>): TernaryMultimethod<T0, T1, T2, Promise<TR>>;
     new<T0, T1, T2, TR>(options: {arity: 3, timing?: 'sync'} & TernaryMultimethodOptions<T0, T1, T2, TR>): TernaryMultimethod<T0, T1, T2, TR>;
-    new<T, TR>(options: {arity: 'variadic', timing?: 'mixed'} & VariadicMultimethodOptions<T, TR | Promise<TR>>): VariadicMultimethod<T, TR | Promise<TR>>;
-    new<T, TR>(options: {arity: 'variadic', timing?: 'async'} & VariadicMultimethodOptions<T, Promise<TR>>): VariadicMultimethod<T, Promise<TR>>;
-    new<T, TR>(options: {arity: 'variadic', timing?: 'sync'} & VariadicMultimethodOptions<T, TR>): VariadicMultimethod<T, TR>;
+    new<T, TR>(options: {timing?: 'mixed'} & VariadicMultimethodOptions<T, TR | Promise<TR>>): VariadicMultimethod<T, TR | Promise<TR>>;
+    new<T, TR>(options: {timing?: 'async'} & VariadicMultimethodOptions<T, Promise<TR>>): VariadicMultimethod<T, Promise<TR>>;
+    new<T, TR>(options: {timing?: 'sync'} & VariadicMultimethodOptions<T, TR>): VariadicMultimethod<T, TR>;
     new(options?: MultimethodOptions): Multimethod;
 }
 export const Multimethod: MultimethodConstructor = createMultimethodClass(undefined);
@@ -49,7 +49,7 @@ export interface UnaryMultimethodConstructor {
     new<T0, TR>(options: UnaryMultimethodOptions<T0, TR> & {timing?: 'sync'}): UnaryMultimethod<T0, TR>;
     new(): UnaryMultimethod<any, any>;
 }
-export interface UnaryMultimethod<T0, TR> {
+export interface UnaryMultimethod<T0, TR> extends Multimethod {
     ($0: T0): TR;
     add(methods: {[predicate: string]: UnaryMethod<T0, TR>}): this;
     add(predicate: string, consequent: UnaryMethod<T0, TR>): this;
@@ -132,9 +132,9 @@ export interface VariadicMultimethod<T, TR> extends Multimethod {
     add(methods: {[predicate: string]: VariadicMethod<T, TR>}): this;
     add(predicate: string, consequent: VariadicMethod<T, TR>): this;
 }
-export const VariadicMultimethod = <VariadicMultimethodConstructor> class VariadicMultimethod extends createMultimethodClass('variadic') { };
+export const VariadicMultimethod = <VariadicMultimethodConstructor> class VariadicMultimethod extends createMultimethodClass() { };
 export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
-    arity?: 'variadic';
+    // TODO: was... arity?: 'variadic';
     toDiscriminant?: (...args: T[]) => string;
     methods?: {[predicate: string]: VariadicMethod<T, TR>};
 }
@@ -159,7 +159,7 @@ function createMultimethodClass(staticArity?: Arity): MultimethodConstructor {
             }
 
             // Use whichever arity is given. If neither arity is given, default to 'variadic'.
-            let arity = staticArity || options.arity || 'variadic';
+            let arity = staticArity || options.arity || undefined; // TODO: need last clause
 
             // TODO: ...
             let instance = createMultimethod(arity, options);
@@ -229,8 +229,15 @@ export type Context = {[name: string]: string} & {next: Function};
         function test() {
 
 
+            let mmx = new Multimethod({ // mixed variadic
+                //arity: undefined, // uncomment and it becomes UnaryMultimethod (except if using --strictNullChecks)
+            });
+            let resultx = mmx('foo');
+            resultx = mmx('foo', 42, 'bar'); // OK, variadic
+
+
             let mm0 = new Multimethod({ // mixed variadic
-                arity: 'variadic',
+                arity: undefined, // or don't give this key at all
                 timing: 'mixed',
                 toDiscriminant: ([$0]) => '',
                 methods: {
@@ -262,7 +269,8 @@ export type Context = {[name: string]: string} & {next: Function};
                 timing: 'sync',
                 methods: {
                     '/foo': (_, x: string) => '42',
-                    '/bar': (_, x: string) => '42'
+                    '/bar': (_, x: string) => '42',
+                    // '/baz': (_, x: string, y: number) => '42' ERROR if uncommented
                 }
             });
             mm2.add({'/baz': (_, a) => '42'});
