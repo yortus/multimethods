@@ -11,6 +11,9 @@ import {MultimethodError} from '../util';
 
 // TODO: Base case...
 export interface MultimethodConstructor {
+    new<TR>(options: {arity: 0, timing?: 'mixed'} & NullaryMultimethodOptions<TR | Promise<TR>>): NullaryMultimethod<TR | Promise<TR>>;
+    new<TR>(options: {arity: 0, timing?: 'async'} & NullaryMultimethodOptions<Promise<TR>>): NullaryMultimethod<Promise<TR>>;
+    new<TR>(options: {arity: 0, timing?: 'sync'} & NullaryMultimethodOptions<TR>): NullaryMultimethod<TR>;
     new<T0, TR>(options: {arity: 1, timing?: 'mixed'} & UnaryMultimethodOptions<T0, TR | Promise<TR>>): UnaryMultimethod<T0, TR | Promise<TR>>;
     new<T0, TR>(options: {arity: 1, timing?: 'async'} & UnaryMultimethodOptions<T0, Promise<TR>>): UnaryMultimethod<T0, Promise<TR>>;
     new<T0, TR>(options: {arity: 1, timing?: 'sync'} & UnaryMultimethodOptions<T0, TR>): UnaryMultimethod<T0, TR>;
@@ -37,6 +40,32 @@ export interface MultimethodOptions {
     methods?: {[predicate: string]: Function};
 }
 export default Multimethod;
+
+
+
+
+
+// TODO: Nullary case...
+export interface NullaryMultimethodConstructor {
+    new<TR>(options: NullaryMultimethodOptions<TR | Promise<TR>> & {timing?: 'mixed'}): NullaryMultimethod<TR | Promise<TR>>;
+    new<TR>(options: NullaryMultimethodOptions<Promise<TR>> & {timing?: 'async'}): NullaryMultimethod<Promise<TR>>;
+    new<TR>(options: NullaryMultimethodOptions<TR> & {timing?: 'sync'}): NullaryMultimethod<TR>;
+    new(): NullaryMultimethod<any>;
+}
+export interface NullaryMultimethod<TR> extends Multimethod {
+    (): TR;
+    add(methods: {[predicate: string]: NullaryMethod<TR>}): this;
+    add(predicate: string, consequent: NullaryMethod<TR>): this;
+}
+export const NullaryMultimethod = <NullaryMultimethodConstructor> class NullaryMultimethod extends createMultimethodClass(0) { };
+export interface NullaryMultimethodOptions<TR> extends MultimethodOptions {
+    arity?: 0;
+    toDiscriminant?: () => string;
+    methods?: {[predicate: string]: NullaryMethod<TR>};
+}
+export interface NullaryMethod<TR> {
+    (ctx: Context): TR;
+}
 
 
 
@@ -322,6 +351,17 @@ export type Context = {[name: string]: string} & {next: Function};
             let mm = new Multimethod({}); // untyped
             mm(42, 24);
             mm(1, 2, 3);
+
+
+            let mm6 = new Multimethod({ // mixed nullary
+                arity: 0,
+                methods: {
+                    foo: (ctx) => 'foo'
+                }
+            });
+            let result6 = mm6();
+            result6 = mm6('foo');                                               // ERROR arity
+
         }
 
 
