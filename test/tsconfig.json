@@ -5,6 +5,14 @@
         "lib": ["es6"],
         "removeComments": false,
         "sourceMap": true,
-        "outDir": "../built/test"
+        "outDir": "../built/test",
+
+        // Static checks
+        "strictNullChecks": false, // TODO: set true...
+        "noUnusedLocals": false,
+        "noImplicitAny": false,
+        "noImplicitThis": false,
+        "noImplicitReturns": false,
+        "noFallthroughCasesInSwitch": false
     }
 }

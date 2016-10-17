@@ -7,8 +7,8 @@ import {Multimethod, UnaryMultimethod, BinaryMultimethod, TernaryMultimethod, Va
 // TODO: ...
 describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Constructing a Multimethod instance', () => {
 
-    let arities: Array<1|2|3|'variadic'> = [undefined, 1, 2, 3, 'variadic'];
-    let timings: Array<'mixed'|'async'|'sync'> = [undefined, 'mixed', 'async', 'sync'];
+    let arities = [undefined, 0, 1, 2, 3, 4, 5];
+    let timings: Array<'mixed'|'async'|'sync'|undefined> = [undefined, 'mixed', 'async', 'sync'];
 
 
     arities.forEach(arity => {
@@ -67,16 +67,25 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         function test() {
 
 
+            let mmx = new Multimethod({ // mixed variadic
+                //arity: undefined, // uncomment and it becomes UnaryMultimethod (except if using --strictNullChecks)
+            });
+            let resultx = mmx('foo');
+            resultx = mmx('foo', 42, 'bar'); // OK, variadic
+
+
             let mm0 = new Multimethod({ // mixed variadic
-                arity: 'variadic',
+                arity: undefined, // or don't give this key at all
                 timing: 'mixed',
                 toDiscriminant: ([$0]) => '',
                 methods: {
                     '/foo': async (_, x) => 42,
                     '/bar': async (_, x) => 42,
+                    '/baz': async (_, x, y, z, w) => 42,
                 }
             });
             let result0 = mm0('foo');
+            result0 = mm0('foo', 42, 'bar'); // OK, variadic
 
 
             let mm1 = new Multimethod<string, string>({ // async unary
@@ -89,6 +98,8 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             });
             mm1.add('/foo', async ({n, next}, x) => '42');
             let result1 = mm1('foo');
+            //result1 = mm1();                                                    // ERROR arity
+            //result1 = mm1('foo', 'bar');                                        // ERROR arity
 
 
             let mm2 = new UnaryMultimethod({ // sync unary
@@ -96,11 +107,14 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 timing: 'sync',
                 methods: {
                     '/foo': (_, x: string) => '42',
-                    '/bar': (_, x: string) => '42'
+                    '/bar': (_, x: string) => '42',
+                    // '/baz': (_, x: string, y: number) => '42' ERROR if uncommented
                 }
             });
             mm2.add({'/baz': (_, a) => '42'});
             let result2 = mm2('foo');
+            //result2 = mm2();                                                    // ERROR arity
+            //result2 = mm2('foo', 'bar');                                        // ERROR arity
 
 
             let mm3 = new Multimethod({ // async unary
@@ -112,6 +126,8 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 }
             });
             let result3 = mm3('foo');
+            //result3 = mm3(); // ERROR arity
+            //result3 = mm3('foo', 'bar');                                        // ERROR arity
 
 
             let mm4 = new BinaryMultimethod({ // mixed binary
@@ -123,6 +139,9 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 }
             });
             let result4 = mm4('foo', 720);
+            //result4 = mm4();                                                    // ERROR arity
+            //result4 = mm4('foo', 'bar');                                        // ERROR type
+            //result4 = mm4('foo', 11, 'bar');                                    // ERROR arity
 
 
             let mm5 = new Multimethod({ // mixed ternary
@@ -134,10 +153,24 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 }
             });
             let result5 = mm5('foo', 'bar', 'baz');
+            //result5 = mm5('foo', 'bar');                                        // ERROR arity
+            //result5 = mm5('foo', 'bar', 'baz', 'quux');                         // ERROR arity
 
 
             let mm = new Multimethod({}); // untyped
             mm(42, 24);
+            mm(1, 2, 3);
+
+
+            let mm6 = new Multimethod({ // mixed nullary
+                arity: 0,
+                methods: {
+                    foo: (ctx) => 'foo'
+                }
+            });
+            let result6 = mm6();
+            //result6 = mm6('foo');                                               // ERROR arity
+
         }
 
 
@@ -148,6 +181,7 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             
             let m2 = new UnaryMultimethod();
             let r2 = m2(43);
+            //r2 = m2(43, true);                                                  // ERROR arity
 
             let m3 = new BinaryMultimethod();
             let r3 = m3(42, 24);
@@ -156,7 +190,9 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             let r4 = m4(42, 24, 2);
 
             let m5 = new VariadicMultimethod();
-            let r5 = m5(42, 24); // TODO: should NOT typecheck!
+            let r5 = m5(42, 24);
+            r5 = m5(); // OK
+
         }
 
 

@@ -1,11 +1,10 @@
-import Arity from './arity';
 
 
 
 
 
 // TODO: ...
-export default function createMultimethod(arity: Arity, options: {}) {
+export default function createMultimethod(arity: number | undefined, options: {}) {
 
     // TODO: ...
     let result = () => {};
