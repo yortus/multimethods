@@ -2,6 +2,7 @@
 // NB: Multimethod classes are defined as decomposed static-side and instance-side interfaces. They are defined
 //     this way to achieve type-parameterization in the constructor (class decls don't allow this, see TS #10860).
 import createMultimethod from './create-multimethod';
+import MultimethodOptions from './multimethod-options';
 import {MultimethodError} from '../util';
 
 
@@ -9,6 +10,7 @@ import {MultimethodError} from '../util';
 
 
 // TODO: Base case...
+// TODO: could this be more DRYly represented as an intersection of the other cases?
 export interface MultimethodConstructor {
     new<TR>(options: {arity: 0, timing?: 'mixed'} & NullaryMultimethodOptions<TR | Promise<TR>>): NullaryMultimethod<TR | Promise<TR>>;
     new<TR>(options: {arity: 0, timing?: 'async'} & NullaryMultimethodOptions<Promise<TR>>): NullaryMultimethod<Promise<TR>>;
@@ -31,12 +33,6 @@ export const Multimethod: MultimethodConstructor = createMultimethodClass(undefi
 export interface Multimethod extends Function {
     add(methods: {[predicate: string]: Function}): this;
     add(predicate: string, consequent: Function): this;
-}
-export interface MultimethodOptions {
-    arity?: number;
-    timing?: 'mixed' | 'async' | 'sync';
-    toDiscriminant?: Function;
-    methods?: {[predicate: string]: Function};
 }
 export default Multimethod;
 
@@ -178,7 +174,7 @@ export interface VariadicMethod<T, TR> {
 function createMultimethodClass(staticArity?: number): MultimethodConstructor {
 
     return <any> class Multimethod {
-        constructor(options?: {arity?: number}) {
+        constructor(options?: MultimethodOptions) {
             options = options || {};
 
             // If *both* arities given, they must match
@@ -186,11 +182,13 @@ function createMultimethodClass(staticArity?: number): MultimethodConstructor {
                 throw new MultimethodError(`arity mismatch`); // TODO: improve diagnostic message
             }
 
-            // Use whichever arity is given. If neither arity is given, default to variadic.
-            let arity = typeof staticArity === 'number' ? staticArity : options.arity;
+            // Create a new options object incorporating all defaults (including staticArity)
+            // TODO: other defaults?
+            options = Object.assign({}, options);
+            if (typeof options.arity !== 'number') options.arity = staticArity;
 
             // TODO: ...
-            let instance = createMultimethod(arity, options);
+            let instance = createMultimethod(options);
             instance[CTOR] = Multimethod;
             return instance;
         }
