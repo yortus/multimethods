@@ -3,14 +3,14 @@
 ## Multimethods
 - immutable
 - no this?
-- comprise a list of 'methods', each method is a {predicate: consequent} pair
-- In a method, the predicate is a pattern, and the consequent is a function
+- comprise a list of 'rules', each rule is a {predicate: method} pair
+- rules are either normal rules or meta-rules
+- In a rule, the predicate is a pattern, and the method is a function
 - predicate/pattern extensions: binary tree format... TODO WIP
 - predicates form a taxonomy according to their specificity (the subset of discriminants they 'contain')
-- a method can be an 'ordinary' method, or a decorator (a method with special semantics to call/control 'downstream' methods)
+- a rule can be an 'ordinary' rule, or a metarule (whose method has special semantics to call/control 'downstream' methods)
 - a multimethod may be variadic or fixed arity (for optimisation only)
 - a multimethod may be closed or open (can add methods after construction or not) (also for optimisation only?)
-
 - each MM call generates a discriminant, according to the 'toDiscriminant()' function supplied to the ctor (default to toString()?)
 - discriminant is matched against all method predicates
 

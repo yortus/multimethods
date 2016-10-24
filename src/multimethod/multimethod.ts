@@ -1,7 +1,7 @@
 // TODO: where to put the following note?
 // NB: Multimethod classes are defined as decomposed static-side and instance-side interfaces. They are defined
 //     this way to achieve type-parameterization in the constructor (class decls don't allow this, see TS #10860).
-import createMultimethod from './create-multimethod';
+import createMultimethod from './impl/create-multimethod';
 import MultimethodOptions from './multimethod-options';
 import {MultimethodError} from '../util';
 
@@ -31,8 +31,8 @@ export interface MultimethodConstructor {
 }
 export const Multimethod: MultimethodConstructor = createMultimethodClass(undefined);
 export interface Multimethod extends Function {
-    add(methods: {[predicate: string]: Function}): this;
-    add(predicate: string, consequent: Function): this;
+    add(rules: {[predicate: string]: Function}): this;
+    add(predicate: string, method: Function): this;
 }
 export default Multimethod;
 
@@ -49,14 +49,14 @@ export interface NullaryMultimethodConstructor {
 }
 export interface NullaryMultimethod<TR> extends Multimethod {
     (): TR;
-    add(methods: {[predicate: string]: NullaryMethod<TR>}): this;
-    add(predicate: string, consequent: NullaryMethod<TR>): this;
+    add(rules: {[predicate: string]: NullaryMethod<TR>}): this;
+    add(predicate: string, method: NullaryMethod<TR>): this;
 }
 export const NullaryMultimethod = <NullaryMultimethodConstructor> class NullaryMultimethod extends createMultimethodClass(0) { };
 export interface NullaryMultimethodOptions<TR> extends MultimethodOptions {
     arity?: 0;
     toDiscriminant?: () => string;
-    methods?: {[predicate: string]: NullaryMethod<TR>};
+    rules?: {[predicate: string]: NullaryMethod<TR>};
 }
 export interface NullaryMethod<TR> {
     (ctx: Context): TR;
@@ -75,14 +75,14 @@ export interface UnaryMultimethodConstructor {
 }
 export interface UnaryMultimethod<T0, TR> extends Multimethod {
     ($0: T0): TR;
-    add(methods: {[predicate: string]: UnaryMethod<T0, TR>}): this;
-    add(predicate: string, consequent: UnaryMethod<T0, TR>): this;
+    add(rules: {[predicate: string]: UnaryMethod<T0, TR>}): this;
+    add(predicate: string, method: UnaryMethod<T0, TR>): this;
 }
 export const UnaryMultimethod = <UnaryMultimethodConstructor> class UnaryMultimethod extends createMultimethodClass(1) { };
 export interface UnaryMultimethodOptions<T0, TR> extends MultimethodOptions {
     arity?: 1;
     toDiscriminant?: ($0: T0) => string;
-    methods?: {[predicate: string]: UnaryMethod<T0, TR>};
+    rules?: {[predicate: string]: UnaryMethod<T0, TR>};
 }
 export interface UnaryMethod<T0, TR> {
     (ctx: Context, $0: T0): TR;
@@ -101,14 +101,14 @@ export interface BinaryMultimethodConstructor {
 }
 export interface BinaryMultimethod<T0, T1, TR> extends Multimethod {
     ($0: T0, $1: T1): TR;
-    add(methods: {[predicate: string]: BinaryMethod<T0, T1, TR>}): this;
-    add(predicate: string, consequent: BinaryMethod<T0, T1, TR>): this;
+    add(rules: {[predicate: string]: BinaryMethod<T0, T1, TR>}): this;
+    add(predicate: string, method: BinaryMethod<T0, T1, TR>): this;
 }
 export const BinaryMultimethod = <BinaryMultimethodConstructor> class BinaryMultimethod extends createMultimethodClass(2) { };
 export interface BinaryMultimethodOptions<T0, T1, TR> extends MultimethodOptions {
     arity?: 2;
     toDiscriminant?: ($0: T0, $1: T1) => string;
-    methods?: {[predicate: string]: BinaryMethod<T0, T1, TR>};
+    rules?: {[predicate: string]: BinaryMethod<T0, T1, TR>};
 }
 export interface BinaryMethod<T0, T1, TR> {
     (ctx: Context, $0: T0, $1: T1): TR;
@@ -127,14 +127,14 @@ export interface TernaryMultimethodConstructor {
 }
 export interface TernaryMultimethod<T0, T1, T2, TR> extends Multimethod {
     ($0: T0, $1: T1, $2: T2): TR;
-    add(methods: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>}): this;
-    add(predicate: string, consequent: TernaryMethod<T0, T1, T2, TR>): this;
+    add(rules: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>}): this;
+    add(predicate: string, method: TernaryMethod<T0, T1, T2, TR>): this;
 }
 export const TernaryMultimethod = <TernaryMultimethodConstructor> class TernaryMultimethod extends createMultimethodClass(3) { };
 export interface TernaryMultimethodOptions<T0, T1, T2, TR> extends MultimethodOptions {
     arity?: 3;
     toDiscriminant?: ($0: T0, $1: T1, $2: T2) => string;
-    methods?: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>};
+    rules?: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>};
 }
 export interface TernaryMethod<T0, T1, T2, TR> {
     (ctx: Context, $0: T0, $1: T1, $2: T2): TR;
@@ -153,14 +153,14 @@ export interface VariadicMultimethodConstructor {
 }
 export interface VariadicMultimethod<T, TR> extends Multimethod {
     (...args: T[]): TR;
-    add(methods: {[predicate: string]: VariadicMethod<T, TR>}): this;
-    add(predicate: string, consequent: VariadicMethod<T, TR>): this;
+    add(rules: {[predicate: string]: VariadicMethod<T, TR>}): this;
+    add(predicate: string, method: VariadicMethod<T, TR>): this;
 }
 export const VariadicMultimethod = <VariadicMultimethodConstructor> class VariadicMultimethod extends createMultimethodClass() { };
 export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
     arity?: never;
     toDiscriminant?: (...args: T[]) => string;
-    methods?: {[predicate: string]: VariadicMethod<T, TR>};
+    rules?: {[predicate: string]: VariadicMethod<T, TR>};
 }
 export interface VariadicMethod<T, TR> {
     (ctx: Context, ...args: T[]): TR;
@@ -186,6 +186,8 @@ function createMultimethodClass(staticArity?: number): MultimethodConstructor {
             // TODO: other defaults?
             options = Object.assign({}, options);
             if (typeof options.arity !== 'number') options.arity = staticArity;
+            options.rules = options.rules || {};
+            options.toDiscriminant = options.toDiscriminant || (x => x.toString()); // TODO: temp testing review this!
 
             // TODO: ...
             let instance = createMultimethod(options);

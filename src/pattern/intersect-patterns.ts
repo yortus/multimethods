@@ -85,7 +85,7 @@ function getAllIntersections(a: string, b: string): string[] {
 function getAllPatternSplits(pattern: string): [string, string][] {
     let result = [];
     for (let i = 0; i <= pattern.length; ++i) {
-        let pair = [pattern.substring(0, i), pattern.substring(i)];
+        let pair: [string, string] = [pattern.substring(0, i), pattern.substring(i)];
         if (pattern[i] === '…' || pattern[i] === '*') {
             pair[0] += pattern[i];
             ++i; // skip next iteration

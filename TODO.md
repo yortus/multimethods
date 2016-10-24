@@ -1,13 +1,31 @@
+# Source Audit for terminology & naming
+- [ ] /src/multimethod/impl/create-multimethod.ts
+- [x] /src/multimethod/impl/disambiguate-routes.ts
+- [x] /src/multimethod/impl/disambiguate-rules.ts
+- [ ] /src/multimethod/impl/make-composite-method.ts
+- [x] /src/multimethod/impl/rule.ts
+- [ ] /src/multimethod/impl/unhandled.ts
+
+
+# Other audits:
+- [ ] consistent British English spelling
+- [ ] consistent code style & quality
+- [ ] functionality & test converage
+- [ ] perforance & benchmarks
+
+
 # To Do List
 
+- [ ] Use consistent British English spelling (-ise vs -ize)
 - [x] README - remove TODO lists into separate files (or into github issue(s)?)
 
 - [ ] Multimethod: get rid of refs to address, request, response (now discriminant, parameters/arguments, return value/result)
 - [ ] Multimethod: conflicts... (tiebreak / disambiguate / ambiguity)
 - [x] Multimethod: getDiscriminant --> toDiscriminant
 - [x] Multimethod: address --> discriminant
-- [x] Multimethod: Rule --> Method
+- [x] ~~Multimethod: Rule --> Method~~
 - [x] Multimethod: Rule#test --> Method#predicate
+- [ ] Multimethod: decorator -> meta-rule
 - [ ] Multimethod: Route --> MatchingMethods                    Path
 - [ ] Multimethod: RouteHandler --> ShortlistHandler???         PathHandler
 - [ ] Multimethod: RouteSelector --> ShortlistSelector          PathSelector

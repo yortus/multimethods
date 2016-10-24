@@ -8,5 +8,5 @@ interface MultimethodOptions {
     arity?: number;
     timing?: 'mixed' | 'async' | 'sync';
     toDiscriminant?: Function;
-    methods?: {[predicate: string]: Function};
+    rules?: {[predicate: string]: Function};
 }
