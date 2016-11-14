@@ -43,10 +43,10 @@ export default function createRouteSelector(taxonomy: Taxonomy, candidates: Map<
     let fn = eval(`(() => {\n${lines.join('\n')}\n})`)();
 
 // TODO: temp testing
-console.log('\n\n\n\n<----------------------->');
-let allLines = lines.join('\n');
-console.log(allLines);
-console.log('</----------------------->');
+// console.log('\n\n\n\n<----------------------->');
+// let allLines = lines.join('\n');
+// console.log(allLines);
+// console.log('</----------------------->');
 
     return fn;
 }

@@ -8,6 +8,17 @@ import * as unhandled from './unhandled';
 
 
 
+// Declare isPromise and UNHANDLED in module scope, so the eval'ed route handlers below can reference them. NB: the source code
+// for eval cannot safely refer directly to expressions like `util.isPromiseLike`, since the `util` identifier may not
+// appear in the transpiled JavaScript for this module. This is because TypeScript may rename modules to try to preserve
+// ES6 module semantics.
+let isPromise = util.isPromiseLike;
+let UNHANDLED = unhandled.default;
+
+
+
+
+
 // TODO: rewrite comment. Esp signature of route executor matches signature of multimethod (as per provided Options)
 /**
  * Generates the composite method for the route described by the given `rules`.
@@ -42,8 +53,9 @@ export default function createRouteExecutor(rules: Rule[]): RouteExecutor {
     let lines = [
         ...ruleNames.map((name, i) => `var caps${name} = rules[${i}].predicate.match;`),
         ...ruleNames.map((name, i) => `var exec${name} = rules[${i}].method;`),
-        'function ℙØ(addr, req) {\n    return UNHANDLED;\n}',
-        generateMethodHandlerSourceCode(rules, ruleNames),
+        'var FROZEN_EMPTY_OBJECT = Object.freeze({});',                 // TODO: note ES6 in source here
+        'function ℙØ(disc, result, $0) {\n    return UNHANDLED;\n}',    // TODO: anything refs this ever??
+        generateRouteExecutorSourceCode(rules, ruleNames),
         `return ${startMethodName};`
     ];
 
@@ -57,10 +69,10 @@ export default function createRouteExecutor(rules: Rule[]): RouteExecutor {
     let fn = eval(`(() => {\n${lines.join('\n')}\n})`)();
 
 // TODO: temp testing
-console.log('\n\n\n\n<----------------------->');
-let allLines = lines.join('\n');
-console.log(allLines);
-console.log('</----------------------->');
+// console.log('\n\n\n\n<----------------------->');
+// let allLines = lines.join('\n');
+// console.log(allLines);
+// console.log('</----------------------->');
 
     return fn;
 }
@@ -73,7 +85,7 @@ console.log('</----------------------->');
  * Helper function to generate source code for a set of interdependent functions (one per rule) that perform the
  * cascading evaluation of a route, accounting for the possibly mixed sync/async implementation of the rule handlers.
  */
-function generateMethodHandlerSourceCode(rules: Rule[], ruleNames: string[]): string {
+function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[]): string {
 
     // Generate source code for each rule in turn.
     let sources = rules.map((method, i) => {
@@ -92,42 +104,74 @@ function generateMethodHandlerSourceCode(rules: Rule[], ruleNames: string[]): st
         let endsPartition = i === rules.length - 1 || rules[i + 1].isMetaRule;
         let captureNames = method.predicate.captureNames;
         let hasCaptures = captureNames.length > 0;
-        // let paramMappings = captureNames.reduce((map, name) => (map[name] = `captures${ruleName}.${name}`, map), {});
-        // paramMappings['$addr'] = 'addr';
-        // paramMappings['$req'] = 'req';
-        // paramMappings['$next'] = `rq => ${downstreamRuleName}(addr, rq === void 0 ? req : rq)`;
-        //const handlerArgs = rule.parameterNames.map(name => paramMappings[name]).join(', ');
+        let isMetaRule = method.isMetaRule;
 
-//TODO: temp testing...
-const handlerArgs = ['req', hasCaptures ? `captures${methodName}` : 'void 0'];
-if (method.isMetaRule) {
-    handlerArgs.push(`rq => ${downstreamMethodName}(addr, rq === void 0 ? req : rq)`);
-}        
 
-        // Generate the initial source code, substituting in the values computed above. Note the
-        // conditional annotations to the right of each line. The code will be tweaked more below.
-        let source = `
-            function ${methodName}(addr, req, res?) {
-                if (res !== UNHANDLED) return res;                                              #if ${!startsPartition}
-                var captures${methodName} = caps${methodName}(addr);                            #if ${hasCaptures}
-                var res = exec${methodName}(${handlerArgs});                                    #if ${!endsPartition}
-                if (isPromise(res)) return res.then(rs => ${nextMethodName}(addr, req, rs));    #if ${!endsPartition}
-                return ${nextMethodName}(addr, req, res);                                       #if ${!endsPartition}
-                return exec${methodName}(${handlerArgs});                                       #if ${endsPartition}
+        let DELEGATE_DOWNSTREAM;    // ${downstreamMethodName}
+        let DELEGATE_NEXT;          // ${nextMethodName}
+        let EXECUTE_THIS;           // exec${methodName}
+        let MATCH;                  // caps${methodName}
+        let FROZEN_EMPTY_OBJECT;
+
+
+        // TODO: note ES6 in source here - spread and rest (...MM_ARGS)
+        let test_fn = function METHOD_NAME(disc: string, result: any, ...MM_ARGS: any[]) {
+            if (!startsPartition) {
+                if (result !== UNHANDLED) {
+                    return result;
+                }
             }
-        `;
+            if (hasCaptures) {
+                var context = MATCH(disc);
+            }
+            if (!hasCaptures) {
+                if (isMetaRule) {
+                    var context: any = {};
+                }
+                if (!isMetaRule) {
+                    var context = FROZEN_EMPTY_OBJECT;
+                }
+            }
+            if (isMetaRule) {
+                // TODO: need to ensure there is no capture named `next`
+                context.next = (...MM_ARGS) => DELEGATE_DOWNSTREAM(disc, UNHANDLED, ...MM_ARGS);
+            }
 
-        // Strip off superfluous lines and indentation.
-        source = source.split(/[\r\n]+/).slice(1, -1).join('\n');
-        let indent = source.match(/^[ ]+/)[0].length;
-        source = source.split('\n').map(line => line.slice(indent)).join('\n');
+            if (!endsPartition) {
+                result = EXECUTE_THIS(context, ...MM_ARGS);
+                if (isPromise(result)) {
+                    return result.then(rs => DELEGATE_NEXT(disc, rs, ...MM_ARGS));
+                }
+                else {
+                    return DELEGATE_NEXT(disc, result, ...MM_ARGS);
+                }
+            }
+            if (endsPartition) {
+                return EXECUTE_THIS(context, ...MM_ARGS);
+            }
+        }
 
-        // Conditionally keep/discard whole lines according to #if directives.
-        source = source.replace(/^(.*?)([ ]+#if true)$/gm, '$1').replace(/\n.*?[ ]+#if false/g, '');
+        // TODO:
+        // 1. un-evaluate (i.e. stringify)
+        let source = test_fn.toString();
+        let srcLines = source.split(/[\r\n]+/); // NB: this removed blank lines too
 
-        // The first rule in each partition doesn't need a 'res' parameter. Adjust accordingly.
-        source = source.replace(', res?', startsPartition ? '' : ', res');
-        source = source.replace('var res', startsPartition ? 'var res' : 'res');
+        // 2. dedent
+        let dedentCount = srcLines[1].match(/^[ ]+/)[0].length - 4;
+        srcLines = [].concat(srcLines.shift(), ...srcLines.map(line => line.slice(dedentCount)));
+
+        // 3. eliminate dead code
+        srcLines = eliminateDeadCode(srcLines, {startsPartition, isMetaRule, hasCaptures, endsPartition});
+        source = srcLines.join('\n');
+
+        // 4. string replace
+        source = source.replace(/METHOD_NAME/g, methodName);
+        source = source.replace(/DELEGATE_DOWNSTREAM/g, downstreamMethodName);
+        source = source.replace(/MATCH/g, `caps${methodName}`);
+        source = source.replace(/EXECUTE_THIS/g, `exec${methodName}`);
+        source = source.replace(/DELEGATE_NEXT/g, nextMethodName);
+
+        // 5. done
         return source;
     });
 
@@ -139,9 +183,57 @@ if (method.isMetaRule) {
 
 
 
-// Declare isPromise and UNHANDLED in local scope, so the eval'ed route handlers can reference them. NB: the source code
-// for eval cannot safely refer directly to expressions like `util.isPromiseLike`, since the `util` identifier may not
-// appear in the transpiled JavaScript for this module. This is because TypeScript may rename modules to try to preserve
-// ES6 module semantics.
-let isPromise = util.isPromiseLike;
-let UNHANDLED = unhandled.default;
+
+
+
+
+
+
+
+
+
+
+const MATCH_IF = /^(\s*)if \((\!?)([a-z$_][a-z0-9$_]*)\) \{$/i;
+
+
+
+
+
+// TODO: assumes consistent 4-space block indents, no elses, simple conditions... relax any of these?
+// TODO: support simple `else`!
+function eliminateDeadCode(inLines: string[], consts: {[name: string]: boolean}): string[] {
+    let outLines: string[] = [];
+    while (inLines.length > 0) {
+        let inLine = inLines.shift();
+
+        let matches = MATCH_IF.exec(inLine);
+        if (!matches || !consts.hasOwnProperty(matches[3])) {
+            outLines.push(inLine);
+            continue;
+        }
+
+        let indent = matches[1];
+        let isNegated = matches[2] === '!';
+        let constName = matches[3];
+        let isElided = consts[constName] === isNegated;
+        let blockLines: string[] = [];
+        let blockClose = indent + '}';
+
+        // TODO: support recursion...
+        while ((inLine = inLines.shift()) !== blockClose) {
+            blockLines.push(inLine.slice(4));
+        }
+        if (!isElided) {
+            outLines = outLines.concat(...eliminateDeadCode(blockLines, consts));
+        }
+
+        // while (inLines[0] !== blockClose) { // TODO: lots happening here, split into several lines?
+        //     inLine = inLines.shift();
+        //     if (!isElided) {
+        //         outLines.push(inLine.slice(4));
+        //     }
+        // }
+    }
+
+    return outLines;
+}

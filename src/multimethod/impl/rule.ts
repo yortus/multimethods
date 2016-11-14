@@ -46,7 +46,7 @@ TODO:... fix comment...
 
 // TODO: temp testing... will we (can we?) still check sig at runtime?
         //checkConsequentSignature(method, pattern);
-        this.isMetaRule = method.length === 3; // TODO: new way to check now?? This won't work anymore...
+        this.isMetaRule = method[IS_META] === true;
     }
 
 
@@ -61,3 +61,9 @@ TODO:... fix comment...
     /** Indicates whether the consequent function represents a decorator. Decorators have a '$next' formal parameter */
     isMetaRule: boolean;
 }
+
+
+
+
+// TODO: copypasta with index.ts. Factor out this const into a symbol in its own file
+const IS_META = '__meta';

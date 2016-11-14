@@ -9,8 +9,21 @@ export {default as Taxonomy, TaxonomyNode} from './taxonomy';
 
 
 // TODO: temp testing...
-export {default as OldMultimethod, Method, UNHANDLED} from './zzz-multimethod';
+export {default as OldMultimethod, Method} from './zzz-multimethod';
 export * from './multimethod';
+
+
+
+
+
+// TODO: temp testing...
+export function meta<T extends Function>(fn: T) {
+    const IS_META = '__meta';
+    // TODO: use a symbol...
+    // TODO: ensure it is a function, etc
+    fn[IS_META] = true;
+    return fn;
+}
 
 
 

@@ -1,12 +1,12 @@
 import {expect} from 'chai';
-import {Multimethod, UnaryMultimethod, BinaryMultimethod, TernaryMultimethod, VariadicMultimethod} from 'multimethods';
+import {Multimethod, UnaryMultimethod, BinaryMultimethod, TernaryMultimethod, VariadicMultimethod, meta} from 'multimethods';
 
 
 
 
 
 // TODO: ...
-describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Constructing a Multimethod instance', () => {
+describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
 
 
 
@@ -14,13 +14,14 @@ describe('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // TODO: temp testing...
 it('???????????????????????????????????????????????', () => {
-    debugger;
+
     let mm = new UnaryMultimethod({
         arity: 1,
         rules: {
             '/{thing}': ({thing}, x) => x,
             '/foo':     (ctx, x) => 'foo' + x,
             '/bar':     (ctx, x) => 'bar' + x,
+            '...':      meta((ctx, x) => `---${ctx.next(x)}---`)
         }
     });
     let result = mm('/foo');

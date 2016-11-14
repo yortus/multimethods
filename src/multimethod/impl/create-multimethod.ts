@@ -53,10 +53,10 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     let selectRoute = createRouteSelector(taxonomy, routeExecutors);
 
     // Return a composite handler representing this entire rule set.
-    return function _compiledMultimethod(request: any) {
-        let discriminant = options.toDiscriminant(request);
+    return function _compiledMultimethod($0: any) {
+        let discriminant = options.toDiscriminant($0);
         let executeRoute = selectRoute(discriminant);
-        let result = executeRoute(discriminant, request);
+        let result = executeRoute(discriminant, UNHANDLED, $0);
         return result;
     };
 }
@@ -78,7 +78,9 @@ function findAllRoutesThroughTaxonomy(taxonomy: Taxonomy, rules: {[pattern: stri
 
     // Every route begins with this universal rule. It matches all discriminants,
     // and its method just returns the 'unhandled' sentinel value.
-    const universalFallbackRule = new Rule(Pattern.ANY.toString(), function _unhandled() { return UNHANDLED; });
+    const universalFallbackRule = new Rule(Pattern.ANY.toString(), function _unhandled() {
+        return UNHANDLED;
+    });
 
     // Find the equal-best rules corresponding to each pattern in the taxonomy, sorted least- to most-specific in each
     // case. Since the rules are 'equal best', there is no inherent way to recognise their relative specificity. This is
