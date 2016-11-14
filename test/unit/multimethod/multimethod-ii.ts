@@ -11,33 +11,33 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
 
     // Declare the test rule set.
     const ruleSet = {
-        '/foo': (ctx, req) => 'foo',
-        '/bar': (ctx, req) => 'bar',
-        '/baz': (ctx, req) => 'baz',
-        '/*a*': meta((ctx, req) => `---${ifUnhandled(ctx.next(req), 'NONE')}---`),
+        '/foo': () => 'foo',
+        '/bar': () => 'bar',
+        '/baz': () => 'baz',
+        '/*a*': meta(({next}, req) => `---${ifUnhandled(next(req), 'NONE')}---`),
 
-        'a/*': (ctx, req) => `starts with 'a'`,
-        '*/b': (ctx, req) => `ends with 'b'`,
-        'a/b': (ctx, req) => `starts with 'a' AND ends with 'b'`,
+        'a/*': () => `starts with 'a'`,
+        '*/b': () => `ends with 'b'`,
+        'a/b': () => `starts with 'a' AND ends with 'b'`,
 
-        'c/*': (ctx, req) => `starts with 'c'`,
-        '*/d': (ctx, req) => `ends with 'd'`,
-        'c/d': (ctx, req) => UNHANDLED,
+        'c/*': () => `starts with 'c'`,
+        '*/d': () => `ends with 'd'`,
+        'c/d': () => UNHANDLED,
 
-        'api/... #a': (ctx, req) => `fallback`,
-        'api/... #b': (ctx, req) => `fallback`,
-        'api/fo*o': (ctx, req) => UNHANDLED,
-        'api/fo* #2': meta((ctx, req) => `fo2-(${ifUnhandled(ctx.next(req), 'NONE')})`),
-        'api/fo* #1': meta((ctx, req) => `fo1-(${ifUnhandled(ctx.next(req), 'NONE')})`),
+        'api/... #a': (_, req) => `fallback`,
+        'api/... #b': (_, req) => `fallback`,
+        'api/fo*o': (_, req) => UNHANDLED,
+        'api/fo* #2': meta(({next}, req) => `fo2-(${ifUnhandled(next(req), 'NONE')})`),
+        'api/fo* #1': meta(({next}, req) => `fo1-(${ifUnhandled(next(req), 'NONE')})`),
         'api/foo ': meta((ctx, req) => `${ifUnhandled(ctx.next(req), 'NONE')}!`),
-        'api/foo': (ctx, req) => 'FOO',
-        'api/foot': (ctx, req) => 'FOOt',
-        'api/fooo': (ctx, req) => 'fooo',
-        'api/bar': (ctx, req) => UNHANDLED,
+        'api/foo': () => 'FOO',
+        'api/foot': () => 'FOOt',
+        'api/fooo': () => 'fooo',
+        'api/bar': () => UNHANDLED,
 
-        'zzz/{...rest}': meta((ctx, req) => `${ifUnhandled(ctx.next({address: ctx.rest.split('').reverse().join('')}), 'NONE')}`),
-        'zzz/b*z': (ctx, req) => `${req.address}`,
-        'zzz/./*': (ctx, req) => 'forty-two'
+        'zzz/{...rest}': meta(({next, rest}, req) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+        'zzz/b*z': (_, req) => `${req.address}`,
+        'zzz/./*': (_, req) => 'forty-two'
     };
 
 
@@ -74,7 +74,7 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
 
 
     // Set up the tests.
-    let ruleSetHandler = new UnaryMultimethod({
+    let mm = new UnaryMultimethod({
         toDiscriminant: r => r.address,
         rules: ruleSet
     });
@@ -87,12 +87,7 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
     // Loop over the tests.
     for (let i = 0; i < tests.length; ++i) {
         it(addresses[i], async () => {
-
-            if (addresses[i] === '/quux') {
-                debugger;
-            }
-
-            let res = ruleSetHandler(requests[i]);
+            let res = mm(requests[i]);
             let actualResponse = await res;
             expect(actualResponse).equals(responses[i]);
         });
