@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Multimethod, UnaryMultimethod, BinaryMultimethod, TernaryMultimethod, VariadicMultimethod, meta, UNHANDLED} from 'multimethods';
+import {Multimethod, UnaryMultimethod, BinaryMultimethod, TernaryMultimethod, VariadicMultimethod, meta} from 'multimethods';
 
 
 
@@ -7,6 +7,9 @@ import {Multimethod, UnaryMultimethod, BinaryMultimethod, TernaryMultimethod, Va
 
 // TODO: ...
 describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
+
+    // TODO: temp testing...
+    const UNHANDLED: any = {};    
 
 
     // Declare the test rule set.
@@ -76,12 +79,13 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
     // Set up the tests.
     let mm = new UnaryMultimethod({
         toDiscriminant: r => r.address,
-        rules: ruleSet
+        rules: ruleSet,
+        unhandled: UNHANDLED
     });
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));
     let responses = tests.map(test => test.split(' ==> ')[1]);
-    responses.forEach((res, i) => { if (res === 'UNHANDLED') responses[i] = <any> UNHANDLED; });
+    responses.forEach((res, i) => { if (res === 'UNHANDLED') responses[i] = UNHANDLED; });
 
 
     // Loop over the tests.
@@ -92,13 +96,18 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
             expect(actualResponse).equals(responses[i]);
         });
     }
+
+
+
+
+
+    // TODO: doc helper...
+    function ifUnhandled(lhs, rhs) {
+        return lhs === UNHANDLED ? rhs : lhs;
+    }
 });
 
 
 
 
 
-// TODO: doc helper...
-function ifUnhandled(lhs, rhs) {
-    return lhs === UNHANDLED ? rhs : lhs;
-}

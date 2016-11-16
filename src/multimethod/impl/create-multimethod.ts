@@ -6,7 +6,6 @@ import Rule from './rule';
 import MultimethodOptions from '../multimethod-options';
 import Pattern from '../../pattern';
 import Taxonomy, {TaxonomyNode} from '../../taxonomy';
-import UNHANDLED from './unhandled';
 import {warn} from '../../util';
 
 
@@ -39,11 +38,11 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     }
 
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
-    let routes = findAllRoutesThroughTaxonomy(taxonomy, rules);
+    let routes = findAllRoutesThroughTaxonomy(taxonomy, rules, options.unhandled);
 
     // Create a route executor for each distinct route through the rule set.
     let routeExecutors = Array.from(routes.keys()).reduce(
-        (map, pattern) => map.set(pattern, createRouteExecutor(routes.get(pattern))),
+        (map, pattern) => map.set(pattern, createRouteExecutor(routes.get(pattern), options.unhandled)),
         new Map<Pattern, (...args: any[]) => any>()
     );
 
@@ -56,7 +55,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     return function _compiledMultimethod($0: any) {
         let discriminant = options.toDiscriminant($0);
         let executeRoute = selectRoute(discriminant);
-        let result = executeRoute(discriminant, UNHANDLED, $0);
+        let result = executeRoute(discriminant, options.unhandled, $0);
         return result;
     };
 }
@@ -74,12 +73,12 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
  *  to any address that is best matched by the
  * pattern associated with the route.
  */
-function findAllRoutesThroughTaxonomy(taxonomy: Taxonomy, rules: {[pattern: string]: Function}): Map<Pattern, Rule[]> {
+function findAllRoutesThroughTaxonomy(taxonomy: Taxonomy, rules: {[pattern: string]: Function}, unhandled: any): Map<Pattern, Rule[]> {
 
     // Every route begins with this universal rule. It matches all discriminants,
     // and its method just returns the 'unhandled' sentinel value.
     const universalFallbackRule = new Rule(Pattern.ANY.toString(), function _unhandled() {
-        return UNHANDLED;
+        return unhandled;
     });
 
     // Find the equal-best rules corresponding to each pattern in the taxonomy, sorted least- to most-specific in each

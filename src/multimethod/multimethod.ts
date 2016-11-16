@@ -188,6 +188,7 @@ function createMultimethodClass(staticArity?: number): MultimethodConstructor {
             if (typeof options.arity !== 'number') options.arity = staticArity;
             options.rules = options.rules || {};
             options.toDiscriminant = options.toDiscriminant || (x => x.toString()); // TODO: temp testing review this!
+            options.unhandled = options.unhandled || '???'; // TODO: temp testing - what should be the default UNHANLDED sentinet? undefined? null? false? Some export? Pros/cons of each?
 
             // TODO: ...
             let instance = createMultimethod(options);

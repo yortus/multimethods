@@ -4,7 +4,6 @@
 - [x] /src/multimethod/impl/disambiguate-rules.ts
 - [ ] /src/multimethod/impl/make-composite-method.ts
 - [x] /src/multimethod/impl/rule.ts
-- [ ] /src/multimethod/impl/unhandled.ts
 
 
 # Other audits:
@@ -16,6 +15,7 @@
 
 # To Do List
 
+- [ ] replace all void 0 with undefined
 - [ ] Use consistent British English spelling (-ise vs -ize)
 - [x] README - remove TODO lists into separate files (or into github issue(s)?)
 
@@ -116,7 +116,7 @@ Contenders
   - address --> string
   - request --> input or argument
   - respose --> output or result
-  - UNHANDLED -> NO_MATCH
+  - UNHANDLED -> NO_MATCH ???
   - ??? -> discriminant
   - request --> ??? input $input in $in
   - response --> ??? result? output $output out $out
@@ -138,7 +138,7 @@ Contenders
 
 
 - [x] RuleSet: change to UNHANDLED sentinel value instead of null
-- [ ] RuleSet: allow UNHANDLED value to be specified as an option
+- [x] RuleSet: allow UNHANDLED value to be specified as an option
 - [ ] RuleSet: allow custom 'tiebreak' function to be specified as an option
 - [ ] Transport: for 'file' responses, harden againt rel paths in address eg '../../../sys/passwords.txt'
 - [ ] docs: some code comments are almost impossible to grasp (eg see comments in findAllRoutesThroughRuleSet). Need step-by-step explanations of concepts in separate .md file(s), code can refer reader to these docs for more explanation. Code comments should then be reduced to simpler statements.

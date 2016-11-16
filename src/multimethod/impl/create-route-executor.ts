@@ -2,18 +2,16 @@
 import * as util from '../../util';
 import RouteExecutor from './route-executor';
 import Rule from './rule';
-import * as unhandled from './unhandled';
 
 
 
 
 
-// Declare isPromise and UNHANDLED in module scope, so the eval'ed route handlers below can reference them. NB: the source code
+// Declare isPromise in module scope, so the eval'ed route handlers below can reference it. NB: the source code
 // for eval cannot safely refer directly to expressions like `util.isPromiseLike`, since the `util` identifier may not
 // appear in the transpiled JavaScript for this module. This is because TypeScript may rename modules to try to preserve
 // ES6 module semantics.
 const isPromise = util.isPromiseLike;
-const UNHANDLED = unhandled.default;
 
 
 
@@ -22,6 +20,7 @@ const UNHANDLED = unhandled.default;
 // TODO: ...
 const getCapturesFor = 'getCapturesFor';
 const callMethodFor = 'callMethodFor';
+
 
 
 
@@ -40,7 +39,7 @@ const callMethodFor = 'callMethodFor';
  * @param {Rule[]} rules - the list of rules comprising the route, ordered from least- to most-specific.
  * @returns {Method} the composite method for the route.
  */
-export default function createRouteExecutor(rules: Rule[]): RouteExecutor {
+export default function createRouteExecutor(rules: Rule[], unhandled: any): RouteExecutor {
 
     // Obtain a reversed copy of the rule list, ordered from most- to least-specific. This simplifies logic below.
     rules = rules.slice().reverse();
@@ -61,8 +60,8 @@ export default function createRouteExecutor(rules: Rule[]): RouteExecutor {
         ...ruleNames.map((name, i) => `var ${getCapturesFor}${name} = rules[${i}].predicate.match;`),
         ...ruleNames.map((name, i) => `var ${callMethodFor}${name} = rules[${i}].method;`),
         'var FROZEN_EMPTY_OBJECT = Object.freeze({});',                 // TODO: note ES6 in source here
-        'function ℙØ(discriminant, result, $0) {\n    return UNHANDLED;\n}',    // TODO: anything refs this ever??
-        generateRouteExecutorSourceCode(rules, ruleNames),
+        'function ℙØ(discriminant, result, $0) {\n    return unhandled;\n}',    // TODO: anything refs this ever??
+        generateRouteExecutorSourceCode(rules, ruleNames, unhandled),
         `return ${startMethodName};`
     ];
 
@@ -88,7 +87,7 @@ export default function createRouteExecutor(rules: Rule[]): RouteExecutor {
  * Helper function to generate source code for a set of interdependent functions (one per rule) that perform the
  * cascading evaluation of a route, accounting for the possibly mixed sync/async implementation of the rule handlers.
  */
-function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[]): string {
+function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], unhandled: any): string {
 
     // Generate source code for each rule in turn.
     let sources = rules.map((method, i) => {
@@ -113,6 +112,7 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[]): st
         });
         source = replaceAll(source, {
             METHOD_NAME: ruleNames[i],
+            UNHANDLED: 'unhandled',
             GET_CAPTURES: `${getCapturesFor}${ruleNames[i]}`,
             CALL_METHOD: `${callMethodFor}${ruleNames[i]}`,
             DELEGATE_DOWNSTREAM: ruleNames.filter((n, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop() || 'ℙØ',
@@ -139,6 +139,7 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[]): st
 
 
 // TODO: explain each of these in turn...
+let UNHANDLED: any;
 let STARTS_PARTITION: boolean;
 let ENDS_PARTITION: boolean;
 let HAS_CAPTURES: boolean;

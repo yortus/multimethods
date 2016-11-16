@@ -5,7 +5,7 @@
 
 
 import {expect} from 'chai';
-import {OldMultimethod, UNHANDLED, util, configure} from 'multimethods';
+import {OldMultimethod, util, configure} from 'multimethods';
 // TODO: rename these tests in filename and describe() ? this is more about invoking the Multimethod, not constructing it...
 // TODO: more multimethod tests? for other files?
 
@@ -16,6 +16,13 @@ import {OldMultimethod, UNHANDLED, util, configure} from 'multimethods';
 // - [ ] one decorator and some non-decorators for same pattern
 // - [ ] decorators along ambiguous paths (same decorators on all paths)
 // - [x] decorators along ambiguous paths (not same decorators on all paths) - c/d
+
+
+
+
+
+// TODO: temp testing...
+const UNHANDLED: any = {};
 
 
 

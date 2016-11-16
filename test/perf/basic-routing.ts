@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {OldMultimethod, UNHANDLED, util} from 'multimethods';
+import {OldMultimethod, util} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -25,6 +25,7 @@ import {OldMultimethod, UNHANDLED, util} from 'multimethods';
 
 // Declare test configuration.
 const COUNT = 1000000;
+const UNHANDLED: any = {};
 
 
 // Declare the test rule set.
@@ -96,7 +97,7 @@ const tests = [
 
     // Set up the tests.
     console.log(`Running perf test: basic routing...`);
-    let ruleSetHandler = new OldMultimethod<string>({toDiscriminant: r => r.address}, ruleSet);
+    let mm = new OldMultimethod<string>({toDiscriminant: r => r.address}, ruleSet);
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));
     let responses = tests.map(test => test.split(' ==> ')[1]);
@@ -110,7 +111,7 @@ const tests = [
     // Loop over the tests.
     for (let i = 0; i < COUNT; ++i) {
         let index = Math.floor(Math.random() * tests.length);
-        let res = ruleSetHandler(requests[index]);
+        let res = mm(requests[index]);
         let actualResponse = util.isPromiseLike(res) ? await (res) : res;
         assert.equal(actualResponse, responses[index]);
     }
