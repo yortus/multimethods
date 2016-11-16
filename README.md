@@ -34,7 +34,7 @@
 ## pros/cons for custom UNHANDLED value
 - CON: builtin handlers don't know which UNHANDLED to use - can't assume the default one will work
 - CON: if the default HANDLER always works in addition to a user-defd one, then checking for UNHANDLED value becomes more complicated
-- PRO: why? use case? Can decide that undefined means UNHANLDED, or null, or false or falsy.
+- PRO: why? use case? Can decide that undefined means UNHANDLED, or null, or false or falsy.
 
 
 ## The Pattern DSL

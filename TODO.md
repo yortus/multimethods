@@ -116,7 +116,7 @@ Contenders
   - address --> string
   - request --> input or argument
   - respose --> output or result
-  - UNHANLDED -> NO_MATCH
+  - UNHANDLED -> NO_MATCH
   - ??? -> discriminant
   - request --> ??? input $input in $in
   - response --> ??? result? output $output out $out
