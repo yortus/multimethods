@@ -102,55 +102,6 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[]): st
         //   values are the source code for the argument corresponding to each parameter.
 
 
-        let STARTS_PARTITION: boolean;
-        let ENDS_PARTITION: boolean;
-        let HAS_CAPTURES: boolean;
-        let IS_META_RULE: boolean;
-        let METHOD_NAME: string;
-        let DELEGATE_DOWNSTREAM: RouteExecutor;
-        let DELEGATE_NEXT: RouteExecutor;
-        let GET_CAPTURES: (discriminant: string) => {};
-        let CALL_METHOD: (context: any, ...args: any[]) => any; // Method signature
-        let FROZEN_EMPTY_OBJECT: {};
-
-
-        // TODO: note ES6 in source here - spread and rest (...MM_ARGS)
-        let template = function METHOD_NAME(discriminant: string, result: any, ...MM_ARGS: any[]) {
-            if (!STARTS_PARTITION) {
-                if (result !== UNHANDLED) {
-                    return result;
-                }
-            }
-            if (HAS_CAPTURES) {
-                var context = GET_CAPTURES(discriminant);
-            }
-            if (!HAS_CAPTURES) {
-                if (IS_META_RULE) {
-                    var context = {};
-                }
-                if (!IS_META_RULE) {
-                    var context = FROZEN_EMPTY_OBJECT;
-                }
-            }
-            if (IS_META_RULE) {
-                // TODO: need to ensure there is no capture named `next`
-                context['next'] = (...MM_ARGS) => DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
-            }
-
-            if (!ENDS_PARTITION) {
-                result = CALL_METHOD(context, ...MM_ARGS);
-                if (isPromise(result)) {
-                    return result.then(rs => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
-                }
-                else {
-                    return DELEGATE_NEXT(discriminant, result, ...MM_ARGS);
-                }
-            }
-            if (ENDS_PARTITION) {
-                return CALL_METHOD(context, ...MM_ARGS);
-            }
-        }
-
         // TODO:
         let source = template.toString();
         source = normaliseSource(source);
@@ -167,11 +118,76 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[]): st
             DELEGATE_DOWNSTREAM: ruleNames.filter((n, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop() || 'ℙØ',
             DELEGATE_NEXT: ruleNames[i + 1]
         });
+
+        // TODO: temp testing...
+        let arity = 2;
+        if (typeof arity === 'number') {
+            let replacement = [...Array(arity).keys()].map(key => '_' + key).join(', '); // TODO: ES6 stuff here...
+            source = source.replace(/\.\.\.MM_ARGS/g, replacement);
+        }
+
+
         return source;
     });
 
     // Combine and return all the sources.
     return sources.join('\n');
+}
+
+
+
+
+
+// TODO: explain each of these in turn...
+let STARTS_PARTITION: boolean;
+let ENDS_PARTITION: boolean;
+let HAS_CAPTURES: boolean;
+let IS_META_RULE: boolean;
+let METHOD_NAME: string;
+let DELEGATE_DOWNSTREAM: RouteExecutor;
+let DELEGATE_NEXT: RouteExecutor;
+let GET_CAPTURES: (discriminant: string) => {};
+let CALL_METHOD: (context: any, ...args: any[]) => any; // Method signature
+let FROZEN_EMPTY_OBJECT: {};
+
+
+// TODO: note ES6 in source here - spread and rest (...MM_ARGS)
+// TODO: explain important norms in the template function...
+// TODO: don't need to dedent any more!
+let template = function METHOD_NAME(discriminant: string, result: any, ...MM_ARGS: any[]) {
+    if (!STARTS_PARTITION) {
+        if (result !== UNHANDLED) {
+            return result;
+        }
+    }
+    if (HAS_CAPTURES) {
+        var context = GET_CAPTURES(discriminant);
+    }
+    if (!HAS_CAPTURES) {
+        if (IS_META_RULE) {
+            var context = {};
+        }
+        if (!IS_META_RULE) {
+            var context = FROZEN_EMPTY_OBJECT;
+        }
+    }
+    if (IS_META_RULE) {
+        // TODO: need to ensure there is no capture named `next`
+        context['next'] = (...MM_ARGS) => DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
+    }
+
+    if (!ENDS_PARTITION) {
+        result = CALL_METHOD(context, ...MM_ARGS);
+        if (isPromise(result)) {
+            return result.then(rs => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
+        }
+        else {
+            return DELEGATE_NEXT(discriminant, result, ...MM_ARGS);
+        }
+    }
+    if (ENDS_PARTITION) {
+        return CALL_METHOD(context, ...MM_ARGS);
+    }
 }
 
 
