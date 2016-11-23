@@ -1,5 +1,6 @@
 //TODO: review all comments in here...
 import * as util from '../../util';
+import MultimethodOptions from '../multimethod-options';
 import RouteExecutor from './route-executor';
 import Rule from './rule';
 
@@ -39,7 +40,11 @@ const callMethodFor = 'callMethodFor';
  * @param {Rule[]} rules - the list of rules comprising the route, ordered from least- to most-specific.
  * @returns {Method} the composite method for the route.
  */
-export default function createRouteExecutor(rules: Rule[], unhandled: any): RouteExecutor {
+export default function createRouteExecutor(rules: Rule[], options: MultimethodOptions): RouteExecutor {
+
+    // TODO: temp testing...
+    const UNHANDLED = options.unhandled;
+    const arity = options.arity;
 
     // Obtain a reversed copy of the rule list, ordered from most- to least-specific. This simplifies logic below.
     rules = rules.slice().reverse();
@@ -60,8 +65,8 @@ export default function createRouteExecutor(rules: Rule[], unhandled: any): Rout
         ...ruleNames.map((name, i) => `var ${getCapturesFor}${name} = rules[${i}].predicate.match;`),
         ...ruleNames.map((name, i) => `var ${callMethodFor}${name} = rules[${i}].method;`),
         'var FROZEN_EMPTY_OBJECT = Object.freeze({});',                 // TODO: note ES6 in source here
-        'function ℙØ(discriminant, result, $0) {\n    return unhandled;\n}',    // TODO: anything refs this ever??
-        generateRouteExecutorSourceCode(rules, ruleNames, unhandled),
+        'function ℙØ(discriminant, result, $0) {\n    return UNHANDLED;\n}',    // TODO: anything refs this ever??
+        generateRouteExecutorSourceCode(rules, ruleNames, arity),
         `return ${startMethodName};`
     ];
 
@@ -87,7 +92,7 @@ export default function createRouteExecutor(rules: Rule[], unhandled: any): Rout
  * Helper function to generate source code for a set of interdependent functions (one per rule) that perform the
  * cascading evaluation of a route, accounting for the possibly mixed sync/async implementation of the rule handlers.
  */
-function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], unhandled: any): string {
+function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], arity: number|undefined): string {
 
     // Generate source code for each rule in turn.
     let sources = rules.map((method, i) => {
@@ -112,15 +117,13 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], unh
         });
         source = replaceAll(source, {
             METHOD_NAME: ruleNames[i],
-            UNHANDLED: 'unhandled',
             GET_CAPTURES: `${getCapturesFor}${ruleNames[i]}`,
             CALL_METHOD: `${callMethodFor}${ruleNames[i]}`,
             DELEGATE_DOWNSTREAM: ruleNames.filter((n, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop() || 'ℙØ',
             DELEGATE_NEXT: ruleNames[i + 1]
         });
 
-        // TODO: temp testing...
-        let arity = 2;
+        // TODO: temp testing... specialise for arity...
         if (typeof arity === 'number') {
             let replacement = [...Array(arity).keys()].map(key => '_' + key).join(', '); // TODO: ES6 stuff here...
             source = source.replace(/\.\.\.MM_ARGS/g, replacement);
