@@ -16,11 +16,6 @@ import {warn} from '../../util';
 /** Internal function used to generate the RuleSet#execute method. */
 export default function createMultimethod(options: MultimethodOptions): (p0: any) => any { // TODO: generalise return type!!!
 
-    // TODO: temp testing... relax this...
-    if (options.arity !== 1) {
-        throw new Error(`Not supported yet: arity != 1`);
-    }
-
     // TODO: assume options are normalized by now? Or normalize them here?
     let rules = options.rules;
 
@@ -42,7 +37,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
 
     // Create a route executor for each distinct route through the rule set.
     let routeExecutors = Array.from(routes.keys()).reduce(
-        (map, pattern) => map.set(pattern, createRouteExecutor(routes.get(pattern), options.unhandled)),
+        (map, pattern) => map.set(pattern, createRouteExecutor(routes.get(pattern), options)),
         new Map<Pattern, (...args: any[]) => any>()
     );
 
