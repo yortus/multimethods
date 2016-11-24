@@ -77,10 +77,12 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
 
 
     // Set up the tests.
-    let mm = new UnaryMultimethod({
+    let mm = new Multimethod({ // TODO: was UnaryMultimethod (for stronger statc typing)
+        arity: 1,
         toDiscriminant: r => r.address,
         rules: ruleSet,
-        unhandled: UNHANDLED
+        unhandled: UNHANDLED,
+        emitES5: true
     });
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));

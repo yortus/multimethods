@@ -44,7 +44,6 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
 
     // TODO: temp testing...
     const UNHANDLED = options.unhandled;
-    const arity = options.arity;
 
     // Obtain a reversed copy of the rule list, ordered from most- to least-specific. This simplifies logic below.
     rules = rules.slice().reverse();
@@ -66,7 +65,7 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
         ...ruleNames.map((name, i) => `var ${callMethodFor}${name} = rules[${i}].method;`),
         'var FROZEN_EMPTY_OBJECT = Object.freeze({});',                 // TODO: note ES6 in source here
         'function ℙØ(discriminant, result, $0) {\n    return UNHANDLED;\n}',    // TODO: anything refs this ever??
-        generateRouteExecutorSourceCode(rules, ruleNames, arity),
+        generateRouteExecutorSourceCode(rules, ruleNames, options),
         `return ${startMethodName};`
     ];
 
@@ -92,7 +91,7 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
  * Helper function to generate source code for a set of interdependent functions (one per rule) that perform the
  * cascading evaluation of a route, accounting for the possibly mixed sync/async implementation of the rule handlers.
  */
-function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], arity: number|undefined): string {
+function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], options: MultimethodOptions): string {
 
     // Generate source code for each rule in turn.
     let sources = rules.map((method, i) => {
@@ -124,9 +123,13 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], ari
         });
 
         // TODO: temp testing... specialise for arity...
-        if (typeof arity === 'number') {
-            let replacement = [...Array(arity).keys()].map(key => '_' + key).join(', '); // TODO: ES6 stuff here...
+        if (typeof options.arity === 'number') {
+            let replacement = [...Array(options.arity).keys()].map(key => '_' + key).join(', '); // TODO: ES6 stuff here...
             source = source.replace(/\.\.\.MM_ARGS/g, replacement);
+        }
+        else if (options.emitES5) {
+            source = downlevelES6Rest(source);
+            source = downlevelES6Spread(source);
         }
 
 
@@ -158,7 +161,9 @@ let FROZEN_EMPTY_OBJECT: {};
 // TODO: note ES6 in source here - spread and rest (...MM_ARGS)
 // TODO: explain important norms in the template function...
 // TODO: don't need to dedent any more!
+// TODO: put more explanatory comments inside, and strip them out to maximise inlining potential
 let template = function METHOD_NAME(discriminant: string, result: any, ...MM_ARGS: any[]) {
+
     if (!STARTS_PARTITION) {
         if (result !== UNHANDLED) {
             return result;
@@ -177,7 +182,9 @@ let template = function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     }
     if (IS_META_RULE) {
         // TODO: need to ensure there is no capture named `next`
-        context['next'] = (...MM_ARGS) => DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
+        context['next'] = function (...MM_ARGS) {
+            return DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
+        };
     }
 
     if (!ENDS_PARTITION) {
@@ -267,4 +274,39 @@ function replaceAll(source: string, replacements: {[identifier: string]: string}
         source = source.replace(regex, replacement);
     }
     return source;
+}
+
+
+
+
+
+// TODO: ...
+function downlevelES6Rest(source: string): string {
+    // TODO: ensure no other kinds of rest left behind afterward...
+
+    // Matches (non-arrow) function headers with a rest argument
+    const REGEX = /function([^(]*)\((.*?),\s*\.\.\.[^)]+\)\s*{\n(\s*)/gi;
+
+    // ES5 equivalent for initialising the rest argument MM_ARGS
+    const REST = `for (var MM_ARGS = [], len = arguments.length, i = 2; i < len; ++i) MM_ARGS.push(arguments[i]);`;
+
+    return source.replace(REGEX, (substr, funcName: string, firstArgs: string, indent: string) => {
+        return `function ${funcName}(${firstArgs}) {\n${indent}${REST}\n${indent}`;
+    });
+}
+
+
+
+
+
+// TODO: ...
+function downlevelES6Spread(source: string): string {
+    // TODO: ensure no other kinds of spreads left behind afterward...
+
+    // Matches argument list of function calls where the final argument is a spread expression
+    let REGEX = /\(([^(]*?),\s*\.\.\.([^)]+)\)/gi;
+
+    return source.replace(REGEX, (substr, firstArgs: string, finalSpreadArg: string) => {
+        return `.apply(null, [${firstArgs}].concat(${finalSpreadArg}))`;
+    });
 }

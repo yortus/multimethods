@@ -10,4 +10,7 @@ interface MultimethodOptions {
     toDiscriminant?: Function;
     unhandled?: any;
     rules?: {[predicate: string]: Function};
+
+    // TODO: ensure all codegen code respects this...
+    emitES5?: boolean;
 }
