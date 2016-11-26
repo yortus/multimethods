@@ -80,6 +80,7 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
     let mm = new Multimethod({ // TODO: was UnaryMultimethod (for stronger statc typing)
         arity: 1,
         toDiscriminant: r => r.address,
+        timing: 'sync',
         rules: ruleSet,
         unhandled: UNHANDLED,
         emitES5: true

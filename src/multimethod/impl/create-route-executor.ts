@@ -112,7 +112,9 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], opt
             STARTS_PARTITION: i === 0 || method.isMetaRule,
             ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
             HAS_CAPTURES: method.predicate.captureNames.length > 0,
-            IS_META_RULE: method.isMetaRule
+            IS_META_RULE: method.isMetaRule,
+            IS_PURE_SYNC: options.timing === 'sync',
+            IS_PURE_ASYNC: options.timing === 'async'
         });
         source = replaceAll(source, {
             METHOD_NAME: ruleNames[i],
@@ -150,6 +152,8 @@ let STARTS_PARTITION: boolean;
 let ENDS_PARTITION: boolean;
 let HAS_CAPTURES: boolean;
 let IS_META_RULE: boolean;
+let IS_PURE_SYNC: boolean;
+let IS_PURE_ASYNC: boolean;
 let METHOD_NAME: string;
 let DELEGATE_DOWNSTREAM: RouteExecutor;
 let DELEGATE_NEXT: RouteExecutor;
@@ -169,17 +173,21 @@ let template = function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
             return result;
         }
     }
+
+    // TODO: set up context...
     if (HAS_CAPTURES) {
         var context = GET_CAPTURES(discriminant);
     }
-    if (!HAS_CAPTURES) {
+    else {
         if (IS_META_RULE) {
             var context = {};
         }
-        if (!IS_META_RULE) {
+        else {
             var context = FROZEN_EMPTY_OBJECT;
         }
     }
+
+    // TODO: meta rules...
     if (IS_META_RULE) {
         // TODO: need to ensure there is no capture named `next`
         context['next'] = function (...MM_ARGS) {
@@ -187,18 +195,35 @@ let template = function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
         };
     }
 
+    // TODO: call method...
+    result = CALL_METHOD(context, ...MM_ARGS);
+
+    // TODO: cascade result...
     if (!ENDS_PARTITION) {
-        result = CALL_METHOD(context, ...MM_ARGS);
-        if (isPromise(result)) {
-            return result.then(rs => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
+        if (IS_PURE_SYNC) {
+
+            // All methods in this MM are synchronous
+            result = DELEGATE_NEXT(discriminant, result, ...MM_ARGS);
         }
         else {
-            return DELEGATE_NEXT(discriminant, result, ...MM_ARGS);
+            if (IS_PURE_ASYNC) {
+
+                // All methods in this MM are asynchronous
+                result = result.then(rs => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
+            }
+            else {
+
+                // Methods may be sync or async, and we must differentiate at runtime
+                if (isPromise(result)) {
+                    result = result.then(rs => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
+                }
+                else {
+                    result = DELEGATE_NEXT(discriminant, result, ...MM_ARGS);
+                }
+            }
         }
     }
-    if (ENDS_PARTITION) {
-        return CALL_METHOD(context, ...MM_ARGS);
-    }
+    return result;
 }
 
 
@@ -215,6 +240,7 @@ function normaliseSource(source: string): string {
     // TODO: verify/fix 4-space indents. Otherwise hard-to find bugs may creep in if devs alter the template function
     // TODO: -or- don't assume 4-space indents anymore?
     let lines = source.split(/[\r\n]+/); // NB: this removes blank lines too
+    lines = lines.filter(line => !/^\s*\/\//.test(line)); // Remove comment lines
     let dedentCount = lines[1].match(/^[ ]+/)[0].length - 4;
     lines = [].concat(lines.shift(), ...lines.map(line => line.slice(dedentCount)));
     source = lines.join('\n');
@@ -225,10 +251,10 @@ function normaliseSource(source: string): string {
 
 
 
-// TODO: assumes consistent 4-space block indents, no elses, simple conditions... relax any of these?
-// TODO: support simple `else`!
+// TODO: assumes consistent 4-space block indents, simple conditions... relax any of these?
 function eliminateDeadCode(source: string, consts: {[name: string]: boolean}): string {
-    const MATCH_IF = /^(\s*)if \((\!?)([a-z$_][a-z0-9$_]*)\) \{$/i;
+    const MATCH_IF = /^(\s*)if \((\!?)([a-zA-Z$_][a-zA-Z0-9$_]*)\) {$/;
+    const MATCH_ELSE = /^(\s*)else {$/;
     let inLines = source ? source.split('\n') : [];
     let outLines: string[] = [];
     while (inLines.length > 0) {
@@ -247,12 +273,17 @@ function eliminateDeadCode(source: string, consts: {[name: string]: boolean}): s
         let blockLines: string[] = [];
         let blockClose = indent + '}';
 
-        // TODO: support recursion...
         while ((inLine = inLines.shift()) !== blockClose) {
             blockLines.push(inLine.slice(4));
         }
+
         if (!isElided) {
             outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n'), consts));
+        }
+
+        // TODO: handle 'else' blocks...
+        if (inLines.length > 0 && MATCH_ELSE.test(inLines[0])) {
+            inLines[0] = `${indent}if (${isNegated ? '' : '!'}${constName}) {`;
         }
     }
 
