@@ -6,7 +6,7 @@
   "main": "built/index.js",
   "typings": "built/index.d.ts",
   "scripts": {
-    "build": "tsc -p src && tsc -p test && pegjs src/pattern/pattern-source-grammar.peg built/pattern/pattern-source-grammar.js && pegjs src/zzz-multimethod/consequent-signature-grammar.peg built/zzz-multimethod/consequent-signature-grammar.js",
+    "build": "tsc -p src && tsc -p test && pegjs src/pattern/pattern-source-grammar.peg built/pattern/pattern-source-grammar.js",
     "clean": "rimraf built/",
     "prepublish": "npm run self-ref && npm run build",
     "test": "node ./scripts/run-unit-tests",

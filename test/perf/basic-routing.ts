@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {OldMultimethod, util} from 'multimethods';
+import {Multimethod, meta, util} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -10,6 +10,9 @@ import {OldMultimethod, util} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
+// 2016-11-26   LAJESTIC    Dispatched 1000000 requests in 1.625 seconds   (~615000 req/sec)    setting option arity=1
+// 2016-11-26   LAJESTIC    Dispatched 1000000 requests in 4.25 seconds    (~235000 req/sec)    After rewrite of MM API, options, and codegen, with no optimising options set
+
 // 2016-08-22   LAJESTIC    Dispatched 1000000 requests in 1.52 seconds    (~667000 req/sec)    After switching from ES5 + asyncawait to ES6 + async/await (although no async routes here!?) Commit: 4789506
 // 2016-08-22   LAJESTIC    Dispatched 1000000 requests in 1.172 seconds   (~853000 req/sec)    New baseline (haven't run this for quite a while). Commit: 1385eb5
 
@@ -33,7 +36,7 @@ const ruleSet = {
     '/foo': () => 'foo',
     '/bar': () => 'bar',
     '/baz': () => 'baz',
-    '/*a*': ($req, _, $next) => `---${ifUnhandled($next($req), 'NONE')}---`,
+    '/*a*': meta(({next}, $req) => `---${ifUnhandled(next($req), 'NONE')}---`),
 
     'a/*': () => `starts with 'a'`,
     '*/b': () => `ends with 'b'`,
@@ -46,16 +49,16 @@ const ruleSet = {
     'api/... #a': () => `fallback`,
     'api/... #b': () => `fallback`,
     'api/fo*o': () => UNHANDLED,
-    'api/fo* #2': ($req, _, $next) => `fo2-(${ifUnhandled($next($req), 'NONE')})`,
-    'api/fo* #1': ($req, _, $next) => `fo1-(${ifUnhandled($next($req), 'NONE')})`,
-    'api/foo ': ($req, _, $next) => `${ifUnhandled($next($req), 'NONE')}!`,
+    'api/fo* #2': meta(({next}, $req) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
+    'api/fo* #1': meta(({next}, $req) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
+    'api/foo ': meta(({next}, $req) => `${ifUnhandled(next($req), 'NONE')}!`),
     'api/foo': () => 'FOO',
     'api/foot': () => 'FOOt',
     'api/fooo': () => 'fooo',
     'api/bar': () => UNHANDLED,
 
-    'zzz/{...rest}': (_, {rest}, $next) => `${ifUnhandled($next({address: rest.split('').reverse().join('')}), 'NONE')}`,
-    'zzz/b*z': ($req) => `${$req.address}`,
+    'zzz/{...rest}': meta(({rest, next}) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+    'zzz/b*z': (_, $req) => `${$req.address}`,
     'zzz/./*': () => 'forty-two'
 };
 
@@ -97,7 +100,13 @@ const tests = [
 
     // Set up the tests.
     console.log(`Running perf test: basic routing...`);
-    let mm = new OldMultimethod<string>({toDiscriminant: r => r.address}, ruleSet);
+    let mm = new Multimethod({
+        rules: ruleSet,
+        toDiscriminant: r => r.address,
+        unhandled: UNHANDLED,
+        arity: 1,
+        timing: 'sync'
+    });
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));
     let responses = tests.map(test => test.split(' ==> ')[1]);
