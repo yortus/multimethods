@@ -22,6 +22,14 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the multimethod's rule set.
     let taxonomy = new Taxonomy(Object.keys(rules).map(src => new Pattern(src)));
 
+    // TODO: put validation logic (this and some later paragraphs) elsewhere...
+    // TODO: ensure no pattern has a capture called 'next'
+    Object.keys(rules).forEach(src => {
+        let pattern = new Pattern(src);
+        if (pattern.captureNames.indexOf('next') === -1) return;
+        throw new Error(`Pattern '${pattern}' uses reserved name 'next'`);
+    });
+
     // Detect synthesized patterns in the taxonomy (i.e., ones with no exactly-matching predicates in the rule set).
     // TODO: If ... then warn...
     // TODO: explain this a bit better... F# also issues a warning when a match expression doesn't cover all possible cases...

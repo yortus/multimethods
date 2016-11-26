@@ -168,6 +168,7 @@ let FROZEN_EMPTY_OBJECT: {};
 // TODO: put more explanatory comments inside, and strip them out to maximise inlining potential
 let template = function METHOD_NAME(discriminant: string, result: any, ...MM_ARGS: any[]) {
 
+    // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
     if (!STARTS_PARTITION) {
         if (result !== UNHANDLED) {
             return result;
@@ -189,7 +190,6 @@ let template = function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
 
     // TODO: meta rules...
     if (IS_META_RULE) {
-        // TODO: need to ensure there is no capture named `next`
         context['next'] = function (...MM_ARGS) {
             return DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
         };
