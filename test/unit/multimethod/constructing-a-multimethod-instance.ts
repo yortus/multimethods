@@ -5,7 +5,7 @@
 
 
 import {expect} from 'chai';
-import {OldMultimethod, util, configure} from 'multimethods';
+import {Multimethod, meta, util} from 'multimethods';
 // TODO: rename these tests in filename and describe() ? this is more about invoking the Multimethod, not constructing it...
 // TODO: more multimethod tests? for other files?
 
@@ -43,7 +43,7 @@ describe('Constructing a Multimethod instance', () => {
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
             '/baz': () => val('baz'),
-            '/*a*': async (req, cap, $next) => val(`---${await ifUnhandled(await $next(), () => err('no downstream!'))}---`),
+            '/*a*': meta(async ({next}) => val(`---${await ifUnhandled(await next(), () => err('no downstream!'))}---`)),
 
             'a/*': () => val(`starts with 'a'`),
             '*/b': () => val(`ends with 'b'`),
@@ -56,16 +56,18 @@ describe('Constructing a Multimethod instance', () => {
             'api/... #a': () => val(`fallback`),
             'api/... #b': () => val(`fallback`), // TODO: temp testing, remove this...
             'api/fo*o': () => val(UNHANDLED),
-            'api/fo* #2': async ($req, cap, $next) => val(`fo2-(${ifUnhandled(await $next($req), 'NONE')})`),
-            'api/fo* #1': async ($req, cap, $next) => val(`fo1-(${ifUnhandled(await $next($req), 'NONE')})`),
-            'api/foo ': async ($req, cap, $next) => val(`${ifUnhandled(await $next($req), 'NONE')}!`),
+            'api/fo* #2': meta(async ({next}, rq) => val(`fo2-(${ifUnhandled(await next(rq), 'NONE')})`)),
+            'api/fo* #1': meta(async ({next}, rq) => val(`fo1-(${ifUnhandled(await next(rq), 'NONE')})`)),
+            'api/foo ': meta(async ({next}, rq) => val(`${ifUnhandled(await next(rq), 'NONE')}!`)),
             'api/foo': () => val('FOO'),
             'api/foot': () => val('FOOt'),
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(UNHANDLED),
 
-            'zzz/{...rest}': async (req, {rest}, $next) => val(`${ifUnhandled(await $next({address: rest.split('').reverse().join('')}), 'NONE')}`),
-            'zzz/b*z': ($req) => val(`${$req.address}`),
+            'zzz/{...rest}': meta(async ({rest, next}) => {
+                return val(`${ifUnhandled(await next({address: rest.split('').reverse().join('')}), 'NONE')}`);
+            }),
+            'zzz/b*z': (_, rq) => val(`${rq.address}`),
             'zzz/./*': () => val('forty-two')
         };
 
@@ -104,9 +106,13 @@ describe('Constructing a Multimethod instance', () => {
         ];
 
         // TODO: doc...
-        configure({warnings: 'off'});
-        let multimethod = new OldMultimethod<string>({toDiscriminant: r => r.address}, ruleSet);
-        configure({warnings: 'default'});
+//        configure({warnings: 'off'});
+        let multimethod = new Multimethod({
+            toDiscriminant: r => r.address,
+            rules: ruleSet,
+            unhandled: UNHANDLED
+        });
+//        configure({warnings: 'default'});
 
         tests.forEach(test => it(test, async () => {
             let address = test.split(' ==> ')[0];
