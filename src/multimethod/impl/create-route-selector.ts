@@ -36,18 +36,14 @@ export default function createRouteSelector(taxonomy: Taxonomy, candidates: Map<
         '};'
     ];
 
+    // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
+    // console.log(`\n\n\n================ ROUTE SELECTOR ================\n${lines.join('\n')}`);
+
     // Evaluate the source code, and return its result, which is the route selector function. The use of eval here is
     // safe. There are no untrusted inputs substituted into the source. More importantly, the use of eval here allows
     // for route selection code that is both more readable and more efficient, since it is tailored specifically to the
     // give taxonomy of patterns, rather than having to be generalized for all possible cases.
     let fn = eval(`(() => {\n${lines.join('\n')}\n})`)();
-
-// TODO: temp testing
-// console.log('\n\n\n\n<----------------------->');
-// let allLines = lines.join('\n');
-// console.log(allLines);
-// console.log('</----------------------->');
-
     return fn;
 }
 

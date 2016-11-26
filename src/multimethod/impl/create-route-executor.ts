@@ -70,7 +70,7 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route executor at runtime.
-    console.log(`\n\n\n================ ROUTE EXECUTOR for ${startMethodName} ================\n${lines.join('\n')}`);
+    // console.log(`\n\n\n================ ROUTE EXECUTOR for ${startMethodName} ================\n${lines.join('\n')}`);
 
 // TODO: switch to `new Function` with closed over vars passed as params (as done in bluebird)
     // Evaluate the source code, and return its result, which is the composite route handler function. The use of eval
