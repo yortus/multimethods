@@ -36,7 +36,7 @@ const ruleSet = {
     '/foo': () => 'foo',
     '/bar': () => 'bar',
     '/baz': () => 'baz',
-    '/*a*': meta(($req, {next}) => `---${ifUnhandled(next($req), 'NONE')}---`),
+    '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
 
     'a/*': () => `starts with 'a'`,
     '*/b': () => `ends with 'b'`,
@@ -49,15 +49,15 @@ const ruleSet = {
     'api/... #a': () => `fallback`,
     'api/... #b': () => `fallback`,
     'api/fo*o': () => UNHANDLED,
-    'api/fo* #2': meta(($req, {next}) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
-    'api/fo* #1': meta(($req, {next}) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
-    'api/foo ': meta(($req, {next}) => `${ifUnhandled(next($req), 'NONE')}!`),
+    'api/fo* #2': meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
+    'api/fo* #1': meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
+    'api/foo ': meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
     'api/foo': () => 'FOO',
     'api/foot': () => 'FOOt',
     'api/fooo': () => 'fooo',
     'api/bar': () => UNHANDLED,
 
-    'zzz/{...rest}': meta(($req, {rest, next}) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+    'zzz/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
     'zzz/b*z': ($req) => `${$req.address}`,
     'zzz/./*': () => 'forty-two'
 };
