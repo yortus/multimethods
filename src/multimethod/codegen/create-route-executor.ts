@@ -2,7 +2,7 @@
 import * as util from '../../util';
 import MultimethodOptions from '../multimethod-options';
 import RouteExecutor from './route-executor';
-import Rule from './rule';
+import Rule from '../impl/rule';
 
 
 

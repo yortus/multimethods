@@ -1,5 +1,5 @@
-import createRouteExecutor from './create-route-executor';
-import createRouteSelector from './create-route-selector';
+import createRouteExecutor from '../codegen/create-route-executor';
+import createRouteSelector from '../codegen/create-route-selector';
 import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
