@@ -43,7 +43,7 @@ describe('Constructing a Multimethod instance', () => {
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
             '/baz': () => val('baz'),
-            '/*a*': meta(async ({next}) => val(`---${await ifUnhandled(await next(), () => err('no downstream!'))}---`)),
+            '/*a*': meta(async (rq, {next}) => val(`---${await ifUnhandled(await next(), () => err('no downstream!'))}---`)),
 
             'a/*': () => val(`starts with 'a'`),
             '*/b': () => val(`ends with 'b'`),
@@ -56,18 +56,18 @@ describe('Constructing a Multimethod instance', () => {
             'api/... #a': () => val(`fallback`),
             'api/... #b': () => val(`fallback`), // TODO: temp testing, remove this...
             'api/fo*o': () => val(UNHANDLED),
-            'api/fo* #2': meta(async ({next}, rq) => val(`fo2-(${ifUnhandled(await next(rq), 'NONE')})`)),
-            'api/fo* #1': meta(async ({next}, rq) => val(`fo1-(${ifUnhandled(await next(rq), 'NONE')})`)),
-            'api/foo ': meta(async ({next}, rq) => val(`${ifUnhandled(await next(rq), 'NONE')}!`)),
+            'api/fo* #2': meta(async (rq, {next}) => val(`fo2-(${ifUnhandled(await next(rq), 'NONE')})`)),
+            'api/fo* #1': meta(async (rq, {next}) => val(`fo1-(${ifUnhandled(await next(rq), 'NONE')})`)),
+            'api/foo ': meta(async (rq, {next}) => val(`${ifUnhandled(await next(rq), 'NONE')}!`)),
             'api/foo': () => val('FOO'),
             'api/foot': () => val('FOOt'),
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(UNHANDLED),
 
-            'zzz/{...rest}': meta(async ({rest, next}) => {
+            'zzz/{...rest}': meta(async (rq, {rest, next}) => {
                 return val(`${ifUnhandled(await next({address: rest.split('').reverse().join('')}), 'NONE')}`);
             }),
-            'zzz/b*z': (_, rq) => val(`${rq.address}`),
+            'zzz/b*z': (rq) => val(`${rq.address}`),
             'zzz/./*': () => val('forty-two')
         };
 

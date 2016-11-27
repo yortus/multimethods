@@ -22,7 +22,7 @@ let IS_PURE_ASYNC: boolean;
 let DELEGATE_DOWNSTREAM: RouteExecutor;
 let DELEGATE_NEXT: RouteExecutor;
 let GET_CAPTURES: (discriminant: string) => {};
-let CALL_METHOD: (context: any, ...args: any[]) => any; // Method signature
+let CALL_METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
 let FROZEN_EMPTY_OBJECT: {};
 
 
@@ -60,7 +60,7 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     }
 
     // TODO: call method...
-    result = CALL_METHOD(context, ...MM_ARGS);
+    result = CALL_METHOD(...MM_ARGS, context);
 
     // TODO: cascade result...
     if (!ENDS_PARTITION) {

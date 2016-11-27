@@ -85,7 +85,7 @@ export interface UnaryMultimethodOptions<T0, TR> extends MultimethodOptions {
     rules?: {[predicate: string]: UnaryMethod<T0, TR>};
 }
 export interface UnaryMethod<T0, TR> {
-    (ctx: Context, $0: T0): TR;
+    ($0: T0, ctx: Context): TR;
 }
 
 
@@ -111,7 +111,7 @@ export interface BinaryMultimethodOptions<T0, T1, TR> extends MultimethodOptions
     rules?: {[predicate: string]: BinaryMethod<T0, T1, TR>};
 }
 export interface BinaryMethod<T0, T1, TR> {
-    (ctx: Context, $0: T0, $1: T1): TR;
+    ($0: T0, $1: T1, ctx: Context): TR;
 }
 
 
@@ -137,7 +137,7 @@ export interface TernaryMultimethodOptions<T0, T1, T2, TR> extends MultimethodOp
     rules?: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>};
 }
 export interface TernaryMethod<T0, T1, T2, TR> {
-    (ctx: Context, $0: T0, $1: T1, $2: T2): TR;
+    ($0: T0, $1: T1, $2: T2, ctx: Context): TR;
 }
 
 
@@ -163,7 +163,7 @@ export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
     rules?: {[predicate: string]: VariadicMethod<T, TR>};
 }
 export interface VariadicMethod<T, TR> {
-    (ctx: Context, ...args: T[]): TR;
+    (...args: Array<T|Context>): TR; // TODO: this is best effort, but really needs to be (...args: T[], ctx: Context)
 }
 
 
@@ -219,7 +219,7 @@ const CTOR = Symbol('ctor');
 
 
 // TODO: doc...
-export type Context = {[name: string]: string} & {next: Function};
+export type Context = {[captureName: string]: string} & {next: Function};
 
 // TODO: was... remove...
 // export type Captures = {[name: string]: string;};

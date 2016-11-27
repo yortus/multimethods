@@ -18,10 +18,10 @@ it('???????????????????????????????????????????????', () => {
     let mm = new UnaryMultimethod({
         arity: 1,
         rules: {
-            '/{thing}': ({thing}, x) => x,
-            '/foo':     (ctx, x) => 'foo' + x,
-            '/bar':     (ctx, x) => 'bar' + x,
-            '...':      meta((ctx, x) => `---${ctx.next(x)}---`)
+            '/{thing}': (x, {thing, next}) => x,
+            '/foo':     (x) => 'foo' + x,
+            '/bar':     (x) => 'bar' + x,
+            '...':      meta((x, {next}) => `---${next(x)}---`)
         }
     });
     let result = mm('/foo');

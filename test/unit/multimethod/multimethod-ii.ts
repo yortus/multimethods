@@ -17,7 +17,7 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
         '/foo': () => 'foo',
         '/bar': () => 'bar',
         '/baz': () => 'baz',
-        '/*a*': meta(({next}, req) => `---${ifUnhandled(next(req), 'NONE')}---`),
+        '/*a*': meta((req, {next}) => `---${ifUnhandled(next(req), 'NONE')}---`),
 
         'a/*': () => `starts with 'a'`,
         '*/b': () => `ends with 'b'`,
@@ -27,20 +27,20 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
         '*/d': () => `ends with 'd'`,
         'c/d': () => UNHANDLED,
 
-        'api/... #a': (_, req) => `fallback`,
-        'api/... #b': (_, req) => `fallback`,
-        'api/fo*o': (_, req) => UNHANDLED,
-        'api/fo* #2': meta(({next}, req) => `fo2-(${ifUnhandled(next(req), 'NONE')})`),
-        'api/fo* #1': meta(({next}, req) => `fo1-(${ifUnhandled(next(req), 'NONE')})`),
-        'api/foo ': meta((ctx, req) => `${ifUnhandled(ctx.next(req), 'NONE')}!`),
+        'api/... #a': (req, _) => `fallback`,
+        'api/... #b': (req, _) => `fallback`,
+        'api/fo*o': (req, _) => UNHANDLED,
+        'api/fo* #2': meta((req, {next}) => `fo2-(${ifUnhandled(next(req), 'NONE')})`),
+        'api/fo* #1': meta((req, {next}) => `fo1-(${ifUnhandled(next(req), 'NONE')})`),
+        'api/foo ': meta((req, ctx) => `${ifUnhandled(ctx.next(req), 'NONE')}!`),
         'api/foo': () => 'FOO',
         'api/foot': () => 'FOOt',
         'api/fooo': () => 'fooo',
         'api/bar': () => UNHANDLED,
 
-        'zzz/{...rest}': meta(({next, rest}, req) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
-        'zzz/b*z': (_, req) => `${req.address}`,
-        'zzz/./*': (_, req) => 'forty-two'
+        'zzz/{...rest}': meta((req, {next, rest}) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+        'zzz/b*z': (req) => `${req.address}`,
+        'zzz/./*': (req) => 'forty-two'
     };
 
 
@@ -109,8 +109,3 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
         return lhs === UNHANDLED ? rhs : lhs;
     }
 });
-
-
-
-
-
