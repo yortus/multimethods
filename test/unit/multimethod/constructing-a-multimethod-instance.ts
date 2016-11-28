@@ -108,7 +108,7 @@ describe('Constructing a Multimethod instance', () => {
         // TODO: doc...
 //        configure({warnings: 'off'});
         let multimethod = new Multimethod({
-            toDiscriminant: r => r.address,
+            toDiscriminant: (r: any) => r.address,
             rules: ruleSet,
             unhandled: UNHANDLED
         });

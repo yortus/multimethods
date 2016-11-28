@@ -15,6 +15,7 @@
 
 # To Do List
 
+- [ ] provide a default UNHANDLED value in the library. Users can optionally override it in MM options
 - [ ] replace all void 0 with undefined
 - [ ] Use consistent British English spelling (-ise vs -ize)
 - [x] README - remove TODO lists into separate files (or into github issue(s)?)
