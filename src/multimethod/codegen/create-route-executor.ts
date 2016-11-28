@@ -69,12 +69,12 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
             .map((rule, i) => `var ${getCapturesFor}${rule.name} = rules[${i}].predicate.match;`)
             .filter((_, i) => rules[i].predicate.captureNames.length > 0),
         ...rules.map((rule, i) => `var ${invokeMethodFor}${rule.name} = rules[${i}].method;`),
-        generateRouteExecutorSourceCode(rules, options),
+        generateExecutorSourceCode(rules, options),
         `return ${startMethodName};`
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route executor at runtime.
-    console.log(`\n\n\n================ ROUTE EXECUTOR for ${startMethodName} ================\n${lines.join('\n')}`);
+    // console.log(`\n\n\n================ ROUTE EXECUTOR for ${startMethodName} ================\n${lines.join('\n')}`);
 
 // TODO: switch to `new Function` with closed over vars passed as params (as done in bluebird)
     // Evaluate the source code, and return its result, which is the composite route handler function. The use of eval
@@ -95,7 +95,7 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
  * Helper function to generate source code for a set of interdependent functions (one per rule) that perform the
  * cascading evaluation of a route, accounting for the possibly mixed sync/async implementation of the rule handlers.
  */
-function generateRouteExecutorSourceCode(rules: Rule[], options: MultimethodOptions): string {
+function generateExecutorSourceCode(rules: Rule[], options: MultimethodOptions): string {
 
     // Generate source code for each rule in turn.
     let sources = rules.map((rule, i) => {

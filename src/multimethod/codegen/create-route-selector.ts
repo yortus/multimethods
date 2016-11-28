@@ -15,12 +15,12 @@ import Taxonomy, {TaxonomyNode} from '../../taxonomy';
  * @param {Map<Pattern, Function>} candidates - The route executors for each pattern in the given `taxonomy`.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function createRouteSelector(taxonomy: Taxonomy, candidates: Map<Pattern, RouteExecutor>): RouteSelector {
+export default function createRouteSelector(taxonomy: Taxonomy, candidates: {[pattern: string]: RouteExecutor}): RouteSelector {
 
     // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
     // TODO: extra doc - explain opt here that match functions never have captures due to using normalised forms...
     let patterns = taxonomy.allNodes.map(node => node.pattern);
-    let executors = patterns.map(pat => candidates.get(pat));
+    let executors = patterns.map(pat => candidates[pat.identifier]);
 
     // Generate a unique pretty name for each pattern, suitable for use in the generated source code.
     let patternNames = patterns.map(p => p.identifier);
@@ -31,8 +31,8 @@ export default function createRouteSelector(taxonomy: Taxonomy, candidates: Map<
     let lines = [
         ...patternNames.map((name, i) => `var matches${name} = patterns[${i}].match;`),
         ...patternNames.map((name, i) => `var ${name} = executors[${i}];`),
-        'return function dispatch(discriminant) {',
-        ...generateDispatchSourceCode(taxonomy.rootNode.specializations, Pattern.ANY, 1),
+        'return function _selectExecutor(discriminant) {',
+        ...generateSelectorSourceCode(taxonomy.rootNode.specializations, Pattern.ANY, 1),
         '};'
     ];
 
@@ -59,7 +59,7 @@ export type RouteSelector = (discriminant: string) => RouteExecutor;
 
 
 /** Helper function to generate source code for part of the dispatcher function used for route selection. */
-function generateDispatchSourceCode(specializations: TaxonomyNode[], fallback: Pattern, nestDepth: number) {
+function generateSelectorSourceCode(specializations: TaxonomyNode[], fallback: Pattern, nestDepth: number) {
 
     // Make the indenting string corresponding to the given `nestDepth`.
     let indent = '    '.repeat(nestDepth);
@@ -74,7 +74,7 @@ function generateDispatchSourceCode(specializations: TaxonomyNode[], fallback: P
         lines = [
             ...lines,
             `${condition}{`,
-            ...generateDispatchSourceCode(nextLevel, node.pattern, nestDepth + 1),
+            ...generateSelectorSourceCode(nextLevel, node.pattern, nestDepth + 1),
             `${indent}}`
         ];
     });
