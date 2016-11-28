@@ -19,9 +19,17 @@ const isPromise = util.isPromiseLike;
 
 
 
+// TODO: temp testing... these are ref'ed in codegen code and never change
+const FROZEN_EMPTY_OBJECT = Object.freeze({});
+const ℙØ = (discriminant, result) => result; // ND: *always* called with result = UNHANDLED
+
+
+
+
+
 // TODO: ...
 const getCapturesFor = 'getCapturesFor';
-const callMethodFor = 'callMethodFor';
+const invokeMethodFor = 'invokeMethodFor';
 
 
 
@@ -62,16 +70,16 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
     // all rules' matchers and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of the route.
     let lines = [
-        ...ruleNames.map((name, i) => `var ${getCapturesFor}${name} = rules[${i}].predicate.match;`),
-        ...ruleNames.map((name, i) => `var ${callMethodFor}${name} = rules[${i}].method;`),
-        'var FROZEN_EMPTY_OBJECT = Object.freeze({});',                 // TODO: note ES6 in source here
-        'function ℙØ(discriminant, result, $0) {\n    return UNHANDLED;\n}',    // TODO: anything refs this ever??
+        ...ruleNames
+            .map((name, i) => `var ${getCapturesFor}${name} = rules[${i}].predicate.match;`)
+            .filter((name, i) => rules[i].predicate.captureNames.length > 0),
+        ...ruleNames.map((name, i) => `var ${invokeMethodFor}${name} = rules[${i}].method;`),
         generateRouteExecutorSourceCode(rules, ruleNames, options),
         `return ${startMethodName};`
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route executor at runtime.
-    // console.log(`\n\n\n================ ROUTE EXECUTOR for ${startMethodName} ================\n${lines.join('\n')}`);
+    console.log(`\n\n\n================ ROUTE EXECUTOR for ${startMethodName} ================\n${lines.join('\n')}`);
 
 // TODO: switch to `new Function` with closed over vars passed as params (as done in bluebird)
     // Evaluate the source code, and return its result, which is the composite route handler function. The use of eval
@@ -120,7 +128,7 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], opt
         source = replaceAll(source, {
             METHOD_NAME: ruleNames[i],
             GET_CAPTURES: `${getCapturesFor}${ruleNames[i]}`,
-            CALL_METHOD: `${callMethodFor}${ruleNames[i]}`,
+            CALL_METHOD: `${invokeMethodFor}${ruleNames[i]}`,
             DELEGATE_DOWNSTREAM: ruleNames.filter((n, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop() || 'ℙØ',
             DELEGATE_NEXT: ruleNames[i + 1]
         });

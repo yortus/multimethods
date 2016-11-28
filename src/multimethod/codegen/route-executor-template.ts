@@ -39,26 +39,26 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
         }
     }
 
-    // TODO: set up context...
-    if (HAS_CAPTURES) {
-        var captures = GET_CAPTURES(discriminant);
-    }
-    else {
-        var captures = FROZEN_EMPTY_OBJECT;
-    }
-
-    // TODO: meta rules...
+    // TODO: call method in most efficient way...
     if (IS_META_RULE) {
-        var next: any = function (...MM_ARGS) {
+        var next = function (...MM_ARGS) {
             return DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
         };
+        if (HAS_CAPTURES) {
+            result = CALL_METHOD(...MM_ARGS, GET_CAPTURES(discriminant), next);
+        }
+        else {
+            result = CALL_METHOD(...MM_ARGS, undefined, next);
+        }
     }
     else {
-        var next = undefined;
+        if (HAS_CAPTURES) {
+            result = CALL_METHOD(...MM_ARGS, GET_CAPTURES(discriminant));
+        }
+        else {
+            result = CALL_METHOD(...MM_ARGS);
+        }
     }
-
-    // TODO: call method...
-    result = CALL_METHOD(...MM_ARGS, captures, next);
 
     // TODO: cascade result...
     if (!ENDS_PARTITION) {

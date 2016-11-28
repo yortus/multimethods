@@ -15,6 +15,12 @@
 
 # To Do List
 
+- [ ] ensure codegen uses no ES6 features with emitES5 option is set
+  - [ ] arrow functions
+  - [ ] let/const
+  - [x] rest/spread
+  - [ ] builtins
+  - [ ] other?
 - [ ] provide a default UNHANDLED value in the library. Users can optionally override it in MM options
 - [ ] replace all void 0 with undefined
 - [ ] Use consistent British English spelling (-ise vs -ize)
