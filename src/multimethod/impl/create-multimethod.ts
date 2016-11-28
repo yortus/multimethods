@@ -1,5 +1,4 @@
-import createRouteExecutor from '../codegen/create-route-executor';
-import createRouteSelector from '../codegen/create-route-selector';
+import createDispatcher from '../codegen/create-dispatcher';
 import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
@@ -50,24 +49,9 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
         .reduce((names, n) => names.concat(`${n}${names.indexOf(n) === -1 ? '' : `_${names.length}`}`), <string[]>[])
         .forEach((name, i) => allRules[i].name = name);
 
-    // Create a route executor for each distinct route through the rule set.
-    let routeExecutors = Array.from(routes.keys()).reduce(
-        (map, pattern) => map.set(pattern, createRouteExecutor(routes.get(pattern), options)),
-        new Map<Pattern, (...args: any[]) => any>()
-    );
-
-/*--> UPTOHERE <--*/
-    // TODO: generalize here down for arities...
-    // Generate a function that, given a discriminant, returns the executor for the best-matching route.
-    let selectRoute = createRouteSelector(taxonomy, routeExecutors);
-
-    // Return a composite handler representing this entire rule set.
-    return function _compiledMultimethod($0: any) {
-        let discriminant = options.toDiscriminant($0);
-        let executeRoute = selectRoute(discriminant);
-        let result = executeRoute(discriminant, options.unhandled, $0);
-        return result;
-    };
+    // TODO: ...
+    let dispatcher = createDispatcher(taxonomy, routes, options);
+    return dispatcher;
 }
 
 

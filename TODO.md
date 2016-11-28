@@ -11,11 +11,11 @@
 - [ ] consistent code style & quality
 - [ ] functionality & test converage
 - [ ] perforance & benchmarks
+- [ ] all errors and warnings (eg validation, codegen, etc)
 
 
 # To Do List
-
-- [ ] ensure codegen uses no ES6 features with emitES5 option is set
+- [ ] ensure codegen uses no ES6 features when emitES5 option is set
   - [ ] arrow functions
   - [ ] let/const
   - [x] rest/spread
