@@ -43,6 +43,13 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
     let routes = findAllRoutesThroughTaxonomy(taxonomy, rules, options.unhandled);
 
+    // Ensure every rule across every route has a mutually-unique name.
+    let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
+    allRules
+        .map(rule => rule.name)
+        .reduce((names, n) => names.concat(`${n}${names.indexOf(n) === -1 ? '' : `_${names.length}`}`), <string[]>[])
+        .forEach((name, i) => allRules[i].name = name);
+
     // Create a route executor for each distinct route through the rule set.
     let routeExecutors = Array.from(routes.keys()).reduce(
         (map, pattern) => map.set(pattern, createRouteExecutor(routes.get(pattern), options)),

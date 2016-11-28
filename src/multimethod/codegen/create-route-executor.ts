@@ -57,24 +57,19 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
     // Obtain a reversed copy of the rule list, ordered from most- to least-specific. This simplifies logic below.
     rules = rules.slice().reverse();
 
-    // Generate a unique pretty name for each rule, suitable for use in the generated source code.
-    let ruleNames: string[] = rules
-        .map(rule => rule.predicate.identifier)
-        .reduce((names, name) => names.concat(`${name}${names.indexOf(name) === -1 ? '' : `_${names.length}`}`), []);
-
     // The 'start' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
     // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
-    let startMethodName = ruleNames.filter((_, i) => rules[i].isMetaRule).pop() || ruleNames[0];
+    let startMethodName = (rules.filter(rule => rule.isMetaRule).pop() || rules[0]).name;
 
     // Generate the combined source code for handling the route. This includes local variable declarations for
     // all rules' matchers and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of the route.
     let lines = [
-        ...ruleNames
-            .map((name, i) => `var ${getCapturesFor}${name} = rules[${i}].predicate.match;`)
-            .filter((name, i) => rules[i].predicate.captureNames.length > 0),
-        ...ruleNames.map((name, i) => `var ${invokeMethodFor}${name} = rules[${i}].method;`),
-        generateRouteExecutorSourceCode(rules, ruleNames, options),
+        ...rules
+            .map((rule, i) => `var ${getCapturesFor}${rule.name} = rules[${i}].predicate.match;`)
+            .filter((_, i) => rules[i].predicate.captureNames.length > 0),
+        ...rules.map((rule, i) => `var ${invokeMethodFor}${rule.name} = rules[${i}].method;`),
+        generateRouteExecutorSourceCode(rules, options),
         `return ${startMethodName};`
     ];
 
@@ -100,10 +95,10 @@ export default function createRouteExecutor(rules: Rule[], options: MultimethodO
  * Helper function to generate source code for a set of interdependent functions (one per rule) that perform the
  * cascading evaluation of a route, accounting for the possibly mixed sync/async implementation of the rule handlers.
  */
-function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], options: MultimethodOptions): string {
+function generateRouteExecutorSourceCode(rules: Rule[], options: MultimethodOptions): string {
 
     // Generate source code for each rule in turn.
-    let sources = rules.map((method, i) => {
+    let sources = rules.map((rule, i) => {
 
         // For each rule, we reuse the source code template below. But first we need to compute a number of
         // values for substitution into the template. A few notes on these substitutions:
@@ -118,19 +113,19 @@ function generateRouteExecutorSourceCode(rules: Rule[], ruleNames: string[], opt
         let source = routeExecutorTemplate.toString();
         source = normaliseSource(source);
         source = eliminateDeadCode(source, {
-            STARTS_PARTITION: i === 0 || method.isMetaRule,
+            STARTS_PARTITION: i === 0 || rule.isMetaRule,
             ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
-            HAS_CAPTURES: method.predicate.captureNames.length > 0,
-            IS_META_RULE: method.isMetaRule,
+            HAS_CAPTURES: rule.predicate.captureNames.length > 0,
+            IS_META_RULE: rule.isMetaRule,
             IS_PURE_SYNC: options.timing === 'sync',
             IS_PURE_ASYNC: options.timing === 'async'
         });
         source = replaceAll(source, {
-            METHOD_NAME: ruleNames[i],
-            GET_CAPTURES: `${getCapturesFor}${ruleNames[i]}`,
-            CALL_METHOD: `${invokeMethodFor}${ruleNames[i]}`,
-            DELEGATE_DOWNSTREAM: ruleNames.filter((n, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop() || 'ℙØ',
-            DELEGATE_NEXT: ruleNames[i + 1]
+            METHOD_NAME: rule.name,
+            GET_CAPTURES: `${getCapturesFor}${rule.name}`,
+            CALL_METHOD: `${invokeMethodFor}${rule.name}`,
+            DELEGATE_DOWNSTREAM: (rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop() || <any>{}).name || 'ℙØ',
+            DELEGATE_NEXT: i === rules.length - 1 ? undefined : rules[i + 1].name
         });
 
         // TODO: temp testing... specialise for arity...
