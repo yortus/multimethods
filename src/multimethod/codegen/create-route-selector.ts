@@ -15,12 +15,12 @@ import Taxonomy, {TaxonomyNode} from '../../taxonomy';
  * @param {Map<Pattern, Function>} candidates - The route executors for each pattern in the given `taxonomy`.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function createRouteSelector(taxonomy: Taxonomy, candidates: {[pattern: string]: RouteExecutor}): RouteSelector {
+export default function createRouteSelector(taxonomy: Taxonomy, candidates: Map<Pattern, RouteExecutor>): RouteSelector {
 
     // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
     // TODO: extra doc - explain opt here that match functions never have captures due to using normalised forms...
     let patterns = taxonomy.allNodes.map(node => node.pattern);
-    let executors = patterns.map(pat => candidates[pat.identifier]);
+    let executors = patterns.map(pattern => candidates.get(pattern));
 
     // Generate a unique pretty name for each pattern, suitable for use in the generated source code.
     let patternNames = patterns.map(p => p.identifier);
@@ -30,14 +30,14 @@ export default function createRouteSelector(taxonomy: Taxonomy, candidates: {[pa
     // housing all the conditional logic for selecting the best route handler based on address matching.
     let lines = [
         ...patternNames.map((name, i) => `var matches${name} = patterns[${i}].match;`),
-        ...patternNames.map((name, i) => `var ${name} = executors[${i}];`),
+        ...patternNames.map((name, i) => `var execute${name} = executors[${i}];`),
         'return function _selectExecutor(discriminant) {',
         ...generateSelectorSourceCode(taxonomy.rootNode.specializations, Pattern.ANY, 1),
         '};'
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
-    console.log(`\n\n\n================ ROUTE SELECTOR ================\n${lines.join('\n')}`);
+    // console.log(`\n\n\n================ ROUTE SELECTOR ================\n${lines.join('\n')}`);
 
     // Evaluate the source code, and return its result, which is the route selector function. The use of eval here is
     // safe. There are no untrusted inputs substituted into the source. More importantly, the use of eval here allows
@@ -70,7 +70,7 @@ function generateSelectorSourceCode(specializations: TaxonomyNode[], fallback: P
         let patternName = node.pattern.identifier;
         let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${patternName}(discriminant)) `;
         let nextLevel = node.specializations;
-        if (nextLevel.length === 0) return lines.push(`${condition}return ${patternName};`);
+        if (nextLevel.length === 0) return lines.push(`${condition}return execute${patternName};`);
         lines = [
             ...lines,
             `${condition}{`,
@@ -80,6 +80,6 @@ function generateSelectorSourceCode(specializations: TaxonomyNode[], fallback: P
     });
 
     // Add a line to select the fallback pattern if none of the more specialised patterns matched the discriminant.
-    lines.push(`${indent}return ${fallback.identifier};`);
+    lines.push(`${indent}return execute${fallback.identifier};`);
     return lines;
 }

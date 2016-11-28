@@ -11,10 +11,10 @@ import Rule from '../impl/rule';
 
 
 // TODO: ...
-export default function createRouteExecutors(routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions): {[pattern: string]: RouteExecutor} {
+export default function createRouteExecutors(routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions): Map<Pattern, RouteExecutor> {
     let routeExecutors = [...routes.keys()].reduce(
-        (hash, pattern) => (hash[pattern.identifier] = createRouteExecutor(routes.get(pattern), normalisedOptions), hash),
-        {} as {[pattern: string]: RouteExecutor}
+        (map, pattern) => map.set(pattern, createRouteExecutor(routes.get(pattern), normalisedOptions)),
+        new Map<Pattern, RouteExecutor>()
     );
     return routeExecutors;
 }
