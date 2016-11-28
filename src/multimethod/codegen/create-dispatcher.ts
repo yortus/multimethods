@@ -1,4 +1,4 @@
-import createRouteExecutor from './create-route-executor';
+import createRouteExecutors from './create-route-executors';
 import createRouteSelector from './create-route-selector';
 import MultimethodOptions from '../multimethod-options';
 import Pattern from '../../pattern';
@@ -17,10 +17,7 @@ export default function createDispatcher(taxonomy: Taxonomy, routes: Map<Pattern
     let UNHANDLED = normalisedOptions.unhandled;
 
     // Create a route executor for each distinct route through the rule set.
-    let routeExecutors = Array.from(routes.keys()).reduce(
-        (hash, pattern) => (hash[pattern.identifier] = createRouteExecutor(routes.get(pattern), normalisedOptions), hash),
-        {} as {[pattern: string]: RouteExecutor}
-    );
+    let routeExecutors = createRouteExecutors(routes, normalisedOptions);
 
     // Generate a function that, given a discriminant, returns the executor for the best-matching route.
     let selectRoute = createRouteSelector(taxonomy, routeExecutors);

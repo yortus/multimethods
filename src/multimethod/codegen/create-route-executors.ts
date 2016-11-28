@@ -1,9 +1,23 @@
 //TODO: review all comments in here...
 import * as util from '../../util';
 import MultimethodOptions from '../multimethod-options';
+import Pattern from '../../pattern';
 import RouteExecutor from './route-executor';
 import routeExecutorTemplate from './route-executor-template';
 import Rule from '../impl/rule';
+
+
+
+
+
+// TODO: ...
+export default function createRouteExecutors(routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions): {[pattern: string]: RouteExecutor} {
+    let routeExecutors = [...routes.keys()].reduce(
+        (hash, pattern) => (hash[pattern.identifier] = createRouteExecutor(routes.get(pattern), normalisedOptions), hash),
+        {} as {[pattern: string]: RouteExecutor}
+    );
+    return routeExecutors;
+}
 
 
 
@@ -49,7 +63,7 @@ const invokeMethodFor = 'invokeMethodFor';
  * @param {Rule[]} rules - the list of rules comprising the route, ordered from least- to most-specific.
  * @returns {Method} the composite method for the route.
  */
-export default function createRouteExecutor(rules: Rule[], options: MultimethodOptions): RouteExecutor {
+function createRouteExecutor(rules: Rule[], options: MultimethodOptions): RouteExecutor {
 
     // TODO: temp testing...
     const UNHANDLED = options.unhandled;

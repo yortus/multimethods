@@ -37,7 +37,7 @@ export default function createRouteSelector(taxonomy: Taxonomy, candidates: {[pa
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
-    // console.log(`\n\n\n================ ROUTE SELECTOR ================\n${lines.join('\n')}`);
+    console.log(`\n\n\n================ ROUTE SELECTOR ================\n${lines.join('\n')}`);
 
     // Evaluate the source code, and return its result, which is the route selector function. The use of eval here is
     // safe. There are no untrusted inputs substituted into the source. More importantly, the use of eval here allows
