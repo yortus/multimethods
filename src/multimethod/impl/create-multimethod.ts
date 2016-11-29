@@ -43,6 +43,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     let routes = findAllRoutesThroughTaxonomy(taxonomy, rules, options.unhandled);
 
     // Ensure every rule across every route has a mutually-unique name.
+    // TODO: explain better... there may be more rules than routes due to additional synthesised rules being added (eg 'ambiguous fallback' crasher rules), etc...
     let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
     allRules
         .map(rule => rule.name)
@@ -67,7 +68,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
  *  to any address that is best matched by the
  * pattern associated with the route.
  */
-function findAllRoutesThroughTaxonomy(taxonomy: Taxonomy, rules: {[pattern: string]: Function}, unhandled: any): Map<Pattern, Rule[]> {
+function findAllRoutesThroughTaxonomy(taxonomy: Taxonomy<never>, rules: {[pattern: string]: Function}, unhandled: any): Map<Pattern, Rule[]> {
 
     // Every route begins with this universal rule. It matches all discriminants,
     // and its method just returns the 'unhandled' sentinel value.

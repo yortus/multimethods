@@ -38,7 +38,7 @@ import TaxonomyNode from './taxonomy-node';
  *      \
  *        bar
  */
-export default class Taxonomy {
+export default class Taxonomy<T> {
 
 
     /**
@@ -51,11 +51,19 @@ export default class Taxonomy {
 
 
     /** Holds the root node of the taxonomy. */
-    rootNode: TaxonomyNode;
+    rootNode: TaxonomyNode & T;
 
 
     /** Holds a snapshot of all the nodes in the taxonomy at the time of construction. */
-    allNodes: TaxonomyNode[];
+    allNodes: Array<TaxonomyNode & T>;
+
+
+    // TODO: temp testing... doc...
+    // TODO: better name? It maps the props AND assigns props back to nodes (like a mixin)
+    // - augment? addProps?
+    map<U>(callback: (value: T, pattern: Pattern) => U): Taxonomy<U> {
+        return mapTaxonomy(this, callback);
+    }
 }
 
 
@@ -63,14 +71,14 @@ export default class Taxonomy {
 
 
 /** Internal helper function used by the Taxonomy constructor. */
-function initTaxonomy(taxonomy: Taxonomy, patterns: Pattern[]) {
+function initTaxonomy<T>(taxonomy: Taxonomy<T>, patterns: Pattern[]) {
 
     // Create the nodeFor() function to return the node corresponding to a given pattern,
     // creating it on demand if it doesn't already exist. This function ensures that every
     // request for the same pattern gets the same singleton node.
-    let nodeMap = new Map<Pattern, TaxonomyNode>();
+    let nodeMap = new Map<Pattern, TaxonomyNode & T>();
     let nodeFor = (pattern: Pattern) => {
-        if (!nodeMap.has(pattern)) nodeMap.set(pattern, new TaxonomyNode(pattern));
+        if (!nodeMap.has(pattern)) nodeMap.set(pattern, <TaxonomyNode & T> new TaxonomyNode(pattern));
         return nodeMap.get(pattern);
     }
 
@@ -86,4 +94,33 @@ function initTaxonomy(taxonomy: Taxonomy, patterns: Pattern[]) {
 
     // Finally, compute the `allNodes` snapshot.
     taxonomy.allNodes = Array.from(nodeMap.values());
+}
+
+
+
+
+
+/** Internal helper function used to implement Taxonomy#map. */
+function mapTaxonomy<T, U>(taxonomy: Taxonomy<T>, callback: (value: T, pattern: Pattern) => U): Taxonomy<U> {
+
+    // Clone the bare taxonomy.
+    let oldNodes = taxonomy.allNodes;
+    let newNodes = oldNodes.map(old => new TaxonomyNode(old.pattern)) as Array<TaxonomyNode & U>;
+    let oldToNew = oldNodes.reduce((map, old, i) => map.set(old, newNodes[i]), new Map());
+    newNodes.forEach((node, i) => {
+        node.generalizations = oldNodes[i].generalizations.map(gen => oldToNew.get(gen));
+        node.specializations = oldNodes[i].specializations.map(spc => oldToNew.get(spc));
+    });
+
+    // Map and assign the additional properties.
+    newNodes.forEach((node, i) => {
+        let newProps = callback(oldNodes[i], node.pattern) || {};
+        Object.keys(newProps).forEach(key => node[key] = newProps[key]);
+    });
+
+    // Return the new taxonomy.
+    let newTaxonomy = new Taxonomy<U>([]);
+    newTaxonomy.rootNode = oldToNew.get(taxonomy.rootNode);
+    newTaxonomy.allNodes = newNodes;
+    return newTaxonomy;
 }

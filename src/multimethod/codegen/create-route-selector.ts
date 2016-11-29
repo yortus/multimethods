@@ -15,7 +15,7 @@ import Taxonomy, {TaxonomyNode} from '../../taxonomy';
  * @param {Map<Pattern, Function>} candidates - The route executors for each pattern in the given `taxonomy`.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function createRouteSelector(taxonomy: Taxonomy, candidates: {[pattern: string]: RouteExecutor}): RouteSelector {
+export default function createRouteSelector(taxonomy: Taxonomy<never>, candidates: {[pattern: string]: RouteExecutor}): RouteSelector {
 
     // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
     // TODO: extra doc - explain opt here that match functions never have captures due to using normalised forms...
@@ -42,7 +42,7 @@ let patterns = taxonomy.allNodes.map(node => node.pattern);
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
-    // console.log(`\n\n\n================ ROUTE SELECTOR ================\n${lines.join('\n')}`);
+    console.log(`\n\n\n================ ROUTE SELECTOR ================\n${lines.join('\n')}`);
 
     // Evaluate the source code, and return its result, which is the route selector function. The use of eval here is
     // safe. There are no untrusted inputs substituted into the source. More importantly, the use of eval here allows

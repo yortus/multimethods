@@ -10,7 +10,7 @@ import Taxonomy from '../../taxonomy';
 
 
 
-export default function createDispatcher(taxonomy: Taxonomy, routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions) {
+export default function createDispatcher(taxonomy: Taxonomy<never>, routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions) {
 
     // TODO: ...
     let toDiscriminant = normalisedOptions.toDiscriminant;
