@@ -58,11 +58,18 @@ export default class Taxonomy<T> {
     allNodes: Array<TaxonomyNode & T>;
 
 
+    // TODO: temp testing... doc... looks up the node for the given pattern. returns undefined if not found.
+    get(pattern: Pattern): TaxonomyNode & T {
+        return this.allNodes.filter(node => node.pattern === pattern)[0];
+    }
+
+
     // TODO: temp testing... doc...
     // TODO: better name? It maps the props AND assigns props back to nodes (like a mixin)
     // - augment? addProps?
-    map<U>(callback: (value: T, pattern: Pattern) => U): Taxonomy<U> {
-        return mapTaxonomy(this, callback);
+
+    augment<U>(callback: (node: TaxonomyNode & T) => U): Taxonomy<T & U> {
+        return augmentTaxonomy(this, callback);
     }
 }
 
@@ -101,11 +108,11 @@ function initTaxonomy<T>(taxonomy: Taxonomy<T>, patterns: Pattern[]) {
 
 
 /** Internal helper function used to implement Taxonomy#map. */
-function mapTaxonomy<T, U>(taxonomy: Taxonomy<T>, callback: (value: T, pattern: Pattern) => U): Taxonomy<U> {
+function augmentTaxonomy<T, U>(taxonomy: Taxonomy<T>, callback: (node: TaxonomyNode & T) => U): Taxonomy<T & U> {
 
     // Clone the bare taxonomy.
     let oldNodes = taxonomy.allNodes;
-    let newNodes = oldNodes.map(old => new TaxonomyNode(old.pattern)) as Array<TaxonomyNode & U>;
+    let newNodes = oldNodes.map(old => new TaxonomyNode(old.pattern)) as Array<TaxonomyNode & T & U>;
     let oldToNew = oldNodes.reduce((map, old, i) => map.set(old, newNodes[i]), new Map());
     newNodes.forEach((node, i) => {
         node.generalizations = oldNodes[i].generalizations.map(gen => oldToNew.get(gen));
@@ -114,12 +121,14 @@ function mapTaxonomy<T, U>(taxonomy: Taxonomy<T>, callback: (value: T, pattern: 
 
     // Map and assign the additional properties.
     newNodes.forEach((node, i) => {
-        let newProps = callback(oldNodes[i], node.pattern) || {};
-        Object.keys(newProps).forEach(key => node[key] = newProps[key]);
+        let oldProps = oldNodes[i];
+        let newProps = callback(oldProps) || {};
+        Object.keys(newProps).forEach(key => { if (!(key in node)) node[key] = newProps[key]; });
+        Object.keys(oldProps).forEach(key => { if (!(key in node)) node[key] = oldProps[key]; });
     });
 
     // Return the new taxonomy.
-    let newTaxonomy = new Taxonomy<U>([]);
+    let newTaxonomy = new Taxonomy<T & U>([]);
     newTaxonomy.rootNode = oldToNew.get(taxonomy.rootNode);
     newTaxonomy.allNodes = newNodes;
     return newTaxonomy;

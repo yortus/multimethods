@@ -10,14 +10,14 @@ import Taxonomy from '../../taxonomy';
 
 
 
-export default function createDispatcher(taxonomy: Taxonomy<never>, routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions) {
+export default function createDispatcher(taxonomy: Taxonomy<{route: Rule[]}>, normalisedOptions: MultimethodOptions) {
 
     // TODO: ...
     let toDiscriminant = normalisedOptions.toDiscriminant;
     let UNHANDLED = normalisedOptions.unhandled;
 
     // Create a route executor for each distinct route through the rule set.
-    let routeExecutors = createRouteExecutors(routes, normalisedOptions);
+    let routeExecutors = createRouteExecutors(taxonomy, normalisedOptions);
 
     // Generate a function that, given a discriminant, returns the executor for the best-matching route.
     let selectRoute = createRouteSelector(taxonomy, routeExecutors);

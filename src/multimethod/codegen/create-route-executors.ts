@@ -5,18 +5,20 @@ import Pattern from '../../pattern';
 import RouteExecutor from './route-executor';
 import routeExecutorTemplate from './route-executor-template';
 import Rule from '../impl/rule';
+import Taxonomy from '../../taxonomy';
 
 
 
 
 
 // TODO: ...
-export default function createRouteExecutors(routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions) {
+export default function createRouteExecutors(taxonomy: Taxonomy<{route: Rule[]}>, normalisedOptions: MultimethodOptions) {
 
     // TODO: temp testing...
     const UNHANDLED = normalisedOptions.unhandled;
 
     // TODO: temp testing...
+let routes = new Map(taxonomy.allNodes.map(node => [node.pattern, node.route] as [Pattern, Rule[]]));
     let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
 
     // Generate the combined source code for handling the route. This includes local variable declarations for

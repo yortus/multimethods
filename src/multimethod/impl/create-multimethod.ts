@@ -19,7 +19,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     let rules = options.rules;
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the multimethod's rule set.
-    let taxonomy = new Taxonomy(Object.keys(rules).map(src => new Pattern(src)));
+    let taxonomy = new Taxonomy<never>(Object.keys(rules).map(src => new Pattern(src)));
 
     // TODO: put validation logic (this and some later paragraphs) elsewhere...
     // TODO: ensure no pattern has a capture called 'next'
@@ -40,10 +40,11 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     }
 
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
-    let routes = findAllRoutesThroughTaxonomy(taxonomy, rules, options.unhandled);
+    let taxonomyWithRoutes = computeAllRoutes(taxonomy, rules, options.unhandled);
 
     // Ensure every rule across every route has a mutually-unique name.
     // TODO: explain better... there may be more rules than routes due to additional synthesised rules being added (eg 'ambiguous fallback' crasher rules), etc...
+let routes = new Map(taxonomyWithRoutes.allNodes.map(node => [node.pattern, node.route] as [Pattern, Rule[]]));
     let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
     allRules
         .map(rule => rule.name)
@@ -51,7 +52,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
         .forEach((name, i) => allRules[i].name = name);
 
     // TODO: ...
-    let dispatcher = createDispatcher(taxonomy, routes, options);
+    let dispatcher = createDispatcher(taxonomyWithRoutes, options);
     return dispatcher;
 }
 
@@ -68,7 +69,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
  *  to any address that is best matched by the
  * pattern associated with the route.
  */
-function findAllRoutesThroughTaxonomy(taxonomy: Taxonomy<never>, rules: {[pattern: string]: Function}, unhandled: any): Map<Pattern, Rule[]> {
+function computeAllRoutes<T>(taxonomy: Taxonomy<T>, rules: {[pattern: string]: Function}, unhandled: any): Taxonomy<T & {route: Rule[]}> {
 
     // Every route begins with this universal rule. It matches all discriminants,
     // and its method just returns the 'unhandled' sentinel value.
@@ -80,15 +81,11 @@ function findAllRoutesThroughTaxonomy(taxonomy: Taxonomy<never>, rules: {[patter
     // case. Since the rules are 'equal best', there is no inherent way to recognise their relative specificity. This is
     // where the client-supplied 'tiebreak' function is used. It must provide an unambiguous order in all cases where
     // rules are otherwise of identical specificity.
-    let equalBestRules = taxonomy.allNodes.reduce(
-        (map, node) => {
-            let bestRules = getEqualBestRulesForPredicate(node.pattern, rules);
-            bestRules = disambiguateRules(bestRules); // NB: may throw
-            map.set(node.pattern, bestRules);
-            return map;
-        },
-        new Map<Pattern, Rule[]>()
-    );
+    let equalBestRules = taxonomy.augment(node => {
+        let bestRules = getEqualBestRulesForPredicate(node.pattern, rules);
+        bestRules = disambiguateRules(bestRules); // NB: may throw
+        return { bestRules };
+    });
 
     // Every node in the taxonomy represents the best-matching pattern for some set of discriminants. Therefore, the set
     // of all possible discriminants may be thought of as being partitioned by a taxonomy into one partition per node,
@@ -100,26 +97,25 @@ function findAllRoutesThroughTaxonomy(taxonomy: Taxonomy<never>, rules: {[patter
     // taxonomy, since it is a DAG and may therefore contain 'diamonds'. Since we tolerate no ambiguity, these multiple
     // routes must be effectively collapsed down to a single unambiguous route. The details of this are in the
     // disambiguateRoutes() function.
-    return taxonomy.allNodes.reduce(
-        (map, node) => {
+    let result = taxonomy.augment(node => {
 
-            // TODO: confusing! possibleRoutes, alternateRoutes sound like the same thing but are not!!
-            // Get all possible routes through the taxonomy from the root to `node`.
-            let possibleRoutes = getAllRoutesFromRootToNode(node);
+        // TODO: confusing! possibleRoutes, alternateRoutes sound like the same thing but are not!!
+        // Get all possible routes through the taxonomy from the root to `node`.
+        let possibleRoutes = getAllRoutesFromRootToNode(node);
 
-            // Obtain the full rule list corresponding to each pathway, ordered from least- to most-specific.
-            let alternateRoutes = possibleRoutes
-                .map(route => route
-                    .map(pattern => equalBestRules.get(pattern))
-                    .reduce((path, methods) => path.concat(methods), [universalFallbackRule])
-                );
+        // Obtain the full rule list corresponding to each pathway, ordered from least- to most-specific.
+        let alternateRoutes = possibleRoutes
+            .map(route => route
+                .map(pattern => equalBestRules.get(pattern))
+                .reduce((path, node) => path.concat(node.bestRules), [universalFallbackRule])
+            );
 
-            // Make a single best path. Ensure no possibility of ambiguity.
-            let singleRoute = disambiguateRoutes(node.pattern, alternateRoutes);
-            return map.set(node.pattern, singleRoute);
-        },
-        new Map<Pattern, Rule[]>()
-    );
+        // Make a single best path. Ensure no possibility of ambiguity.
+        let route = disambiguateRoutes(node.pattern, alternateRoutes);
+        return { route };
+    });
+
+    return result;
 }
 
 
