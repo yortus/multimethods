@@ -15,22 +15,27 @@ import Taxonomy, {TaxonomyNode} from '../../taxonomy';
  * @param {Map<Pattern, Function>} candidates - The route executors for each pattern in the given `taxonomy`.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function createRouteSelector(taxonomy: Taxonomy, candidates: Map<Pattern, RouteExecutor>): RouteSelector {
+export default function createRouteSelector(taxonomy: Taxonomy, candidates: {[pattern: string]: RouteExecutor}): RouteSelector {
 
     // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
     // TODO: extra doc - explain opt here that match functions never have captures due to using normalised forms...
-    let patterns = taxonomy.allNodes.map(node => node.pattern);
-    let executors = patterns.map(pattern => candidates.get(pattern));
+    let patternNames = Object.keys(candidates);
+    let executors = patternNames.map(pattern => candidates[pattern]);
 
-    // Generate a unique pretty name for each pattern, suitable for use in the generated source code.
-    let patternNames = patterns.map(p => p.identifier);
+// TODO: temp testing... HACKY BUGGY brittle B/C assumes taxonomy.allNodes has identical pattern order as `candidates` object keys...    
+// TODO: how otherwise to link candidates back to patterns, since they just preserve rule names that were derived from pattern identifiers, but are no longer necessarily the same
+// TODO: maybe use a Map again... but that won't work on ES5?? (but can shim)
+let patterns = taxonomy.allNodes.map(node => node.pattern);
+
+    // // Generate a unique pretty name for each pattern, suitable for use in the generated source code.
+    // let patternNames = patterns.map(p => p.identifier);
 
     // Generate the combined source code for selecting the best route handler. This includes local variable declarations
     // for all the match functions and all the candidate route handler functions, as well as the dispatcher function
     // housing all the conditional logic for selecting the best route handler based on address matching.
     let lines = [
-        ...patternNames.map((name, i) => `var matches${name} = patterns[${i}].match;`),
-        ...patternNames.map((name, i) => `var execute${name} = executors[${i}];`),
+        ...patterns.map((p, i) => `var matches${p.identifier} = patterns[${i}].match;`),
+        ...patterns.map((p, i) => `var execute${p.identifier} = executors[${i}];`),
         'return function _selectExecutor(discriminant) {',
         ...generateSelectorSourceCode(taxonomy.rootNode.specializations, Pattern.ANY, 1),
         '};'

@@ -11,12 +11,44 @@ import Rule from '../impl/rule';
 
 
 // TODO: ...
-export default function createRouteExecutors(routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions): Map<Pattern, RouteExecutor> {
-    let routeExecutors = [...routes.keys()].reduce(
-        (map, pattern) => map.set(pattern, createRouteExecutor(routes.get(pattern), normalisedOptions)),
-        new Map<Pattern, RouteExecutor>()
-    );
-    return routeExecutors;
+export default function createRouteExecutors(routes: Map<Pattern, Rule[]>, normalisedOptions: MultimethodOptions) {
+
+    // TODO: temp testing...
+    const UNHANDLED = normalisedOptions.unhandled;
+
+    // TODO: temp testing...
+    let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
+
+    // Generate the combined source code for handling the route. This includes local variable declarations for
+    // all rules' matchers and methods, as well as the interdependent function declarations that perform
+    // the cascading, and possibly asynchronous, evaluation of the route.
+    let lines = [
+
+        ...allRules
+            .map((rule, i) => `var ${getCapturesFor}${rule.name} = allRules[${i}].predicate.match;`)
+            .filter((_, i) => allRules[i].predicate.captureNames.length > 0),
+
+        ...allRules.map((rule, i) => `var ${invokeMethodFor}${rule.name} = allRules[${i}].method;`),
+
+        `return {`,
+
+        ...[...routes.values()].map(rules => generateExecutorSourceCode(rules, normalisedOptions)),
+
+        `};`
+    ];
+
+    // FOR DEBUGGING: uncomment the following line to see the generated code for each route executor at runtime.
+    console.log(`\n\n\n================ ROUTE EXECUTORS ================\n${lines.join('\n')}`);
+
+// TODO: switch to `new Function` with closed over vars passed as params (as done in bluebird)
+    // Evaluate the source code, and return its result, which is the composite route handler function. The use of eval
+    // here is safe. There are no untrusted inputs substituted into the source. The client-provided rule handler
+    // functions can do anything (so may be considered untrusted), but that has nothing to do with the use of 'eval'
+    // here, since they would need to be called by the route handler whether or not eval was used. More importantly,
+    // the use of eval here allows for route handler code that is both more readable and more efficient, since it is
+    // tailored specifically to the route being evaluated, rather than having to be generalized for all possible cases.
+    let executors: {[pattern: string]: RouteExecutor} = eval(`(() => {\n${lines.join('\n')}\n})`)();
+    return executors;
 }
 
 
@@ -49,6 +81,7 @@ const invokeMethodFor = 'invokeMethodFor';
 
 
 
+// TODO: was... superseded by above/below code... extract out comments/useful stuff then remove...
 // TODO: rewrite comment. Esp signature of route executor matches signature of multimethod (as per provided Options)
 /**
  * Generates the composite method for the route described by the given `rules`.
@@ -63,43 +96,44 @@ const invokeMethodFor = 'invokeMethodFor';
  * @param {Rule[]} rules - the list of rules comprising the route, ordered from least- to most-specific.
  * @returns {Method} the composite method for the route.
  */
-function createRouteExecutor(rules: Rule[], options: MultimethodOptions): RouteExecutor {
+// function createRouteExecutor(pattern: Pattern, rules: Rule[], options: MultimethodOptions): RouteExecutor {
+//     // TODO: pattern parameter not used - remove it or use it?
 
-    // TODO: temp testing...
-    const UNHANDLED = options.unhandled;
+//     // TODO: temp testing...
+//     const UNHANDLED = options.unhandled;
 
-    // Obtain a reversed copy of the rule list, ordered from most- to least-specific. This simplifies logic below.
-    rules = rules.slice().reverse();
+//     // Obtain a reversed copy of the rule list, ordered from most- to least-specific. This simplifies logic below.
+//     rules = rules.slice().reverse();
 
-    // The 'start' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
-    // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
-    let startMethodName = (rules.filter(rule => rule.isMetaRule).pop() || rules[0]).name;
+//     // The 'start' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
+//     // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
+//     let startMethodName = (rules.filter(rule => rule.isMetaRule).pop() || rules[0]).name;
 
-    // Generate the combined source code for handling the route. This includes local variable declarations for
-    // all rules' matchers and methods, as well as the interdependent function declarations that perform
-    // the cascading, and possibly asynchronous, evaluation of the route.
-    let lines = [
-        ...rules
-            .map((rule, i) => `var ${getCapturesFor}${rule.name} = rules[${i}].predicate.match;`)
-            .filter((_, i) => rules[i].predicate.captureNames.length > 0),
-        ...rules.map((rule, i) => `var ${invokeMethodFor}${rule.name} = rules[${i}].method;`),
-        generateExecutorSourceCode(rules, options),
-        `return ${startMethodName};`
-    ];
+//     // Generate the combined source code for handling the route. This includes local variable declarations for
+//     // all rules' matchers and methods, as well as the interdependent function declarations that perform
+//     // the cascading, and possibly asynchronous, evaluation of the route.
+//     let lines = [
+//         ...rules
+//             .map((rule, i) => `var ${getCapturesFor}${rule.name} = rules[${i}].predicate.match;`)
+//             .filter((_, i) => rules[i].predicate.captureNames.length > 0),
+//         ...rules.map((rule, i) => `var ${invokeMethodFor}${rule.name} = rules[${i}].method;`),
+//         generateExecutorSourceCode(rules, options),
+//         `return ${startMethodName};`
+//     ];
 
-    // FOR DEBUGGING: uncomment the following line to see the generated code for each route executor at runtime.
-    // console.log(`\n\n\n================ ROUTE EXECUTOR for ${startMethodName} ================\n${lines.join('\n')}`);
+//     // FOR DEBUGGING: uncomment the following line to see the generated code for each route executor at runtime.
+//     console.log(`\n\n\n================ ROUTE EXECUTOR for ${startMethodName} ================\n${lines.join('\n')}`);
 
-// TODO: switch to `new Function` with closed over vars passed as params (as done in bluebird)
-    // Evaluate the source code, and return its result, which is the composite route handler function. The use of eval
-    // here is safe. There are no untrusted inputs substituted into the source. The client-provided rule handler
-    // functions can do anything (so may be considered untrusted), but that has nothing to do with the use of 'eval'
-    // here, since they would need to be called by the route handler whether or not eval was used. More importantly,
-    // the use of eval here allows for route handler code that is both more readable and more efficient, since it is
-    // tailored specifically to the route being evaluated, rather than having to be generalized for all possible cases.
-    let fn = eval(`(() => {\n${lines.join('\n')}\n})`)();
-    return fn;
-}
+// // TODO: switch to `new Function` with closed over vars passed as params (as done in bluebird)
+//     // Evaluate the source code, and return its result, which is the composite route handler function. The use of eval
+//     // here is safe. There are no untrusted inputs substituted into the source. The client-provided rule handler
+//     // functions can do anything (so may be considered untrusted), but that has nothing to do with the use of 'eval'
+//     // here, since they would need to be called by the route handler whether or not eval was used. More importantly,
+//     // the use of eval here allows for route handler code that is both more readable and more efficient, since it is
+//     // tailored specifically to the route being evaluated, rather than having to be generalized for all possible cases.
+//     let fn = eval(`(() => {\n${lines.join('\n')}\n})`)();
+//     return fn;
+// }
 
 
 
@@ -110,6 +144,17 @@ function createRouteExecutor(rules: Rule[], options: MultimethodOptions): RouteE
  * cascading evaluation of a route, accounting for the possibly mixed sync/async implementation of the rule handlers.
  */
 function generateExecutorSourceCode(rules: Rule[], options: MultimethodOptions): string {
+
+    // Obtain a reversed copy of the rule list, ordered from most- to least-specific. This simplifies logic below.
+    rules = rules.slice().reverse();
+
+// TODO: temp testing...
+let namesake = rules[0].name;
+
+    // TODO: copypasta from above... pass this in? or out? or factor into own function?
+    // The 'start' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
+    // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
+    let startMethodName = (rules.filter(rule => rule.isMetaRule).pop() || rules[0]).name;
 
     // Generate source code for each rule in turn.
     let sources = rules.map((rule, i) => {
@@ -134,6 +179,7 @@ function generateExecutorSourceCode(rules: Rule[], options: MultimethodOptions):
             IS_PURE_SYNC: options.timing === 'sync',
             IS_PURE_ASYNC: options.timing === 'async'
         });
+
         source = replaceAll(source, {
             METHOD_NAME: rule.name,
             GET_CAPTURES: `${getCapturesFor}${rule.name}`,
@@ -156,8 +202,11 @@ function generateExecutorSourceCode(rules: Rule[], options: MultimethodOptions):
         return source;
     });
 
-    // Combine and return all the sources.
-    return sources.join('\n');
+    sources = [].concat(...sources.map(lines => lines.split('\n')));
+    sources = sources.map(line => '        ' + line);
+
+    // Combine and return all the sources into an IIFE that returns the executor's entry point.
+    return `\n    ${namesake}: (function () {\n${sources.join('\n')}\n        return ${startMethodName};\n    })(),`;  // TODO: ES2017 trailing comma will break stuff!
 }
 
 
