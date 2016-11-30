@@ -13,7 +13,6 @@ let isPromise: (x: any) => boolean;
 
 // TODO: explain each of these in turn...
 let UNHANDLED: any;
-let STARTS_PARTITION: boolean;
 let ENDS_PARTITION: boolean;
 let HAS_CAPTURES: boolean;
 let IS_META_RULE: boolean;
@@ -33,10 +32,8 @@ let FROZEN_EMPTY_OBJECT: {};
 export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARGS: any[]) {
 
     // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
-    if (!STARTS_PARTITION) {
-        if (result !== UNHANDLED) {
-            return result;
-        }
+    if (result !== UNHANDLED) {
+        return result;
     }
 
     // TODO: call method in most efficient way...
@@ -45,7 +42,8 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
             return DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
         };
         if (HAS_CAPTURES) {
-            result = CALL_METHOD(...MM_ARGS, GET_CAPTURES(discriminant), next);
+            var captures = GET_CAPTURES(discriminant);
+            result = CALL_METHOD(...MM_ARGS, captures, next);
         }
         else {
             result = CALL_METHOD(...MM_ARGS, undefined, next);
@@ -53,7 +51,8 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     }
     else {
         if (HAS_CAPTURES) {
-            result = CALL_METHOD(...MM_ARGS, GET_CAPTURES(discriminant));
+            var captures = GET_CAPTURES(discriminant);
+            result = CALL_METHOD(...MM_ARGS, captures);
         }
         else {
             result = CALL_METHOD(...MM_ARGS);

@@ -11,8 +11,117 @@ import Taxonomy, {TaxonomyNode} from '../../taxonomy';
 
 
 
+function computeAllExecutors(taxonomy: Taxonomy<WithRoute>, options: MultimethodOptions) {
+
+    let augmentedTaxomony = taxonomy.augment(node => {
+
+        let sources: string[] = [];
+        sources.push(`\n// ========== EXECUTORS FOR ${node.pattern} ==========`);
+        sources.push(...node.route.map(rule => {
+
+            // Skip duplicates
+            let isOriginalRule = rule.isMetaRule || taxonomy.get(rule.predicate) === node;
+            if (!isOriginalRule) return;
+
+            return getSourceCodeForRule(taxonomy, node, rule, options);
+        }));
+        let source = sources.join('\n');
+
+        // TODO: temp testing...
+        let rules = node.route;
+        let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
+        let entryPoint = getNameForRule(taxonomy, node, entryPointRule);
+
+        return <WithExecutors> { source, entryPoint };
+    });
+    return augmentedTaxomony;
+}
+
+function getSourceCodeForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode & WithRoute, rule: Rule, options: MultimethodOptions) {
+    let name = getNameForRule(taxonomy, node, rule);
+
+    // TODO: to get copypasta'd code working... revise...
+    let i = node.route.indexOf(rule);
+    let rules = node.route;
+
+    // TODO: start with the template...
+    let source = routeExecutorTemplate.toString();
+
+    // TODO: ... all booleans
+    source = normaliseSource(source);
+    source = eliminateDeadCode(source, {
+        STARTS_PARTITION: i === 0 || rule.isMetaRule,
+        ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
+        HAS_CAPTURES: rule.predicate.captureNames.length > 0,
+        IS_META_RULE: rule.isMetaRule,
+        IS_PURE_SYNC: options.timing === 'sync',
+        IS_PURE_ASYNC: options.timing === 'async'
+    });
+
+    // TODO: temp testing...
+    let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
+    let downstreamName = downstreamRule ? getNameForRule(taxonomy, node, downstreamRule) : 'ℙØ';
+    let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${node.pattern.identifier}`;
+    let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${node.pattern.identifier}`;
+
+    // TODO: ... all strings
+    source = replaceAll(source, {
+        METHOD_NAME: getNameForRule(taxonomy, node, rule),
+        GET_CAPTURES: getCaptures,
+        CALL_METHOD: callMethod,
+        DELEGATE_DOWNSTREAM: downstreamName,
+        DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(taxonomy, node, rules[i + 1]) : null
+    });
+
+    // TODO: temp testing... specialise for arity...
+    if (typeof options.arity === 'number') {
+        let replacement = [...Array(options.arity).keys()].map(key => '_' + key).join(', '); // TODO: ES6 stuff here...
+        source = source.replace(/\.\.\.MM_ARGS/g, replacement);
+    }
+    else if (options.emitES5) {
+        source = downlevelES6Rest(source);
+        source = downlevelES6Spread(source);
+    }
+
+    // TODO: temp testing...
+    if (rule.predicate.captureNames.length > 0) {
+        source = source + `\nvar ${getCaptures} = taxonomy.get('${node.pattern.normalized}').route[${i}].predicate.match;`
+    }
+    source = source + `\nvar ${callMethod} = taxonomy.get('${node.pattern.normalized}').route[${i}].method;`;
+
+    // All done for this iteration.
+    return source;
+}
+
+function getNameForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode & WithRoute, rule: Rule) {
+    let ruleNode = taxonomy.get(rule.predicate.normalized);
+    let ruleIndex = ruleNode.route.indexOf(rule);
+
+    if (rule.isMetaRule) {
+        return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.pattern.identifier}Within${node.pattern.identifier}`;
+    }
+    else {
+        return `tryRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.pattern.identifier}`;
+    }
+}
+
+
+
+
+
+
+
+
+
+
 // TODO: temp testing...
-export type WithRoute = {route: Rule[]}
+export interface WithRoute {
+    route: Rule[];
+};
+export interface WithExecutors {
+    source: string;
+    entryPoint: string;
+};
 
 
 
@@ -20,6 +129,11 @@ export type WithRoute = {route: Rule[]}
 
 // TODO: ...
 export default function createRouteExecutors(taxonomy: Taxonomy<WithRoute>, normalisedOptions: MultimethodOptions) {
+
+// TODO: temp testing...
+computeAllExecutors(taxonomy, normalisedOptions);
+
+
 
     // Bring things into local scope that are ref'd from eval'ed code. NB: the source code
     // for eval cannot safely refer directly to expressions like `util.isPromiseLike`, since the `util` identifier may not
