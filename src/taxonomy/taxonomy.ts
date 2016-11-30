@@ -59,8 +59,11 @@ export default class Taxonomy<T> {
 
 
     // TODO: temp testing... doc... looks up the node for the given pattern. returns undefined if not found.
-    get(pattern: Pattern): TaxonomyNode & T {
-        return this.allNodes.filter(node => node.pattern === pattern)[0];
+    // algo: exact match using canonical form of given Pattern/string
+    get(pattern: Pattern | string): TaxonomyNode & T {
+        let p = typeof pattern === 'string' ? new Pattern(pattern) : pattern;
+        let result = this.allNodes.filter(node => node.pattern === p.normalized)[0];
+        return result;
     }
 
 

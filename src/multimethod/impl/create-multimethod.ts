@@ -42,14 +42,14 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
     let taxonomyWithRoutes = computeAllRoutes(taxonomy, rules, options.unhandled);
 
-    // Ensure every rule across every route has a mutually-unique name.
-    // TODO: explain better... there may be more rules than routes due to additional synthesised rules being added (eg 'ambiguous fallback' crasher rules), etc...
-let routes = new Map(taxonomyWithRoutes.allNodes.map(node => [node.pattern, node.route] as [Pattern, Rule[]]));
-    let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
-    allRules
-        .map(rule => rule.name)
-        .reduce((names, n) => names.concat(`${n}${names.indexOf(n) === -1 ? '' : `_${names.length}`}`), <string[]>[])
-        .forEach((name, i) => allRules[i].name = name);
+//     // Ensure every rule across every route has a mutually-unique name.
+//     // TODO: explain better... there may be more rules than routes due to additional synthesised rules being added (eg 'ambiguous fallback' crasher rules), etc...
+// let routes = new Map(taxonomyWithRoutes.allNodes.map(node => [node.pattern, node.route] as [Pattern, Rule[]]));
+//     let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
+//     allRules
+//         .map(rule => rule.name)
+//         .reduce((names, n) => names.concat(`${n}${names.indexOf(n) === -1 ? '' : `_${names.length}`}`), <string[]>[])
+//         .forEach((name, i) => allRules[i].name = name);
 
     // TODO: ...
     let dispatcher = createDispatcher(taxonomyWithRoutes, options);
@@ -112,6 +112,11 @@ function computeAllRoutes<T>(taxonomy: Taxonomy<T>, rules: {[pattern: string]: F
 
         // Make a single best path. Ensure no possibility of ambiguity.
         let route = disambiguateRoutes(node.pattern, alternateRoutes);
+
+        // Now order the rules from most- to least- specific
+        route.reverse();
+
+        // All done
         return { route };
     });
 

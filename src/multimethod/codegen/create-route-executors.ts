@@ -5,36 +5,43 @@ import Pattern from '../../pattern';
 import RouteExecutor from './route-executor';
 import routeExecutorTemplate from './route-executor-template';
 import Rule from '../impl/rule';
-import Taxonomy from '../../taxonomy';
+import Taxonomy, {TaxonomyNode} from '../../taxonomy';
+
+
+
+
+
+// TODO: temp testing...
+export type WithRoute = {route: Rule[]}
 
 
 
 
 
 // TODO: ...
-export default function createRouteExecutors(taxonomy: Taxonomy<{route: Rule[]}>, normalisedOptions: MultimethodOptions) {
+export default function createRouteExecutors(taxonomy: Taxonomy<WithRoute>, normalisedOptions: MultimethodOptions) {
 
     // TODO: temp testing...
     const UNHANDLED = normalisedOptions.unhandled;
 
     // TODO: temp testing...
-let routes = new Map(taxonomy.allNodes.map(node => [node.pattern, node.route] as [Pattern, Rule[]]));
-    let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
+//let routes = new Map(taxonomy.allNodes.map(node => [node.pattern, node.route] as [Pattern, Rule[]]));
+    //let allRules: Rule[] = [...new Set([].concat(...routes.values())).values()];
 
     // Generate the combined source code for handling the route. This includes local variable declarations for
     // all rules' matchers and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of the route.
     let lines = [
 
-        ...allRules
-            .map((rule, i) => `var ${getCapturesFor}${rule.name} = allRules[${i}].predicate.match;`)
-            .filter((_, i) => allRules[i].predicate.captureNames.length > 0),
+        // ...allRules
+        //     .map((rule, i) => `var ${getCapturesFor}${getNameForRule(rule)} = allRules[${i}].predicate.match;`)
+        //     .filter((_, i) => allRules[i].predicate.captureNames.length > 0),
 
-        ...allRules.map((rule, i) => `var ${invokeMethodFor}${rule.name} = allRules[${i}].method;`),
+        // ...allRules.map((rule, i) => `var ${invokeMethodFor}${getNameForRule(rule)} = allRules[${i}].method;`),
 
         `return {`,
 
-        ...[...routes.values()].map(rules => generateExecutorSourceCode(rules, normalisedOptions)),
+        ...taxonomy.allNodes.map(node => generateExecutorSourceCode(node, normalisedOptions)),
 
         `};`
     ];
@@ -145,18 +152,16 @@ const invokeMethodFor = 'invokeMethodFor';
  * Helper function to generate source code for a set of interdependent functions (one per rule) that perform the
  * cascading evaluation of a route, accounting for the possibly mixed sync/async implementation of the rule handlers.
  */
-function generateExecutorSourceCode(rules: Rule[], options: MultimethodOptions): string {
+function generateExecutorSourceCode(node: TaxonomyNode & WithRoute, options: MultimethodOptions): string {
 
     // Obtain a reversed copy of the rule list, ordered from most- to least-specific. This simplifies logic below.
-    rules = rules.slice().reverse();
-
-// TODO: temp testing...
-let namesake = rules[0].name;
+    let rules = node.route;
 
     // TODO: copypasta from above... pass this in? or out? or factor into own function?
     // The 'start' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
     // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
-    let startMethodName = (rules.filter(rule => rule.isMetaRule).pop() || rules[0]).name;
+    let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0]
+    let entryPointName = `${entryPointRule.predicate.identifier}_${rules.indexOf(entryPointRule)}`;
 
     // Generate source code for each rule in turn.
     let sources = rules.map((rule, i) => {
@@ -182,12 +187,16 @@ let namesake = rules[0].name;
             IS_PURE_ASYNC: options.timing === 'async'
         });
 
+// TODO: temp testing...
+let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
+let downstreamName = downstreamRule ? `${downstreamRule.predicate.identifier}_${rules.indexOf(downstreamRule)}` : 'ℙØ';
+
         source = replaceAll(source, {
-            METHOD_NAME: rule.name,
-            GET_CAPTURES: `${getCapturesFor}${rule.name}`,
-            CALL_METHOD: `${invokeMethodFor}${rule.name}`,
-            DELEGATE_DOWNSTREAM: (rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop() || <any>{}).name || 'ℙØ',
-            DELEGATE_NEXT: i === rules.length - 1 ? undefined : rules[i + 1].name
+            METHOD_NAME: `${rule.predicate.identifier}_${i}`,
+            GET_CAPTURES: `${getCapturesFor}${rule.predicate.identifier}_${i}`,
+            CALL_METHOD: `${invokeMethodFor}${rule.predicate.identifier}_${i}`,
+            DELEGATE_DOWNSTREAM: downstreamName,
+            DELEGATE_NEXT: i < rules.length - 1 ? `${rules[i + 1].predicate.identifier}_${i + 1}` : null
         });
 
         // TODO: temp testing... specialise for arity...
@@ -200,6 +209,11 @@ let namesake = rules[0].name;
             source = downlevelES6Spread(source);
         }
 
+// TODO: temp testing...
+source = `var ${invokeMethodFor}${rule.predicate.identifier}_${i} = taxonomy.get('${node.pattern.normalized}').route[${i}].method;\n${source}`;
+if (rule.predicate.captureNames.length > 0) {
+    source = `var ${getCapturesFor}${rule.predicate.identifier}_${i} = taxonomy.get('${node.pattern.normalized}').route[${i}].predicate.match;\n${source}`
+}
 
         return source;
     });
@@ -208,13 +222,31 @@ let namesake = rules[0].name;
     sources = sources.map(line => '        ' + line);
 
     // Combine and return all the sources into an IIFE that returns the executor's entry point.
-    return `\n    ${namesake}: (function () {\n${sources.join('\n')}\n        return ${startMethodName};\n    })(),`;  // TODO: ES2017 trailing comma will break stuff!
+// TODO: temp testing...
+let namesake = rules[0].predicate.identifier;
+    return `\n    ${namesake}: (function () {\n${sources.join('\n')}\n        return ${entryPointName};\n    })(),`;  // TODO: ES2017 trailing comma will break stuff!
 }
 
 
 
 
 
+// TODO: temp testing...
+// function getNameForRule(rule: Rule) {
+//     return rule.name;
+
+//     // TODO: audit below - ensure it is not possible to craft a pattern whose identifier will be the same as an augmented rule name generated by this function
+
+//     // if (rule.method.name === '_unhandled') {
+//     //     return 'BIGDADDY'; // TODO: temp fix... always last method tried on every route (UNIVERSAL ROOT)
+//     // }
+//     // if (rule.method.name === '_ambiguous') {
+//     //     return rule.predicate.identifier + '_ambiguous'; // TODO: see above comment - this *could* clash with another pattern identifier that was crafted to do that
+//     // }
+//     // else {
+//     //     return rule.predicate.identifier;
+//     // }
+// }
 
 
 
