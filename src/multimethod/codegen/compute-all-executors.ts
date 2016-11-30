@@ -63,28 +63,29 @@ function getSourceCodeForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode 
     // TODO: start with the template...
     let source = routeExecutorTemplate.toString();
 
-    // TODO: ... all booleans
     source = normaliseSource(source);
+
+    // TODO: temp testing...
+    let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
+    let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${node.pattern.identifier}`;
+    let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${node.pattern.identifier}`;
+
+    // TODO: ... all booleans
     source = eliminateDeadCode(source, {
         ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
         HAS_CAPTURES: rule.predicate.captureNames.length > 0,
         IS_META_RULE: rule.isMetaRule,
+        HAS_DOWNSTREAM: downstreamRule != null,
         IS_PURE_SYNC: options.timing === 'sync',
         IS_PURE_ASYNC: options.timing === 'async'
     });
-
-    // TODO: temp testing...
-    let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
-    let downstreamName = downstreamRule ? getNameForRule(taxonomy, node, downstreamRule) : 'ℙØ';
-    let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${node.pattern.identifier}`;
-    let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${node.pattern.identifier}`;
 
     // TODO: ... all strings
     source = replaceAll(source, {
         METHOD_NAME: getNameForRule(taxonomy, node, rule),
         GET_CAPTURES: getCaptures,
         CALL_METHOD: callMethod,
-        DELEGATE_DOWNSTREAM: downstreamName,
+        DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(taxonomy, node, downstreamRule) : null,
         DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(taxonomy, node, rules[i + 1]) : null
     });
 

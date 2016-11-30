@@ -18,6 +18,7 @@ let HAS_CAPTURES: boolean;
 let IS_META_RULE: boolean;
 let IS_PURE_SYNC: boolean;
 let IS_PURE_ASYNC: boolean;
+let HAS_DOWNSTREAM: boolean;
 let DELEGATE_DOWNSTREAM: RouteExecutor;
 let DELEGATE_NEXT: RouteExecutor;
 let GET_CAPTURES: (discriminant: string) => {};
@@ -38,9 +39,16 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
 
     // TODO: call method in most efficient way...
     if (IS_META_RULE) {
-        var next = function (...MM_ARGS) {
-            return DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
-        };
+        if (HAS_DOWNSTREAM) {
+            var next: Function = function (...MM_ARGS) {
+                return DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
+            };
+        }
+        else {
+            var next: Function = function () {
+                return UNHANDLED;
+            };
+        }
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
             result = CALL_METHOD(...MM_ARGS, captures, next);

@@ -22,7 +22,7 @@ export default function createDispatcher(taxonomy: Taxonomy<WithRoute>, normalis
 
     let wholeSource = [selectorSource, ...t2.allNodes.map(node => node.source)].join('\n');
 
-    //console.log(wholeSource);
+    console.log(wholeSource);
 
 
     // Bring things into local scope that are ref'd from eval'ed code. NB: the source code
@@ -32,7 +32,6 @@ export default function createDispatcher(taxonomy: Taxonomy<WithRoute>, normalis
     let toDiscriminant = normalisedOptions.toDiscriminant;
     const isPromise = util.isPromiseLike;
     const UNHANDLED = normalisedOptions.unhandled;
-    const ℙØ = (discriminant, result) => result; // ND: *always* called with result = UNHANDLED
 
 
     let selectRoute = eval(`(function () {\n${wholeSource}\nreturn _selectExecutor;\n})`)(); // TODO: brittle - don't assume name _selectExecutor 
