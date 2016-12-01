@@ -38,5 +38,5 @@ export default function disambiguateRoutes(pattern: Pattern, alternateRuleLists:
     let crasher = new Rule(pattern.toString(), _ambiguous);
 
     // The final composite rule list == common prefix + crasher + common suffix.
-    return [].concat(prefix, crasher, suffix);
+    return ([] as Rule[]).concat(prefix, crasher, suffix);
 }

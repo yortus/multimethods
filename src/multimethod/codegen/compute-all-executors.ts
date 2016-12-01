@@ -44,17 +44,10 @@ export default function computeAllExecutors(taxonomy: Taxonomy<WithRoute>, optio
 
     let augmentedTaxomony = taxonomy.augment(node => {
 
-        let sources: string[] = [];
-        sources.push(`// ========== EXECUTORS FOR ${node.pattern} ==========\n`);
-        sources.push(...node.route.map(rule => {
-
-            // TODO: explain... Skip duplicates
-            let isOriginalRule = rule.isMetaRule || taxonomy.get(rule.predicate) === node;
-            if (!isOriginalRule) return;
-
-            return getSourceCodeForRule(taxonomy, node, rule, options) + '\n';
-        }));
-        let source = sources.join('');
+        // TODO: doc...
+        let rulesWithDuplicatesRemoved = node.route.filter(rule => rule.isMetaRule || taxonomy.get(rule.predicate) === node);
+        let sources = rulesWithDuplicatesRemoved.map(rule => getSourceCodeForRule(taxonomy, node, rule, options) + '\n');
+        let source = [`// ========== EXECUTORS FOR ${node.pattern} ==========\n`].concat(sources).join('');
 
         // TODO: temp testing...
         // The 'entry point' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
@@ -111,8 +104,8 @@ function getSourceCodeForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode 
         METHOD_NAME: getNameForRule(taxonomy, node, rule),
         GET_CAPTURES: getCaptures,
         CALL_METHOD: callMethod,
-        DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(taxonomy, node, downstreamRule) : null,
-        DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(taxonomy, node, rules[i + 1]) : null
+        DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(taxonomy, node, downstreamRule) : '',
+        DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(taxonomy, node, rules[i + 1]) : ''
     });
 
     // TODO: temp testing... specialise for arity...

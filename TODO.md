@@ -18,6 +18,8 @@
 - [ ] switch stricter tsconfig flags back on (eg strictNullChecks, noImplicitAny)
 - [ ] Do some V8 profiling/analysis. list possible optiisations.
 - [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
+- [ ] enfore max line length <= 120 chars
+- [ ] get rid of nasty TypeScript '!' non-null assertions in code
 ----------
 - [ ] clarify terminology around executor/method/rule/tryRule/tryMetaRule
 - [ ] use arrow functions in executor template then downlevel them.

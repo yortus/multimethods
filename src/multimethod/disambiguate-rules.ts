@@ -45,7 +45,7 @@ function ruleComparator(ruleA: Rule, ruleB: Rule) {
 
 
 /** Default implementation for returning the more-specific of the two given rules. */
-function tieBreakFn(a: Rule, b: Rule): Rule {
+function tieBreakFn(a: Rule, b: Rule): Rule | undefined {
 
     // All else being equal, a normal rule is more specific than a meta-rule.
     if (!a.isMetaRule && b.isMetaRule) return a;

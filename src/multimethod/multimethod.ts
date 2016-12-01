@@ -156,7 +156,7 @@ export interface VariadicMultimethod<T, TR> extends Multimethod {
     add(rules: {[predicate: string]: VariadicMethod<T, TR>}): this;
     add(predicate: string, method: VariadicMethod<T, TR>): this;
 }
-export const VariadicMultimethod = <VariadicMultimethodConstructor> class VariadicMultimethod extends createMultimethodClass() { };
+export const VariadicMultimethod = <VariadicMultimethodConstructor> class VariadicMultimethod extends createMultimethodClass('variadic') { };
 export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
     arity: never;
     toDiscriminant: (...args: T[]) => string;

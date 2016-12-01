@@ -12,14 +12,14 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     options = options || {};
 
     // If *both* static and runtime arities are given, they must match.
-    if (typeof staticArity === 'number' && typeof options.arity === 'number' && staticArity !== options.arity) {
+    if (staticArity !== undefined && options.arity !== undefined && staticArity !== options.arity) {
         throw new MultimethodError(`arity mismatch`); // TODO: improve diagnostic message
     }
 
     // TODO: more validation, eg signatures of given rules, legal arity, legal timing, legal discriminant, etc
 
     // TODO: review all these defaults. ESP. toDiscriminant!!
-    const arity = typeof options.arity === 'number' ? options.arity : staticArity;
+    const arity = options.arity !== undefined ? options.arity : staticArity !== undefined ? staticArity : 'variadic';
     const timing = options.timing || 'mixed';
     let toDiscriminant = options.toDiscriminant || ((...args: any[]) => args.map(arg => (arg || '').toString()).join(''));
     let unhandled = options.unhandled || {}; // TODO: export a lib-defined UNHANDLED const

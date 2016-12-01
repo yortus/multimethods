@@ -9,7 +9,7 @@
         "outDir": "../built",
 
         // Static checks
-        "strictNullChecks": false, // TODO: set true
+        "strictNullChecks": true,
         "noImplicitAny": true,
         "noUnusedLocals": false,
         "noImplicitThis": false,

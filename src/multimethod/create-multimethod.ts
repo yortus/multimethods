@@ -152,7 +152,7 @@ function getEqualBestRulesForPredicate(predicate: Pattern, methods: {[pattern: s
  * [1] See: https://en.wikipedia.org/wiki/Glossary_of_graph_theory#Walks
  */
 function getAllRoutesFromRootToNode(node: TaxonomyNode): Pattern[][] {
-    let allRoutes: Pattern[][] = [].concat(...node.generalizations.map(getAllRoutesFromRootToNode));
+    let allRoutes = ([] as Pattern[][]).concat(...node.generalizations.map(getAllRoutesFromRootToNode));
     if (allRoutes.length === 0) {
 
         // No parent paths, therefore this must be the root.

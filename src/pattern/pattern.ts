@@ -1,6 +1,6 @@
 import {warn} from '../util';
 import intersectPatterns from './intersect-patterns';
-import makeMatchMethod from './make-match-method';
+import makeMatchMethod, {MatchMethod} from './make-match-method';
 import parsePatternSource from './parse-pattern-source';
 
 
@@ -91,7 +91,7 @@ export default class Pattern {
      * @returns {Object} null if the string is not recognized by the pattern. Otherwise, a hash of captured name/value
      *          pairs that unify the string with this pattern.
      */
-    match: (string: string) => {[captureName: string]: string};
+    match: MatchMethod;
 
 
     /**

@@ -10,7 +10,7 @@ export default function eliminateDeadCode(normalisedFunctionSource: string, cons
     let inLines = normalisedFunctionSource.split('\n');
     let outLines: string[] = [];
     while (inLines.length > 0) {
-        let inLine = inLines.shift();
+        let inLine = inLines.shift()!;
 
         let matches = MATCH_IF.exec(inLine);
         if (!matches || !consts.hasOwnProperty(matches[3])) {
@@ -25,7 +25,7 @@ export default function eliminateDeadCode(normalisedFunctionSource: string, cons
         let blockLines: string[] = [];
         let blockClose = indent + '}';
 
-        while ((inLine = inLines.shift()) !== blockClose) {
+        while ((inLine = inLines.shift()!) !== blockClose) {
             blockLines.push(inLine.slice(4));
         }
 

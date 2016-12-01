@@ -89,7 +89,7 @@ function initTaxonomy<T>(taxonomy: Taxonomy<T>, patterns: Pattern[]) {
     let nodeMap = new Map<Pattern, TaxonomyNode & T>();
     let nodeFor = (pattern: Pattern) => {
         if (!nodeMap.has(pattern)) nodeMap.set(pattern, <TaxonomyNode & T> new TaxonomyNode(pattern));
-        return nodeMap.get(pattern);
+        return nodeMap.get(pattern)!;
     }
 
     // Retrieve the root node, which always corresponds to the '…' pattern.
