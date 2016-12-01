@@ -19,6 +19,7 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
     // using a RegExp. Note that all but the default case below could be commented out with no change in runtime
     // behaviour. The additional cases are strictly optimizations.
     let simplifiedPatternSignature = patternSource
+        .replace(/[ ]*\#.*$/g, '')      // strip trailing whitespace
         .replace(/{[^.}]+}/g, 'ᕽ')      // replace '{name}' with 'ᕽ'
         .replace(/{\.+[^}]+}/g, '﹍')    // replace '{...name}' with '﹍'
         .replace(/{…[^}]+}/g, '﹍')      // replace '{…name}' with '﹍'
@@ -81,6 +82,8 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
             return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
 
         default:
+// TODO: temp testing... remove...
+console.log(`=====>   NOT OPTIMISED   ${simplifiedPatternSignature}   ('${patternSource}')`);
             let regexp = makeRegExpForPattern(patternAST);
             return s => {
                 let matches = s.match(regexp);
