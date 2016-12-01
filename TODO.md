@@ -15,6 +15,11 @@
 
 
 # To Do List
+- [ ] Do some V8 profiling/analysis. list possible optiisations.
+- [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
+- [ ] use arrow functions in executor template then downlevel them.
+- [ ] arrange all src/multimethod files & exports more nicely
+- [ ] rename 'route' in WithRoute to 'matchedRules'
 - [ ] ensure codegen uses no ES6 features when emitES5 option is set
   - [ ] arrow functions
   - [ ] let/const
