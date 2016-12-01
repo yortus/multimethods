@@ -18,7 +18,7 @@ export default function configure(options: Options) {
 
 
 // TODO: doc...
-function getWarnBehaviour(options: WarningsOptions) {
+function getWarnBehaviour(options: WarningsOptions): (message: string) => void {
 
     if (typeof options === 'function') {
         return options;

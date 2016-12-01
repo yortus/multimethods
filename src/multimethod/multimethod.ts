@@ -184,11 +184,11 @@ function createMultimethodClass(staticArity?: number | 'variadic'): MultimethodC
     return <any> class Multimethod {
         constructor(options?: Partial<MultimethodOptions>) {
 
-            // Create a new options object incorporating all defaults (including staticArity if given)
+            // Create a new options object incorporating all defaults.
             let normalisedOptions = normaliseOptions(options, staticArity);
 
             // TODO: ...
-            let instance = createMultimethod(normalisedOptions);
+            let instance: any = createMultimethod(normalisedOptions);
             instance[CTOR] = Multimethod;
             return instance;
         }

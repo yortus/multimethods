@@ -47,7 +47,7 @@ TODO:... fix comment...
 
 // TODO: temp testing... will we (can we?) still check sig at runtime?
         //checkConsequentSignature(method, pattern);
-        this.isMetaRule = method[IS_META] === true;
+        this.isMetaRule = (method as any)[IS_META] === true;
     }
 
 

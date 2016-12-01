@@ -58,7 +58,7 @@ export default function createDispatcher(taxonomy: Taxonomy<WithRoute>, normalis
 
     // Generate the overall dispatch function for the multimethod.
     // TODO: support arity properly... don't assume arity === 1 like done below...
-    let dispatcher = function _dispatch($0) {
+    let dispatcher = function _dispatch($0: any) {
         let discriminant = toDiscriminant($0);
         let executeRoute = selectRoute(discriminant);
         let result = executeRoute(discriminant, UNHANDLED, $0);

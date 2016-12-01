@@ -95,7 +95,7 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
             return s => {
                 let matches = s.match(regexp);
                 if (!matches) return null;
-                return captureNames.reduce((hash, name, i) => (hash[name] = matches[i + 1], hash), {});
+                return captureNames.reduce((hash, name, i) => (hash[name] = matches[i + 1], hash), {} as any);
             };
     }
 }

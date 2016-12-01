@@ -123,9 +123,9 @@ function augmentTaxonomy<T, U>(taxonomy: Taxonomy<T>, callback: (node: TaxonomyN
     });
 
     // Map and assign the additional properties.
-    newNodes.forEach((node, i) => {
-        let oldProps = oldNodes[i];
-        let newProps = callback(oldProps) || {};
+    newNodes.forEach((node: any, i) => {
+        let oldProps: any = oldNodes[i];
+        let newProps: any = callback(oldProps) || {};
         Object.keys(newProps).forEach(key => { if (!(key in node)) node[key] = newProps[key]; });
         Object.keys(oldProps).forEach(key => { if (!(key in node)) node[key] = oldProps[key]; });
     });

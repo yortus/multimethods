@@ -10,8 +10,8 @@
 
         // Static checks
         "strictNullChecks": false, // TODO: set true
+        "noImplicitAny": true,
         "noUnusedLocals": false,
-        "noImplicitAny": false,
         "noImplicitThis": false,
         "noImplicitReturns": false,
         "noFallthroughCasesInSwitch": false

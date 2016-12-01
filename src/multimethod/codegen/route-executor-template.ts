@@ -40,7 +40,7 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     // TODO: call method in most efficient way...
     if (IS_META_RULE) {
         if (HAS_DOWNSTREAM) {
-            var next: Function = function (...MM_ARGS) {
+            var next: Function = function (...MM_ARGS: any[]) {
                 return DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ...MM_ARGS);
             };
         }
@@ -78,13 +78,13 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
             if (IS_PURE_ASYNC) {
 
                 // All methods in this MM are asynchronous
-                result = result.then(rs => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
+                result = result.then((rs: any) => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
             }
             else {
 
                 // Methods may be sync or async, and we must differentiate at runtime
                 if (isPromise(result)) {
-                    result = result.then(rs => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
+                    result = result.then((rs: any) => DELEGATE_NEXT(discriminant, rs, ...MM_ARGS));
                 }
                 else {
                     result = DELEGATE_NEXT(discriminant, result, ...MM_ARGS);
