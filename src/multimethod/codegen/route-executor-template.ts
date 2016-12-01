@@ -26,7 +26,7 @@ let CALL_METHOD: (...args: any[]) => any; // Method signature, NB: context is pa
 let FROZEN_EMPTY_OBJECT: {};
 
 
-// TODO: note ES6 in source here - spread and rest (...MM_ARGS)
+// TODO: note ES6 in source here - spread and rest (...MM_ARGS), arrow functions
 // TODO: explain important norms in the template function...
 // TODO: don't need to dedent any more!
 // TODO: put more explanatory comments inside, and strip them out to maximise inlining potential
@@ -45,9 +45,7 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
             };
         }
         else {
-            var next: Function = function () {
-                return UNHANDLED;
-            };
+            var next: Function = () => UNHANDLED;
         }
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
