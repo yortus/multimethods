@@ -1,7 +1,7 @@
 import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
-import Pattern from '../pattern';
+import Pattern from '../predicate';
 import Taxonomy, {TaxonomyNode} from '../taxonomy';
 
 

@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {parsePatternSource, PatternAST} from 'multimethods';
+import {parsePattern, PatternAST} from 'multimethods';
 
 
-describe('Parsing a pattern source string', () => {
+describe('Parsing a Predicate pattern string', () => {
 
     let tests = [
         '∅ ==> {signature: "", identifier: "ℙ", captures: []}',
@@ -53,13 +53,13 @@ describe('Parsing a pattern source string', () => {
 
     tests.forEach(test => {
         it(test, () => {
-            let patternSource = test.split(' ==> ')[0].replace(/^∅$/, '');
+            let pattern = test.split(' ==> ')[0].replace(/^∅$/, '');
             let rhs = test.split(' ==> ')[1];
             let expected: PatternAST|string = rhs === "ERROR" ? rhs : eval(`(${rhs})`);
             let expectedError = '';// TODO: implement this...
             let actual: PatternAST|string = 'ERROR';
             try {
-                actual = parsePatternSource(patternSource);
+                actual = parsePattern(pattern);
             }
             catch (ex) { }
             expect(actual).to.deep.equal(expected);

@@ -1,4 +1,4 @@
-import {PatternAST} from './parse-pattern-source';
+import {PatternAST} from './pattern-parser';
 
 
 

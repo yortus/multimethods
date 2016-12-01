@@ -1,6 +1,6 @@
 // TODO: review all comments and terminology in here...
 // TODO: explain what decorators are here, or refer to docs elsewhere (and write them).
-import Pattern from '../pattern';
+import Pattern from '../predicate';
 //import checkConsequentSignature from './check-consequent-signature';
 
 

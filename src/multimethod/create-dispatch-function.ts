@@ -2,7 +2,7 @@ import computePatternLineages from './compute-pattern-lineages';
 import generateDispatchFunction from './codegen/generate-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
-import Pattern from '../pattern';
+import Pattern from '../predicate';
 import Taxonomy from '../taxonomy';
 import {warn} from '../util';
 

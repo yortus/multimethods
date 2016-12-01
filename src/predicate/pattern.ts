@@ -1,6 +1,6 @@
 import intersectPatterns from './intersect-patterns';
 import makeMatchMethod, {MatchMethod} from './make-match-method';
-import parsePatternSource from './parse-pattern-source';
+import parsePattern from './pattern-parser';
 
 
 
@@ -36,7 +36,7 @@ export default class Pattern {
     constructor(private source: string) {
 
         // Parse the source string to test its validity and to get syntax information. NB: may throw.
-        let ast = parsePatternSource(source);
+        let ast = parsePattern(source);
 
         // If the source is already normalized, return the singleton instance from the normalized pattern cache.
         if (source === ast.signature) {

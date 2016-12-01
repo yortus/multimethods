@@ -1,4 +1,4 @@
-import Pattern from '../pattern';
+import Pattern from '../predicate';
 import TaxonomyNode from './taxonomy-node';
 
 

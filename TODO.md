@@ -22,10 +22,17 @@
 - [ ] get rid of nasty TypeScript '!' non-null assertions in code
 - [ ] get whole lib working in ES5 mode (currently there are runtime errors due to reliance on ES6 runtime features in source)
 ----------
+- [ ] rename Pattern (class/type) to Predicate, and patternSource (arg/var) to pattern
+  - [ ] update all affected file/folder names
+  - [ ] update all affected names of exports/imports/vars/functions
+  - [ ] update all references in comments
+  - [ ] update all tests including test names
+----------
 - [ ] clarify terminology around executor/route/method/rule/tryRule/tryMetaRule
   - [x] *method* is a client-provided function that implements the behaviour associated with a rule
-  - [ ] *rule* is a client-provided predicate/method pair, a bunch of which comprise the behaviour of a multimethod
-  - [ ] 
+  - [x] *rule* is a client-provided predicate/method pair, a bunch of which comprise the behaviour of a multimethod
+  - [ ] *lineage*???
+
 - [ ] clarify terminology around pattern vs predicate
 - [ ] use arrow functions in executor template then downlevel them.
 - [ ] arrange all src/multimethod files & exports more nicely

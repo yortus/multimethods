@@ -1,5 +1,5 @@
 import {MultimethodError} from '../util';
-const patternSourceGrammar: { parse(text: string): PatternAST; } = require('./pattern-source-grammar');
+const patternSourceGrammar: { parse(text: string): PatternAST; } = require('./pattern-grammar');
 
 
 
@@ -11,9 +11,9 @@ const patternSourceGrammar: { parse(text: string): PatternAST; } = require('./pa
  * @param {string} patternSource - the pattern source string to be parsed.
  * @returns {PatternAST} an object containing details about the successfully parsed pattern.
  */
-export default function parsePatternSource(patternSource: string): PatternAST {
+export default function parsePattern(pattern: string): PatternAST {
     try {
-        let ast = patternSourceGrammar.parse(patternSource);
+        let ast = patternSourceGrammar.parse(pattern);
         return ast;
     }
     catch (ex) {
@@ -21,7 +21,7 @@ export default function parsePatternSource(patternSource: string): PatternAST {
         let endCol = ex.location.end.column;
         if (endCol <= startCol) endCol = startCol + 1;
         let indicator = Array(startCol).join(' ') + Array(endCol - startCol + 1).join('^');
-        throw new MultimethodError(`${ex.message}:\n${patternSource}\n${indicator}`);
+        throw new MultimethodError(`${ex.message}:\n${pattern}\n${indicator}`);
     }
 }
 
