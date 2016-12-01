@@ -10,6 +10,9 @@ import {Multimethod, meta, util} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
+// 2016-12-01   LAJESTIC    Dispatched 1000000 requests in 0.812 seconds   (~1232000 req/sec)   more tweaks of string functions (startsWith, endsWith, containsSlash)
+// 2016-12-01   LAJESTIC    Dispatched 1000000 requests in 0.898 seconds   (~1114000 req/sec)   after some profile-based optimisations (eg removing useless deopted IIAFE below, adding custom indexOf fn)
+
 // 2016-11-26   LAJESTIC    Dispatched 1000000 requests in 1.625 seconds   (~615000 req/sec)    setting option arity=1
 // 2016-11-26   LAJESTIC    Dispatched 1000000 requests in 4.25 seconds    (~235000 req/sec)    After rewrite of MM API, options, and codegen, with no optimising options set
 
@@ -57,6 +60,7 @@ const ruleSet = {
     'api/fooo': () => 'fooo',
     'api/bar': () => UNHANDLED,
 
+    // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
     'zzz/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
     'zzz/b*z': ($req) => `${$req.address}`,
     'zzz/./*': () => 'forty-two'
@@ -96,7 +100,7 @@ const tests = [
 
 
 // TODO: ...
-(async () => {
+// TODO: was... (async () => {
 
     // Set up the tests.
     console.log(`Running perf test: basic routing...`);
@@ -121,7 +125,7 @@ const tests = [
     for (let i = 0; i < COUNT; ++i) {
         let index = Math.floor(Math.random() * tests.length);
         let res = mm(requests[index]);
-        let actualResponse = util.isPromiseLike(res) ? await (res) : res;
+        let actualResponse = res; // TODO: was... util.isPromiseLike(res) ? await (res) : res;
         assert.equal(actualResponse, responses[index]);
     }
 
@@ -134,7 +138,7 @@ const tests = [
     let sec = (stop - start) / 1000;
     let rate = Math.round(0.001 * COUNT / sec) * 1000;
     console.log(`Dispatched ${COUNT} requests in ${sec} seconds   (~${rate} req/sec)`);
-})().catch(console.log);
+// TODO: was... })().catch(console.log);
 
 
 // TODO: doc helper...

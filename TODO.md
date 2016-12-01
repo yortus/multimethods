@@ -16,7 +16,10 @@
 
 # To Do List
 - [x] switch stricter tsconfig flags back on (eg strictNullChecks, noImplicitAny)
-- [ ] Do some V8 profiling/analysis. list possible optiisations.
+- [ ] Do some V8 profiling/analysis. list possible optimisations.
+  - [x] indexOf (in make-match-method.js) takes ~30% of time - try rewriting
+  - [x] the (unoptimizable) generator function housing the perf test loop takes ~20% of time (remove it)
+  - [ ] others?
 - [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
 - [ ] enfore max line length <= 120 chars
 - [ ] get rid of nasty TypeScript '!' non-null assertions in code

@@ -31,10 +31,10 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
             return s => s === literalChars ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
         case '*':
-            return s => s.indexOf('/') === -1 ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
+            return s => containsSlash(s) ? null : SUCCESSFUL_MATCH_NO_CAPTURES;
 
         case '{cap}':
-            return s => s.indexOf('/') === -1 ? {[firstCaptureName]: s} : null;
+            return s => containsSlash(s) ? null : {[firstCaptureName]: s};
 
         case '…':
             return _s => SUCCESSFUL_MATCH_NO_CAPTURES;
@@ -44,51 +44,41 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
 
         case 'lit*':
             return s => {
-                if (s.indexOf(literalChars) !== 0) return null;
-                return s.indexOf('/', literalCharCount) === -1 ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
+                if (!startsWith(s, literalChars)) return null;
+                return containsSlash(s, literalCharCount) ? null : SUCCESSFUL_MATCH_NO_CAPTURES;
             };
 
         case 'lit{cap}':
             return s => {
-                if (s.indexOf(literalChars) !== 0) return null;
-                return s.indexOf('/', literalCharCount) === -1 ? {[firstCaptureName]: s.slice(literalCharCount)} : null;
+                if (!startsWith(s, literalChars)) return null;
+                return containsSlash(s, literalCharCount) ? null : {[firstCaptureName]: s.slice(literalCharCount)};
             };
 
         case 'lit…':
-            return s => s.indexOf(literalChars) === 0 ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
+            return s => startsWith(s, literalChars) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
         case 'lit{...cap}':
-            return s => s.indexOf(literalChars) === 0 ? {[firstCaptureName]: s.slice(literalCharCount)} : null;
+            return s => startsWith(s, literalChars) ? {[firstCaptureName]: s.slice(literalCharCount)} : null;
 
         case '*lit':
             return s => {
                 let litStart = s.length - literalCharCount;
-                if (litStart < 0) return null;
-                if (s.indexOf(literalChars, litStart) !== litStart) return null;
-                return s.lastIndexOf('/', litStart - 1) === -1 ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
+                if (!endsWith(s, literalChars)) return null;
+                return containsSlash(s, 0, litStart) ? null : SUCCESSFUL_MATCH_NO_CAPTURES;
             };
 
         case '{cap}lit':
             return s => {
                 let litStart = s.length - literalCharCount;
-                if (litStart < 0) return null;
-                if (s.indexOf(literalChars, litStart) !== litStart) return null;
-                return s.lastIndexOf('/', litStart - 1) === -1 ? {[firstCaptureName]: s.slice(0, litStart)} : null;
+                if (!endsWith(s, literalChars)) return null;
+                return containsSlash(s, 0, litStart) ? null : {[firstCaptureName]: s.slice(0, litStart)};
             };
 
         case '…lit':
-            return s => {
-                let litStart = s.length - literalCharCount;
-                if (litStart < 0) return null;
-                return s.indexOf(literalChars, litStart) === litStart ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
-            };
+            return s => endsWith(s, literalChars) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
         case '{...cap}lit':
-            return s => {
-                let litStart = s.length - literalCharCount;
-                if (litStart < 0) return null;
-                return s.indexOf(literalChars, litStart) === litStart ? {[firstCaptureName]: s.slice(0, litStart)} : null;
-            };
+            return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
 
         default:
             let regexp = makeRegExpForPattern(patternAST);
@@ -142,3 +132,33 @@ function makeRegExpForPattern(patternAST: PatternAST) {
 // captures. This reduces the number of cases where calls to match() functions create new heap objects.
 const SUCCESSFUL_MATCH_NO_CAPTURES = <{[captureName: string]: string}> {};
 Object.freeze(SUCCESSFUL_MATCH_NO_CAPTURES);
+
+
+
+
+
+// TODO: V8 profiling proves calling these is faster than equivalent calls to the native string#indexOf in V8!!!
+// TODO: leave this here? If so, try further opts, write it up properly
+function containsSlash(s: string, from = 0, to = s.length) {
+    for (let i = from; i < to; ++i) {
+        if (s[i] === '/') return true;
+    }
+    return false;
+}
+function startsWith(s: string, searchString: string) {
+    let len = searchString.length;
+    if (len > s.length) return false;
+    for (let i = 0; i < len; ++i) {
+        if (s[i] !== searchString[i]) return false;
+    }
+    return true;
+}
+function endsWith(s: string, searchstring: string) {
+    let len1 = s.length;
+    let len2 = searchstring.length;
+    if (len2 > len1) return false;
+    for (let i = len1 - len2, j = 0; i < len1; ++i, ++j) {
+        if (s[i] !== searchstring[j]) return false;
+    }
+    return true;
+}
