@@ -3,7 +3,7 @@ import computeRouteSelector from './compute-route-selector';
 import MultimethodOptions from '../multimethod-options';
 import Pattern from '../../pattern';
 import RouteExecutor from './route-executor';
-import Rule from '../impl/rule';
+import Rule from '../rule';
 import Taxonomy from '../../taxonomy';
 import * as util from '../../util';
 

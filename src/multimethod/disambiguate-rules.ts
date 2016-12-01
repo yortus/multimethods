@@ -1,5 +1,5 @@
 // TODO: `tieBreakFn` should be passed in or somehow provided from outside, with builtin fallback/default impl as below.
-import {warn, MultimethodError} from '../../util';
+import {warn, MultimethodError} from '../util';
 import {inspect} from 'util';
 import Rule from './rule';
 

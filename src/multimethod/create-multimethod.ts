@@ -1,11 +1,11 @@
-import createDispatcher from '../codegen/create-dispatcher';
+import createDispatcher from './codegen/create-dispatcher';
 import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
-import MultimethodOptions from '../multimethod-options';
-import Pattern from '../../pattern';
-import Taxonomy, {TaxonomyNode} from '../../taxonomy';
-import {warn} from '../../util';
+import MultimethodOptions from './multimethod-options';
+import Pattern from '../pattern';
+import Taxonomy, {TaxonomyNode} from '../taxonomy';
+import {warn} from '../util';
 
 
 
@@ -13,17 +13,17 @@ import {warn} from '../../util';
 
 // TODO: review all comments here - eg refs to 'RuleSet' should be updated to Multimethod, etc
 /** Internal function used to generate the RuleSet#execute method. */
-export default function createMultimethod(options: MultimethodOptions): (p0: any) => any { // TODO: generalise return type!!!
+export default function createMultimethod(normalisedOptions: MultimethodOptions): (p0: any) => any { // TODO: generalise return type!!!
 
-    // TODO: assume options are normalized by now? Or normalize them here?
-    let rules = options.rules;
+    // TODO: ...
+    let rawRules = normalisedOptions.rules;
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the multimethod's rule set.
-    let taxonomy = new Taxonomy<never>(Object.keys(rules).map(src => new Pattern(src)));
+    let taxonomy = new Taxonomy<never>(Object.keys(rawRules).map(src => new Pattern(src)));
 
     // TODO: put validation logic (this and some later paragraphs) elsewhere...
     // TODO: ensure no pattern has a capture called 'next'
-    Object.keys(rules).forEach(src => {
+    Object.keys(rawRules).forEach(src => {
         let pattern = new Pattern(src);
         if (pattern.captureNames.indexOf('next') === -1) return;
         throw new Error(`Pattern '${pattern}' uses reserved name 'next'`);
@@ -32,7 +32,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     // Detect synthesized patterns in the taxonomy (i.e., ones with no exactly-matching predicates in the rule set).
     // TODO: If ... then warn...
     // TODO: explain this a bit better... F# also issues a warning when a match expression doesn't cover all possible cases...
-    let normalizedPatterns = Object.keys(rules).map(p => new Pattern(p).normalized);
+    let normalizedPatterns = Object.keys(rawRules).map(p => new Pattern(p).normalized);
     let unhandledPatterns = taxonomy.allNodes.map(n => n.pattern).filter(p => normalizedPatterns.indexOf(p) === -1);
     if (unhandledPatterns.length > 0) {
         // TODO: improve error message...
@@ -40,7 +40,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
     }
 
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
-    let taxonomyWithRoutes = computeAllRoutes(taxonomy, rules, options.unhandled);
+    let taxonomyWithRoutes = computeAllRoutes(taxonomy, rawRules, normalisedOptions.unhandled);
 
 //     // Ensure every rule across every route has a mutually-unique name.
 //     // TODO: explain better... there may be more rules than routes due to additional synthesised rules being added (eg 'ambiguous fallback' crasher rules), etc...
@@ -52,7 +52,7 @@ export default function createMultimethod(options: MultimethodOptions): (p0: any
 //         .forEach((name, i) => allRules[i].name = name);
 
     // TODO: ...
-    let dispatcher = createDispatcher(taxonomyWithRoutes, options);
+    let dispatcher = createDispatcher(taxonomyWithRoutes, normalisedOptions);
     return dispatcher;
 }
 

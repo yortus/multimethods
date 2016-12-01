@@ -15,6 +15,7 @@
 
 
 # To Do List
+- [ ] switch stricter tsconfig flags back on (eg strictNullChecks, noImplicitAny)
 - [ ] Do some V8 profiling/analysis. list possible optiisations.
 - [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
 ----------

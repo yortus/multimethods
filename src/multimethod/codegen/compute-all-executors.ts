@@ -5,7 +5,7 @@ import getNormalisedFunctionSource from './get-normalised-function-source';
 import MultimethodOptions from '../multimethod-options';
 import replaceAll from './transforms/replace-all';
 import routeExecutorTemplate from './route-executor-template';
-import Rule from '../impl/rule';
+import Rule from '../rule';
 import Taxonomy, {TaxonomyNode} from '../../taxonomy';
 
 
