@@ -1,5 +1,6 @@
-import computeAllExecutors, {WithRoute} from './compute-all-executors';
+import computeAllExecutors from './compute-all-executors';
 import computeRouteSelector from './compute-route-selector';
+import {Lineage} from '../compute-pattern-lineages';
 import MultimethodOptions from '../multimethod-options';
 import Taxonomy from '../../taxonomy';
 import * as util from '../../util';
@@ -9,7 +10,7 @@ import * as util from '../../util';
 
 
 // TODO: ...
-export default function createDispatcher(taxonomy: Taxonomy<WithRoute>, normalisedOptions: MultimethodOptions) {
+export default function generateDispatchFunction(taxonomy: Taxonomy<Lineage>, normalisedOptions: MultimethodOptions) {
 
     // TODO: ...
     // Generate the combined source code for handling the route. This includes local variable declarations for
@@ -47,7 +48,8 @@ export default function createDispatcher(taxonomy: Taxonomy<WithRoute>, normalis
 
     // Generate the overall dispatch function for the multimethod.
     // TODO: support arity properly... don't assume arity === 1 like done below...
-    let dispatcher = function _dispatch($0: any) {
+    // TODO: use rest/spread and the transforms used in generating the executors...
+    let dispatchFunction: Function = function _dispatch($0: any) {
         let discriminant = toDiscriminant($0);
         let executeRoute = selectRoute(discriminant);
         let result = executeRoute(discriminant, UNHANDLED, $0);
@@ -55,5 +57,5 @@ export default function createDispatcher(taxonomy: Taxonomy<WithRoute>, normalis
     };
 
     // All done.
-    return dispatcher;
+    return dispatchFunction;
 }

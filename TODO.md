@@ -15,14 +15,18 @@
 
 
 # To Do List
-- [ ] switch stricter tsconfig flags back on (eg strictNullChecks, noImplicitAny)
+- [x] switch stricter tsconfig flags back on (eg strictNullChecks, noImplicitAny)
 - [ ] Do some V8 profiling/analysis. list possible optiisations.
 - [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
 - [ ] enfore max line length <= 120 chars
 - [ ] get rid of nasty TypeScript '!' non-null assertions in code
 - [ ] get whole lib working in ES5 mode (currently there are runtime errors due to reliance on ES6 runtime features in source)
 ----------
-- [ ] clarify terminology around executor/method/rule/tryRule/tryMetaRule
+- [ ] clarify terminology around executor/route/method/rule/tryRule/tryMetaRule
+  - [x] *method* is a client-provided function that implements the behaviour associated with a rule
+  - [ ] *rule* is a client-provided predicate/method pair, a bunch of which comprise the behaviour of a multimethod
+  - [ ] 
+- [ ] clarify terminology around pattern vs predicate
 - [ ] use arrow functions in executor template then downlevel them.
 - [ ] arrange all src/multimethod files & exports more nicely
 - [ ] rename 'route' in WithRoute to 'matchedRules'

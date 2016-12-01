@@ -6,6 +6,7 @@ import TaxonomyNode from './taxonomy-node';
 
 
 
+// TODO: review comments below - e.g. references to 'address', pattern vs predicate, ...
 /**
  * A taxonomy is an arrangement of patterns into a directed acyclic graph (DAG), according to their
  * set relationships. Recall that a pattern represents a set of addresses, so two patterns may have

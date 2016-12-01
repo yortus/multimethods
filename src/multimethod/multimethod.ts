@@ -1,7 +1,7 @@
 // TODO: where to put the following note?
 // NB: Multimethod classes are defined as decomposed static-side and instance-side interfaces. They are defined
 //     this way to achieve type-parameterization in the constructor (class decls don't allow this, see TS #10860).
-import createMultimethod from './create-multimethod';
+import createDispatchFunction from './create-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseOptions from './normalise-options';
 
@@ -178,8 +178,8 @@ export type Next = Function;
 
 
 
-// TODO: ...
-function createMultimethodClass(staticArity?: number | 'variadic'): MultimethodConstructor {
+// TODO: doc... also, need an ES5 version of this...
+function createMultimethodClass(staticArity?: MultimethodOptions['arity']): MultimethodConstructor {
 
     return <any> class Multimethod {
         constructor(options?: Partial<MultimethodOptions>) {
@@ -188,7 +188,7 @@ function createMultimethodClass(staticArity?: number | 'variadic'): MultimethodC
             let normalisedOptions = normaliseOptions(options, staticArity);
 
             // TODO: ...
-            let instance: any = createMultimethod(normalisedOptions);
+            let instance: any = createDispatchFunction(normalisedOptions);
             instance[CTOR] = Multimethod;
             return instance;
         }

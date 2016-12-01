@@ -2,6 +2,7 @@ import downlevelES6Rest from './transforms/downlevel-es6-rest';
 import downlevelES6Spread from './transforms/downlevel-es6-spread';
 import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
+import {Lineage} from '../compute-pattern-lineages';
 import MultimethodOptions from '../multimethod-options';
 import replaceAll from './transforms/replace-all';
 import routeExecutorTemplate from './route-executor-template';
@@ -13,9 +14,6 @@ import Taxonomy, {TaxonomyNode} from '../../taxonomy';
 
 
 // TODO: temp testing...
-export interface WithRoute {
-    route: Rule[];
-};
 export interface WithExecutors {
     source: string;
     entryPoint: string;
@@ -40,19 +38,19 @@ export interface WithExecutors {
  * @param {Rule[]} rules - the list of rules comprising the route, ordered from least- to most-specific.
  * @returns {Method} the composite method for the route.
  */
-export default function computeAllExecutors(taxonomy: Taxonomy<WithRoute>, options: MultimethodOptions) {
+export default function computeAllExecutors(taxonomy: Taxonomy<Lineage>, options: MultimethodOptions) {
 
     let augmentedTaxomony = taxonomy.augment(node => {
 
         // TODO: doc...
-        let rulesWithDuplicatesRemoved = node.route.filter(rule => rule.isMetaRule || taxonomy.get(rule.predicate) === node);
+        let rulesWithDuplicatesRemoved = node.lineage.filter(rule => rule.isMetaRule || taxonomy.get(rule.predicate) === node);
         let sources = rulesWithDuplicatesRemoved.map(rule => getSourceCodeForRule(taxonomy, node, rule, options) + '\n');
         let source = [`// ========== EXECUTORS FOR ${node.pattern} ==========\n`].concat(sources).join('');
 
         // TODO: temp testing...
         // The 'entry point' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
         // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
-        let rules = node.route;
+        let rules = node.lineage;
         let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
         let entryPoint = getNameForRule(taxonomy, node, entryPointRule);
 
@@ -66,11 +64,11 @@ export default function computeAllExecutors(taxonomy: Taxonomy<WithRoute>, optio
 
 
 // TODO: ...
-function getSourceCodeForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode & WithRoute, rule: Rule, options: MultimethodOptions) {
+function getSourceCodeForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & Lineage, rule: Rule, options: MultimethodOptions) {
 
     // TODO: to get copypasta'd code working... revise...
-    let i = node.route.indexOf(rule);
-    let rules = node.route;
+    let i = node.lineage.indexOf(rule);
+    let rules = node.lineage;
 
     // TODO: start with the template...
     let source = getNormalisedFunctionSource(routeExecutorTemplate);
@@ -117,11 +115,11 @@ function getSourceCodeForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode 
         source = downlevelES6Spread(source);
     }
 
-    // TODO: temp testing...
+    // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
     if (rule.predicate.captureNames.length > 0) {
-        source = source + `\nvar ${getCaptures} = taxonomy.get('${node.pattern.normalized}').route[${i}].predicate.match;`
+        source = source + `\nvar ${getCaptures} = taxonomy.get('${node.pattern.normalized}').lineage[${i}].predicate.match;`
     }
-    source = source + `\nvar ${callMethod} = taxonomy.get('${node.pattern.normalized}').route[${i}].method;`;
+    source = source + `\nvar ${callMethod} = taxonomy.get('${node.pattern.normalized}').lineage[${i}].method;`;
 
     // All done for this iteration.
     return source;
@@ -132,9 +130,9 @@ function getSourceCodeForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode 
 
 
 // TODO: ...
-function getNameForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode & WithRoute, rule: Rule) {
+function getNameForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & Lineage, rule: Rule) {
     let ruleNode = taxonomy.get(rule.predicate.normalized);
-    let ruleIndex = ruleNode.route.indexOf(rule);
+    let ruleIndex = ruleNode.lineage.indexOf(rule);
 
     if (rule.isMetaRule) {
         return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.pattern.identifier}Within${node.pattern.identifier}`;
