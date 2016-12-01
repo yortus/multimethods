@@ -1,5 +1,9 @@
-//TODO: review all comments in here...
+import downlevelES6Rest from './transforms/downlevel-es6-rest';
+import downlevelES6Spread from './transforms/downlevel-es6-spread';
+import eliminateDeadCode from './transforms/eliminate-dead-code';
+import getNormalisedFunctionSource from './get-normalised-function-source';
 import MultimethodOptions from '../multimethod-options';
+import replaceAll from './transforms/replace-all';
 import routeExecutorTemplate from './route-executor-template';
 import Rule from '../impl/rule';
 import Taxonomy, {TaxonomyNode} from '../../taxonomy';
@@ -21,7 +25,21 @@ export interface WithExecutors {
 
 
 
-// TODO: ...
+// TODO: rewrite comments. Esp signature of route executor matches signature of multimethod (as per provided Options)
+
+/**
+ * Generates the composite method for the route described by the given `rules`.
+ * In the absence of meta-rules, the logic for executing a route is straightforward: execute the method for each rule in
+ * turn, from the most- to the least-specific, until one produces a result. With meta-rules, the logic becomes more
+ * complex, because a meta-rule's method must run *before* the methods of more specfic rules, with those more specific
+ * methods being wrapped into a callback function and passed to the meta-rule's method. To account for this, we perform
+ * an order-preserving partitioning of a route's rules into a number of sublists, with each meta-rule starting a new
+ * partition. Within each partition, the simple cascading logic outlined in the first sentence above is performed.
+ * However each partition is executed in reverse-order (least to most specific), with the next (more-specific) partition
+ * being passed as the ctx.next parameter to the meta-rule starting the previous (less-specific) partition.
+ * @param {Rule[]} rules - the list of rules comprising the route, ordered from least- to most-specific.
+ * @returns {Method} the composite method for the route.
+ */
 export default function computeAllExecutors(taxonomy: Taxonomy<WithRoute>, options: MultimethodOptions) {
 
     let augmentedTaxomony = taxonomy.augment(node => {
@@ -30,7 +48,7 @@ export default function computeAllExecutors(taxonomy: Taxonomy<WithRoute>, optio
         sources.push(`// ========== EXECUTORS FOR ${node.pattern} ==========\n`);
         sources.push(...node.route.map(rule => {
 
-            // Skip duplicates
+            // TODO: explain... Skip duplicates
             let isOriginalRule = rule.isMetaRule || taxonomy.get(rule.predicate) === node;
             if (!isOriginalRule) return;
 
@@ -39,6 +57,8 @@ export default function computeAllExecutors(taxonomy: Taxonomy<WithRoute>, optio
         let source = sources.join('');
 
         // TODO: temp testing...
+        // The 'entry point' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
+        // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
         let rules = node.route;
         let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
         let entryPoint = getNameForRule(taxonomy, node, entryPointRule);
@@ -61,14 +81,20 @@ function getSourceCodeForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode 
     let rules = node.route;
 
     // TODO: start with the template...
-    let source = routeExecutorTemplate.toString();
-
-    source = normaliseSource(source);
+    let source = getNormalisedFunctionSource(routeExecutorTemplate);
 
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
     let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${node.pattern.identifier}`;
     let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${node.pattern.identifier}`;
+
+    // For each rule, we reuse the source code template below. But first we need to compute a number of
+    // values for substitution into the template. A few notes on these substitutions:
+    // - `nextRuleName` is used for cascading evaluation, i.e. when the current rule handler returns UNHANDLED.
+    // - `downstreamRuleName` refers to the first rule in the next more-specific partition (see JSDoc notes at top
+    //   of this file). It is substituted in as the value of `$next` when a meta-rule's method is called.
+    // - `handlerArgs` is a hash keyed by all possible parameter names a rule's raw handler may use, and whose
+    //   values are the source code for the argument corresponding to each parameter.
 
     // TODO: ... all booleans
     source = eliminateDeadCode(source, {
@@ -124,115 +150,4 @@ function getNameForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode & With
     else {
         return `tryRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.pattern.identifier}`;
     }
-}
-
-
-
-
-
-// TODO: ... doc: 4-space indents, no blank lines, '\n' line endings
-function normaliseSource(source: string): string {
-    // TODO: verify/fix 4-space indents. Otherwise hard-to find bugs may creep in if devs alter the template function
-    // TODO: -or- don't assume 4-space indents anymore?
-    let lines = source.split(/[\r\n]+/); // NB: this removes blank lines too
-    lines = lines.filter(line => !/^\s*\/\//.test(line)); // Remove comment lines
-    let dedentCount = lines[1].match(/^[ ]+/)[0].length - 4;
-    lines = [].concat(lines.shift(), ...lines.map(line => line.slice(dedentCount)));
-    source = lines.join('\n');
-    return source;
-}
-
-
-
-
-
-// TODO: assumes consistent 4-space block indents, simple conditions... relax any of these?
-function eliminateDeadCode(source: string, consts: {[name: string]: boolean}): string {
-    const MATCH_IF = /^(\s*)if \((\!?)([a-zA-Z$_][a-zA-Z0-9$_]*)\) {$/;
-    const MATCH_ELSE = /^(\s*)else {$/;
-    let inLines = source ? source.split('\n') : [];
-    let outLines: string[] = [];
-    while (inLines.length > 0) {
-        let inLine = inLines.shift();
-
-        let matches = MATCH_IF.exec(inLine);
-        if (!matches || !consts.hasOwnProperty(matches[3])) {
-            outLines.push(inLine);
-            continue;
-        }
-
-        let indent = matches[1];
-        let isNegated = matches[2] === '!';
-        let constName = matches[3];
-        let isElided = consts[constName] === isNegated;
-        let blockLines: string[] = [];
-        let blockClose = indent + '}';
-
-        while ((inLine = inLines.shift()) !== blockClose) {
-            blockLines.push(inLine.slice(4));
-        }
-
-        if (!isElided) {
-            outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n'), consts));
-        }
-
-        // TODO: handle 'else' blocks...
-        if (inLines.length > 0 && MATCH_ELSE.test(inLines[0])) {
-            inLines[0] = `${indent}if (${isNegated ? '' : '!'}${constName}) {`;
-        }
-    }
-
-    return outLines.join('\n');
-}
-
-
-
-
-
-// TODO: ...
-function replaceAll(source: string, replacements: {[identifier: string]: string}): string {
-    let identifiers = Object.keys(replacements);
-    let regexs = identifiers.map(id => new RegExp(id.replace(/\$/g, '\\$'), 'g'));
-    for (let i = 0; i < identifiers.length; ++i) {
-        let id = identifiers[i];
-        let regex = regexs[i];
-        let replacement = replacements[id];
-        source = source.replace(regex, replacement);
-    }
-    return source;
-}
-
-
-
-
-
-// TODO: ...
-function downlevelES6Rest(source: string): string {
-    // TODO: ensure no other kinds of rest left behind afterward...
-
-    // Matches (non-arrow) function headers with a rest argument
-    const REGEX = /function([^(]*)\((.*?),\s*\.\.\.[^)]+\)\s*{\n(\s*)/gi;
-
-    // ES5 equivalent for initialising the rest argument MM_ARGS
-    const REST = `for (var MM_ARGS = [], len = arguments.length, i = 2; i < len; ++i) MM_ARGS.push(arguments[i]);`;
-
-    return source.replace(REGEX, (substr, funcName: string, firstArgs: string, indent: string) => {
-        return `function ${funcName}(${firstArgs}) {\n${indent}${REST}\n${indent}`;
-    });
-}
-
-
-
-
-
-// TODO: ...
-function downlevelES6Spread(source: string): string {
-    // TODO: ensure no other kinds of spreads left behind afterward...
-
-    // Matches argument list of function calls where the final argument is a spread expression
-    let REGEX = /\(([^(]*?),\s*\.\.\.([^)]+)\)/gi;
-
-    return source.replace(REGEX, (substr, firstArgs: string, finalSpreadArg: string) => {
-        return `.apply(null, [${firstArgs}].concat(${finalSpreadArg}))`;
-    });
 }

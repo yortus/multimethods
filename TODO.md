@@ -17,6 +17,8 @@
 # To Do List
 - [ ] Do some V8 profiling/analysis. list possible optiisations.
 - [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
+----------
+- [ ] clarify terminology around executor/method/rule/tryRule/tryMetaRule
 - [ ] use arrow functions in executor template then downlevel them.
 - [ ] arrange all src/multimethod files & exports more nicely
 - [ ] rename 'route' in WithRoute to 'matchedRules'
