@@ -20,6 +20,7 @@
 - [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
 - [ ] enfore max line length <= 120 chars
 - [ ] get rid of nasty TypeScript '!' non-null assertions in code
+- [ ] get whole lib working in ES5 mode (currently there are runtime errors due to reliance on ES6 runtime features in source)
 ----------
 - [ ] clarify terminology around executor/method/rule/tryRule/tryMetaRule
 - [ ] use arrow functions in executor template then downlevel them.

@@ -11,7 +11,7 @@ export default function getNormalisedFunctionSource(fn: Function): string {
     let lines = source.split(/[\r\n]+/); // NB: this removes blank lines too
     lines = lines.filter(line => !/^\s*\/\//.test(line)); // Remove comment lines
     let dedentCount = lines[1].match(/^[ ]+/)![0].length - 4;
-    lines = ([] as string[]).concat(lines.shift()!, ...lines.map(line => line.slice(dedentCount)));
+    lines = [lines.shift()!].concat(...lines.map(line => line.slice(dedentCount)));
     source = lines.join('\n');
     return source;
 }
