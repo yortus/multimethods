@@ -1,4 +1,3 @@
-import {warn} from '../util';
 import intersectPatterns from './intersect-patterns';
 import makeMatchMethod, {MatchMethod} from './make-match-method';
 import parsePatternSource from './parse-pattern-source';

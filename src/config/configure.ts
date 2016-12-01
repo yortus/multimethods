@@ -1,5 +1,5 @@
 import Options, {WarningsOptions} from './options';
-import {warn, setWarnBehaviour, MultimethodError} from '../util';
+import {setWarnBehaviour, MultimethodError} from '../util';
 
 
 
@@ -27,7 +27,7 @@ function getWarnBehaviour(options: WarningsOptions): (message: string) => void {
     switch (options) {
         case 'default':
         case 'console': return message => console.warn(message);
-        case 'off':     return message => {};
+        case 'off':     return _message => {};
         case 'throw':   return message => { throw new MultimethodError(message); }
         default:        throw new MultimethodError(`Invalid value for 'warnings': ${options}`);
     }

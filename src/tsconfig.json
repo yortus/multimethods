@@ -9,11 +9,15 @@
         "outDir": "../built",
 
         // Static checks
-        "strictNullChecks": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
-        "noUnusedLocals": false,
-        "noImplicitThis": false,
-        "noImplicitReturns": false,
-        "noFallthroughCasesInSwitch": false
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitUseStrict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": true
     }
 }

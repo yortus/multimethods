@@ -37,7 +37,7 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
             return s => s.indexOf('/') === -1 ? {[firstCaptureName]: s} : null;
 
         case '…':
-            return s => SUCCESSFUL_MATCH_NO_CAPTURES;
+            return _s => SUCCESSFUL_MATCH_NO_CAPTURES;
 
         case '{...cap}':
             return s => ({[firstCaptureName]: s});

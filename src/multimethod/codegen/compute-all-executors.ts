@@ -67,7 +67,6 @@ export default function computeAllExecutors(taxonomy: Taxonomy<WithRoute>, optio
 
 // TODO: ...
 function getSourceCodeForRule(taxonomy: Taxonomy<WithRoute>, node: TaxonomyNode & WithRoute, rule: Rule, options: MultimethodOptions) {
-    let name = getNameForRule(taxonomy, node, rule);
 
     // TODO: to get copypasta'd code working... revise...
     let i = node.route.indexOf(rule);

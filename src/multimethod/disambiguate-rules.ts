@@ -54,4 +54,7 @@ function tieBreakFn(a: Rule, b: Rule): Rule | undefined {
     // All else being equal, localeCompare of pattern comments provides the rule order (comes before == more specific).
     if (a.predicate.comment.localeCompare(b.predicate.comment) < 0) return a;
     if (b.predicate.comment.localeCompare(a.predicate.comment) < 0) return b;
+
+    // TODO: explain...
+    return undefined;
 }

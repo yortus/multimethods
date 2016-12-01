@@ -163,7 +163,7 @@ export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
     rules: {[predicate: string]: VariadicMethod<T, TR>};
 }
 export interface VariadicMethod<T, TR> {
-    (...args: any[]): TR; // TODO: this is best effort, but really needs to be (...args: T[], captures: {[name: string]: string}, next: Function)
+    (...args: Array<T|Captures|Next>): TR; // TODO: this is best effort, but really needs to be (...args: T[], captures: {[name: string]: string}, next: Function)
 }
 
 

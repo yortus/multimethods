@@ -1,4 +1,3 @@
-import Pattern from '../../pattern';
 import RouteExecutor from './route-executor';
 import Taxonomy, {TaxonomyNode} from '../../taxonomy';
 import {WithExecutors} from './compute-all-executors';
@@ -18,10 +17,10 @@ import {WithExecutors} from './compute-all-executors';
  */
 export default function computeRouteSelector(taxonomy: Taxonomy<WithExecutors>) {
 
+// TODO: revise comments...
     // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
     // TODO: extra doc - explain opt here that match functions never have captures due to using normalised forms...
     //let patternNames = taxonomy.allNodes.map(node => node.pattern.identifier);
-    let executors = taxonomy.allNodes.map(node => node.entryPoint);
 
 // TODO: temp testing... HACKY BUGGY brittle B/C assumes taxonomy.allNodes has identical pattern order as `candidates` object keys...    
 // TODO: how otherwise to link candidates back to patterns, since they just preserve rule names that were derived from pattern identifiers, but are no longer necessarily the same
@@ -39,7 +38,7 @@ let patterns = taxonomy.allNodes.map(node => node.pattern);
         'function _selectExecutor(discriminant) {',
         ...generateSelectorSourceCode(taxonomy.rootNode, 1),
         '};',
-        ...patterns.map((p, i) => `var matches${p.identifier} = taxonomy.get('${p}').pattern.match;`),
+        ...patterns.map(p => `var matches${p.identifier} = taxonomy.get('${p}').pattern.match;`),
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
@@ -79,7 +78,12 @@ function generateSelectorSourceCode(from: TaxonomyNode & WithExecutors, nestDept
     specializations.forEach((node: TaxonomyNode & WithExecutors, i) => {
         let patternName = node.pattern.identifier;
         let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${patternName}(discriminant)) `;
-        if (node.specializations.length === 0) return lines.push(`${condition}return ${node.entryPoint};`);
+
+        if (node.specializations.length === 0) {
+            lines.push(`${condition}return ${node.entryPoint};`);
+            return;
+        }
+
         lines = [
             ...lines,
             `${condition}{`,

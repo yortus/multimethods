@@ -23,7 +23,6 @@ let DELEGATE_DOWNSTREAM: RouteExecutor;
 let DELEGATE_NEXT: RouteExecutor;
 let GET_CAPTURES: (discriminant: string) => {};
 let CALL_METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
-let FROZEN_EMPTY_OBJECT: {};
 
 
 // TODO: note ES6 in source here - spread and rest (...MM_ARGS), arrow functions

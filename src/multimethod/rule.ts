@@ -41,18 +41,13 @@ TODO:... fix comment...
     constructor(patternSource: string, method: Function) {
 
         // Construct the pattern instance, and assign the pattern and method properties.
-        let pattern = this.predicate = new Pattern(patternSource); // NB: may throw
-        //this.name = pattern.identifier;
+        this.predicate = new Pattern(patternSource); // NB: may throw
         this.method = method;
 
 // TODO: temp testing... will we (can we?) still check sig at runtime?
         //checkConsequentSignature(method, pattern);
         this.isMetaRule = (method as any)[IS_META] === true;
     }
-
-
-    /** A name for the rule. Defaults to the value of the pattern's `identifier` property. */
-    //name: string;
 
 
     /** The pattern associated with this Method instance. */

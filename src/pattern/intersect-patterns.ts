@@ -107,7 +107,7 @@ function getDistinctPatterns(patterns: string[]) {
 
     // Set up a parallel array to flag which patterns are duplicates.
     // Start by assuming none are.
-    let isDuplicate = patterns.map(u => false);
+    let isDuplicate = patterns.map(_ => false);
 
     // Compare all patterns pairwise, marking as duplicates all those
     // patterns that are (proper or improper) subsets of another pattern.
