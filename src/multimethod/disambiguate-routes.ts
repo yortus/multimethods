@@ -1,6 +1,6 @@
 // TODO: better explain how/why this works in external documentation (esp. the synthesized 'crasher' method).
 import {getLongestCommonPrefix, MultimethodError} from '../util';
-import Pattern from '../predicate';
+import Predicate from '../predicate';
 import Rule from './rule';
 
 
@@ -13,7 +13,7 @@ import Rule from './rule';
  * error if no unambiguous single rule list can be formed (e.g. because the alternative rule lists have different
  * meta-rules in their non-common sections).
  */
-export default function disambiguateRoutes(pattern: Pattern, alternateRuleLists: Rule[][]): Rule[] {
+export default function disambiguateRoutes(predicate: Predicate, alternateRuleLists: Rule[][]): Rule[] {
 
     // If there is only one rule list, return it as-is.
     if (alternateRuleLists.length === 1) return alternateRuleLists[0];
@@ -28,14 +28,14 @@ export default function disambiguateRoutes(pattern: Pattern, alternateRuleLists:
     alternateRuleLists.forEach(cand => {
         let nonCommonRules: Rule[] = cand.slice(prefix.length, -suffix.length);
         let hasMetaRules = nonCommonRules.some(rule => rule.isMetaRule);
-        if (hasMetaRules) throw new MultimethodError(`Multiple paths to '${pattern}' with different meta-rules`);
+        if (hasMetaRules) throw new MultimethodError(`Multiple paths to '${predicate}' with different meta-rules`);
     });
 
     // Synthesize a 'crasher' rule that throws an 'ambiguous' error.
     let ambiguousFallbacks = alternateRuleLists.map(cand => cand[cand.length - suffix.length - 1]);
-    let ambiguousError = new MultimethodError(`Multiple possible fallbacks from '${pattern}: ${ambiguousFallbacks}`); // TODO: what does this print? use 'inspect' like in disambiguate-rules.ts?
+    let ambiguousError = new MultimethodError(`Multiple possible fallbacks from '${predicate}: ${ambiguousFallbacks}`); // TODO: what does this print? use 'inspect' like in disambiguate-rules.ts?
     function _ambiguous() { throw ambiguousError; }
-    let crasher = new Rule(pattern.toString(), _ambiguous);
+    let crasher = new Rule(predicate.toString(), _ambiguous);
 
     // The final composite rule list == common prefix + crasher + common suffix.
     return ([] as Rule[]).concat(prefix, crasher, suffix);

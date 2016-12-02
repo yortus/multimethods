@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Pattern, Taxonomy, TaxonomyNode} from 'multimethods';
+import {Predicate, Taxonomy, TaxonomyNode} from 'multimethods';
 
 
 describe('Constructing a Taxonomy instance', () => {
@@ -140,7 +140,7 @@ describe('Constructing a Taxonomy instance', () => {
 
     tests.forEach(test => {
         it(test.name, () => {
-            let patterns = test.patterns.map(ps => new Pattern(ps));
+            let patterns = test.patterns.map(ps => new Predicate(ps));
             let expected: any = test.taxonomy;
             let actual: any;
             try {

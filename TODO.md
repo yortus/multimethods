@@ -19,7 +19,7 @@
 - [ ] Do some V8 profiling/analysis. list possible optimisations.
   - [x] indexOf (in make-match-method.js) takes ~30% of time - try rewriting
   - [x] the (unoptimizable) generator function housing the perf test loop takes ~20% of time (remove it)
-  - [ ] try splitting selector function into multiple small functions (one per non-leaf node in taxonomy)
+  - [ ] do try this --> splitting selector function into multiple small functions (one per non-leaf node in taxonomy)
   - [ ] others?
 - [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
 - [ ] enfore max line length <= 120 chars
@@ -27,10 +27,10 @@
 - [ ] get whole lib working in ES5 mode (currently there are runtime errors due to reliance on ES6 runtime features in source)
 ----------
 - [ ] rename Pattern (class/type) to Predicate, and patternSource (arg/var) to pattern
-  - [ ] update all affected file/folder names
+  - [x] update all affected file/folder names
   - [ ] update all affected names of exports/imports/vars/functions
   - [ ] update all references in comments
-  - [ ] update all tests including test names
+  - [x] update all tests including test names
 ----------
 - [ ] clarify terminology around executor/route/method/rule/tryRule/tryMetaRule
   - [x] *method* is a client-provided function that implements the behaviour associated with a rule
@@ -38,6 +38,12 @@
   - [ ] *lineage*???
 
 - [ ] clarify terminology around pattern vs predicate
+  - [x] *predicate* is a class/object for recognising specific strings, similar to a RexExp object but supports set analysis
+  - [x] *predicate pattern* is the string/textual representation of a predicate, using a special DSL syntax
+  - [ ] *predicate evaluation* - tests whether apredicate is true for a given string (and computes captures)
+  - [ ] *predicate intersection* - TODO
+
+- [ ] predicates: divide evaluation into two methods ('evaluate' and 'capture')?
 - [ ] use arrow functions in executor template then downlevel them.
 - [ ] arrange all src/multimethod files & exports more nicely
 - [ ] rename 'route' in WithRoute to 'matchedRules'

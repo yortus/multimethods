@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {Pattern} from 'multimethods';
+import {Predicate} from 'multimethods';
 
 
-describe('Constructing a Pattern instance', () => {
+describe('Constructing a Predicate instance', () => {
 
     let tests = [
         '∅ ==> ∅ WITH []',
@@ -62,7 +62,7 @@ describe('Constructing a Pattern instance', () => {
             let actualCaptureNames = [];
             let actualComment = '';
             try {
-                let pattern = new Pattern(patternSource);
+                let pattern = new Predicate(patternSource);
                 actualSignature = pattern.normalized.toString();
                 actualCaptureNames = pattern.captureNames;
                 actualComment = pattern.comment;

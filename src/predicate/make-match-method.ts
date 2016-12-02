@@ -1,16 +1,17 @@
-import {PatternAST} from './pattern-parser';
+// TODO: review all comments in this file for accurate terminology
+import {PredicatePatternAST} from './predicate-pattern-parser';
 
 
 
 
 
-/** Internal function used to generate the Pattern#match method. */
-export default function makeMatchMethod(patternSource: string, patternAST: PatternAST): MatchMethod {
+/** Internal function used to generate the Predicate#match method. */
+export default function makeMatchMethod(predicatePattern: string, predicatePatternAST: PredicatePatternAST): MatchMethod {
 
     // Gather information about the pattern to be matched. The closures below close over these variables.
-    let captureNames = patternAST.captures.filter(capture => capture !== '?');
+    let captureNames = predicatePatternAST.captures.filter(capture => capture !== '?');
     let firstCaptureName = captureNames[0];
-    let literalChars = patternAST.signature.replace(/[*…]/g, '');
+    let literalChars = predicatePatternAST.signature.replace(/[*…]/g, '');
     let literalCharCount = literalChars.length;
 
     // Construct the match method, using optimizations where possible. Pattern matching may be done frequently, possibly
@@ -18,7 +19,7 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
     // picks out some simpler cases and provides specialized match methods for them. The default case falls back to
     // using a RegExp. Note that all but the default case below could be commented out with no change in runtime
     // behaviour. The additional cases are strictly optimizations.
-    let simplifiedPatternSignature = patternSource
+    let simplifiedPatternSignature = predicatePattern
         .replace(/[ ]*\#.*$/g, '')      // strip trailing whitespace
         .replace(/{[^.}]+}/g, 'ᕽ')      // replace '{name}' with 'ᕽ'
         .replace(/{\.+[^}]+}/g, '﹍')    // replace '{...name}' with '﹍'
@@ -82,9 +83,9 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
             return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
 
         case 'lit*lit':
-            let captureStart = patternAST.signature.indexOf('*');
-            let startLit = patternAST.signature.slice(0, captureStart);
-            let endLit = patternAST.signature.slice(captureStart + 1);
+            let captureStart = predicatePatternAST.signature.indexOf('*');
+            let startLit = predicatePatternAST.signature.slice(0, captureStart);
+            let endLit = predicatePatternAST.signature.slice(captureStart + 1);
             return s => surroundedWith(s, startLit, endLit) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
         // TODO: consider implementing the following cases for a *marginal* performance boost
@@ -96,9 +97,9 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
         default:
             // TODO: alert on match functions that don't get optimised... either remove this or formalise it as a warning...
             //       - probably remove, since 'optimisations' are fardly possible beyond the simpler cases already handled above (i.e. there are diminishing returns)
-            console.log(`=====>   NOT OPTIMISED   ${simplifiedPatternSignature}   ('${patternSource}')`);
+            console.log(`=====>   NOT OPTIMISED   ${simplifiedPatternSignature}   ('${predicatePattern}')`);
 
-            let regexp = makeRegExpForPattern(patternAST);
+            let regexp = makeRegExpForPattern(predicatePatternAST);
             return s => {
                 let matches = s.match(regexp);
                 if (!matches) return null;
@@ -111,7 +112,7 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
 
 
 
-/** Describes the signature of the Pattern#match method. */
+/** Describes the signature of the Predicate#match method. */
 export type MatchMethod = (string: string) => {[captureName: string]: string} | null;
 
 
@@ -122,7 +123,7 @@ export type MatchMethod = (string: string) => {[captureName: string]: string} | 
  * Constructs a regular expression that matches all strings recognized by the given pattern. Each
  * named globstar/wildcard in the pattern corresponds to a capture group in the regular expression.
  */
-function makeRegExpForPattern(patternAST: PatternAST) {
+function makeRegExpForPattern(patternAST: PredicatePatternAST) {
     let captureIndex = 0;
     let re = patternAST.signature.split('').map(c => {
         if (c === '*') {

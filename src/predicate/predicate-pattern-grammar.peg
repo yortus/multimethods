@@ -4,7 +4,7 @@
 
 
 // ================================================================================
-Pattern
+PredicatePattern
 =   elems:Element*   TRAILING_WS?
     {
         let signature = elems.map(elem => elem[0]).join('');

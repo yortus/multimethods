@@ -1,5 +1,5 @@
 import insertAsDescendent from './insert-as-descendent';
-import Pattern from '../predicate';
+import Predicate from '../predicate';
 import TaxonomyNode from './taxonomy-node';
 
 
@@ -44,10 +44,10 @@ export default class Taxonomy<T> {
 
     /**
      * Constructs a new Taxonomy instance from the given list of patterns.
-     * @param {Pattern[]} patterns - the list of patterns to be arranged as a DAG.
+     * @param {Predicate[]} predicates - the list of patterns to be arranged as a DAG.
      */
-    constructor(patterns: Pattern[]) {
-        initTaxonomy(this, patterns);
+    constructor(predicates: Predicate[]) {
+        initTaxonomy(this, predicates);
     }
 
 
@@ -59,10 +59,10 @@ export default class Taxonomy<T> {
     allNodes: Array<TaxonomyNode & T>;
 
 
-    // TODO: temp testing... doc... looks up the node for the given pattern. returns undefined if not found.
-    // algo: exact match using canonical form of given Pattern/string
-    get(pattern: Pattern | string): TaxonomyNode & T {
-        let p = typeof pattern === 'string' ? new Pattern(pattern) : pattern;
+    // TODO: temp testing... doc... looks up the node for the given predicate. returns undefined if not found.
+    // algo: exact match using canonical form of given Predicate/string
+    get(predicate: Predicate | string): TaxonomyNode & T {
+        let p = typeof predicate === 'string' ? new Predicate(predicate) : predicate;
         let result = this.allNodes.filter(node => node.pattern === p.normalized)[0];
         return result;
     }
@@ -82,25 +82,25 @@ export default class Taxonomy<T> {
 
 
 /** Internal helper function used by the Taxonomy constructor. */
-function initTaxonomy<T>(taxonomy: Taxonomy<T>, patterns: Pattern[]) {
+function initTaxonomy<T>(taxonomy: Taxonomy<T>, patterns: Predicate[]) {
 
     // Create the nodeFor() function to return the node corresponding to a given pattern,
     // creating it on demand if it doesn't already exist. This function ensures that every
     // request for the same pattern gets the same singleton node.
-    let nodeMap = new Map<Pattern, TaxonomyNode & T>();
-    let nodeFor = (pattern: Pattern) => {
+    let nodeMap = new Map<Predicate, TaxonomyNode & T>();
+    let nodeFor = (pattern: Predicate) => {
         if (!nodeMap.has(pattern)) nodeMap.set(pattern, <TaxonomyNode & T> new TaxonomyNode(pattern));
         return nodeMap.get(pattern)!;
     }
 
     // Retrieve the root node, which always corresponds to the '…' pattern.
-    let rootNode = taxonomy.rootNode = nodeFor(Pattern.ANY);
+    let rootNode = taxonomy.rootNode = nodeFor(Predicate.ANY);
 
     // Insert each of the given patterns, except '…', into a DAG rooted at '…'.
     // The insertion logic assumes only normalized patterns, which we obtain first.
     patterns
         .map(pattern => pattern.normalized) // TODO: what if normalized patterns contain duplicates?
-        .filter(pattern => pattern !== Pattern.ANY) // TODO: why need this??
+        .filter(pattern => pattern !== Predicate.ANY) // TODO: why need this??
         .forEach(pattern => insertAsDescendent(nodeFor(pattern), rootNode, nodeFor));
 
     // Finally, compute the `allNodes` snapshot.

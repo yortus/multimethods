@@ -1,6 +1,6 @@
 import computeAllExecutors from './compute-all-executors';
 import computeRouteSelector from './compute-route-selector';
-import {Lineage} from '../compute-pattern-lineages';
+import {Lineage} from '../compute-predicate-lineages';
 import MultimethodOptions from '../multimethod-options';
 import Taxonomy from '../../taxonomy';
 import * as util from '../../util';

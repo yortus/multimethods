@@ -2,7 +2,7 @@ import downlevelES6Rest from './transforms/downlevel-es6-rest';
 import downlevelES6Spread from './transforms/downlevel-es6-spread';
 import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
-import {Lineage} from '../compute-pattern-lineages';
+import {Lineage} from '../compute-predicate-lineages';
 import MultimethodOptions from '../multimethod-options';
 import replaceAll from './transforms/replace-all';
 import routeExecutorTemplate from './route-executor-template';

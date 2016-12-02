@@ -1,7 +1,7 @@
 import {configure} from './config';
 import {getLongestCommonPrefix, isPromiseLike}  from './util';
 export {configure, Options} from './config';
-export {default as Pattern, parsePattern, PatternAST} from './predicate';
+export {default as Predicate, parsePredicatePattern, PredicatePatternAST} from './predicate';
 export {default as Taxonomy, TaxonomyNode} from './taxonomy';
 
 

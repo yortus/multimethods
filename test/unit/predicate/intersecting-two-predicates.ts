@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {Pattern} from 'multimethods';
+import {Predicate} from 'multimethods';
 
 
-describe('Intersecting two patterns', () => {
+describe('Intersecting two predicates', () => {
 
     let tests = [
         '… ∩ ∅ = ∅',
@@ -80,7 +80,7 @@ describe('Intersecting two patterns', () => {
             let rhs = test.split(' = ')[1].replace(/^∅$/, '');
             let actual: string, expected = rhs;
             try {
-                let intersections = new Pattern(lhsA).intersect(new Pattern(lhsB));
+                let intersections = new Predicate(lhsA).intersect(new Predicate(lhsB));
                 actual = `[${intersections}]`;
                 if (intersections.length === 1) actual = actual.slice(1, -1);
             }

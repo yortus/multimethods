@@ -12,7 +12,6 @@ import {WithExecutors} from './compute-all-executors';
  * candidates. The returned selector function is generated for maximum readability and efficiency, using conditional
  * constructs that follow the branches of the given `taxonomy`.
  * @param {Taxonomy} taxonomy - The arrangement of patterns on which to base the returned selector function.
- * @param {Map<Pattern, Function>} candidates - The route executors for each pattern in the given `taxonomy`.
  * @returns {(address: string) => Function} The generated route selector function.
  */
 export default function computeRouteSelector(taxonomy: Taxonomy<WithExecutors>) {

@@ -1,4 +1,4 @@
-import Pattern from '../predicate';
+import Predicate from '../predicate';
 
 
 
@@ -9,13 +9,13 @@ export default class TaxonomyNode {
 
 
     /** Constructs a new TaxonomyNode instance that holds the given pattern. */
-    constructor(pattern: Pattern) {
+    constructor(pattern: Predicate) {
         this.pattern = pattern;
     }
 
 
     /** The pattern associated with this node. */
-    pattern: Pattern;
+    pattern: Predicate;
 
 
     /** Links to this node's direct parents (i.e., incoming edges). */

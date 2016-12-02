@@ -1,4 +1,4 @@
-import Pattern from '../predicate';
+import Predicate from '../predicate';
 import TaxonomyNode from './taxonomy-node';
 
 
@@ -11,12 +11,12 @@ import TaxonomyNode from './taxonomy-node';
  * subset of `ancestor`'s pattern, and `insertee` must not hold the empty pattern '∅'.
  * @param {TaxonomyNode} insertee - the new node to be inserted into the taxonomy below `ancestor`.
  * @param {TaxonomyNode} ancestor - the root node of the taxonomy subgraph in which `insertee` belongs.
- * @param {(pattern: Pattern) => TaxonomyNode} nodeFor - a function that returns the taxonomy node for
+ * @param {(predicate: Predicate) => TaxonomyNode} nodeFor - a function that returns the taxonomy node for
  *        a given pattern. It is expected to return the same instance when passed the same pattern for
  *        the same taxonomy. When `insertee` overlaps an existing node in the subgraph, this function
  *        is used to synthesize the additional intersection node(s).
  */
-export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: TaxonomyNode, nodeFor: (pattern: Pattern) => TaxonomyNode) {
+export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: TaxonomyNode, nodeFor: (predicate: Predicate) => TaxonomyNode) {
 
     // Determine the set relationship between `insertee` and each of the `ancestor` node's existing children.
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
@@ -28,7 +28,7 @@ export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: Tax
             intersections.forEach(i => comparands.push({node, intersection: nodeFor(i)}));
 
             // TODO: was...
-            //if (intersection !== Pattern.EMPTY) comparands.push({node, intersection: nodeFor(intersection)});
+            //if (intersection !== Predicate.EMPTY) comparands.push({node, intersection: nodeFor(intersection)});
 
 
             return comparands;

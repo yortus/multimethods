@@ -1,3 +1,4 @@
+// TODO: review all comments in this file for accurate terminology
 
 
 
@@ -14,10 +15,11 @@
  * (3) An array of multiple patterns - the array contains a list of mutually-disjoint patterns, the union of whose
  *     recognized strings are precisely those strings that are recognized by both input patterns.
  *     E.g. test.* ∩ *.js = [test.js, test.*.js]
+// TODO: fix jsdocs...
  * @param {Pattern} other - a pattern instance. May or may not be normalized.
  * @returns {Pattern[]} - an array of normalized patterns representing the intersection of the input patterns.
  */
-export default function intersectPatterns(a: string, b: string): string[] {
+export default function intersectPredicatePatterns(a: string, b: string): string[] {
     let allIntersections = getAllIntersections(a, b);
     let distinctIntersections = getDistinctPatterns(allIntersections);
     return distinctIntersections;

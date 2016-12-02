@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {parsePattern, PatternAST} from 'multimethods';
+import {parsePredicatePattern, PredicatePatternAST} from 'multimethods'; // TODO: these exports are lib internals - expose them differently? eg under util or something like that?
 
 
-describe('Parsing a Predicate pattern string', () => {
+describe('Parsing a predicate pattern', () => {
 
     let tests = [
         '∅ ==> {signature: "", identifier: "ℙ", captures: []}',
@@ -55,11 +55,11 @@ describe('Parsing a Predicate pattern string', () => {
         it(test, () => {
             let pattern = test.split(' ==> ')[0].replace(/^∅$/, '');
             let rhs = test.split(' ==> ')[1];
-            let expected: PatternAST|string = rhs === "ERROR" ? rhs : eval(`(${rhs})`);
+            let expected: PredicatePatternAST|string = rhs === "ERROR" ? rhs : eval(`(${rhs})`);
             let expectedError = '';// TODO: implement this...
-            let actual: PatternAST|string = 'ERROR';
+            let actual: PredicatePatternAST|string = 'ERROR';
             try {
-                actual = parsePattern(pattern);
+                actual = parsePredicatePattern(pattern);
             }
             catch (ex) { }
             expect(actual).to.deep.equal(expected);
