@@ -10,6 +10,7 @@ import {Multimethod, meta, util} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
+// 2016-12-02   LAJESTIC    Dispatched 1000000 requests in 0.789 seconds   (~1267000 req/sec)   more tweaks of string functions (surroundedWith). NB: diminishing returns.
 // 2016-12-01   LAJESTIC    Dispatched 1000000 requests in 0.812 seconds   (~1232000 req/sec)   more tweaks of string functions (startsWith, endsWith, containsSlash)
 // 2016-12-01   LAJESTIC    Dispatched 1000000 requests in 0.898 seconds   (~1114000 req/sec)   after some profile-based optimisations (eg removing useless deopted IIAFE below, adding custom indexOf fn)
 

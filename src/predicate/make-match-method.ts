@@ -26,7 +26,7 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
         .replace(/\.\.\./g, '…')          // replace '...' with '…'
         .replace(/[^*…ᕽ﹍]+/g, 'lit')    // replace contiguous sequences of literal characters with 'lit'
         .replace(/ᕽ/g, '{cap}')         // replace named wildcard captures with '{cap}'
-        .replace(/﹍/g, '{...cap}');     // replace named globstar captures with '{...cap}'
+        .replace(/﹍/g, '{…cap}');     // replace named globstar captures with '{...cap}'
     switch (simplifiedPatternSignature) {
         case 'lit':
             return s => s === literalChars ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
@@ -40,7 +40,7 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
         case '…':
             return _s => SUCCESSFUL_MATCH_NO_CAPTURES;
 
-        case '{...cap}':
+        case '{…cap}':
             return s => ({[firstCaptureName]: s});
 
         case 'lit*':
@@ -58,7 +58,7 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
         case 'lit…':
             return s => startsWith(s, literalChars) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
-        case 'lit{...cap}':
+        case 'lit{…cap}':
             return s => startsWith(s, literalChars) ? {[firstCaptureName]: s.slice(literalCharCount)} : null;
 
         case '*lit':
@@ -78,8 +78,20 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
         case '…lit':
             return s => endsWith(s, literalChars) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
-        case '{...cap}lit':
+        case '{…cap}lit':
             return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
+
+        case 'lit*lit':
+            let captureStart = patternAST.signature.indexOf('*');
+            let startLit = patternAST.signature.slice(0, captureStart);
+            let endLit = patternAST.signature.slice(captureStart + 1);
+            return s => surroundedWith(s, startLit, endLit) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
+
+        // TODO: consider implementing the following cases for a *marginal* performance boost
+        //       (but there are diminishing returns over default RegExp soln as pattern complexity increases).
+        case 'lit{cap}lit':
+        case 'lit…lit':
+        case 'lit{…cap}lit':
 
         default:
 // TODO: temp testing... remove...
@@ -162,6 +174,17 @@ function endsWith(s: string, searchstring: string) {
     if (len2 > len1) return false;
     for (let i = len1 - len2, j = 0; i < len1; ++i, ++j) {
         if (s[i] !== searchstring[j]) return false;
+    }
+    return true;
+}
+function surroundedWith(s: string, startString: string, endString: string) {
+    let len1 = startString.length;
+    let len2 = endString.length;
+    for (let i = 0, j = 0; j < len1; ++i, ++j) {
+        if (s[i] !== startString[j]) return false;
+    }
+    for (let i = s.length - len2, j = 0; j < len2; ++i, ++j) {
+        if (s[i] !== endString[j]) return false;
     }
     return true;
 }
