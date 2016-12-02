@@ -9,7 +9,7 @@ interface MultimethodOptions {
     timing: 'mixed' | 'async' | 'sync';
     toDiscriminant: Function;
     unhandled: any;
-    rules: {[predicate: string]: Function};
+    rules: {[predicatePattern: string]: Function};
 
     // TODO: ensure all codegen code respects this...
     emitES5: boolean;

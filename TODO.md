@@ -40,7 +40,7 @@
 - [ ] clarify terminology around pattern vs predicate
   - [x] *predicate* is a class/object for recognising specific strings, similar to a RexExp object but supports set analysis
   - [x] *predicate pattern* is the string/textual representation of a predicate, using a special DSL syntax
-  - [ ] *predicate evaluation* - tests whether apredicate is true for a given string (and computes captures)
+  - [ ] *predicate matching* - testing whether a predicate is true for a given string (and computing captures as well)
   - [ ] *predicate intersection* - TODO
 
 - [ ] predicates: divide evaluation into two methods ('evaluate' and 'capture')?

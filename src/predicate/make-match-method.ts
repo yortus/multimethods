@@ -1,24 +1,26 @@
-// TODO: review all comments in this file for accurate terminology
 import {PredicatePatternAST} from './predicate-pattern-parser';
 
 
 
 
 
-/** Internal function used to generate the Predicate#match method. */
+/**
+ * Internal function used to generate the Predicate#match method. Although RegExps may be used to implement the `match`
+ * method for any predicate, we avoid using RegExps for a number of simpler kinds of predicate pattern. This is because
+ * predicate matching may be performed frequently, and possibly on critical paths. As such, the use of optimised `match`
+ * implementations may result in substantial overall performance improvements in client code.
+ */
 export default function makeMatchMethod(predicatePattern: string, predicatePatternAST: PredicatePatternAST): MatchMethod {
 
-    // Gather information about the pattern to be matched. The closures below close over these variables.
-    let captureNames = predicatePatternAST.captures.filter(capture => capture !== '?');
-    let firstCaptureName = captureNames[0];
-    let literalChars = predicatePatternAST.signature.replace(/[*…]/g, '');
-    let literalCharCount = literalChars.length;
+    // Compute useful invariants for the given predicate pattern.
+    // These are used as precomputed values in the closures created below.
+    const captureNames = predicatePatternAST.captures.filter(capture => capture !== '?');
+    const firstCaptureName = captureNames[0];
+    const literalChars = predicatePatternAST.signature.replace(/[*…]/g, '');
+    const literalCharCount = literalChars.length;
 
-    // Construct the match method, using optimizations where possible. Pattern matching may be done frequently, possibly
-    // on a critical path. For simpler patterns, we can avoid the overhead of using a RegExp. The switch block below
-    // picks out some simpler cases and provides specialized match methods for them. The default case falls back to
-    // using a RegExp. Note that all but the default case below could be commented out with no change in runtime
-    // behaviour. The additional cases are strictly optimizations.
+    // Characterise the given predicate pattern using a simplified 'signature'.
+    // E.g., '/foo/*.js' becomes 'lit*lit', and '/pub/{...rest}' becomes 'lit{…cap}'
     let simplifiedPatternSignature = predicatePattern
         .replace(/[ ]*\#.*$/g, '')      // strip trailing whitespace
         .replace(/{[^.}]+}/g, 'ᕽ')      // replace '{name}' with 'ᕽ'
@@ -28,6 +30,10 @@ export default function makeMatchMethod(predicatePattern: string, predicatePatte
         .replace(/[^*…ᕽ﹍]+/g, 'lit')    // replace contiguous sequences of literal characters with 'lit'
         .replace(/ᕽ/g, '{cap}')         // replace named wildcard captures with '{cap}'
         .replace(/﹍/g, '{…cap}');     // replace named globstar captures with '{...cap}'
+
+    // The switch block below picks out some simpler cases and provides specialized `match` methods for them.
+    // The default case falls back to using a RegExp. Note that all but the default case below could be
+    // commented out with no change in runtime behaviour. The additional cases are strictly for optimisation.
     switch (simplifiedPatternSignature) {
         case 'lit':
             return s => s === literalChars ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
@@ -112,7 +118,7 @@ export default function makeMatchMethod(predicatePattern: string, predicatePatte
 
 
 
-/** Describes the signature of the Predicate#match method. */
+/** The signature of the Predicate#match method. */
 export type MatchMethod = (string: string) => {[captureName: string]: string} | null;
 
 
@@ -120,8 +126,8 @@ export type MatchMethod = (string: string) => {[captureName: string]: string} | 
 
 
 /**
- * Constructs a regular expression that matches all strings recognized by the given pattern. Each
- * named globstar/wildcard in the pattern corresponds to a capture group in the regular expression.
+ * Constructs a regular expression that matches all strings recognized by the given predicate pattern.
+ * Each named globstar/wildcard in the pattern corresponds to a capture group in the regular expression.
  */
 function makeRegExpForPattern(patternAST: PredicatePatternAST) {
     let captureIndex = 0;
@@ -148,15 +154,15 @@ function makeRegExpForPattern(patternAST: PredicatePatternAST) {
 
 // A singleton match result that may be returned in all cases of a successful match with no named
 // captures. This reduces the number of cases where calls to match() functions create new heap objects.
-const SUCCESSFUL_MATCH_NO_CAPTURES = <{[captureName: string]: string}> {};
-Object.freeze(SUCCESSFUL_MATCH_NO_CAPTURES);
+const SUCCESSFUL_MATCH_NO_CAPTURES = <{[captureName: string]: string}> Object.freeze({});
 
 
 
 
 
-// TODO: V8 profiling proves calling these is faster than equivalent calls to the native string#indexOf in V8!!!
-// TODO: leave this here? If so, try further opts, write it up properly
+// Some string utility functions used within `match` implementations. V8 profiling has shown that calling
+// these is faster than using equivalent calls to the native string#indexOf (at least on the V8 engine).
+// Having these here also means we don't depend on anything beyond ES5 for string manipulation.
 function containsSlash(s: string, from = 0, to = s.length) {
     for (let i = from; i < to; ++i) {
         if (s[i] === '/') return true;

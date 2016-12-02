@@ -1,4 +1,3 @@
-// TODO: review all comments in this file for accurate terminology
 import {MultimethodError} from '../util';
 const patternSourceGrammar: { parse(text: string): PredicatePatternAST; } = require('./predicate-pattern-grammar');
 
@@ -7,10 +6,11 @@ const patternSourceGrammar: { parse(text: string): PredicatePatternAST; } = requ
 
 
 /**
- * Verifies that `patternSource` has a valid format, and returns abstract syntax information about the pattern. Throws
- * an error if `patternSource` is invalid. Consult the documentation for further information about the pattern DSL.
- * @param {string} pattern - the pattern source string to be parsed.
- * @returns {PatternAST} an object containing details about the successfully parsed pattern.
+ * Verifies that `pattern` is a valid predicate pattern and returns abstract syntax information about the pattern.
+ * Throws an error if `pattern` is not a valid predicate pattern. Consult the documentation for further information
+ * about the predicate pattern syntax.
+ * @param {string} pattern - the predicate pattern string to be parsed.
+ * @returns {PredicatePatternAST} an object containing details about the successfully parsed pattern.
  */
 export default function parsePredicatePattern(pattern: string): PredicatePatternAST {
     try {
@@ -30,13 +30,13 @@ export default function parsePredicatePattern(pattern: string): PredicatePattern
 
 
 
-/** Holds the information associated with a successfully parsed pattern source string. */
+/** Information associated with a successfully parsed predicate pattern string. */
 export interface PredicatePatternAST {
 
 
     /**
-     * The pattern in its normalized form (i.e. all named captures replaced with '*' and '…').
-     * Any two patterns with the same signature are guaranteed to match the same set of strings.
+     * The predicate pattern in its normalized form (i.e. all named captures replaced with '*' and '…').
+     * Any two predicates with the same signature are guaranteed to match the same set of strings.
      */
     signature: string;
 
@@ -47,9 +47,9 @@ export interface PredicatePatternAST {
     identifier: string;
 
     /**
-     * An array of strings whose elements correspond, in order, to the captures in the pattern. Each element holds the
-     * name of its corresponding capture, or '?' if the corresponding capture is anonymous (i.e. '*' or '…'). For
-     * example, the pattern '{...path}/*.{ext}' has a `captures` value of ['path', '?', 'ext'].
+     * An array of strings whose elements correspond, in order, to the captures in the predicate. Each element holds
+     * the name of its corresponding capture, or '?' if the corresponding capture is anonymous (i.e. '*' or '…').
+     * For example, the pattern '{...path}/*.{ext}' has a `captures` value of ['path', '?', 'ext'].
      */
     captures: string[];
 }

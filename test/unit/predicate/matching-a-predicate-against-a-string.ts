@@ -60,9 +60,31 @@ describe('Matching a predicate against a string', () => {
             let rhs = test.split(split)[1];
             let address = rhs.split(' WITH ')[0].replace(/^∅$/, '');
             let expectedCaptures = isMatch ? eval(`(${rhs.split(' WITH ')[1]})`) || {} : null;
-            let pattern = new Predicate(patternSource);
-            let actualCaptures = pattern.match(address);
+            let predicate = new Predicate(patternSource);
+            let actualCaptures = predicate.match(address);
             expect(actualCaptures).to.deep.equal(expectedCaptures);
         });
     });
 });
+
+
+
+
+// TODO: temp testing revise terminology...
+let predicate;
+let str;
+
+predicate.match(str) // current
+predicate.eval(str)
+predicate.evaluate(str)
+predicate.test(str)
+predicate.apply(str)
+predicate.isMember(str)
+predicate.matches(str)
+predicate.unify(str)
+predicate.capture(str)
+predicate.recognise(str)
+
+
+
+

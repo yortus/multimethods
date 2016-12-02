@@ -1,6 +1,5 @@
-// TODO: review all comments in this file for accurate terminology
 import intersectPredicatePatterns from './intersect-predicate-patterns';
-import makeMatchMethod, {MatchMethod} from './make-match-method';
+import makeMatchMethod from './make-match-method';
 import parsePredicatePattern from './predicate-pattern-parser';
 
 
@@ -8,9 +7,9 @@ import parsePredicatePattern from './predicate-pattern-parser';
 
 
 /**
- * Holds a singleton instance for every normalized predicate that has been instantiated. Subsequent instantiations of the
+ * Singleton instance holding every normalized predicate that has been instantiated. Subsequent instantiations of the
  * same normalized predicate return the same singleton instance from this map. NB: This is declared before the Predicate
- * class to ensure it is has been initialized before the the static property initializer for ANY is run.
+ * class to ensure it is has been initialized before the the static property initialiser for Predicate.ANY is run.
  */
 const normalizedPredicateCache = new Map<string, Predicate>();
 
@@ -23,7 +22,7 @@ const normalizedPredicateCache = new Map<string, Predicate>();
  * to a small set of fit-for-purpose operators and literals. The limited syntax facilitates set operations on predicates,
  * such as intersection. Predicates are case-sensitive. Every predicate has a unique normalized form that recognizes the
  * same set of strings. Instances of normalized predicates are guaranteed to be singletons, so such predicates may be safely
- * compared using strict equality ('==='). Consult the documentation for details about the pattern string syntax.
+ * compared using strict equality ('==='). Consult the documentation for details about the predicate pattern syntax.
  */
 export default class Predicate {
 
@@ -36,7 +35,7 @@ export default class Predicate {
      */
     constructor(private pattern: string) {
 
-        // Parse the pattern string to test its validity and to get syntax information. NB: may throw.
+        // Parse the predicate pattern to test its validity and to get syntax information. NB: may throw.
         let ast = parsePredicatePattern(pattern);
 
         // If the pattern is already normalized, return the singleton instance from the normalized predicate cache.
@@ -91,20 +90,23 @@ export default class Predicate {
      * @returns {Object} null if the string is not recognized by the predicate. Otherwise, a hash of captured name/value
      *          pairs that unify the string with this predicate.
      */
-    match: MatchMethod; // TODO: list longhand here for clarity?
+    match: (string: string) => {[captureName: string]: string} | null;
 
 
     /**
-     * Computes the intersection of `this` predicate and the `other` predicate. The intersection recognizes a string if and
-     * only if that string is recognized by *both* the input predicates. Because the intersection cannot in general be
-     * expressed as a single predicate, the result is given as an array of normalized predicates, as follows:
-     * (1) An empty array - this means the input predicates are disjoint, i.e. there are no strings that are recognized by
-     *     both input predicates. E.g., foo ∩ bar = []
-     * (2) An array with one predicate - this means the intersection can be represented by the single predicate contained in
-     *     the array. E.g. a* ∩ *b = [a*b]
-     * (3) An array of multiple predicates - the array contains a list of mutually-disjoint predicates, the union of whose
-     *     recognized strings are precisely those strings that are recognized by both input predicates.
-     *     E.g. test.* ∩ *.js = [test.js, test.*.js]
+     * Computes the intersection of `this` predicate and the `other` predicate. The intersection recognizes a
+     * string if and only if that string is recognized by *both* the input predicates. Because intersections
+     * cannot in general be expressed as a single predicate, the result is given as an array of normalized
+     * predicates, to be interpreted as follows:
+     * (1) An empty array. This means the input predicates are disjoint.
+     *     That is, there are no strings that are recognized by both input predicates.
+     *     Example: 'foo' ∩ 'bar' = []
+     * (2) An array with one element. This means the intersection may be represented
+     *     by a single predicate, whose normalized form is contained in the array.
+     *     Example: 'a*' ∩ '*b' = ['a*b']
+     * (3) An array with multiple elements. The array contains a list of mutually disjoint predicates, the union
+     *     of whose recognized strings are precisely those strings that are recognized by both of the input predicates.
+     *     Example: 'test.*' ∩ '*.js' = ['test.js', 'test.*.js']
      * @param {Predicate} other - a predicate instance. May or may not be normalized.
      * @returns {Predicate[]} - an array of normalized predicates representing the intersection of the input predicates.
      */
@@ -114,7 +116,7 @@ export default class Predicate {
     }
 
 
-    /** Returns the source string with which this instance was constructed. */
+    /** Returns the pattern string with which this instance was constructed. */
     toString() { return this.pattern; }
 
 
