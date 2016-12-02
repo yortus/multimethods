@@ -94,8 +94,10 @@ export default function makeMatchMethod(patternSource: string, patternAST: Patte
         case 'lit{…cap}lit':
 
         default:
-// TODO: temp testing... remove...
-console.log(`=====>   NOT OPTIMISED   ${simplifiedPatternSignature}   ('${patternSource}')`);
+            // TODO: alert on match functions that don't get optimised... either remove this or formalise it as a warning...
+            //       - probably remove, since 'optimisations' are fardly possible beyond the simpler cases already handled above (i.e. there are diminishing returns)
+            console.log(`=====>   NOT OPTIMISED   ${simplifiedPatternSignature}   ('${patternSource}')`);
+
             let regexp = makeRegExpForPattern(patternAST);
             return s => {
                 let matches = s.match(regexp);
