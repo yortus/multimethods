@@ -1,4 +1,18 @@
 ## Renaming and Reorganising
+### To Dos
+- Predicate: replace class with one or more branded strings and free functions
+  - parsePredicate(s: string): Predicate
+  - normalisePredicate(p: Predicate): NormalisedPredicate
+  - ...
+- Taxonomy...? - an Euler Diagram represented as a DAG whose nodes are Set instances, where a Set contains a predicate, links to supersets and subsets, and extra annotations
+
+- Multimethod...?
+
+
+
+
+
+
 ### Set Theory, Logic & Math
 - Predicate
 - predicate notation (pattern / DSL)
