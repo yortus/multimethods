@@ -8,13 +8,68 @@ import TaxonomyNode from './taxonomy-node';
 
 // TODO: review comments below - e.g. references to 'address', pattern vs predicate, ...
 /**
- * A taxonomy is an arrangement of patterns into a directed acyclic graph (DAG), according to their
- * set relationships. Recall that a pattern represents a set of addresses, so two patterns may have
- * a subset, superset, disjoint, or other relationship, according to the set of addresses they match.
- * Each node in a taxonomy holds a single pattern, as well as links to all parent and child nodes.
- * Every taxonomy has a single root node that holds the universal pattern '…'. In any given taxonomy,
- * for any two nodes holding patterns P and Q, if Q is a proper subset of P, then Q will be a
- * descendent of P in the taxonomy. Overlapping patterns (i.e., patterns whose intersection is
+
+
+TextPredicate
+TextClassifier
+Taxonomy
+Hierarchy
+
+
+
+Predicate
+Set
+
+VennDiagram (SetDiagram, LogicDiagram)
+VennSet
+vennDiagram.annotate
+    .addAnnotation
+    .addInfo
+vennSet.supersets
+vennSet.subsets
+
+
+EulerDiagram
+
+
+Classifier
+classifier.addInfo
+classifierNode
+
+Predicate
+Taxonomy
+taxonomy.addInfo
+
+
+
+
+ * A taxonomy is a directed acyclic graph (DAG) where each node holds a predicate. The nodes are arranged according to
+ * the relationships between their respecive predicates. More specifically, given any two nodes A and B within the same
+ * taxonomy, node B is a descendent of node A if and only if the set of strings matched by node B's predicate is a
+ * proper subset of the set of strings matched by node A's predicate.
+ * 
+ *  and where the nodes are arranged
+ * according to the set relationships between the predicate's sets of matching strings.
+
+
+
+
+
+
+
+ * 
+ *  The predicates in a
+ * taxonomy are arranged according to the relationships between the sets of strings they match.
+ *
+ * Recall that a predicate matches a particular set of strings. Accordingly, two predicates may have
+ * a subset, superset, disjoint, or other relationship, according to the respective sets of string they match.
+ *
+ * Each node in a taxonomy holds a single predicate, as well as links to all parent and child nodes.
+ * Every taxonomy has a single root node that holds the universal predicate '…' that matches all strings.
+ * 
+ * In any given taxonomy,
+ * for any two nodes holding predicates P and Q, if Q is a proper subset of P, then Q will be a
+ * descendent of P in the taxonomy. Overlapping predicates (i.e., predicates whose intersection is
  * non-empty but neither is a subset of the other) are siblings in the taxonomy. For overlapping
  * patterns, an additional pattern representing their intersection is synthesized and added to the
  * taxonomy as a descendent of both patterns. All patterns in a taxonomy are normalized. Some nodes
@@ -63,7 +118,7 @@ export default class Taxonomy<T> {
     // algo: exact match using canonical form of given Predicate/string
     get(predicate: Predicate | string): TaxonomyNode & T {
         let p = typeof predicate === 'string' ? new Predicate(predicate) : predicate;
-        let result = this.allNodes.filter(node => node.pattern === p.normalized)[0];
+        let result = this.allNodes.filter(node => node.predicate === p.normalized)[0];
         return result;
     }
 
@@ -116,7 +171,7 @@ function augmentTaxonomy<T, U>(taxonomy: Taxonomy<T>, callback: (node: TaxonomyN
 
     // Clone the bare taxonomy.
     let oldNodes = taxonomy.allNodes;
-    let newNodes = oldNodes.map(old => new TaxonomyNode(old.pattern)) as Array<TaxonomyNode & T & U>;
+    let newNodes = oldNodes.map(old => new TaxonomyNode(old.predicate)) as Array<TaxonomyNode & T & U>;
     let oldToNew = oldNodes.reduce((map, old, i) => map.set(old, newNodes[i]), new Map());
     newNodes.forEach((node, i) => {
         node.generalizations = oldNodes[i].generalizations.map(gen => oldToNew.get(gen));

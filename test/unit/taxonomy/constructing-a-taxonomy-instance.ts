@@ -8,7 +8,7 @@ describe('Constructing a Taxonomy instance', () => {
         {
             // ======================================== 1. ========================================
             name: 'simple tree',
-            patterns: [
+            predicates: [
                 '/...',
                 '/foo/*',
                 '/bar/*',
@@ -26,7 +26,7 @@ describe('Constructing a Taxonomy instance', () => {
         {
             // ======================================== 2. ========================================
             name: 'impossible intersections',
-            patterns: [
+            predicates: [
                 '...',
                 'a*',
                 '*a',
@@ -45,12 +45,12 @@ describe('Constructing a Taxonomy instance', () => {
             }
 
             // TODO: was...
-            // taxonomy: 'ERROR: Intersection of *a and a* cannot be expressed as a single pattern...'
+            // taxonomy: 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
         },
         {
             // ======================================== 3. ========================================
             name: 'complex DAG',
-            patterns: [
+            predicates: [
                 'a*',
                 '*m*',
                 '*z',
@@ -140,11 +140,11 @@ describe('Constructing a Taxonomy instance', () => {
 
     tests.forEach(test => {
         it(test.name, () => {
-            let patterns = test.patterns.map(ps => new Predicate(ps));
+            let predicates = test.predicates.map(ps => new Predicate(ps));
             let expected: any = test.taxonomy;
             let actual: any;
             try {
-                actual = nodeToObj(new Taxonomy(patterns).rootNode);
+                actual = nodeToObj(new Taxonomy(predicates).rootNode);
             }
             catch (ex) {
                 actual = 'ERROR: ' + ex.message;
@@ -158,7 +158,7 @@ describe('Constructing a Taxonomy instance', () => {
 });
 
 
-/** Helper function that converts a Taxonomy to a simple nested object with pattern sources for keys */
+/** Helper function that converts a Taxonomy to a simple nested object with predicate sources for keys */
 function nodeToObj(node: TaxonomyNode): {} {
-    return node.specializations.reduce((obj, node) => (obj[node.pattern.toString()] = nodeToObj(node), obj), {});
+    return node.specializations.reduce((obj, node) => (obj[node.predicate.toString()] = nodeToObj(node), obj), {});
 }

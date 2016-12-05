@@ -24,7 +24,7 @@ export default function computeRouteSelector(taxonomy: Taxonomy<WithExecutors>) 
 // TODO: temp testing... HACKY BUGGY brittle B/C assumes taxonomy.allNodes has identical pattern order as `candidates` object keys...    
 // TODO: how otherwise to link candidates back to patterns, since they just preserve rule names that were derived from pattern identifiers, but are no longer necessarily the same
 // TODO: maybe use a Map again... but that won't work on ES5?? (but can shim)
-let patterns = taxonomy.allNodes.map(node => node.pattern);
+let predicates = taxonomy.allNodes.map(node => node.predicate);
 
     // // Generate a unique pretty name for each pattern, suitable for use in the generated source code.
     // let patternNames = patterns.map(p => p.identifier);
@@ -37,7 +37,7 @@ let patterns = taxonomy.allNodes.map(node => node.pattern);
         'function _selectExecutor(discriminant) {',
         ...generateSelectorSourceCode(taxonomy.rootNode, 1),
         '};',
-        ...patterns.map(p => `var matches${p.identifier} = taxonomy.get('${p}').pattern.match;`),
+        ...predicates.map(p => `var matches${p.identifier} = taxonomy.get('${p}').predicate.match;`),
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
@@ -75,8 +75,8 @@ function generateSelectorSourceCode(from: TaxonomyNode & WithExecutors, nestDept
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
     specializations.forEach((node: TaxonomyNode & WithExecutors, i) => {
-        let patternName = node.pattern.identifier;
-        let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${patternName}(discriminant)) `;
+        let predicateName = node.predicate.identifier;
+        let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${predicateName}(discriminant)) `;
 
         if (node.specializations.length === 0) {
             lines.push(`${condition}return ${node.entryPoint};`);
@@ -91,7 +91,7 @@ function generateSelectorSourceCode(from: TaxonomyNode & WithExecutors, nestDept
         ];
     });
 
-    // Add a line to select the fallback pattern if none of the more specialised patterns matched the discriminant.
+    // Add a line to select the fallback predicate if none of the more specialised predicates matched the discriminant.
     lines.push(`${indent}return ${from.entryPoint};`);
     return lines;
 }

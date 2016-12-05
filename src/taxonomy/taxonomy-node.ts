@@ -8,20 +8,20 @@ import Predicate from '../predicate';
 export default class TaxonomyNode {
 
 
-    /** Constructs a new TaxonomyNode instance that holds the given pattern. */
-    constructor(pattern: Predicate) {
-        this.pattern = pattern;
+    /** Constructs a new TaxonomyNode instance that holds the given predicate. */
+    constructor(predicate: Predicate) {
+        this.predicate = predicate;
     }
 
 
-    /** The pattern associated with this node. */
-    pattern: Predicate;
+    /** The predicate associated with this node. */
+    predicate: Predicate;
 
 
-    /** Links to this node's direct parents (i.e., incoming edges). */
+    /** Links to this node's direct parents (i.e., more generalised or 'wider' predicates). */
     generalizations: TaxonomyNode[] = [];
 
 
-    /** Links to this node's direct children (i.e., outgoing edges). */
+    /** Links to this node's direct children (i.e., more specialised or 'narrower' predicates). */
     specializations: TaxonomyNode[] = [];
 }

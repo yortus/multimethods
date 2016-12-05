@@ -38,10 +38,10 @@ TODO:... fix comment...
      *        response. An `UNHANDLED` (eventual) return value signifies that the handler declined to respond to the
      *        given request, even if the pattern matched the request's address.
      */
-    constructor(patternSource: string, method: Function) {
+    constructor(predicatePattern: string, method: Function) {
 
         // Construct the pattern instance, and assign the pattern and method properties.
-        this.predicate = new Predicate(patternSource); // NB: may throw
+        this.predicate = new Predicate(predicatePattern); // NB: may throw
         this.method = method;
 
 // TODO: temp testing... will we (can we?) still check sig at runtime?

@@ -1,3 +1,43 @@
+## Renaming and Reorganising
+### Set Theory, Logic & Math
+- Predicate
+- predicate notation (pattern / DSL)
+- predicate normalisation
+- predicate evaluation
+- Set
+- Euler Diagram
+- intersection
+- union
+- subset
+- superset
+- universe of strings
+- partition
+
+
+
+type Predicate = string & { __predicateBrand: any }
+type NormalisedPredicate = Predicate & { __normalisedPredicateBrand: any }
+
+Predicate functions:
+- parse(pred: Predicate): PredicateAST
+- normalise(pred: Predicate): NormalisedPredicate
+- toIdentifier(pred: Predicate): string
+- getMembershipFunction(pred: Predicate): (s: string) => boolean
+- getUnificationFunction(pred: Predicate): (s: string) => Captures
+- equals(p: Predicate, q: Predicate): boolean
+- intersect(p: Predicate, q: Predicate): Predicate[]; // or introduce 'or' operator in predicate DSL
+
+Set functions:
+- generate taxonomy from predicates
+- annotate taxonomy
+
+
+
+
+
+
+
+
 # Source Audit for terminology & naming
 - [ ] /src/multimethod/impl/create-multimethod.ts
 - [x] /src/multimethod/impl/disambiguate-routes.ts

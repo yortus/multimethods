@@ -19,17 +19,17 @@ describe('Traversing a taxonomy', () => {
             let taxonomy = new Taxonomy(patterns);
 
             // A taxonomy is always rooted at '…'.
-            expect(taxonomy.rootNode.pattern).equals(Predicate.ANY);
+            expect(taxonomy.rootNode.predicate).equals(Predicate.ANY);
 
             // All input patterns are in the taxonomy constructed from them.
-            let taxonomyPatterns = taxonomy.allNodes.map(node => node.pattern);
+            let taxonomyPatterns = taxonomy.allNodes.map(node => node.predicate);
             expect(patterns.every(p => taxonomyPatterns.indexOf(p.normalized) !== -1)).to.be.true;
 
-            // Every child node's pattern matches a subset of the addresses matched by its parent node's pattern.
+            // Every child node's pattern matches a subset of the addresses matched by its parent node's predicate.
             let edges = getAllEdges(taxonomy.rootNode);
             expect(edges.every(edge => {
-                let intersections = edge.parent.pattern.intersect(edge.child.pattern);
-                return intersections.length === 1 && intersections[0] === edge.child.pattern
+                let intersections = edge.parent.predicate.intersect(edge.child.predicate);
+                return intersections.length === 1 && intersections[0] === edge.child.predicate
             })).to.be.true;
         });
     });

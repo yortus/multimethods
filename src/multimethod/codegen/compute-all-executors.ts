@@ -45,7 +45,7 @@ export default function computeAllExecutors(taxonomy: Taxonomy<Lineage>, options
         // TODO: doc...
         let rulesWithDuplicatesRemoved = node.lineage.filter(rule => rule.isMetaRule || taxonomy.get(rule.predicate) === node);
         let sources = rulesWithDuplicatesRemoved.map(rule => getSourceCodeForRule(taxonomy, node, rule, options) + '\n');
-        let source = [`// ========== EXECUTORS FOR ${node.pattern} ==========\n`].concat(sources).join('');
+        let source = [`// ========== EXECUTORS FOR ${node.predicate} ==========\n`].concat(sources).join('');
 
         // TODO: temp testing...
         // The 'entry point' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
@@ -75,8 +75,8 @@ function getSourceCodeForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & 
 
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
-    let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${node.pattern.identifier}`;
-    let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${node.pattern.identifier}`;
+    let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${node.predicate.identifier}`;
+    let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${node.predicate.identifier}`;
 
     // For each rule, we reuse the source code template below. But first we need to compute a number of
     // values for substitution into the template. A few notes on these substitutions:
@@ -117,9 +117,9 @@ function getSourceCodeForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & 
 
     // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
     if (rule.predicate.captureNames.length > 0) {
-        source = source + `\nvar ${getCaptures} = taxonomy.get('${node.pattern.normalized}').lineage[${i}].predicate.match;`
+        source = source + `\nvar ${getCaptures} = taxonomy.get('${node.predicate.normalized}').lineage[${i}].predicate.match;`
     }
-    source = source + `\nvar ${callMethod} = taxonomy.get('${node.pattern.normalized}').lineage[${i}].method;`;
+    source = source + `\nvar ${callMethod} = taxonomy.get('${node.predicate.normalized}').lineage[${i}].method;`;
 
     // All done for this iteration.
     return source;
@@ -135,9 +135,9 @@ function getNameForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & Lineag
     let ruleIndex = ruleNode.lineage.indexOf(rule);
 
     if (rule.isMetaRule) {
-        return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.pattern.identifier}Within${node.pattern.identifier}`;
+        return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.predicate.identifier}Within${node.predicate.identifier}`;
     }
     else {
-        return `tryRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.pattern.identifier}`;
+        return `tryRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.predicate.identifier}`;
     }
 }

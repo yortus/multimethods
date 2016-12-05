@@ -48,7 +48,7 @@ function validateTaxonomy(taxonomy: Taxonomy<never>, options: MultimethodOptions
     // behaviour can be made explicit by the user.
     // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
     let normalizedPredicates = Object.keys(options.rules).map(p => new Predicate(p).normalized);
-    let unhandledPredicates = taxonomy.allNodes.map(n => n.pattern).filter(p => normalizedPredicates.indexOf(p) === -1);
+    let unhandledPredicates = taxonomy.allNodes.map(n => n.predicate).filter(p => normalizedPredicates.indexOf(p) === -1);
     if (unhandledPredicates.length > 0) {
         // TODO: improve error message...
         warn(`Multimethod contains conflicts: ${unhandledPredicates.map(p => p.toString()).join(', ')}`);

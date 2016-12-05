@@ -22,7 +22,7 @@ export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: Tax
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
     let nonDisjointComparands = ancestor.specializations.reduce(
         (comparands, node) => {
-            let intersections = insertee.pattern.intersect(node.pattern);
+            let intersections = insertee.predicate.intersect(node.predicate);
 
             // TODO: temp testing...
             intersections.forEach(i => comparands.push({node, intersection: nodeFor(i)}));

@@ -7,7 +7,7 @@ import MultimethodOptions from './multimethod-options';
 
 // TODO: ...
 export default function normaliseRules(rules: MultimethodOptions['rules']) {
-    let result = Object.keys(rules).map(patternSource => new Rule(patternSource, rules[patternSource]));
+    let result = Object.keys(rules).map(predicatePattern => new Rule(predicatePattern, rules[predicatePattern]));
     return result;
 }
 
