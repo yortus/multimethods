@@ -3,7 +3,7 @@ import {getLongestCommonPrefix, isPromiseLike}  from './util';
 export {configure, Options} from './config';
 
 // TODO: export the later two? They are only used in unit tests. Could we do equivalent tests through public API?
-export {default as Predicate, parsePredicatePattern, PredicatePatternAST} from './predicate';
+export {default as PredicateClass, parsePredicatePattern, PredicatePatternAST} from './predicate';
 
 
 export {default as Taxonomy, TaxonomyNode} from './taxonomy';

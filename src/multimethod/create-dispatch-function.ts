@@ -2,7 +2,7 @@ import computePredicateLineages from './compute-predicate-lineages';
 import generateDispatchFunction from './codegen/generate-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
-import Predicate from '../predicate';
+import PredicateClass from '../predicate';
 import Taxonomy from '../taxonomy';
 import {warn} from '../util';
 
@@ -15,7 +15,7 @@ import {warn} from '../util';
 export default function createDispatchFunction(normalisedOptions: MultimethodOptions) {
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the rule set.
-    let taxonomy = new Taxonomy<never>(Object.keys(normalisedOptions.rules).map(pattern => new Predicate(pattern)));
+    let taxonomy = new Taxonomy<never>(Object.keys(normalisedOptions.rules).map(pattern => new PredicateClass(pattern)));
 
     // TODO: explain...
     // TODO: use a flag in options to enable/disable this warning/error
@@ -47,7 +47,7 @@ function validateTaxonomy(taxonomy: Taxonomy<never>, options: MultimethodOptions
     // This often represents a user error, so it's a useful warning to point these patterns out so their intended
     // behaviour can be made explicit by the user.
     // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
-    let normalizedPredicates = Object.keys(options.rules).map(p => new Predicate(p).normalized);
+    let normalizedPredicates = Object.keys(options.rules).map(p => new PredicateClass(p).normalized);
     let unhandledPredicates = taxonomy.allNodes.map(n => n.predicate).filter(p => normalizedPredicates.indexOf(p) === -1);
     if (unhandledPredicates.length > 0) {
         // TODO: improve error message...

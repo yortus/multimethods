@@ -1,4 +1,4 @@
-import Predicate from '../predicate';
+import PredicateClass from '../predicate';
 
 
 
@@ -9,13 +9,13 @@ export default class TaxonomyNode {
 
 
     /** Constructs a new TaxonomyNode instance that holds the given predicate. */
-    constructor(predicate: Predicate) {
+    constructor(predicate: PredicateClass) {
         this.predicate = predicate;
     }
 
 
     /** The predicate associated with this node. */
-    predicate: Predicate;
+    predicate: PredicateClass;
 
 
     /** Links to this node's direct parents (i.e., more generalised or 'wider' predicates). */

@@ -1,4 +1,4 @@
-import Predicate from '../predicate';
+import PredicateClass from '../predicate';
 import TaxonomyNode from './taxonomy-node';
 
 
@@ -16,7 +16,7 @@ import TaxonomyNode from './taxonomy-node';
  *        the same taxonomy. When `insertee` overlaps an existing node in the subgraph, this function
  *        is used to synthesize the additional intersection node(s).
  */
-export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: TaxonomyNode, nodeFor: (predicate: Predicate) => TaxonomyNode) {
+export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: TaxonomyNode, nodeFor: (predicate: PredicateClass) => TaxonomyNode) {
 
     // Determine the set relationship between `insertee` and each of the `ancestor` node's existing children.
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.

@@ -1,6 +1,6 @@
 // TODO: review all comments and terminology in here...
 // TODO: explain what decorators are here, or refer to docs elsewhere (and write them).
-import Predicate from '../predicate';
+import PredicateClass from '../predicate';
 //import checkConsequentSignature from './check-consequent-signature';
 
 
@@ -41,7 +41,7 @@ TODO:... fix comment...
     constructor(predicatePattern: string, method: Function) {
 
         // Construct the pattern instance, and assign the pattern and method properties.
-        this.predicate = new Predicate(predicatePattern); // NB: may throw
+        this.predicate = new PredicateClass(predicatePattern); // NB: may throw
         this.method = method;
 
 // TODO: temp testing... will we (can we?) still check sig at runtime?
@@ -51,7 +51,7 @@ TODO:... fix comment...
 
 
     /** The pattern associated with this Method instance. */
-    predicate: Predicate;
+    predicate: PredicateClass;
 
 
     /** The handler associated with this Method instance, exactly as it was provided to the constructor. */

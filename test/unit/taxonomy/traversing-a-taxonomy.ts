@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Predicate, Taxonomy, TaxonomyNode} from 'multimethods';
+import {PredicateClass, Taxonomy, TaxonomyNode} from 'multimethods';
 
 
 describe('Traversing a taxonomy', () => {
@@ -15,11 +15,11 @@ describe('Traversing a taxonomy', () => {
 
     tests.forEach(test => {
         it(test.join(', '), () => {
-            let patterns = test.map(p => new Predicate(p));
+            let patterns = test.map(p => new PredicateClass(p));
             let taxonomy = new Taxonomy(patterns);
 
             // A taxonomy is always rooted at '…'.
-            expect(taxonomy.rootNode.predicate).equals(Predicate.ANY);
+            expect(taxonomy.rootNode.predicate).equals(PredicateClass.ANY);
 
             // All input patterns are in the taxonomy constructed from them.
             let taxonomyPatterns = taxonomy.allNodes.map(node => node.predicate);

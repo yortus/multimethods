@@ -10,7 +10,7 @@ import * as branded from './branded';
  * same normalized predicate return the same singleton instance from this map. NB: This is declared before the Predicate
  * class to ensure it is has been initialized before the the static property initialiser for Predicate.ANY is run.
  */
-const normalizedPredicateCache = new Map<string, Predicate>();
+const normalizedPredicateCache = new Map<string, PredicateClass>();
 
 
 
@@ -23,7 +23,7 @@ const normalizedPredicateCache = new Map<string, Predicate>();
  * same set of strings. Instances of normalized predicates are guaranteed to be singletons, so such predicates may be safely
  * compared using strict equality ('==='). Consult the documentation for details about the predicate pattern syntax.
  */
-export default class Predicate {
+export default class PredicateClass {
 
 
     /**
@@ -47,7 +47,7 @@ export default class Predicate {
         }
 
         // Initialize members.
-        this.normalized = new Predicate(ast.signature); // NB: recursive.
+        this.normalized = new PredicateClass(ast.signature); // NB: recursive.
         this.identifier = ast.identifier;
         this.captureNames = ast.captures.filter(capture => capture !== '?');
         this.comment = pattern.split('#')[1] || '';
@@ -59,7 +59,7 @@ export default class Predicate {
      * The normalized form of this predicate, which recognizes the same set of strings as this instance. Two predicates that
      * recognize the same set of strings are guaranteed to have the same normalized form.
      */
-    normalized: Predicate;
+    normalized: PredicateClass;
 
 
     /**
@@ -109,9 +109,9 @@ export default class Predicate {
      * @param {Predicate} other - a predicate instance. May or may not be normalized.
      * @returns {Predicate[]} - an array of normalized predicates representing the intersection of the input predicates.
      */
-    intersect(other: Predicate): Predicate[] {
+    intersect(other: PredicateClass): PredicateClass[] {
         let intersections = branded.intersect(this.toString() as branded.Predicate, other.toString() as branded.Predicate);
-        return intersections.map(pattern => new Predicate(pattern));
+        return intersections.map(pattern => new PredicateClass(pattern));
     }
 
 
@@ -120,5 +120,5 @@ export default class Predicate {
 
 
     /** A singleton predicate that recognises *all* strings. */
-    static ANY = new Predicate(branded.ANY);
+    static ANY = new PredicateClass(branded.ANY);
 }

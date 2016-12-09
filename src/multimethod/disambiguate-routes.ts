@@ -1,6 +1,6 @@
 // TODO: better explain how/why this works in external documentation (esp. the synthesized 'crasher' method).
 import {getLongestCommonPrefix, MultimethodError} from '../util';
-import Predicate from '../predicate';
+import PredicateClass from '../predicate';
 import Rule from './rule';
 
 
@@ -13,7 +13,7 @@ import Rule from './rule';
  * error if no unambiguous single rule list can be formed (e.g. because the alternative rule lists have different
  * meta-rules in their non-common sections).
  */
-export default function disambiguateRoutes(predicate: Predicate, alternateRuleLists: Rule[][]): Rule[] {
+export default function disambiguateRoutes(predicate: PredicateClass, alternateRuleLists: Rule[][]): Rule[] {
 
     // If there is only one rule list, return it as-is.
     if (alternateRuleLists.length === 1) return alternateRuleLists[0];

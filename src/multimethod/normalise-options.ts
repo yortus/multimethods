@@ -1,4 +1,4 @@
-import Predicate from '../predicate';
+import PredicateClass from '../predicate';
 import {MultimethodError} from '../util';
 import MultimethodOptions from './multimethod-options';
 
@@ -57,7 +57,7 @@ function validateRules(rules: MultimethodOptions['rules']) {
 
     // TODO: ensure no pattern has a capture called 'next'
     Object.keys(rules).forEach(src => {
-        let predicate = new Predicate(src);
+        let predicate = new PredicateClass(src);
         if (predicate.captureNames.indexOf('next') === -1) return;
         throw new MultimethodError(`Predicate '${predicate}' uses reserved name 'next'`);
     });

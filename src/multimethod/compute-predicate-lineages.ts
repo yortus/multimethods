@@ -1,7 +1,7 @@
 import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
-import Predicate from '../predicate';
+import PredicateClass from '../predicate';
 import Taxonomy, {TaxonomyNode} from '../taxonomy';
 
 
@@ -32,7 +32,7 @@ export default function computePredicateLineages<T>(taxonomy: Taxonomy<T>, rules
 
     // Every route begins with this universal rule. It matches all discriminants,
     // and its method just returns the 'unhandled' sentinel value.
-    const universalFallbackRule = new Rule(Predicate.ANY.toString(), function _unhandled() {
+    const universalFallbackRule = new Rule(PredicateClass.ANY.toString(), function _unhandled() {
         return unhandled;
     });
 
@@ -116,8 +116,8 @@ function distributeRulesOverNodes<T>(taxonomy: Taxonomy<T>, rules: Rule[]) {
  * list of predicates arranged in walk-order (i.e., from the root to the descendent).
  * [1] See: https://en.wikipedia.org/wiki/Glossary_of_graph_theory#Walks
  */
-function getAlternateLineagesForNode(node: TaxonomyNode): Predicate[][] {
-    let allRoutes = ([] as Predicate[][]).concat(...node.generalizations.map(getAlternateLineagesForNode));
+function getAlternateLineagesForNode(node: TaxonomyNode): PredicateClass[][] {
+    let allRoutes = ([] as PredicateClass[][]).concat(...node.generalizations.map(getAlternateLineagesForNode));
     if (allRoutes.length === 0) {
 
         // No parent paths, therefore this must be the root.
