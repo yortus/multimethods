@@ -66,25 +66,3 @@ describe('Matching a predicate against a string', () => {
         });
     });
 });
-
-
-
-
-// TODO: temp testing revise terminology...
-let predicate;
-let str;
-
-predicate.match(str) // current
-predicate.eval(str)
-predicate.evaluate(str)
-predicate.test(str)
-predicate.apply(str)
-predicate.isMember(str)
-predicate.matches(str)
-predicate.unify(str)
-predicate.capture(str)
-predicate.recognise(str)
-
-
-
-

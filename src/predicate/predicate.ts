@@ -1,6 +1,5 @@
-import intersectPredicatePatterns from './intersect-predicate-patterns';
-import makeMatchMethod from './make-match-method';
-import parsePredicatePattern from './predicate-pattern-parser';
+// TODO: temp testing, import specifically what's needed here
+import * as branded from './branded';
 
 
 
@@ -36,7 +35,7 @@ export default class Predicate {
     constructor(private pattern: string) {
 
         // Parse the predicate pattern to test its validity and to get syntax information. NB: may throw.
-        let ast = parsePredicatePattern(pattern);
+        let ast = branded.parse(pattern);
 
         // If the pattern is already normalized, return the singleton instance from the normalized predicate cache.
         if (pattern === ast.signature) {
@@ -52,7 +51,7 @@ export default class Predicate {
         this.identifier = ast.identifier;
         this.captureNames = ast.captures.filter(capture => capture !== '?');
         this.comment = pattern.split('#')[1] || '';
-        this.match = makeMatchMethod(pattern, ast);
+        this.match = branded.makeMatchFunction(pattern, ast);
     }
 
 
@@ -111,7 +110,7 @@ export default class Predicate {
      * @returns {Predicate[]} - an array of normalized predicates representing the intersection of the input predicates.
      */
     intersect(other: Predicate): Predicate[] {
-        let intersections = intersectPredicatePatterns(this.normalized.toString(), other.normalized.toString());
+        let intersections = branded.intersect(this.toString() as branded.Predicate, other.toString() as branded.Predicate);
         return intersections.map(pattern => new Predicate(pattern));
     }
 
@@ -121,5 +120,5 @@ export default class Predicate {
 
 
     /** A singleton predicate that recognises *all* strings. */
-    static ANY = new Predicate('…');
+    static ANY = new Predicate(branded.ANY);
 }
