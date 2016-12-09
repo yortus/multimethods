@@ -1,4 +1,4 @@
-import {MultimethodError} from '../../util';
+import {MultimethodError} from '../util';
 const grammar: { parse(text: string): PredicateAST; } = require('./grammar');
 
 
