@@ -54,5 +54,6 @@ export interface PredicateAST {
     captures: string[];
 
 
-    // TODO: preserve comment in here...
+    // TODO: doc...
+    comment: string;
 }
