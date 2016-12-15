@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {PredicateClass, Taxonomy, TaxonomyNode, intersect, normalise, ANY, toPredicate} from 'multimethods';
+import {Taxonomy, TaxonomyNode, intersect, normalise, ANY, toPredicate} from 'multimethods';
 
 
 describe('Traversing a taxonomy', () => {

@@ -1,7 +1,7 @@
 import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
-import PredicateClass, {normalise, ANY} from '../predicate';
+import {Predicate, normalise, ANY} from '../predicate';
 import Taxonomy, {TaxonomyNode} from '../taxonomy';
 
 
@@ -66,7 +66,7 @@ export default function computePredicateLineages<T>(taxonomy: Taxonomy<T>, rules
             );
 
         // Make a single best path. Ensure no possibility of ambiguity.
-        let lineage = disambiguateRoutes(new PredicateClass(node.predicate), alternateRoutes);
+        let lineage = disambiguateRoutes(node.predicate, alternateRoutes);
 
         // TODO: order the rules from most- to least- specific as per spec...
         lineage.reverse();
@@ -116,12 +116,12 @@ function distributeRulesOverNodes<T>(taxonomy: Taxonomy<T>, rules: Rule[]) {
  * list of predicates arranged in walk-order (i.e., from the root to the descendent).
  * [1] See: https://en.wikipedia.org/wiki/Glossary_of_graph_theory#Walks
  */
-function getAlternateLineagesForNode(node: TaxonomyNode): PredicateClass[][] {
-    let allRoutes = ([] as PredicateClass[][]).concat(...node.generalizations.map(getAlternateLineagesForNode));
+function getAlternateLineagesForNode(node: TaxonomyNode): Predicate[][] {
+    let allRoutes = ([] as Predicate[][]).concat(...node.generalizations.map(getAlternateLineagesForNode));
     if (allRoutes.length === 0) {
 
         // No parent paths, therefore this must be the root.
         allRoutes = [[]];
     }
-    return allRoutes.map(path => path.concat([new PredicateClass(node.predicate)]));
+    return allRoutes.map(path => path.concat([node.predicate]));
 }

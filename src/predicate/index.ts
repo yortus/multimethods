@@ -1,4 +1,3 @@
-export {default} from './predicate-class';
 export {default as parsePredicatePattern} from './parse';
 export {PredicateAST as PredicatePatternAST} from './parse';
 

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {PredicateClass, intersect} from 'multimethods';
+import {toPredicate, intersect} from 'multimethods';
 
 
 describe('Intersecting two predicates', () => {
@@ -80,7 +80,7 @@ describe('Intersecting two predicates', () => {
             let rhs = test.split(' = ')[1].replace(/^∅$/, '');
             let actual: string, expected = rhs;
             try {
-                let intersections = intersect(<any> lhsA, <any> lhsB); // TODO: fix casts
+                let intersections = intersect(toPredicate(lhsA), toPredicate(lhsB)); // TODO: fix casts
                 actual = `[${intersections}]`;
                 if (intersections.length === 1) actual = actual.slice(1, -1);
             }
