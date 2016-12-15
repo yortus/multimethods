@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {PredicateClass} from 'multimethods';
+import {PredicateClass, makeMatchFunction} from 'multimethods';
 
 
 describe('Matching a predicate against a string', () => {
@@ -61,7 +61,7 @@ describe('Matching a predicate against a string', () => {
             let address = rhs.split(' WITH ')[0].replace(/^∅$/, '');
             let expectedCaptures = isMatch ? eval(`(${rhs.split(' WITH ')[1]})`) || {} : null;
             let predicate = new PredicateClass(patternSource);
-            let actualCaptures = predicate.match(address);
+            let actualCaptures = makeMatchFunction(predicate.toString())(address);
             expect(actualCaptures).to.deep.equal(expectedCaptures);
         });
     });

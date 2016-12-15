@@ -1,3 +1,4 @@
+import {makeIdentifier} from '../../predicate';
 import RouteExecutor from './route-executor';
 import Taxonomy, {TaxonomyNode} from '../../taxonomy';
 import {WithExecutors} from './compute-all-executors';
@@ -37,7 +38,7 @@ let predicates = taxonomy.allNodes.map(node => node.predicate);
         'function _selectExecutor(discriminant) {',
         ...generateSelectorSourceCode(taxonomy.rootNode, 1),
         '};',
-        ...predicates.map(p => `var matches${p.identifier} = taxonomy.get('${p}').predicate.match;`),
+        ...predicates.map(p => `var matches${makeIdentifier(<any> p.toString())} = makeMatchFunction(taxonomy.get('${p}').predicate.toString());`),
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
@@ -75,8 +76,8 @@ function generateSelectorSourceCode(from: TaxonomyNode & WithExecutors, nestDept
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
     specializations.forEach((node: TaxonomyNode & WithExecutors, i) => {
-        let predicateName = node.predicate.identifier;
-        let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${predicateName}(discriminant)) `;
+        let predicateIdentifier = makeIdentifier(<any> node.predicate.toString());
+        let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${predicateIdentifier}(discriminant)) `;
 
         if (node.specializations.length === 0) {
             lines.push(`${condition}return ${node.entryPoint};`);

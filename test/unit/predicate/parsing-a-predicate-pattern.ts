@@ -56,6 +56,7 @@ describe('Parsing a predicate pattern', () => {
             let pattern = test.split(' ==> ')[0].replace(/^∅$/, '');
             let rhs = test.split(' ==> ')[1];
             let expected: PredicatePatternAST|string = rhs === "ERROR" ? rhs : eval(`(${rhs})`);
+            if (typeof expected !== 'string') expected.captureNames = expected.captures.filter(c => c !== '?'); // TODO: temp testing for PredicateClass compat. Add above or otherwise clean up.
             let expectedError = '';// TODO: implement this...
             let actual: PredicatePatternAST|string = 'ERROR';
             try {

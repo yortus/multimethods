@@ -1,5 +1,7 @@
-import PredicateClass from '../predicate';
+import PredicateClass, {intersect} from '../predicate';
 import TaxonomyNode from './taxonomy-node';
+
+
 
 
 
@@ -22,10 +24,10 @@ export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: Tax
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
     let nonDisjointComparands = ancestor.specializations.reduce(
         (comparands, node) => {
-            let intersections = insertee.predicate.intersect(node.predicate);
+            let intersections = <string[]> intersect(<any> insertee.predicate.toString(), <any> node.predicate.toString()); // TODO: messy... has casts... fix...
 
             // TODO: temp testing...
-            intersections.forEach(i => comparands.push({node, intersection: nodeFor(i)}));
+            intersections.forEach(i => comparands.push({node, intersection: nodeFor(new PredicateClass(i))}));
 
             // TODO: was...
             //if (intersection !== Predicate.EMPTY) comparands.push({node, intersection: nodeFor(intersection)});

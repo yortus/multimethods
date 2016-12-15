@@ -1,4 +1,4 @@
-import {PredicateAST} from './parse';
+import parse, {PredicateAST} from './parse';
 
 
 
@@ -10,7 +10,10 @@ import {PredicateAST} from './parse';
  * predicate matching may be performed frequently, and possibly on critical paths. As such, the use of optimised `match`
  * implementations may result in substantial overall performance improvements in client code.
  */
-export default function makeMatchFunction(predicatePattern: string, predicatePatternAST: PredicateAST): MatchFunction {
+export default function makeMatchFunction(predicatePattern: string, predicatePatternAST?: PredicateAST): MatchFunction {
+
+    // TODO: temp testing...
+    predicatePatternAST = predicatePatternAST || parse(predicatePattern);
 
     // Compute useful invariants for the given predicate pattern.
     // These are used as precomputed values in the closures created below.

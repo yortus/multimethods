@@ -3,6 +3,7 @@ import downlevelES6Spread from './transforms/downlevel-es6-spread';
 import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
 import {Lineage} from '../compute-predicate-lineages';
+import {makeIdentifier, parse} from '../../predicate';
 import MultimethodOptions from '../multimethod-options';
 import replaceAll from './transforms/replace-all';
 import routeExecutorTemplate from './route-executor-template';
@@ -75,8 +76,10 @@ function getSourceCodeForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & 
 
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
-    let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${node.predicate.identifier}`;
-    let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${node.predicate.identifier}`;
+    let predicateIdentifier = makeIdentifier(<any> node.predicate.toString());
+    let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${predicateIdentifier}`;
+    let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${predicateIdentifier}`;
+    let captureNames = parse(rule.predicate.toString()).captureNames;
 
     // For each rule, we reuse the source code template below. But first we need to compute a number of
     // values for substitution into the template. A few notes on these substitutions:
@@ -89,7 +92,7 @@ function getSourceCodeForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & 
     // TODO: ... all booleans
     source = eliminateDeadCode(source, {
         ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
-        HAS_CAPTURES: rule.predicate.captureNames.length > 0,
+        HAS_CAPTURES: captureNames.length > 0,
         IS_META_RULE: rule.isMetaRule,
         HAS_DOWNSTREAM: downstreamRule != null,
         IS_PURE_SYNC: options.timing === 'sync',
@@ -116,8 +119,8 @@ function getSourceCodeForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & 
     }
 
     // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
-    if (rule.predicate.captureNames.length > 0) {
-        source = source + `\nvar ${getCaptures} = taxonomy.get('${node.predicate.normalized}').lineage[${i}].predicate.match;`
+    if (captureNames.length > 0) {
+        source = source + `\nvar ${getCaptures} = makeMatchFunction(taxonomy.get('${node.predicate.normalized}').lineage[${i}].predicate.toString());` // TODO: too long and complex! fix me!!!
     }
     source = source + `\nvar ${callMethod} = taxonomy.get('${node.predicate.normalized}').lineage[${i}].method;`;
 
@@ -133,11 +136,13 @@ function getSourceCodeForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & 
 function getNameForRule(taxonomy: Taxonomy<Lineage>, node: TaxonomyNode & Lineage, rule: Rule) {
     let ruleNode = taxonomy.get(rule.predicate.normalized);
     let ruleIndex = ruleNode.lineage.indexOf(rule);
+    let ruleIdentifier = makeIdentifier(<any> ruleNode.predicate.toString());
 
     if (rule.isMetaRule) {
-        return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.predicate.identifier}Within${node.predicate.identifier}`;
+        let nodeIdentifier = makeIdentifier(<any> node.predicate.toString());
+        return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleIdentifier}Within${nodeIdentifier}`;
     }
     else {
-        return `tryRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleNode.predicate.identifier}`;
+        return `tryRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleIdentifier}`;
     }
 }

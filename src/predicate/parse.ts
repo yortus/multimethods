@@ -15,6 +15,7 @@ const grammar: { parse(text: string): PredicateAST; } = require('./grammar');
 export default function parse(source: string): PredicateAST {
     try {
         let ast = grammar.parse(source);
+        ast.captureNames = ast.captures.filter(c => c !== '?'); // TODO: temp testing for PredicateClass compat - remove or integrate better
         return ast;
     }
     catch (ex) {
@@ -46,12 +47,17 @@ export interface PredicateAST {
      */
     identifier: string;
 
+
     /**
      * An array of strings whose elements correspond, in order, to the captures in the predicate. Each element holds
      * the name of its corresponding capture, or '?' if the corresponding capture is anonymous (i.e. '*' or '…').
      * For example, the pattern '{...path}/*.{ext}' has a `captures` value of ['path', '?', 'ext'].
      */
     captures: string[];
+
+
+    // TODO: doc...
+    captureNames: string[];
 
 
     // TODO: doc...

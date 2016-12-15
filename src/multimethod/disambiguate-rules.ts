@@ -2,6 +2,7 @@
 import {warn, MultimethodError} from '../util';
 import {inspect} from 'util';
 import Rule from './rule';
+import {parse} from '../predicate';
 
 
 
@@ -52,8 +53,10 @@ function tieBreakFn(a: Rule, b: Rule): Rule | undefined {
     if (!b.isMetaRule && a.isMetaRule) return b;
 
     // All else being equal, localeCompare of pattern comments provides the rule order (comes before == more specific).
-    if (a.predicate.comment.localeCompare(b.predicate.comment) < 0) return a;
-    if (b.predicate.comment.localeCompare(a.predicate.comment) < 0) return b;
+    let aComment = parse(a.predicate.toString()).comment;
+    let bComment = parse(b.predicate.toString()).comment;
+    if (aComment.localeCompare(bComment) < 0) return a;
+    if (bComment.localeCompare(aComment) < 0) return b;
 
     // TODO: explain...
     return undefined;

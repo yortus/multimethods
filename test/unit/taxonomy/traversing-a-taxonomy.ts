@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {PredicateClass, Taxonomy, TaxonomyNode} from 'multimethods';
+import {PredicateClass, Taxonomy, TaxonomyNode, intersect} from 'multimethods';
 
 
 describe('Traversing a taxonomy', () => {
@@ -28,8 +28,8 @@ describe('Traversing a taxonomy', () => {
             // Every child node's pattern matches a subset of the addresses matched by its parent node's predicate.
             let edges = getAllEdges(taxonomy.rootNode);
             expect(edges.every(edge => {
-                let intersections = edge.parent.predicate.intersect(edge.child.predicate);
-                return intersections.length === 1 && intersections[0] === edge.child.predicate
+                let intersections = intersect(<any> edge.parent.predicate.toString(), <any> edge.child.predicate.toString()); // TODO: messy & casty... fix...
+                return intersections.length === 1 && intersections[0] === edge.child.predicate.toString();
             })).to.be.true;
         });
     });

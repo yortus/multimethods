@@ -1,8 +1,8 @@
 import ANY from './any';
-import intersect from './intersect';
-import makeMatchFunction from './make-match-function';
+// import intersect from './intersect';
+// import makeMatchFunction from './make-match-function';
 import parse from './parse';
-import Predicate from './predicate';
+// import Predicate from './predicate';
 
 
 
@@ -51,10 +51,10 @@ export default class PredicateClass {
 
         // Initialize members.
         this.normalized = new PredicateClass(ast.signature); // NB: recursive.
-        this.identifier = ast.identifier;
-        this.captureNames = ast.captures.filter(capture => capture !== '?');
-        this.comment = pattern.split('#')[1] || '';
-        this.match = makeMatchFunction(pattern, ast);
+        // this.identifier = ast.identifier;
+        // this.captureNames = ast.captures.filter(capture => capture !== '?');
+        // this.comment = pattern.split('#')[1] || '';
+        // this.match = makeMatchFunction(pattern, ast);
     }
 
 
@@ -65,57 +65,57 @@ export default class PredicateClass {
     normalized: PredicateClass;
 
 
-    /**
-     * A string that is visually similar to the normalized form of this predicate, but is a valid Identifier
-     * as per the ECMAScript grammar (http://www.ecma-international.org/ecma-262/6.0/index.html#sec-names-and-keywords).
-     * Different normalized forms are guaranteed to have different identifiers.
-     */
-    identifier: string;
+    // /**
+    //  * A string that is visually similar to the normalized form of this predicate, but is a valid Identifier
+    //  * as per the ECMAScript grammar (http://www.ecma-international.org/ecma-262/6.0/index.html#sec-names-and-keywords).
+    //  * Different normalized forms are guaranteed to have different identifiers.
+    //  */
+    // identifier: string;
 
 
-    /**
-     * A array of strings whose elements correspond, in order, to the named captures in the predicate. For example, the
-     * predicate pattern '{...path}/*.{ext}' has the `captureNames` value ['path', 'ext'].
-     */
-    captureNames: string[];
+    // /**
+    //  * A array of strings whose elements correspond, in order, to the named captures in the predicate. For example, the
+    //  * predicate pattern '{...path}/*.{ext}' has the `captureNames` value ['path', 'ext'].
+    //  */
+    // captureNames: string[];
 
 
-    /** The text of the comment portion of the predicate pattern, or '' if there is no comment. */
-    comment: string;
+    // /** The text of the comment portion of the predicate pattern, or '' if there is no comment. */
+    // comment: string;
 
 
-    /**
-     * Attempts to recognize the given string by matching it against this predicate. If the match is successful, an object
-     * is returned containing the name/value pairs for each named capture that unifies the string with this predicate. If
-     * the match fails, the return value is null.
-     * @param {string} string - the string to recognize.
-     * @returns {Object} null if the string is not recognized by the predicate. Otherwise, a hash of captured name/value
-     *          pairs that unify the string with this predicate.
-     */
-    match: (string: string) => {[captureName: string]: string} | null;
+    // /**
+    //  * Attempts to recognize the given string by matching it against this predicate. If the match is successful, an object
+    //  * is returned containing the name/value pairs for each named capture that unifies the string with this predicate. If
+    //  * the match fails, the return value is null.
+    //  * @param {string} string - the string to recognize.
+    //  * @returns {Object} null if the string is not recognized by the predicate. Otherwise, a hash of captured name/value
+    //  *          pairs that unify the string with this predicate.
+    //  */
+    // match: (string: string) => {[captureName: string]: string} | null;
 
 
-    /**
-     * Computes the intersection of `this` predicate and the `other` predicate. The intersection recognizes a
-     * string if and only if that string is recognized by *both* the input predicates. Because intersections
-     * cannot in general be expressed as a single predicate, the result is given as an array of normalized
-     * predicates, to be interpreted as follows:
-     * (1) An empty array. This means the input predicates are disjoint.
-     *     That is, there are no strings that are recognized by both input predicates.
-     *     Example: 'foo' ∩ 'bar' = []
-     * (2) An array with one element. This means the intersection may be represented
-     *     by a single predicate, whose normalized form is contained in the array.
-     *     Example: 'a*' ∩ '*b' = ['a*b']
-     * (3) An array with multiple elements. The array contains a list of mutually disjoint predicates, the union
-     *     of whose recognized strings are precisely those strings that are recognized by both of the input predicates.
-     *     Example: 'test.*' ∩ '*.js' = ['test.js', 'test.*.js']
-     * @param {Predicate} other - a predicate instance. May or may not be normalized.
-     * @returns {Predicate[]} - an array of normalized predicates representing the intersection of the input predicates.
-     */
-    intersect(other: PredicateClass): PredicateClass[] {
-        let intersections = intersect(this.toString() as Predicate, other.toString() as Predicate);
-        return intersections.map(pattern => new PredicateClass(pattern));
-    }
+    // /**
+    //  * Computes the intersection of `this` predicate and the `other` predicate. The intersection recognizes a
+    //  * string if and only if that string is recognized by *both* the input predicates. Because intersections
+    //  * cannot in general be expressed as a single predicate, the result is given as an array of normalized
+    //  * predicates, to be interpreted as follows:
+    //  * (1) An empty array. This means the input predicates are disjoint.
+    //  *     That is, there are no strings that are recognized by both input predicates.
+    //  *     Example: 'foo' ∩ 'bar' = []
+    //  * (2) An array with one element. This means the intersection may be represented
+    //  *     by a single predicate, whose normalized form is contained in the array.
+    //  *     Example: 'a*' ∩ '*b' = ['a*b']
+    //  * (3) An array with multiple elements. The array contains a list of mutually disjoint predicates, the union
+    //  *     of whose recognized strings are precisely those strings that are recognized by both of the input predicates.
+    //  *     Example: 'test.*' ∩ '*.js' = ['test.js', 'test.*.js']
+    //  * @param {Predicate} other - a predicate instance. May or may not be normalized.
+    //  * @returns {Predicate[]} - an array of normalized predicates representing the intersection of the input predicates.
+    //  */
+    // intersect(other: PredicateClass): PredicateClass[] {
+    //     let intersections = intersect(this.toString() as Predicate, other.toString() as Predicate);
+    //     return intersections.map(pattern => new PredicateClass(pattern));
+    // }
 
 
     /** Returns the pattern string with which this instance was constructed. */
