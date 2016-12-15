@@ -1,8 +1,8 @@
-import ANY from './any';
+// import ANY from './any';
 // import intersect from './intersect';
 // import makeMatchFunction from './make-match-function';
 import parse from './parse';
-// import Predicate from './predicate';
+import Predicate from './predicate';
 
 
 
@@ -50,7 +50,7 @@ export default class PredicateClass {
         }
 
         // Initialize members.
-        this.normalized = new PredicateClass(ast.signature); // NB: recursive.
+        // this.normalized = new PredicateClass(ast.signature); // NB: recursive.
         // this.identifier = ast.identifier;
         // this.captureNames = ast.captures.filter(capture => capture !== '?');
         // this.comment = pattern.split('#')[1] || '';
@@ -58,11 +58,11 @@ export default class PredicateClass {
     }
 
 
-    /**
-     * The normalized form of this predicate, which recognizes the same set of strings as this instance. Two predicates that
-     * recognize the same set of strings are guaranteed to have the same normalized form.
-     */
-    normalized: PredicateClass;
+    // /**
+    //  * The normalized form of this predicate, which recognizes the same set of strings as this instance. Two predicates that
+    //  * recognize the same set of strings are guaranteed to have the same normalized form.
+    //  */
+    // normalized: PredicateClass;
 
 
     // /**
@@ -119,9 +119,9 @@ export default class PredicateClass {
 
 
     /** Returns the pattern string with which this instance was constructed. */
-    toString() { return this.pattern; }
+    toString() { return <Predicate> this.pattern; }
 
 
-    /** A singleton predicate that recognises *all* strings. */
-    static ANY = new PredicateClass(ANY);
+    // /** A singleton predicate that recognises *all* strings. */
+    // static ANY = new PredicateClass(ANY);
 }

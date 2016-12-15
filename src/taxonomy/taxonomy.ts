@@ -1,5 +1,5 @@
 import insertAsDescendent from './insert-as-descendent';
-import PredicateClass from '../predicate';
+import PredicateClass, {normalise, ANY} from '../predicate';
 import TaxonomyNode from './taxonomy-node';
 
 
@@ -118,7 +118,7 @@ export default class Taxonomy<T> {
     // algo: exact match using canonical form of given Predicate/string
     get(predicate: PredicateClass | string): TaxonomyNode & T {
         let p = typeof predicate === 'string' ? new PredicateClass(predicate) : predicate;
-        let result = this.allNodes.filter(node => node.predicate === p.normalized)[0];
+        let result = this.allNodes.filter(node => node.predicate.toString() === normalise(p.toString()))[0];
         return result;
     }
 
@@ -149,14 +149,14 @@ function initTaxonomy<T>(taxonomy: Taxonomy<T>, patterns: PredicateClass[]) {
     }
 
     // Retrieve the root node, which always corresponds to the '…' pattern.
-    let rootNode = taxonomy.rootNode = nodeFor(PredicateClass.ANY);
+    let rootNode = taxonomy.rootNode = nodeFor(new PredicateClass(ANY));
 
     // Insert each of the given patterns, except '…', into a DAG rooted at '…'.
     // The insertion logic assumes only normalized patterns, which we obtain first.
     patterns
-        .map(pattern => pattern.normalized) // TODO: what if normalized patterns contain duplicates?
-        .filter(pattern => pattern !== PredicateClass.ANY) // TODO: why need this??
-        .forEach(pattern => insertAsDescendent(nodeFor(pattern), rootNode, nodeFor));
+        .map(pattern => normalise(pattern.toString())) // TODO: what if normalized patterns contain duplicates?
+        .filter(pattern => pattern !== ANY) // TODO: why need this??
+        .forEach(pattern => insertAsDescendent(nodeFor(new PredicateClass(pattern)), rootNode, nodeFor));
 
     // Finally, compute the `allNodes` snapshot.
     taxonomy.allNodes = Array.from(nodeMap.values());

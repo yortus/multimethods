@@ -1,7 +1,7 @@
 import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
-import PredicateClass from '../predicate';
+import PredicateClass, {normalise, ANY} from '../predicate';
 import Taxonomy, {TaxonomyNode} from '../taxonomy';
 
 
@@ -32,7 +32,7 @@ export default function computePredicateLineages<T>(taxonomy: Taxonomy<T>, rules
 
     // Every route begins with this universal rule. It matches all discriminants,
     // and its method just returns the 'unhandled' sentinel value.
-    const universalFallbackRule = new Rule(PredicateClass.ANY.toString(), function _unhandled() {
+    const universalFallbackRule = new Rule(ANY, function _unhandled() {
         return unhandled;
     });
 
@@ -98,7 +98,7 @@ function distributeRulesOverNodes<T>(taxonomy: Taxonomy<T>, rules: Rule[]) {
          * - the always-present root pattern '…'
          * - patterns synthesized at the intersection of overlapping patterns in the rule set.
          */
-        let exactlyMatchingRules = rules.filter(rule => rule.predicate.normalized === node.predicate.normalized);
+        let exactlyMatchingRules = rules.filter(rule => normalise(rule.predicate) === normalise(node.predicate.toString()));
 
         exactlyMatchingRules = disambiguateRules(exactlyMatchingRules); // NB: may throw
 

@@ -5,7 +5,7 @@ import Predicate from './predicate';
 
 
 
-export default function fromString(source: string): Predicate {
+export default function toPredicate(source: string): Predicate {
 
     // Parse the source string to test its validity. NB: may throw.
     parse(source);

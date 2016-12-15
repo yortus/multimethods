@@ -2,7 +2,7 @@ import computePredicateLineages from './compute-predicate-lineages';
 import generateDispatchFunction from './codegen/generate-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
-import PredicateClass from '../predicate';
+import PredicateClass, {toPredicate, normalise} from '../predicate';
 import Taxonomy from '../taxonomy';
 import {warn} from '../util';
 
@@ -47,8 +47,8 @@ function validateTaxonomy(taxonomy: Taxonomy<never>, options: MultimethodOptions
     // This often represents a user error, so it's a useful warning to point these patterns out so their intended
     // behaviour can be made explicit by the user.
     // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
-    let normalizedPredicates = Object.keys(options.rules).map(p => new PredicateClass(p).normalized);
-    let unhandledPredicates = taxonomy.allNodes.map(n => n.predicate).filter(p => normalizedPredicates.indexOf(p) === -1);
+    let normalizedPredicates = Object.keys(options.rules).map(p => normalise(toPredicate(p)));
+    let unhandledPredicates = taxonomy.allNodes.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
     if (unhandledPredicates.length > 0) {
         // TODO: improve error message...
         warn(`Multimethod contains conflicts: ${unhandledPredicates.map(p => p.toString()).join(', ')}`);

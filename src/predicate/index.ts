@@ -8,7 +8,7 @@ export {PredicateAST as PredicatePatternAST} from './parse';
 
 // TODO: ...
 export {default as ANY} from './any';
-export {default as fromString} from './from-string';
+export {default as toPredicate} from './to-predicate';
 export {default as intersect} from './intersect';
 export {default as makeIdentifier} from './make-identifier';
 export {default as makeMatchFunction} from './make-match-function';
