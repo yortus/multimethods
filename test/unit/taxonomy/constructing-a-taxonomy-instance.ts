@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {PredicateClass, Taxonomy, TaxonomyNode} from 'multimethods';
+import {Taxonomy, TaxonomyNode, toPredicate} from 'multimethods';
 
 
 describe('Constructing a Taxonomy instance', () => {
@@ -140,7 +140,7 @@ describe('Constructing a Taxonomy instance', () => {
 
     tests.forEach(test => {
         it(test.name, () => {
-            let predicates = test.predicates.map(ps => new PredicateClass(ps));
+            let predicates = test.predicates.map(ps => toPredicate(ps));
             let expected: any = test.taxonomy;
             let actual: any;
             try {

@@ -2,7 +2,7 @@ import computePredicateLineages from './compute-predicate-lineages';
 import generateDispatchFunction from './codegen/generate-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
-import PredicateClass, {toPredicate, normalise} from '../predicate';
+import {toPredicate, normalise} from '../predicate';
 import Taxonomy from '../taxonomy';
 import {warn} from '../util';
 
@@ -15,7 +15,7 @@ import {warn} from '../util';
 export default function createDispatchFunction(normalisedOptions: MultimethodOptions) {
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the rule set.
-    let taxonomy = new Taxonomy<never>(Object.keys(normalisedOptions.rules).map(pattern => new PredicateClass(pattern)));
+    let taxonomy = new Taxonomy<never>(Object.keys(normalisedOptions.rules).map(pattern => toPredicate(pattern)));
 
     // TODO: explain...
     // TODO: use a flag in options to enable/disable this warning/error

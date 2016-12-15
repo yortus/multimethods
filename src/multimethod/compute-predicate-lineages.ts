@@ -61,12 +61,12 @@ export default function computePredicateLineages<T>(taxonomy: Taxonomy<T>, rules
         // Obtain the full rule list corresponding to each pathway, ordered from least- to most-specific.
         let alternateRoutes = possibleRoutes
             .map(route => route
-                .map(predicate => taxonomyWithExactlyMatchingRules.get(predicate))
+                .map(predicate => taxonomyWithExactlyMatchingRules.get(predicate.toString()))
                 .reduce((path, node) => path.concat(node.exactlyMatchingRules), [universalFallbackRule])
             );
 
         // Make a single best path. Ensure no possibility of ambiguity.
-        let lineage = disambiguateRoutes(node.predicate, alternateRoutes);
+        let lineage = disambiguateRoutes(new PredicateClass(node.predicate), alternateRoutes);
 
         // TODO: order the rules from most- to least- specific as per spec...
         lineage.reverse();
@@ -98,7 +98,7 @@ function distributeRulesOverNodes<T>(taxonomy: Taxonomy<T>, rules: Rule[]) {
          * - the always-present root pattern '…'
          * - patterns synthesized at the intersection of overlapping patterns in the rule set.
          */
-        let exactlyMatchingRules = rules.filter(rule => normalise(rule.predicate) === normalise(node.predicate.toString()));
+        let exactlyMatchingRules = rules.filter(rule => normalise(rule.predicate) === normalise(node.predicate));
 
         exactlyMatchingRules = disambiguateRules(exactlyMatchingRules); // NB: may throw
 
@@ -123,5 +123,5 @@ function getAlternateLineagesForNode(node: TaxonomyNode): PredicateClass[][] {
         // No parent paths, therefore this must be the root.
         allRoutes = [[]];
     }
-    return allRoutes.map(path => path.concat([node.predicate]));
+    return allRoutes.map(path => path.concat([new PredicateClass(node.predicate)]));
 }
