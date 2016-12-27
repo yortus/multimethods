@@ -1,16 +1,16 @@
+import parse from './dsl-parser';
+import Predicate from './predicate';
 
 
 
 
 
-// TODO: revise...
-/**
- * Constructs or returns a Predicate instance. If `pattern` represents a normalized predicate, the corresponding
- * singleton instance of that normalized predicate will be returned. Otherwise, a new Predicate instance will be
- * constructed. Throws an error if `pattern` is not a valid predicate pattern string.
- * @param {string} pattern - the predicate specified as a pattern string.
- */
+/** Asserts `source` is a valid predicate string and returns it. Throws otherwise. */
+export default function toPredicate(source: string): Predicate {
 
+    // Parse the source string to assert its validity. NB: may throw.
+    parse(source);
 
-
-
+    // If we get here, `source` is a valid predicate.
+    return source as Predicate;
+}
