@@ -1,5 +1,5 @@
 import insertAsDescendent from './insert-as-descendent';
-import {Predicate, toPredicate, normalise, NormalisedPredicate, ANY} from '../predicate';
+import {Predicate, toPredicate, toNormalPredicate, NormalPredicate, ANY} from '../set-theory/predicates';
 import TaxonomyNode from './taxonomy-node';
 
 
@@ -117,7 +117,7 @@ export default class Taxonomy<T> {
     // TODO: temp testing... doc... looks up the node for the given predicate. returns undefined if not found.
     // algo: exact match using canonical form of given Predicate/string
     get(predicate: string): TaxonomyNode & T {
-        let p = normalise(toPredicate(predicate));
+        let p = toNormalPredicate(toPredicate(predicate));
         let result = this.allNodes.filter(node => node.predicate === p)[0];
         return result;
     }
@@ -142,8 +142,8 @@ function initTaxonomy<T>(taxonomy: Taxonomy<T>, patterns: Predicate[]) {
     // Create the nodeFor() function to return the node corresponding to a given pattern,
     // creating it on demand if it doesn't already exist. This function ensures that every
     // request for the same pattern gets the same singleton node.
-    let nodeMap = new Map<NormalisedPredicate, TaxonomyNode & T>();
-    let nodeFor = (pattern: NormalisedPredicate) => {
+    let nodeMap = new Map<NormalPredicate, TaxonomyNode & T>();
+    let nodeFor = (pattern: NormalPredicate) => {
         if (!nodeMap.has(pattern)) nodeMap.set(pattern, <TaxonomyNode & T> new TaxonomyNode(pattern));
         return nodeMap.get(pattern)!;
     }
@@ -154,7 +154,7 @@ function initTaxonomy<T>(taxonomy: Taxonomy<T>, patterns: Predicate[]) {
     // Insert each of the given patterns, except '…', into a DAG rooted at '…'.
     // The insertion logic assumes only normalized patterns, which we obtain first.
     patterns
-        .map(pattern => normalise(pattern)) // TODO: what if normalized patterns contain duplicates?
+        .map(pattern => toNormalPredicate(pattern)) // TODO: what if normalized patterns contain duplicates?
         .filter(pattern => pattern !== ANY) // TODO: why need this??
         .forEach(pattern => insertAsDescendent(nodeFor(pattern), rootNode, nodeFor));
 

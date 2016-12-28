@@ -61,6 +61,7 @@ export interface PredicateAST {
     captureNames: string[];
 
 
-    // TODO: doc...
+    // TODO: revise old comment...
+//     // /** The text of the comment portion of the predicate pattern, or '' if there is no comment. */
     comment: string;
 }

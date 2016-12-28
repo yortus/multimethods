@@ -1,4 +1,5 @@
-import {intersect, NormalisedPredicate} from '../predicate';
+import {NormalPredicate} from '../set-theory/predicates';
+import {intersect} from '../set-theory/sets';
 import TaxonomyNode from './taxonomy-node';
 
 
@@ -18,7 +19,7 @@ import TaxonomyNode from './taxonomy-node';
  *        the same taxonomy. When `insertee` overlaps an existing node in the subgraph, this function
  *        is used to synthesize the additional intersection node(s).
  */
-export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: TaxonomyNode, nodeFor: (predicate: NormalisedPredicate) => TaxonomyNode) {
+export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: TaxonomyNode, nodeFor: (predicate: NormalPredicate) => TaxonomyNode) {
 
     // Determine the set relationship between `insertee` and each of the `ancestor` node's existing children.
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.

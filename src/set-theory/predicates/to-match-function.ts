@@ -1,30 +1,40 @@
-import parse, {PredicateAST} from './parse';
+import parse, {PredicateAST} from './dsl-parser';
+import Predicate from './predicate';
 
 
 
 
 
+// TODO: revise comments (merge, remove 'internal', ...)
+//     // /**
+//     //  * Attempts to recognize the given string by matching it against this predicate. If the match is successful, an object
+//     //  * is returned containing the name/value pairs for each named capture that unifies the string with this predicate. If
+//     //  * the match fails, the return value is null.
+//     //  * @param {string} string - the string to recognize.
+//     //  * @returns {Object} null if the string is not recognized by the predicate. Otherwise, a hash of captured name/value
+//     //  *          pairs that unify the string with this predicate.
+//     //  */
 /**
  * Internal function used to generate the Predicate#match method. Although RegExps may be used to implement the `match`
  * method for any predicate, we avoid using RegExps for a number of simpler kinds of predicate pattern. This is because
  * predicate matching may be performed frequently, and possibly on critical paths. As such, the use of optimised `match`
  * implementations may result in substantial overall performance improvements in client code.
  */
-export default function makeMatchFunction(predicatePattern: string, predicatePatternAST?: PredicateAST): MatchFunction {
+export default function toMatchFunction(predicate: Predicate): MatchFunction {
 
     // TODO: temp testing...
-    predicatePatternAST = predicatePatternAST || parse(predicatePattern);
+    let predicateAST = parse(predicate);
 
     // Compute useful invariants for the given predicate pattern.
     // These are used as precomputed values in the closures created below.
-    const captureNames = predicatePatternAST.captures.filter(capture => capture !== '?');
+    const captureNames = predicateAST.captures.filter(capture => capture !== '?');
     const firstCaptureName = captureNames[0];
-    const literalChars = predicatePatternAST.signature.replace(/[*…]/g, '');
+    const literalChars = predicateAST.signature.replace(/[*…]/g, '');
     const literalCharCount = literalChars.length;
 
     // Characterise the given predicate pattern using a simplified 'signature'.
     // E.g., '/foo/*.js' becomes 'lit*lit', and '/pub/{...rest}' becomes 'lit{…cap}'
-    let simplifiedPatternSignature = predicatePattern
+    let simplifiedPatternSignature = predicate
         .replace(/[ ]*\#.*$/g, '')      // strip trailing whitespace
         .replace(/{[^.}]+}/g, 'ᕽ')      // replace '{name}' with 'ᕽ'
         .replace(/{\.+[^}]+}/g, '﹍')    // replace '{...name}' with '﹍'
@@ -92,9 +102,9 @@ export default function makeMatchFunction(predicatePattern: string, predicatePat
             return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
 
         case 'lit*lit':
-            let captureStart = predicatePatternAST.signature.indexOf('*');
-            let startLit = predicatePatternAST.signature.slice(0, captureStart);
-            let endLit = predicatePatternAST.signature.slice(captureStart + 1);
+            let captureStart = predicateAST.signature.indexOf('*');
+            let startLit = predicateAST.signature.slice(0, captureStart);
+            let endLit = predicateAST.signature.slice(captureStart + 1);
             return s => surroundedWith(s, startLit, endLit) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
         // TODO: consider implementing the following cases for a *marginal* performance boost
@@ -106,9 +116,9 @@ export default function makeMatchFunction(predicatePattern: string, predicatePat
         default:
             // TODO: alert on match functions that don't get optimised... either remove this or formalise it as a warning...
             //       - probably remove, since 'optimisations' are fardly possible beyond the simpler cases already handled above (i.e. there are diminishing returns)
-            console.log(`=====>   NOT OPTIMISED   ${simplifiedPatternSignature}   ('${predicatePattern}')`);
+            console.log(`=====>   NOT OPTIMISED   ${simplifiedPatternSignature}   ('${predicate}')`);
 
-            let regexp = makeRegExpForPattern(predicatePatternAST);
+            let regexp = makeRegExpForPattern(predicateAST);
             return s => {
                 let matches = s.match(regexp);
                 if (!matches) return null;

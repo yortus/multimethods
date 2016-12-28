@@ -1,11 +1,11 @@
-import normalise from './normalise';
-import NormalisedPredicate from './normalised-predicate';
-import Predicate from './predicate';
+import {toNormalPredicate, NormalPredicate, Predicate} from '../predicates';
 
 
 
 
 
+// TODO: make this about Sets, not Predicates
+// TODO: revise comment...
 /**
  * Computes the intersection of the two given predicate patterns. The intersection recognizes a string if and only if
  * that string is recognized by *both* arguments. Because intersections cannot in general be expressed as a single
@@ -23,9 +23,9 @@ import Predicate from './predicate';
  * @param {string} b - a normalized predicate pattern.
  * @returns {string[]} - an array of normalized patterns representing the intersection of `a` and `b`.
  */
-export default function intersectPredicatePatterns(a: Predicate, b: Predicate): NormalisedPredicate[] {
-    let na = normalise(a);
-    let nb = normalise(b);
+export default function intersectPredicatePatterns(a: Predicate, b: Predicate): NormalPredicate[] {
+    let na = toNormalPredicate(a);
+    let nb = toNormalPredicate(b);
     let allIntersections = getAllIntersections(na, nb);
     let distinctIntersections = getDistinctPatterns(allIntersections);
     return distinctIntersections;
@@ -44,12 +44,12 @@ export default function intersectPredicatePatterns(a: Predicate, b: Predicate): 
  * @param {string} b - a normalized predicate pattern.
  * @returns {string[]} - a list of normalized predicate patterns that represent valid intersections of `a` and `b`.
  */
-function getAllIntersections(a: NormalisedPredicate, b: NormalisedPredicate): NormalisedPredicate[] {
+function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPredicate[] {
 
     // An empty pattern intersects only with another empty pattern or a single wildcard.
     if (a === '' || b === '') {
         let other = a || b;
-        return other === '' || other === '*' || other === '…' ? ['' as NormalisedPredicate] : [];
+        return other === '' || other === '*' || other === '…' ? ['' as NormalPredicate] : [];
     }
 
     // `a` starts with a wildcard. Generate all possible intersections by unifying
@@ -59,14 +59,14 @@ function getAllIntersections(a: NormalisedPredicate, b: NormalisedPredicate): No
         // Obtain all splits. When unifying splits against '*', do strength
         // reduction on split prefixes containing '…' (ie replace '…' with '*')
         let splits = getAllPatternSplits(b);
-        if (a[0] === '*') splits.forEach(pair => pair[0] = pair[0].replace(/…/g, '*') as NormalisedPredicate);
+        if (a[0] === '*') splits.forEach(pair => pair[0] = pair[0].replace(/…/g, '*') as NormalPredicate);
 
         // Compute and return intersections for all valid unifications. This is a recursive operation.
         let result = splits
             .filter(pair => a[0] === '…' || (pair[0].indexOf('/') === -1 && pair[0].indexOf('…') === -1))
-            .map(pair => getAllIntersections(a.slice(1) as NormalisedPredicate, pair[1]).map(u => pair[0] + u))
+            .map(pair => getAllIntersections(a.slice(1) as NormalPredicate, pair[1]).map(u => pair[0] + u))
             .reduce((ar, el) => (ar.push.apply(ar, el), ar), []);
-        return result as NormalisedPredicate[];
+        return result as NormalPredicate[];
     }
 
     // `b` starts with a wildcard. Delegate to previous case by swapping arguments (since intersection is commutative).
@@ -76,9 +76,9 @@ function getAllIntersections(a: NormalisedPredicate, b: NormalisedPredicate): No
 
     // Both patterns start with the same literal. Intersect their remainders recursively.
     else if (a[0] === b[0]) {
-        let result = getAllIntersections(a.slice(1) as NormalisedPredicate, b.slice(1) as NormalisedPredicate)
+        let result = getAllIntersections(a.slice(1) as NormalPredicate, b.slice(1) as NormalPredicate)
             .map(u => a[0] + u);
-        return result as NormalisedPredicate[];
+        return result as NormalPredicate[];
     }
 
     // If we get here, `a` and `b` must be disjoint.
@@ -94,8 +94,8 @@ function getAllIntersections(a: NormalisedPredicate, b: NormalisedPredicate): No
  * character have the wildcard on both sides of the split (i.e. as the last character of the prefix and the first
  * character of the suffix). E.g., 'ab…c' splits into: ['','ab…c'], ['a','b…c'], ['ab…','…c'], and ['ab…c',''].
  */
-function getAllPatternSplits(pattern: NormalisedPredicate): [NormalisedPredicate, NormalisedPredicate][] {
-    let result = [] as [NormalisedPredicate, NormalisedPredicate][];
+function getAllPatternSplits(pattern: NormalPredicate): [NormalPredicate, NormalPredicate][] {
+    let result = [] as [NormalPredicate, NormalPredicate][];
     for (let i = 0; i <= pattern.length; ++i) {
         let pair = [pattern.substring(0, i), pattern.substring(i)];
         if (pattern[i] === '…' || pattern[i] === '*') {
@@ -115,7 +115,7 @@ function getAllPatternSplits(pattern: NormalisedPredicate): [NormalisedPredicate
  * Returns an array containing a subset of the elements in `patterns`, such that no pattern in
  * the returned array is a proper or improper subset of any other pattern in the returned array.
  */
-function getDistinctPatterns(patterns: NormalisedPredicate[]): NormalisedPredicate[] {
+function getDistinctPatterns(patterns: NormalPredicate[]): NormalPredicate[] {
 
     // Set up a parallel array to flag patterns that are duplicates. Start by assuming none are.
     let isDuplicate = patterns.map(_ => false);
@@ -143,7 +143,7 @@ function getDistinctPatterns(patterns: NormalisedPredicate[]): NormalisedPredica
  * Returns a regular expression that matches all predicate patterns that
  * are proper or improper subsets of the specified predicate pattern.
  */
-function makeSubsetRecogniser(pattern: NormalisedPredicate) {
+function makeSubsetRecogniser(pattern: NormalPredicate) {
     let re = pattern.split('').map(c => {
         if (c === '*') return '[^\\/…]*';
         if (c === '…') return '.*';

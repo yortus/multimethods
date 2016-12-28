@@ -1,7 +1,7 @@
 import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
-import {Predicate, normalise, ANY} from '../predicate';
+import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
 import Taxonomy, {TaxonomyNode} from '../taxonomy';
 
 
@@ -98,7 +98,7 @@ function distributeRulesOverNodes<T>(taxonomy: Taxonomy<T>, rules: Rule[]) {
          * - the always-present root pattern '…'
          * - patterns synthesized at the intersection of overlapping patterns in the rule set.
          */
-        let exactlyMatchingRules = rules.filter(rule => normalise(rule.predicate) === normalise(node.predicate));
+        let exactlyMatchingRules = rules.filter(rule => toNormalPredicate(rule.predicate) === toNormalPredicate(node.predicate));
 
         exactlyMatchingRules = disambiguateRules(exactlyMatchingRules); // NB: may throw
 

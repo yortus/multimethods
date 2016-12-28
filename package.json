@@ -6,7 +6,7 @@
   "main": "built/index.js",
   "typings": "built/index.d.ts",
   "scripts": {
-    "build": "tsc -p src && tsc -p test && pegjs src/predicate/grammar.peg built/predicate/grammar.js",
+    "build": "tsc -p src && tsc -p test && pegjs src/set-theory/predicates/dsl-grammar.peg built/set-theory/predicates/dsl-grammar.js",
     "clean": "rimraf built/",
     "prepublish": "npm run self-ref && npm run build",
     "test": "node ./scripts/run-unit-tests",

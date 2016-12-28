@@ -1,6 +1,6 @@
 // TODO: better explain how/why this works in external documentation (esp. the synthesized 'crasher' method).
 import {getLongestCommonPrefix, MultimethodError} from '../util';
-import {Predicate} from '../predicate';
+import {Predicate} from '../set-theory/predicates';
 import Rule from './rule';
 
 

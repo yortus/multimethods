@@ -1,6 +1,6 @@
 // TODO: review all comments and terminology in here...
 // TODO: explain what decorators are here, or refer to docs elsewhere (and write them).
-import {Predicate, toPredicate} from '../predicate';
+import {Predicate, toPredicate} from '../set-theory/predicates';
 //import checkConsequentSignature from './check-consequent-signature';
 
 

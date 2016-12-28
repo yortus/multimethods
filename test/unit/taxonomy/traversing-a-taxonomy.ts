@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Taxonomy, TaxonomyNode, intersect, normalise, ANY, toPredicate} from 'multimethods';
+import {Taxonomy, TaxonomyNode, intersect, toNormalPredicate, ANY, toPredicate} from 'multimethods';
 
 
 describe('Traversing a taxonomy', () => {
@@ -23,7 +23,7 @@ describe('Traversing a taxonomy', () => {
 
             // All input patterns are in the taxonomy constructed from them.
             let taxonomyPatterns = taxonomy.allNodes.map(node => node.predicate.toString());
-            expect(patterns.every(p => taxonomyPatterns.indexOf(normalise(p)) !== -1)).to.be.true;
+            expect(patterns.every(p => taxonomyPatterns.indexOf(toNormalPredicate(p)) !== -1)).to.be.true;
 
             // Every child node's pattern matches a subset of the addresses matched by its parent node's predicate.
             let edges = getAllEdges(taxonomy.rootNode);

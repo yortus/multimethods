@@ -1,7 +1,7 @@
 import computeAllExecutors from './compute-all-executors';
 import computeRouteSelector from './compute-route-selector';
 import {Lineage} from '../compute-predicate-lineages';
-import * as predicate from '../../predicate';
+import * as predicates from '../../set-theory/predicates';
 import MultimethodOptions from '../multimethod-options';
 import Taxonomy from '../../taxonomy';
 import * as util from '../../util';
@@ -33,9 +33,9 @@ export default function generateDispatchFunction(taxonomy: Taxonomy<Lineage>, no
     const isPromise = util.isPromiseLike;
     isPromise; // Suppress TS6133 decl never used
     const UNHANDLED = normalisedOptions.unhandled;
-    const makeMatchFunction = predicate.makeMatchFunction;
-    makeMatchFunction; // Suppress TS6133 decl never used
-    const parsePredicate = predicate.parse;
+    const toMatchFunction = predicates.toMatchFunction;
+    toMatchFunction; // Suppress TS6133 decl never used
+    const parsePredicate = predicates.parsePredicatePattern;
     parsePredicate; // Suppress TS6133 decl never used
 
 

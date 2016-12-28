@@ -1,4 +1,4 @@
-import {NormalisedPredicate} from '../predicate';
+import {NormalPredicate} from '../set-theory/predicates';
 
 
 
@@ -9,13 +9,13 @@ export default class TaxonomyNode {
 
 
     /** Constructs a new TaxonomyNode instance that holds the given normalised predicate. */
-    constructor(predicate: NormalisedPredicate) {
+    constructor(predicate: NormalPredicate) {
         this.predicate = predicate;
     }
 
 
     /** The normalised predicate associated with this node. */
-    predicate: NormalisedPredicate;
+    predicate: NormalPredicate;
 
 
     /** Links to this node's direct parents (i.e., more generalised or 'wider' predicates). */

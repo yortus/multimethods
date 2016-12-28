@@ -2,7 +2,7 @@ import computePredicateLineages from './compute-predicate-lineages';
 import generateDispatchFunction from './codegen/generate-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
-import {toPredicate, normalise} from '../predicate';
+import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
 import Taxonomy from '../taxonomy';
 import {warn} from '../util';
 
@@ -47,7 +47,7 @@ function validateTaxonomy(taxonomy: Taxonomy<never>, options: MultimethodOptions
     // This often represents a user error, so it's a useful warning to point these patterns out so their intended
     // behaviour can be made explicit by the user.
     // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
-    let normalizedPredicates = Object.keys(options.rules).map(p => normalise(toPredicate(p)));
+    let normalizedPredicates = Object.keys(options.rules).map(p => toNormalPredicate(toPredicate(p)));
     let unhandledPredicates = taxonomy.allNodes.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
     if (unhandledPredicates.length > 0) {
         // TODO: improve error message...
