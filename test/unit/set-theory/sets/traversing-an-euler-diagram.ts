@@ -22,10 +22,10 @@ describe('Traversing an euler diagram', () => {
             expect(eulerDiagram.universe.predicate.toString()).equals(ANY);
 
             // All input predicates are in the euler diagram constructed from them.
-            let eulerDiagramPredicates = eulerDiagram.allNodes.map(node => node.predicate.toString());
+            let eulerDiagramPredicates = eulerDiagram.sets.map(set => set.predicate.toString());
             expect(predicates.every(p => eulerDiagramPredicates.indexOf(toNormalPredicate(p)) !== -1)).to.be.true;
 
-            // Every child node's predicate matches a subset of the addresses matched by its parent node's predicate.
+            // Every child set's predicate matches a subset of the addresses matched by its parent set's predicate.
             let edges = getAllEdges(eulerDiagram.universe);
             expect(edges.every(edge => {
                 let intersections = intersect(<any> edge.parent.predicate.toString(), <any> edge.child.predicate.toString()); // TODO: messy & casty... fix...
@@ -37,8 +37,8 @@ describe('Traversing an euler diagram', () => {
 
 
 /** Helper function that enumerates all edges in an euler diagram. */
-function getAllEdges(node: Set): {parent: Set; child: Set}[] {
-    let direct = node.subsets.map(spec => ({parent: node, child: spec}));
-    let all = direct.concat(...node.subsets.map(getAllEdges)); 
+function getAllEdges(set: Set): {parent: Set; child: Set}[] {
+    let direct = set.subsets.map(spec => ({parent: set, child: spec}));
+    let all = direct.concat(...set.subsets.map(getAllEdges)); 
     return all;
 }

@@ -48,7 +48,7 @@ function validateEulerDiagram(eulerDiagram: EulerDiagram<never>, options: Multim
     // behaviour can be made explicit by the user.
     // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
     let normalizedPredicates = Object.keys(options.rules).map(p => toNormalPredicate(toPredicate(p)));
-    let unhandledPredicates = eulerDiagram.allNodes.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
+    let unhandledPredicates = eulerDiagram.sets.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
     if (unhandledPredicates.length > 0) {
         // TODO: improve error message...
         warn(`Multimethod contains conflicts: ${unhandledPredicates.map(p => p.toString()).join(', ')}`);

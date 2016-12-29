@@ -41,19 +41,19 @@ export interface WithExecutors {
  */
 export default function computeAllExecutors(eulerDiagram: EulerDiagram<Lineage>, options: MultimethodOptions) {
 
-    let augmentedEulerDiagram = eulerDiagram.augment(node => {
+    let augmentedEulerDiagram = eulerDiagram.augment(set => {
 
         // TODO: doc...
-        let rulesWithDuplicatesRemoved = node.lineage.filter(rule => rule.isMetaRule || eulerDiagram.get(rule.predicate) === node);
-        let sources = rulesWithDuplicatesRemoved.map(rule => getSourceCodeForRule(eulerDiagram, node, rule, options) + '\n');
-        let source = [`// ========== EXECUTORS FOR ${node.predicate} ==========\n`].concat(sources).join('');
+        let rulesWithDuplicatesRemoved = set.lineage.filter(rule => rule.isMetaRule || eulerDiagram.get(rule.predicate) === set);
+        let sources = rulesWithDuplicatesRemoved.map(rule => getSourceCodeForRule(eulerDiagram, set, rule, options) + '\n');
+        let source = [`// ========== EXECUTORS FOR ${set.predicate} ==========\n`].concat(sources).join('');
 
         // TODO: temp testing...
         // The 'entry point' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
         // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
-        let rules = node.lineage;
+        let rules = set.lineage;
         let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
-        let entryPoint = getNameForRule(eulerDiagram, node, entryPointRule);
+        let entryPoint = getNameForRule(eulerDiagram, set, entryPointRule);
 
         return <WithExecutors> { source, entryPoint };
     });
@@ -65,18 +65,18 @@ export default function computeAllExecutors(eulerDiagram: EulerDiagram<Lineage>,
 
 
 // TODO: ...
-function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, node: Set & Lineage, rule: Rule, options: MultimethodOptions) {
+function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Lineage, rule: Rule, options: MultimethodOptions) {
 
     // TODO: to get copypasta'd code working... revise...
-    let i = node.lineage.indexOf(rule);
-    let rules = node.lineage;
+    let i = set.lineage.indexOf(rule);
+    let rules = set.lineage;
 
     // TODO: start with the template...
     let source = getNormalisedFunctionSource(routeExecutorTemplate);
 
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
-    let predicateIdentifier = toIdentifier(node.predicate);
+    let predicateIdentifier = toIdentifier(set.predicate);
     let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${predicateIdentifier}`;
     let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${predicateIdentifier}`;
     let captureNames = parsePredicatePattern(rule.predicate.toString()).captureNames;
@@ -101,11 +101,11 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, node: Set & L
 
     // TODO: ... all strings
     source = replaceAll(source, {
-        METHOD_NAME: getNameForRule(eulerDiagram, node, rule),
+        METHOD_NAME: getNameForRule(eulerDiagram, set, rule),
         GET_CAPTURES: getCaptures,
         CALL_METHOD: callMethod,
-        DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(eulerDiagram, node, downstreamRule) : '',
-        DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, node, rules[i + 1]) : ''
+        DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(eulerDiagram, set, downstreamRule) : '',
+        DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : ''
     });
 
     // TODO: temp testing... specialise for arity...
@@ -120,9 +120,9 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, node: Set & L
 
     // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
     if (captureNames.length > 0) {
-        source = source + `\nvar ${getCaptures} = toMatchFunction(eulerDiagram.get('${toNormalPredicate(node.predicate)}').lineage[${i}].predicate.toString());` // TODO: too long and complex! fix me!!!
+        source = source + `\nvar ${getCaptures} = toMatchFunction(eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].predicate.toString());` // TODO: too long and complex! fix me!!!
     }
-    source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(node.predicate)}').lineage[${i}].method;`;
+    source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].method;`;
 
     // All done for this iteration.
     return source;
@@ -133,13 +133,13 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, node: Set & L
 
 
 // TODO: ...
-function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, node: Set & Lineage, rule: Rule) {
+function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Lineage, rule: Rule) {
     let ruleNode = eulerDiagram.get(rule.predicate);
     let ruleIndex = ruleNode.lineage.indexOf(rule);
     let ruleIdentifier = toIdentifier(ruleNode.predicate);
 
     if (rule.isMetaRule) {
-        let nodeIdentifier = toIdentifier(node.predicate);
+        let nodeIdentifier = toIdentifier(set.predicate);
         return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleIdentifier}Within${nodeIdentifier}`;
     }
     else {

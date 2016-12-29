@@ -20,12 +20,12 @@ export default function computeRouteSelector(eulerDiagram: EulerDiagram<WithExec
 // TODO: revise comments...
     // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
     // TODO: extra doc - explain opt here that match functions never have captures due to using normalised forms...
-    //let patternNames = eulerDiagram.allNodes.map(node => node.pattern.identifier);
+    //let patternNames = eulerDiagram.sets.map(set => set.pattern.identifier);
 
-// TODO: temp testing... HACKY BUGGY brittle B/C assumes eulerDiagram.allNodes has identical pattern order as `candidates` object keys...    
+// TODO: temp testing... HACKY BUGGY brittle B/C assumes eulerDiagram.sets has identical pattern order as `candidates` object keys...    
 // TODO: how otherwise to link candidates back to patterns, since they just preserve rule names that were derived from pattern identifiers, but are no longer necessarily the same
 // TODO: maybe use a Map again... but that won't work on ES5?? (but can shim)
-let predicates = eulerDiagram.allNodes.map(node => node.predicate);
+let predicates = eulerDiagram.sets.map(set => set.predicate);
 
     // // Generate a unique pretty name for each pattern, suitable for use in the generated source code.
     // let patternNames = patterns.map(p => p.identifier);
@@ -75,19 +75,19 @@ function generateSelectorSourceCode(from: Set & WithExecutors, nestDepth: number
 
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
-    subsets.forEach((node: Set & WithExecutors, i) => {
-        let predicateIdentifier = toIdentifier(node.predicate);
+    subsets.forEach((set: Set & WithExecutors, i) => {
+        let predicateIdentifier = toIdentifier(set.predicate);
         let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${predicateIdentifier}(discriminant)) `;
 
-        if (node.subsets.length === 0) {
-            lines.push(`${condition}return ${node.entryPoint};`);
+        if (set.subsets.length === 0) {
+            lines.push(`${condition}return ${set.entryPoint};`);
             return;
         }
 
         lines = [
             ...lines,
             `${condition}{`,
-            ...generateSelectorSourceCode(node, nestDepth + 1),
+            ...generateSelectorSourceCode(set, nestDepth + 1),
             `${indent}}`
         ];
     });

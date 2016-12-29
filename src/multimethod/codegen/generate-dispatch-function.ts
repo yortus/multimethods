@@ -20,7 +20,7 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     let t2 = computeAllExecutors(eulerDiagram, normalisedOptions);
     let selectorSource = computeRouteSelector(t2);
 
-    let wholeSource = [selectorSource, ...t2.allNodes.map(node => node.source)].join('\n');
+    let wholeSource = [selectorSource, ...t2.sets.map(set => set.source)].join('\n');
 
 //    console.log(wholeSource);
 

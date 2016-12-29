@@ -144,7 +144,7 @@ describe('Constructing an euler diagram', () => {
             let expected: any = test.eulerDiagram;
             let actual: any;
             try {
-                actual = nodeToObj(new EulerDiagram(predicates).universe);
+                actual = setToObj(new EulerDiagram(predicates).universe);
             }
             catch (ex) {
                 actual = 'ERROR: ' + ex.message;
@@ -159,6 +159,6 @@ describe('Constructing an euler diagram', () => {
 
 
 /** Helper function that converts an EulerDiagram to a simple nested object with predicate sources for keys */
-function nodeToObj(node: Set): {} {
-    return node.subsets.reduce((obj, node) => (obj[node.predicate.toString()] = nodeToObj(node), obj), {});
+function setToObj(set: Set): {} {
+    return set.subsets.reduce((obj, set) => (obj[set.predicate.toString()] = setToObj(set), obj), {});
 }
