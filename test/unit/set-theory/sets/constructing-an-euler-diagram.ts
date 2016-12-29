@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {Taxonomy, TaxonomyNode, toPredicate} from 'multimethods';
+import {EulerDiagram, Set, toPredicate} from 'multimethods';
 
 
-describe('Constructing a Taxonomy instance', () => {
+describe('Constructing an euler diagram', () => {
 
     let tests = [
         {
@@ -14,7 +14,7 @@ describe('Constructing a Taxonomy instance', () => {
                 '/bar/*',
                 '/foo/bar'
             ],
-            taxonomy: {
+            eulerDiagram: {
                 "/…": {
                     "/foo/*": {
                         "/foo/bar": {}
@@ -33,7 +33,7 @@ describe('Constructing a Taxonomy instance', () => {
             ],
 
             // TODO: temp testing...
-            taxonomy: {
+            eulerDiagram: {
                 'a*': {
                     'a': {},
                     'a*a': {}
@@ -45,7 +45,7 @@ describe('Constructing a Taxonomy instance', () => {
             }
 
             // TODO: was...
-            // taxonomy: 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
+            // eulerDiagram: 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
         },
         {
             // ======================================== 3. ========================================
@@ -67,7 +67,7 @@ describe('Constructing a Taxonomy instance', () => {
                 '/*/b',
                 '/*z/b',
             ],
-            taxonomy: {
+            eulerDiagram: {
                 "a*": {
                     "a*m*": {
                         "a*m*z": {}
@@ -141,10 +141,10 @@ describe('Constructing a Taxonomy instance', () => {
     tests.forEach(test => {
         it(test.name, () => {
             let predicates = test.predicates.map(ps => toPredicate(ps));
-            let expected: any = test.taxonomy;
+            let expected: any = test.eulerDiagram;
             let actual: any;
             try {
-                actual = nodeToObj(new Taxonomy(predicates).rootNode);
+                actual = nodeToObj(new EulerDiagram(predicates).universe);
             }
             catch (ex) {
                 actual = 'ERROR: ' + ex.message;
@@ -158,7 +158,7 @@ describe('Constructing a Taxonomy instance', () => {
 });
 
 
-/** Helper function that converts a Taxonomy to a simple nested object with predicate sources for keys */
-function nodeToObj(node: TaxonomyNode): {} {
-    return node.specializations.reduce((obj, node) => (obj[node.predicate.toString()] = nodeToObj(node), obj), {});
+/** Helper function that converts an EulerDiagram to a simple nested object with predicate sources for keys */
+function nodeToObj(node: Set): {} {
+    return node.subsets.reduce((obj, node) => (obj[node.predicate.toString()] = nodeToObj(node), obj), {});
 }

@@ -2,7 +2,7 @@ import disambiguateRoutes from './disambiguate-routes';
 import disambiguateRules from './disambiguate-rules';
 import Rule from './rule';
 import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
-import Taxonomy, {TaxonomyNode} from '../taxonomy';
+import {EulerDiagram, Set} from '../set-theory/sets';
 
 
 
@@ -20,15 +20,15 @@ export interface Lineage {
 
 // TODO: review comments...
 /**
- * Returns a mapping of every possible route through the given taxonomy, keyed by pattern. There is one route for each
- * node in the taxonomy. A route is simply a list of rules, ordered from least- to most-specific, that all match the set
- * of discriminants matched by the corresponding taxonomy node's pattern. Routes are an important internal concept,
+ * Returns a mapping of every possible route through the given euler diagram, keyed by pattern. There is one route for each
+ * node in the euler diagram. A route is simply a list of rules, ordered from least- to most-specific, that all match the set
+ * of discriminants matched by the corresponding euler diagram node's pattern. Routes are an important internal concept,
  * because each route represents the ordered list of matching methods for any given discriminant
  * 
  *  to any address that is best matched by the
  * pattern associated with the route.
  */
-export default function computePredicateLineages<T>(taxonomy: Taxonomy<T>, rules: Rule[], unhandled: any): Taxonomy<T & Lineage> {
+export default function computePredicateLineages<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[], unhandled: any): EulerDiagram<T & Lineage> {
 
     // Every route begins with this universal rule. It matches all discriminants,
     // and its method just returns the 'unhandled' sentinel value.
@@ -36,32 +36,32 @@ export default function computePredicateLineages<T>(taxonomy: Taxonomy<T>, rules
         return unhandled;
     });
 
-    // Find the equal-best rules corresponding to each pattern in the taxonomy, sorted least- to most-specific in each
+    // Find the equal-best rules corresponding to each pattern in the euler diagram, sorted least- to most-specific in each
     // case. Since the rules are 'equal best', there is no inherent way to recognise their relative specificity. This is
     // where the client-supplied 'tiebreak' function is used. It must provide an unambiguous order in all cases where
     // rules are otherwise of identical specificity.
-    let taxonomyWithExactlyMatchingRules = distributeRulesOverNodes(taxonomy, rules);
+    let eulerDiagramWithExactlyMatchingRules = distributeRulesOverNodes(eulerDiagram, rules);
 
-    // Every node in the taxonomy represents the best-matching pattern for some set of discriminants. Therefore, the set
-    // of all possible discriminants may be thought of as being partitioned by a taxonomy into one partition per node,
+    // Every node in the euler diagram represents the best-matching pattern for some set of discriminants. Therefore, the set
+    // of all possible discriminants may be thought of as being partitioned by a euler diagram into one partition per node,
     // where for each partition, that partition's node holds the most-specific pattern that matches that partition's
     // discriminants. For every such partition, we can concatenate the 'equal best' rules for all the nodes along the
     // routes from the root node to the most-specific node in the partition, thus getting a rule
     // list for each partition, ordered from least- to most-specific, of all the rules that match all the partition's
     // discriminants. One complication here is that there may be multiple routes from the root to a node in the
-    // taxonomy, since it is a DAG and may therefore contain 'diamonds'. Since we tolerate no ambiguity, these multiple
+    // euler diagram, since it is a DAG and may therefore contain 'diamonds'. Since we tolerate no ambiguity, these multiple
     // routes must be effectively collapsed down to a single unambiguous route. The details of this are in the
     // disambiguateRoutes() function.
-    let result = taxonomy.augment(node => {
+    let result = eulerDiagram.augment(node => {
 
         // TODO: confusing! possibleRoutes, alternateRoutes sound like the same thing but are not!!
-        // Get all possible routes through the taxonomy from the root to `node`.
+        // Get all possible routes through the euler diagram from the root to `node`.
         let possibleRoutes = getAlternateLineagesForNode(node);
 
         // Obtain the full rule list corresponding to each pathway, ordered from least- to most-specific.
         let alternateRoutes = possibleRoutes
             .map(route => route
-                .map(predicate => taxonomyWithExactlyMatchingRules.get(predicate.toString()))
+                .map(predicate => eulerDiagramWithExactlyMatchingRules.get(predicate.toString()))
                 .reduce((path, node) => path.concat(node.exactlyMatchingRules), [universalFallbackRule])
             );
 
@@ -83,17 +83,17 @@ export default function computePredicateLineages<T>(taxonomy: Taxonomy<T>, rules
 
 
 // TODO: ...
-function distributeRulesOverNodes<T>(taxonomy: Taxonomy<T>, rules: Rule[]) {
+function distributeRulesOverNodes<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[]) {
 
-    // Find the equal-best rules corresponding to each pattern in the taxonomy, sorted least- to most-specific in each
+    // Find the equal-best rules corresponding to each pattern in the euler diagram, sorted least- to most-specific in each
     // case. Since the rules are 'equal best', there is no inherent way to recognise their relative specificity. This is
     // where the client-supplied 'tiebreak' function is used. It must provide an unambiguous order in all cases where
     // rules are otherwise of identical specificity.
-    let result = taxonomy.augment(node => {
+    let result = eulerDiagram.augment(node => {
 
         /**
          * Get all the rules in the rule set whose normalized form exactly matches that of the given `pattern`. NB: some
-         * patterns may have no such rules, because the taxonomy of patterns may include some that are not in the ruleset,
+         * patterns may have no such rules, because the euler diagram of patterns may include some that are not in the ruleset,
          * such as:
          * - the always-present root pattern '…'
          * - patterns synthesized at the intersection of overlapping patterns in the rule set.
@@ -112,12 +112,12 @@ function distributeRulesOverNodes<T>(taxonomy: Taxonomy<T>, rules: Rule[]) {
 
 
 /**
- * Enumerates every possible walk[1] in the taxonomy from the root to the given `node`. Each walk is represented as a
+ * Enumerates every possible walk[1] in the euler diagram from the root to the given `node`. Each walk is represented as a
  * list of predicates arranged in walk-order (i.e., from the root to the descendent).
  * [1] See: https://en.wikipedia.org/wiki/Glossary_of_graph_theory#Walks
  */
-function getAlternateLineagesForNode(node: TaxonomyNode): Predicate[][] {
-    let allRoutes = ([] as Predicate[][]).concat(...node.generalizations.map(getAlternateLineagesForNode));
+function getAlternateLineagesForNode(node: Set): Predicate[][] {
+    let allRoutes = ([] as Predicate[][]).concat(...node.supersets.map(getAlternateLineagesForNode));
     if (allRoutes.length === 0) {
 
         // No parent paths, therefore this must be the root.

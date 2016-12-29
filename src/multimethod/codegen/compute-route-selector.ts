@@ -1,6 +1,6 @@
 import {toIdentifier} from '../../set-theory/predicates';
 import RouteExecutor from './route-executor';
-import Taxonomy, {TaxonomyNode} from '../../taxonomy';
+import {EulerDiagram, Set} from '../../set-theory/sets';
 import {WithExecutors} from './compute-all-executors';
 
 
@@ -11,21 +11,21 @@ import {WithExecutors} from './compute-all-executors';
 /**
  * Generates a function that, given a discriminant, returns the best-matching route executor from the given list of
  * candidates. The returned selector function is generated for maximum readability and efficiency, using conditional
- * constructs that follow the branches of the given `taxonomy`.
- * @param {Taxonomy} taxonomy - The arrangement of patterns on which to base the returned selector function.
+ * constructs that follow the branches of the given `eulerDiagram`.
+ * @param {EulerDiagram} eulerDiagram - The arrangement of patterns on which to base the returned selector function.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function computeRouteSelector(taxonomy: Taxonomy<WithExecutors>) {
+export default function computeRouteSelector(eulerDiagram: EulerDiagram<WithExecutors>) {
 
 // TODO: revise comments...
     // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
     // TODO: extra doc - explain opt here that match functions never have captures due to using normalised forms...
-    //let patternNames = taxonomy.allNodes.map(node => node.pattern.identifier);
+    //let patternNames = eulerDiagram.allNodes.map(node => node.pattern.identifier);
 
-// TODO: temp testing... HACKY BUGGY brittle B/C assumes taxonomy.allNodes has identical pattern order as `candidates` object keys...    
+// TODO: temp testing... HACKY BUGGY brittle B/C assumes eulerDiagram.allNodes has identical pattern order as `candidates` object keys...    
 // TODO: how otherwise to link candidates back to patterns, since they just preserve rule names that were derived from pattern identifiers, but are no longer necessarily the same
 // TODO: maybe use a Map again... but that won't work on ES5?? (but can shim)
-let predicates = taxonomy.allNodes.map(node => node.predicate);
+let predicates = eulerDiagram.allNodes.map(node => node.predicate);
 
     // // Generate a unique pretty name for each pattern, suitable for use in the generated source code.
     // let patternNames = patterns.map(p => p.identifier);
@@ -36,9 +36,9 @@ let predicates = taxonomy.allNodes.map(node => node.predicate);
     let lines = [
         '// ========== SELECTOR FUNCTION ==========',
         'function _selectExecutor(discriminant) {',
-        ...generateSelectorSourceCode(taxonomy.rootNode, 1),
+        ...generateSelectorSourceCode(eulerDiagram.universe, 1),
         '};',
-        ...predicates.map(p => `var matches${toIdentifier(p)} = toMatchFunction(taxonomy.get('${p}').predicate.toString());`),
+        ...predicates.map(p => `var matches${toIdentifier(p)} = toMatchFunction(eulerDiagram.get('${p}').predicate.toString());`),
     ];
 
     // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
@@ -47,7 +47,7 @@ let predicates = taxonomy.allNodes.map(node => node.predicate);
     // Evaluate the source code, and return its result, which is the route selector function. The use of eval here is
     // safe. There are no untrusted inputs substituted into the source. More importantly, the use of eval here allows
     // for route selection code that is both more readable and more efficient, since it is tailored specifically to the
-    // give taxonomy of patterns, rather than having to be generalized for all possible cases.
+    // given euler diagram, rather than having to be generalized for all possible cases.
     // let fn = eval(`(() => {\n${lines.join('\n')}\n})`)();
     // return fn;
 
@@ -67,19 +67,19 @@ export type RouteSelector = (discriminant: string) => RouteExecutor;
 
 
 /** Helper function to generate source code for part of the dispatcher function used for route selection. */
-function generateSelectorSourceCode(from: TaxonomyNode & WithExecutors, nestDepth: number) {
-    let specializations = from.specializations;
+function generateSelectorSourceCode(from: Set & WithExecutors, nestDepth: number) {
+    let subsets = from.subsets;
 
     // Make the indenting string corresponding to the given `nestDepth`.
     let indent = '    '.repeat(nestDepth);
 
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
-    specializations.forEach((node: TaxonomyNode & WithExecutors, i) => {
+    subsets.forEach((node: Set & WithExecutors, i) => {
         let predicateIdentifier = toIdentifier(node.predicate);
         let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${predicateIdentifier}(discriminant)) `;
 
-        if (node.specializations.length === 0) {
+        if (node.subsets.length === 0) {
             lines.push(`${condition}return ${node.entryPoint};`);
             return;
         }

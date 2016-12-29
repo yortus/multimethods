@@ -1,29 +1,30 @@
-import {NormalPredicate} from '../set-theory/predicates';
-import {intersect} from '../set-theory/sets';
-import TaxonomyNode from './taxonomy-node';
+import {NormalPredicate} from '../predicates';
+import intersect from './intersect';
+import Set from './set';
 
 
 
 
 
+// TODO: revise all comments below...
 // TODO: remove jsdoc ref to pattern '∅' below... Safe to remove? Anything to replace it?
 
 /**
- * Inserts `insertee` into the taxonomy subgraph rooted at `ancestor`, preserving all invariants
- * relating to the arrangement of taxonomy nodes. `insertee`'s pattern is assumed to be a proper
- * subset of `ancestor`'s pattern, and `insertee` must not hold the empty pattern '∅'.
- * @param {TaxonomyNode} insertee - the new node to be inserted into the taxonomy below `ancestor`.
- * @param {TaxonomyNode} ancestor - the root node of the taxonomy subgraph in which `insertee` belongs.
- * @param {(predicate: Predicate) => TaxonomyNode} nodeFor - a function that returns the taxonomy node for
- *        a given pattern. It is expected to return the same instance when passed the same pattern for
- *        the same taxonomy. When `insertee` overlaps an existing node in the subgraph, this function
+ * Inserts `insertee` into the euler diagram subgraph rooted at `ancestor`, preserving all invariants
+ * relating to the arrangement of sets. `insertee`'s predicate is assumed to be a proper
+ * subset of `ancestor`'s predicate, and `insertee` must not hold the 'empty' predicate '∅'.
+ * @param {Set} insertee - the new node to be inserted into the euler diagram below `ancestor`.
+ * @param {Set} ancestor - the root node of the euler diagram subgraph in which `insertee` belongs.
+ * @param {(predicate: Predicate) => Set} nodeFor - a function that returns the set for
+ *        a given predicate. It is expected to return the same instance when passed the same predicate for
+ *        the same euler diagram. When `insertee` overlaps an existing node in the subgraph, this function
  *        is used to synthesize the additional intersection node(s).
  */
-export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: TaxonomyNode, nodeFor: (predicate: NormalPredicate) => TaxonomyNode) {
+export default function insertAsDescendent(insertee: Set, ancestor: Set, nodeFor: (predicate: NormalPredicate) => Set) {
 
     // Determine the set relationship between `insertee` and each of the `ancestor` node's existing children.
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
-    let nonDisjointComparands = ancestor.specializations.reduce(
+    let nonDisjointComparands = ancestor.subsets.reduce(
         (comparands, node) => {
             let intersections = intersect(insertee.predicate, node.predicate); // TODO: messy... has casts... fix...
 
@@ -36,7 +37,7 @@ export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: Tax
 
             return comparands;
         },
-        <{node: TaxonomyNode; intersection: TaxonomyNode}[]> []
+        <{node: Set; intersection: Set}[]> []
     );
 
     // If the `ancestor` pattern has no existing children that are non-disjoint
@@ -81,8 +82,8 @@ export default function insertAsDescendent(insertee: TaxonomyNode, ancestor: Tax
 
 
 /** Checks if parent/child links exist directly between `node` and `child`. */
-function hasChild(node: TaxonomyNode, child: TaxonomyNode): boolean {
-    return node.specializations.indexOf(child) !== -1;
+function hasChild(node: Set, child: Set): boolean {
+    return node.subsets.indexOf(child) !== -1;
 }
 
 
@@ -90,11 +91,11 @@ function hasChild(node: TaxonomyNode, child: TaxonomyNode): boolean {
 
 
 /** Ensures parent/child links exist directly between `node` and `child`. */
-function insertChild(node: TaxonomyNode, child: TaxonomyNode) {
+function insertChild(node: Set, child: Set) {
     // NB: If the child is already there, make this a no-op.
     if (hasChild(node, child)) return;
-    node.specializations.push(child);
-    child.generalizations.push(node);
+    node.subsets.push(child);
+    child.supersets.push(node);
 }
 
 
@@ -102,7 +103,7 @@ function insertChild(node: TaxonomyNode, child: TaxonomyNode) {
 
 
 /** Removes the existing parent/child links between `node` and `child`. */
-function removeChild(node: TaxonomyNode, child: TaxonomyNode) {
-    node.specializations.splice(node.specializations.indexOf(child), 1);
-    child.generalizations.splice(child.generalizations.indexOf(node), 1);
+function removeChild(node: Set, child: Set) {
+    node.subsets.splice(node.subsets.indexOf(child), 1);
+    child.supersets.splice(child.supersets.indexOf(node), 1);
 }

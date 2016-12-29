@@ -1,11 +1,12 @@
-import {NormalPredicate} from '../set-theory/predicates';
+import {NormalPredicate} from '../predicates';
 
 
 
 
 
+// TODO: review all comments...
 /** Represents a single node in a Taxonomy graph. */
-export default class TaxonomyNode {
+export default class Set {
 
 
     /** Constructs a new TaxonomyNode instance that holds the given normalised predicate. */
@@ -19,9 +20,9 @@ export default class TaxonomyNode {
 
 
     /** Links to this node's direct parents (i.e., more generalised or 'wider' predicates). */
-    generalizations: TaxonomyNode[] = [];
+    supersets: Set[] = [];
 
 
     /** Links to this node's direct children (i.e., more specialised or 'narrower' predicates). */
-    specializations: TaxonomyNode[] = [];
+    subsets: Set[] = [];
 }

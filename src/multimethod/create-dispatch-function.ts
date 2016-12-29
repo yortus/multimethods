@@ -3,7 +3,7 @@ import generateDispatchFunction from './codegen/generate-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
 import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
-import Taxonomy from '../taxonomy';
+import {EulerDiagram} from '../set-theory/sets';
 import {warn} from '../util';
 
 
@@ -15,20 +15,20 @@ import {warn} from '../util';
 export default function createDispatchFunction(normalisedOptions: MultimethodOptions) {
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the rule set.
-    let taxonomy = new Taxonomy<never>(Object.keys(normalisedOptions.rules).map(pattern => toPredicate(pattern)));
+    let eulerDiagram = new EulerDiagram<never>(Object.keys(normalisedOptions.rules).map(pattern => toPredicate(pattern)));
 
     // TODO: explain...
     // TODO: use a flag in options to enable/disable this warning/error
-    validateTaxonomy(taxonomy, normalisedOptions);
+    validateEulerDiagram(eulerDiagram, normalisedOptions);
 
     // TODO: ...
     let normalisedRules = normaliseRules(normalisedOptions.rules);
 
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
-    let taxonomyWithLineages = computePredicateLineages(taxonomy, normalisedRules, normalisedOptions.unhandled);
+    let eulerDiagramWithLineages = computePredicateLineages(eulerDiagram, normalisedRules, normalisedOptions.unhandled);
 
     // TODO: ...
-    let dispatchFunction = generateDispatchFunction(taxonomyWithLineages, normalisedOptions);
+    let dispatchFunction = generateDispatchFunction(eulerDiagramWithLineages, normalisedOptions);
     return dispatchFunction;
 }
 
@@ -37,9 +37,9 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
 
 
 // TODO: ...
-function validateTaxonomy(taxonomy: Taxonomy<never>, options: MultimethodOptions) {
+function validateEulerDiagram(eulerDiagram: EulerDiagram<never>, options: MultimethodOptions) {
 
-    // Detect synthesized patterns in the taxonomy (i.e., ones with no exactly-matching predicates in the rule set).
+    // Detect synthesized patterns in the euler diagram (i.e., ones with no exactly-matching predicates in the rule set).
     // They get there in two ways:
     // (i)  the root Predicate.ANY where the raw rule set doesn't explicitly handle it, and
     // (ii) intersections of non-disjoint rules that aren't explicitly handled
@@ -48,7 +48,7 @@ function validateTaxonomy(taxonomy: Taxonomy<never>, options: MultimethodOptions
     // behaviour can be made explicit by the user.
     // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
     let normalizedPredicates = Object.keys(options.rules).map(p => toNormalPredicate(toPredicate(p)));
-    let unhandledPredicates = taxonomy.allNodes.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
+    let unhandledPredicates = eulerDiagram.allNodes.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
     if (unhandledPredicates.length > 0) {
         // TODO: improve error message...
         warn(`Multimethod contains conflicts: ${unhandledPredicates.map(p => p.toString()).join(', ')}`);

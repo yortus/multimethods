@@ -3,7 +3,7 @@ import computeRouteSelector from './compute-route-selector';
 import {Lineage} from '../compute-predicate-lineages';
 import * as predicates from '../../set-theory/predicates';
 import MultimethodOptions from '../multimethod-options';
-import Taxonomy from '../../taxonomy';
+import {EulerDiagram} from '../../set-theory/sets';
 import * as util from '../../util';
 
 
@@ -11,13 +11,13 @@ import * as util from '../../util';
 
 
 // TODO: ...
-export default function generateDispatchFunction(taxonomy: Taxonomy<Lineage>, normalisedOptions: MultimethodOptions) {
+export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Lineage>, normalisedOptions: MultimethodOptions) {
 
     // TODO: ...
     // Generate the combined source code for handling the route. This includes local variable declarations for
     // all rules' matchers and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of the route.
-    let t2 = computeAllExecutors(taxonomy, normalisedOptions);
+    let t2 = computeAllExecutors(eulerDiagram, normalisedOptions);
     let selectorSource = computeRouteSelector(t2);
 
     let wholeSource = [selectorSource, ...t2.allNodes.map(node => node.source)].join('\n');
