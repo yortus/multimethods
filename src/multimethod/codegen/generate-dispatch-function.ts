@@ -61,6 +61,15 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
         return result;
     };
 
+    // TODO: temp testing... fix arity handling... but what about variadic?
+    if (typeof normalisedOptions.arity === 'number') {
+        let paramNames = [];
+        for (let i = 0; i < normalisedOptions.arity; ++i) paramNames.push('$' + i);
+        let source = dispatchFunction.toString();
+        source = source.replace(/\$0/g, paramNames.join(', '));
+        dispatchFunction = eval(`(${source})`);
+    }
+
     // All done.
     return dispatchFunction;
 }

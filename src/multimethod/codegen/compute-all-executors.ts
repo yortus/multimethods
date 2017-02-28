@@ -111,7 +111,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Li
     // TODO: temp testing... specialise for arity...
     if (typeof options.arity === 'number') {
         let paramNames = [];
-        for (let i = 0; i < options.arity; ++i) paramNames.push('_' + i);
+        for (let i = 0; i < options.arity; ++i) paramNames.push('$' + i);
         source = source.replace(/\.\.\.MM_ARGS/g, paramNames.join(', '));
     }
     else if (options.emitES5) {
