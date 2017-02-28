@@ -1,6 +1,6 @@
 {
   "name": "multimethods",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "multimethods",
   "readmeFilename": "README.md",
   "main": "built/index.js",

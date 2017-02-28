@@ -110,8 +110,9 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Li
 
     // TODO: temp testing... specialise for arity...
     if (typeof options.arity === 'number') {
-        let replacement = Array.from(Array(options.arity)).map(key => '_' + key).join(', '); // TODO: ES6 stuff here...
-        source = source.replace(/\.\.\.MM_ARGS/g, replacement);
+        let paramNames = [];
+        for (let i = 0; i < options.arity; ++i) paramNames.push('_' + i);
+        source = source.replace(/\.\.\.MM_ARGS/g, paramNames.join(', '));
     }
     else if (options.emitES5) {
         source = downlevelES6Rest(source);
