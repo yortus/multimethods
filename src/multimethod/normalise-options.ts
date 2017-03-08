@@ -16,7 +16,7 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let arity = options.arity !== undefined ? options.arity : staticArity !== undefined ? staticArity : 'variadic';
     let timing = options.timing || 'mixed';
     let toDiscriminant = options.toDiscriminant || ((...args: any[]) => args.map(arg => (arg || '').toString()).join(''));
-    let unhandled = options.unhandled || {}; // TODO: export a lib-defined UNHANDLED const
+    let unhandled = options.hasOwnProperty('unhandled') ? options.unhandled : {}; // TODO: export a lib-defined UNHANDLED const
     let rules = options.rules || {};
     let emitES5 = options.emitES5 === true;
 
