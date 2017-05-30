@@ -15,4 +15,6 @@ interface MultimethodOptions {
     emitES5: boolean;
 
     // TODO: tiebreak... chooseBestRule
+
+    trace: boolean;
 }

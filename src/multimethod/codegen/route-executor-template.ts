@@ -13,6 +13,7 @@ let isPromise: (x: any) => boolean;
 
 // TODO: explain each of these in turn...
 let UNHANDLED: any;
+let IS_TRACING: boolean;
 let ENDS_PARTITION: boolean;
 let HAS_CAPTURES: boolean;
 let IS_META_RULE: boolean;
@@ -34,6 +35,11 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
     if (result !== UNHANDLED) {
         return result;
+    }
+
+    // TODO: trace...
+    if (IS_TRACING) {
+        console.log(`    Entering handler for '${CALL_METHOD.name}'...`);
     }
 
     // TODO: call method in most efficient way...

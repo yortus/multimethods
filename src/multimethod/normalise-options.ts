@@ -19,6 +19,7 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let unhandled = options.hasOwnProperty('unhandled') ? options.unhandled : {}; // TODO: export a lib-defined UNHANDLED const
     let rules = options.rules || {};
     let emitES5 = options.emitES5 === true;
+    let trace = options.trace === true;
 
     // TODO: more validation, eg signatures of given rules, legal arity, legal timing, legal discriminant, etc
     validateArity(arity, staticArity);
@@ -31,7 +32,8 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
         toDiscriminant,
         unhandled,
         rules,
-        emitES5
+        emitES5,
+        trace
     };
 }
 

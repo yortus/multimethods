@@ -91,6 +91,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Li
 
     // TODO: ... all booleans
     source = eliminateDeadCode(source, {
+        IS_TRACING: options.trace,
         ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
         HAS_CAPTURES: captureNames.length > 0,
         IS_META_RULE: rule.isMetaRule,
