@@ -50,7 +50,7 @@ A valid pattern string conforms to the following rules:
 - A wildcard greedily matches zero or more adjacent characters in an address, but cannot match `/`.
 - Captures may be named or anonymous. Named captures return their correspoding capture values in the result of a call to `Pattern#match`.
 - An anonymous globstar is designated with `...` or `…`.
-- A named globstar is designated with `{...id}` where id is a valid JS identifier.
+- A named globstar is designated with `{...id}` or `{…id}` where id is a valid JS identifier.
 - An anonymous wildcard is designated with `*`.
 - A named wildcard is designated with `{id}` where id is a valid JS identifier.
 - Two captures may not occupy adjacent positions in a pattern.

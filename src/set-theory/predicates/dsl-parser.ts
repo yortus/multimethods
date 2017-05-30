@@ -11,7 +11,7 @@ const grammar: { parse(text: string): PredicateAST; } = require('./dsl-grammar')
  * about the predicate DSL syntax [1].
  * [1] TODO...
  * @param {string} source - the source string to be parsed as a predicate.
- * @returns {PredicateAST} an object containing details about the successfully parsed ppredicate.
+ * @returns {PredicateAST} an object containing details about the successfully parsed predicate.
  */
 export default function parse(source: string): PredicateAST {
     try {
