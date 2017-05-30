@@ -39,7 +39,19 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
 
     // TODO: trace...
     if (IS_TRACING) {
-        console.log(`    Entering handler for '${CALL_METHOD.name}'...`);
+        // TODO: temp testing...
+        function fromIdentifier(id: string) {
+            return id
+                .replace(/ℙ/g, '')
+                .replace(/\uFE4D/g, '...')
+                .replace(/\u157D/g, '*')
+                .replace(/\u318D/g, ' ')
+                .replace(/\uFF89/g, '/')
+                .replace(/\uFFDA/g, '-')
+                .replace(/\u02CC/g, '.');
+        }
+        
+        console.log(`    Entering '${fromIdentifier(METHOD_NAME.name)}`);
     }
 
     // TODO: call method in most efficient way...
