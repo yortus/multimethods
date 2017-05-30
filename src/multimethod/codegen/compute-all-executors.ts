@@ -102,6 +102,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Li
 
     // TODO: ... all strings
     source = replaceAll(source, {
+        TRACE_LABEL: JSON.stringify(rule.predicate),
         METHOD_NAME: getNameForRule(eulerDiagram, set, rule),
         GET_CAPTURES: getCaptures,
         CALL_METHOD: callMethod,

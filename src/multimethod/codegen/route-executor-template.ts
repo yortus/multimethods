@@ -14,6 +14,7 @@ let isPromise: (x: any) => boolean;
 // TODO: explain each of these in turn...
 let UNHANDLED: any;
 let IS_TRACING: boolean;
+let TRACE_LABEL: string;
 let ENDS_PARTITION: boolean;
 let HAS_CAPTURES: boolean;
 let IS_META_RULE: boolean;
@@ -39,19 +40,12 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
 
     // TODO: trace...
     if (IS_TRACING) {
-        // TODO: temp testing...
-        function fromIdentifier(id: string) {
-            return id
-                .replace(/ℙ/g, '')
-                .replace(/\uFE4D/g, '...')
-                .replace(/\u157D/g, '*')
-                .replace(/\u318D/g, ' ')
-                .replace(/\uFF89/g, '/')
-                .replace(/\uFFDA/g, '-')
-                .replace(/\u02CC/g, '.');
+        if (IS_META_RULE) {
+            console.log(`    Enter '${TRACE_LABEL}' [METARULE]`);
         }
-        
-        console.log(`    Entering '${fromIdentifier(METHOD_NAME.name)}`);
+        else {
+            console.log(`    Enter '${TRACE_LABEL}'`);
+        }
     }
 
     // TODO: call method in most efficient way...
@@ -79,6 +73,19 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
         }
         else {
             result = CALL_METHOD(...MM_ARGS);
+        }
+    }
+
+    // TODO: trace...
+    if (IS_TRACING) {
+        if (isPromise(result)) {
+            result = result.then((rs: any) => {
+                console.log(`    Leave '${TRACE_LABEL}' ${rs === UNHANDLED ? ' [UNHANDLED]' : `[result is ${typeof rs}]`}`);
+                return rs;
+            });
+        }
+        else {
+            console.log(`    Leave '${TRACE_LABEL}' ${result === UNHANDLED ? ' [UNHANDLED]' : `[result is ${typeof result}]`}`);
         }
     }
 
