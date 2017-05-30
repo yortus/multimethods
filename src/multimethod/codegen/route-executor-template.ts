@@ -41,10 +41,10 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     // TODO: trace...
     if (IS_TRACING) {
         if (IS_META_RULE) {
-            console.log(`    Enter '${TRACE_LABEL}' [METARULE]`);
+            console.log(`==> Enter '${TRACE_LABEL}' [METARULE]`);
         }
         else {
-            console.log(`    Enter '${TRACE_LABEL}'`);
+            console.log(`==> Enter '${TRACE_LABEL}'`);
         }
     }
 
@@ -60,6 +60,12 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
         }
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
+
+            // TODO: trace...
+            if (IS_TRACING) {
+                console.log(`      Captures: ${JSON.stringify(captures)}`);
+            }
+            
             result = CALL_METHOD(...MM_ARGS, captures, next);
         }
         else {
@@ -69,6 +75,12 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     else {
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
+
+            // TODO: trace...
+            if (IS_TRACING) {
+                console.log(`      Captures: ${JSON.stringify(captures)}`);
+            }
+
             result = CALL_METHOD(...MM_ARGS, captures);
         }
         else {
@@ -80,12 +92,12 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     if (IS_TRACING) {
         if (isPromise(result)) {
             result = result.then((rs: any) => {
-                console.log(`    Leave '${TRACE_LABEL}' ${rs === UNHANDLED ? ' [UNHANDLED]' : `[result is ${typeof rs}]`}`);
+                console.log(`==> Leave '${TRACE_LABEL}' ${rs === UNHANDLED ? ' [UNHANDLED]' : `[result is ${typeof rs}]`}`);
                 return rs;
             });
         }
         else {
-            console.log(`    Leave '${TRACE_LABEL}' ${result === UNHANDLED ? ' [UNHANDLED]' : `[result is ${typeof result}]`}`);
+            console.log(`==> Leave '${TRACE_LABEL}' ${result === UNHANDLED ? ' [UNHANDLED]' : `[result is ${typeof result}]`}`);
         }
     }
 
