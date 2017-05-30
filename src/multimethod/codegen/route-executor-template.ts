@@ -92,12 +92,14 @@ export default function METHOD_NAME(discriminant: string, result: any, ...MM_ARG
     if (IS_TRACING) {
         if (isPromise(result)) {
             result = result.then((rs: any) => {
-                console.log(`==> Leave '${TRACE_LABEL}' ${rs === UNHANDLED ? ' [UNHANDLED]' : `[result is ${typeof rs}]`}`);
+                console.log(`==> Leave '${TRACE_LABEL}'`);
+                console.log(`      Handled? ${rs === UNHANDLED ? ' NO' : `YES, type is ${typeof rs}]`}`);
                 return rs;
             });
         }
         else {
-            console.log(`==> Leave '${TRACE_LABEL}' ${result === UNHANDLED ? ' [UNHANDLED]' : `[result is ${typeof result}]`}`);
+            console.log(`==> Leave '${TRACE_LABEL}'`);
+            console.log(`      Handled? ${result === UNHANDLED ? ' NO' : `YES, type is ${typeof result}]`}`);
         }
     }
 
