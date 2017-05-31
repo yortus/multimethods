@@ -9,6 +9,12 @@ import normaliseOptions from './normalise-options';
 
 
 
+// TODO: NB: `add` methods are declared for all classes, but are not yet implemented (calls will fail at runtime)
+
+
+
+
+
 // TODO: Base case...
 // TODO: could this be more DRYly represented as an intersection of the other cases?
 export interface MultimethodConstructor {
