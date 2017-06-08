@@ -1,3 +1,4 @@
+import Rule from './rule';
 
 
 
@@ -14,7 +15,9 @@ interface MultimethodOptions {
     // TODO: ensure all codegen code respects this...
     emitES5: boolean;
 
-    // TODO: tiebreak... chooseBestRule
+    // TODO: tiebreak... or rename to chooseBestRule?
+    moreSpecific: (a: Rule, b: Rule) => Rule|undefined;
 
+    // TODO: doc/improve...
     trace: boolean;
 }

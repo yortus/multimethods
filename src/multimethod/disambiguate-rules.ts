@@ -1,8 +1,8 @@
 // TODO: `tieBreakFn` should be passed in or somehow provided from outside, with builtin fallback/default impl as below.
 import {warn, MultimethodError} from '../util';
 import {inspect} from 'util';
+import MultimethodOptions from './multimethod-options';
 import Rule from './rule';
-import {parsePredicatePattern} from '../set-theory/predicates';
 
 
 
@@ -16,7 +16,8 @@ import {parsePredicatePattern} from '../set-theory/predicates';
  * @param {Rule[]} candidates - the list of rules of equal specificity to be sorted.
  * @returns {Rule[]} a copy of the given rule list, sorted from least- to most-specific.
  */
-export default function disambiguateRules(candidates: Rule[]): Rule[] {
+export default function disambiguateRules(candidates: Rule[], normalisedOptions: MultimethodOptions): Rule[] {
+    const ruleComparator = makeRuleComparator(normalisedOptions.moreSpecific);
     return candidates.slice().sort(ruleComparator);
 }
 
@@ -24,40 +25,31 @@ export default function disambiguateRules(candidates: Rule[]): Rule[] {
 
 
 
-/** Performs pairwise sorting of two rules, using the convention of Array#sort's `compareFn` parameter. */
-function ruleComparator(ruleA: Rule, ruleB: Rule) {
-    let moreSpecificRule = tieBreakFn(ruleA, ruleB);
-    let ruleDiagnostics = `A: ${inspect(ruleA)}, B: ${inspect(ruleB)}`;
+// TODO: ...
+function makeRuleComparator(tieBreakFn: (a: Rule, b: Rule) => Rule|undefined) {
 
-    // TODO: if with curlies...
-    let message = `Ambiguous rule ordering - which is more specific of A and B? ${ruleDiagnostics}`;
-    if (moreSpecificRule !== ruleA && moreSpecificRule !== ruleB) throw new MultimethodError(message);
+    /** Performs pairwise sorting of two rules, using the convention of Array#sort's `compareFn` parameter. */
+    return function ruleComparator(ruleA: Rule, ruleB: Rule) {
 
-    // TODO: if with curlies...
-    // TODO: error or warning?...
-    message = `Unstable rule ordering - tiebreak function is inconsist: A>B ≠ B<A for ${ruleDiagnostics}.`;
-    if (moreSpecificRule !== tieBreakFn(ruleB, ruleA)) warn(message);
+        // TODO: special case: a metarule is *always* less specific than a normal rule with the same predicate
+        if (!ruleA.isMetaRule && ruleB.isMetaRule) return 1;  // A is more specific
+        if (ruleA.isMetaRule && !ruleB.isMetaRule) return -1; // B is more specific
 
-    return ruleA === moreSpecificRule ? 1 : -1; // NB: sorts from least- to most-specific
-}
+        // TODO: general case: use the client-suppied `moreSpecific` function to determine which is more specific...
+        let moreSpecificRule = tieBreakFn(ruleA, ruleB);
+        let ruleDiagnostics = `A: ${inspect(ruleA)}, B: ${inspect(ruleB)}`;
 
+        if (moreSpecificRule !== ruleA && moreSpecificRule !== ruleB) {
+            let message = `Ambiguous rule ordering - which is more specific of A and B? ${ruleDiagnostics}`;
+            throw new MultimethodError(message);
+        }
 
+        // TODO: error or warning?...
+        if (moreSpecificRule !== tieBreakFn(ruleB, ruleA)) {
+            let message = `Unstable rule ordering - tiebreak function is inconsist: A>B ≠ B<A for ${ruleDiagnostics}.`;
+            warn(message);
+        }
 
-
-
-/** Default implementation for returning the more-specific of the two given rules. */
-function tieBreakFn(a: Rule, b: Rule): Rule | undefined {
-
-    // All else being equal, a normal rule is more specific than a meta-rule.
-    if (!a.isMetaRule && b.isMetaRule) return a;
-    if (!b.isMetaRule && a.isMetaRule) return b;
-
-    // All else being equal, localeCompare of pattern comments provides the rule order (comes before == more specific).
-    let aComment = parsePredicatePattern(a.predicate.toString()).comment;
-    let bComment = parsePredicatePattern(b.predicate.toString()).comment;
-    if (aComment.localeCompare(bComment) < 0) return a;
-    if (bComment.localeCompare(aComment) < 0) return b;
-
-    // TODO: explain...
-    return undefined;
+        return ruleA === moreSpecificRule ? 1 : -1; // NB: sorts from least- to most-specific
+    }
 }
