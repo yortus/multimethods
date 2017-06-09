@@ -83,7 +83,13 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
         timing: 'sync',
         rules: ruleSet,
         unhandled: UNHANDLED,
-        emitES5: true
+        emitES5: true,
+        moreSpecific: (a, b) => {
+            let aComment = a.predicate.split('#')[1] || '';
+            let bComment = b.predicate.split('#')[1] || '';
+            if (aComment.localeCompare(bComment) < 0) return a;
+            if (bComment.localeCompare(aComment) < 0) return b;
+        }
     });
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));

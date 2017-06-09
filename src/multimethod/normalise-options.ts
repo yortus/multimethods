@@ -1,7 +1,7 @@
 import {MultimethodError} from '../util';
 import MultimethodOptions from './multimethod-options';
 import {parsePredicatePattern} from '../set-theory/predicates';
-import Rule from './rule';
+// TODO: was... remove...import Rule from './rule';
 
 
 
@@ -20,7 +20,7 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let unhandled = options.hasOwnProperty('unhandled') ? options.unhandled : {}; // TODO: export a lib-defined UNHANDLED const
     let rules = options.rules || {};
     let emitES5 = options.emitES5 === true;
-    let moreSpecific = options.moreSpecific || tieBreakFn;
+    let moreSpecific = options.moreSpecific || (() => undefined);
     let trace = options.trace === true;
 
     // TODO: more validation, eg signatures of given rules, legal arity, legal timing, legal discriminant, etc
@@ -72,15 +72,16 @@ function validateRules(rules: MultimethodOptions['rules']) {
 
 
 
-/** Default implementation for returning the more-specific of the two given rules. */
-function tieBreakFn(a: Rule, b: Rule): Rule | undefined {
+// TODO: we no longer provide this default... It's really not a 'general' algorithm. Will now error on same predicates
+// /** Default implementation for returning the more-specific of the two given rules. */
+// function tieBreakFn(a: Rule, b: Rule): Rule | undefined {
 
-    // All else being equal, localeCompare of pattern comments provides the rule order (comes before == more specific).
-    let aComment = parsePredicatePattern(a.predicate.toString()).comment;
-    let bComment = parsePredicatePattern(b.predicate.toString()).comment;
-    if (aComment.localeCompare(bComment) < 0) return a;
-    if (bComment.localeCompare(aComment) < 0) return b;
+//     // All else being equal, localeCompare of pattern comments provides the rule order (comes before == more specific).
+//     let aComment = parsePredicatePattern(a.predicate.toString()).comment;
+//     let bComment = parsePredicatePattern(b.predicate.toString()).comment;
+//     if (aComment.localeCompare(bComment) < 0) return a;
+//     if (bComment.localeCompare(aComment) < 0) return b;
 
-    // TODO: explain...
-    return undefined;
-}
+//     // TODO: explain...
+//     return undefined;
+// }

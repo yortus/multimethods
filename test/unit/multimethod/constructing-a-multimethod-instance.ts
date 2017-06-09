@@ -110,7 +110,13 @@ describe('Constructing a Multimethod instance', () => {
         let multimethod = new Multimethod({
             toDiscriminant: (r: any) => r.address,
             rules: ruleSet,
-            unhandled: UNHANDLED
+            unhandled: UNHANDLED,
+            moreSpecific: (a, b) => {
+                let aComment = a.predicate.split('#')[1] || '';
+                let bComment = b.predicate.split('#')[1] || '';
+                if (aComment.localeCompare(bComment) < 0) return a;
+                if (bComment.localeCompare(aComment) < 0) return b;
+            }
         });
 //        configure({warnings: 'default'});
 
