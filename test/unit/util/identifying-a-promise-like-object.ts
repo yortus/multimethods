@@ -7,7 +7,7 @@ describe('Identifying a Promise-like object', () => {
     let tests = [
         `T: new Promise(res => {})`,
         `T: Promise.resolve(1)`,
-        `T: Promise.reject('error')`, // TODO: this causes node.js to issue an UnhandledPromiseRejectionWarning - fix it
+        `T: Promise.reject('error').catch(()=>{})`,
         `F: null`,
         `F: void 0`,
         `F: 'a string'`,
