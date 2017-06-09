@@ -57,7 +57,7 @@ function validateArity(arity: MultimethodOptions['arity'], staticArity?: Multime
 
 
 
-// TODO: ...
+// TODO: is this still an error? IDTS... Remove this...
 function validateRules(rules: MultimethodOptions['rules']) {
 
     // TODO: ensure no pattern has a capture called 'next'
