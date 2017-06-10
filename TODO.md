@@ -1,3 +1,15 @@
+## Design Goals
+- fast dispatch with minimal runtime overhead
+- strong typing
+- support MMs of any arity, including variadic
+- Mathematically sound dispatch semantics
+- Straight-forward 'obvious' usage and API
+- Configurability plus sensible defaults
+- Good diagnostics
+- Highly interoperable with other libs and code
+
+
+
 ## Notes
 
 
