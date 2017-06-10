@@ -1,3 +1,63 @@
+## Notes
+
+
+ES6 features in use
+- in source code
+  - arrow functions
+  - spread
+  - computed properties
+  - classes
+  - Promise
+  - Map
+  - String#repeat()
+  - Symbol.hasInstance()
+  - Array.from
+
+- in generated code
+  - arrow functions
+  - rest
+  - spread
+
+
+JS Environments that support ES6 as used:
+- Node.js:  >= 6.5
+- Chrome:   Last 9+ versions
+- Firefox:  Last 9+ versions
+- Edge:     Last 3+ versions
+- Safari:   Last 2 versions
+- iOS:      Last 2 versions
+- IE:       Not supported
+
+
+
+Predicate Special Chars:
+- Literal Match:
+  - `/ ? ; : @ & = + $ ,`
+  - `- _ .`
+
+- Reserve for operators:
+  - ```* ... { } | [ ] ! ^ ( ) \ ~ ` ```
+
+- Questionable
+  - Unicode char literals
+  - Unicode escape sequences
+  - `< > " '`
+  - whitespace: `\s \t \r \n`  etc
+  - `#`     used for URL fragments
+  - `%`     used for encoding
+
+- Likely operators to be added to predicate syntax:
+  union
+  mega-sep
+  mega-glob
+  list of alternatives
+  not
+  
+
+
+
+
+
 ## Renaming and Reorganising
 ### To Dos
 - Predicate: replace class with one or more branded strings and free functions
