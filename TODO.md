@@ -1,5 +1,19 @@
 ## Decisions:
-- 
+- [ ] add option `strictChecks: boolean`
+  - [ ] add note for future addition: this option *may* be expanded to allow for specific strict checks
+  - [ ] current uses of `util.warn` become errors *iff* strictChecks is true, else no error/warning issued.
+- [ ] add an `errors.ts` file listing all possible errors with a short code and a description with {0} holes
+  - [ ] use these codes when throwing errors (via helper)
+- [ ] add option `debug: boolean`
+  - [ ] replaces `trace` option. Remove that.
+  - [ ] use npm `debug` module to sent all debug/trace messages
+  - [ ] remove 'trace' code from executor function; replace with wrapper functions on all handlers when in debug mode
+- [ ] remove add() method. Multimethods are immutable.
+  - [ ] document that multimethods are immutable and why. e.g. can emit fast code for them.
+  - [ ] add note for future addition: export helper functions to 'add' multimethods to create a new multimethod
+- [ ] rename UNHANDLED to FALLBACK or CASCADE.
+  - [ ] doc/explain naming - this is an imperative return value of what MM should do next, not a declaration of what just happened in current handler.
+  - [ ] add note for future addition: more sentinel return values for other builtin behaviours. Such as?
 
 
 ## Design Goals
