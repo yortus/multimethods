@@ -4,7 +4,7 @@ import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
 import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
 import {EulerDiagram} from '../set-theory/sets';
-import {warn} from '../util';
+import {MultimethodError} from '../util';
 
 
 
@@ -18,8 +18,9 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
     let eulerDiagram = new EulerDiagram<never>(Object.keys(normalisedOptions.rules).map(pattern => toPredicate(pattern)));
 
     // TODO: explain...
-    // TODO: use a flag in options to enable/disable this warning/error
-    validateEulerDiagram(eulerDiagram, normalisedOptions);
+    if (normalisedOptions.strictChecks) {
+        validateEulerDiagram(eulerDiagram, normalisedOptions);
+    }
 
     // TODO: ...
     let normalisedRules = normaliseRules(normalisedOptions.rules);
@@ -51,6 +52,6 @@ function validateEulerDiagram(eulerDiagram: EulerDiagram<never>, options: Multim
     let unhandledPredicates = eulerDiagram.sets.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
     if (unhandledPredicates.length > 0) {
         // TODO: improve error message...
-        warn(`Multimethod contains conflicts: ${unhandledPredicates.map(p => p.toString()).join(', ')}`);
+        throw new MultimethodError(`Multimethod contains conflicts: ${unhandledPredicates.map(p => p.toString()).join(', ')}`);
     }
 }

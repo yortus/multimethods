@@ -116,7 +116,8 @@ describe('Constructing a Multimethod instance', () => {
                 let bComment = b.predicate.split('#')[1] || '';
                 if (aComment.localeCompare(bComment) < 0) return a;
                 if (bComment.localeCompare(aComment) < 0) return b;
-            }
+            },
+            strictChecks: false
         });
 //        configure({warnings: 'default'});
 

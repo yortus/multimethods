@@ -1,13 +1,16 @@
 ## Decisions:
-- [ ] add option `strictChecks: boolean`
-  - [ ] add note for future addition: this option *may* be expanded to allow for specific strict checks
-  - [ ] current uses of `util.warn` become errors *iff* strictChecks is true, else no error/warning issued.
+- [x] add option `strictChecks: boolean`
+  - [x] add note for future addition: this option *may* be expanded to allow for specific strict checks
+  - [x] current uses of `util.warn` become errors *iff* strictChecks is true, else no error/warning issued.
+  - [x] remove all `warn`-related stuff from codebase
 - [ ] add an `errors.ts` file listing all possible errors with a short code and a description with {0} holes
   - [ ] use these codes when throwing errors (via helper)
+  - [ ] improve the 'MM contains conflicts' error message. i.e., what does it mean? How to fix it?
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.
   - [ ] use npm `debug` module to sent all debug/trace messages
   - [ ] remove 'trace' code from executor function; replace with wrapper functions on all handlers when in debug mode
+  - [ ] if `strictChecks===false` and `debug===true`, still do strict checks but just output to debug() and continue
 - [ ] remove add() method. Multimethods are immutable.
   - [ ] document that multimethods are immutable and why. e.g. can emit fast code for them.
   - [ ] add note for future addition: export helper functions to 'add' multimethods to create a new multimethod
@@ -16,16 +19,6 @@
   - [ ] add note for future addition: more sentinel return values for other builtin behaviours. Such as?
 
 
-## Design Goals
-- fast dispatch with minimal runtime overhead
-- strong typing
-- support MMs of any arity, including variadic
-- support sync and async use cases
-- Mathematically sound dispatch semantics
-- Straight-forward 'obvious' usage and API
-- Configurability plus sensible defaults
-- Good diagnostics
-- Highly interoperable with other libs and code
 
 
 

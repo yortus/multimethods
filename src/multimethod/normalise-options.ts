@@ -22,6 +22,7 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let emitES5 = options.emitES5 === true;
     let moreSpecific = options.moreSpecific || (() => undefined);
     let trace = options.trace === true;
+    let strictChecks = options.strictChecks === true;
 
     // TODO: more validation, eg signatures of given rules, legal arity, legal timing, legal discriminant, etc
     validateArity(arity, staticArity);
@@ -36,7 +37,8 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
         rules,
         emitES5,
         moreSpecific,
-        trace
+        trace,
+        strictChecks
     };
 }
 

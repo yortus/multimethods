@@ -1,6 +1,4 @@
-import {configure} from './config';
 import {getLongestCommonPrefix, isPromiseLike}  from './util';
-export {configure, Options} from './config';
 
 // TODO: export the later ones? They are only used in unit tests. Could we do equivalent tests through public API?
 export {parsePredicatePattern, PredicateAST, toIdentifier, toMatchFunction, toNormalPredicate, ANY, toPredicate} from './set-theory/predicates';
@@ -40,10 +38,3 @@ export const util = {
     getLongestCommonPrefix,
     isPromiseLike
 };
-
-
-
-
-
-// TODO: doc...
-configure({warnings: 'default'});

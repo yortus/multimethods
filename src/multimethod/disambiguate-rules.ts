@@ -1,5 +1,5 @@
 // TODO: `tieBreakFn` should be passed in or somehow provided from outside, with builtin fallback/default impl as below.
-import {warn, MultimethodError} from '../util';
+import {MultimethodError} from '../util';
 import {inspect} from 'util';
 import MultimethodOptions from './multimethod-options';
 import Rule from './rule';
@@ -44,10 +44,9 @@ function makeRuleComparator(tieBreakFn: (a: Rule, b: Rule) => Rule|undefined) {
             throw new MultimethodError(message);
         }
 
-        // TODO: error or warning?...
         if (moreSpecificRule !== tieBreakFn(ruleB, ruleA)) {
             let message = `Unstable rule ordering - tiebreak function is inconsist: A>B ≠ B<A for ${ruleDiagnostics}.`;
-            warn(message);
+            throw new MultimethodError(message);
         }
 
         return ruleA === moreSpecificRule ? 1 : -1; // NB: sorts from least- to most-specific
