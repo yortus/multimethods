@@ -1,7 +1,12 @@
+## Decisions:
+- 
+
+
 ## Design Goals
 - fast dispatch with minimal runtime overhead
 - strong typing
 - support MMs of any arity, including variadic
+- support sync and async use cases
 - Mathematically sound dispatch semantics
 - Straight-forward 'obvious' usage and API
 - Configurability plus sensible defaults
