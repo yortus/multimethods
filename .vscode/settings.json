@@ -7,9 +7,7 @@
 	"files.exclude": {
         "node_modules": true,
 		"**/.git": true,
-		"**/.DS_Store": true,
-        "**/*.njsproj": true,
-        "**/*.sln": true
+		"**/.DS_Store": true
 	},
 
 	// Specifies the folder path containing the tsserver and lib*.d.ts files to use.

@@ -6,7 +6,7 @@
         "removeComments": false,
         "sourceMap": true,
         "declaration": true,
-        "outDir": "../built",
+        "outDir": "../dist/release",
 
         // Static checks
         "allowUnreachableCode": false,

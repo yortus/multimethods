@@ -5,7 +5,8 @@
         "lib": ["es6"],
         "removeComments": false,
         "sourceMap": true,
-        "outDir": "../dist/test",
+        "outDir": "../dist/extras",
+        "rootDir": ".",
 
         // Static checks
         "strictNullChecks": false, // TODO: set true...

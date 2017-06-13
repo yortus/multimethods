@@ -1,9 +1,10 @@
 .vscode/
-built/test/
+dist/test/
+dist/extras/
 scripts/
 src/
 test/
-typings/
+extras/
 *.ts
 !*.d.ts
 *.js.map

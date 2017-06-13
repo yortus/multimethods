@@ -3,14 +3,15 @@
   "version": "0.2.10",
   "description": "multimethods",
   "readmeFilename": "README.md",
-  "main": "built/index.js",
-  "typings": "built/index.d.ts",
+  "main": "dist/release/index.js",
+  "typings": "dist/release/index.d.ts",
   "scripts": {
-    "build": "tsc -p src && tsc -p test && pegjs src/set-theory/predicates/dsl-grammar.peg built/set-theory/predicates/dsl-grammar.js",
-    "clean": "rimraf built/",
-    "prepublish": "npm run self-ref && npm run build",
+    "build": "tsc -p src && tsc -p test && tsc -p extras && npm run build:peg",
+    "build:peg": "pegjs src/set-theory/predicates/dsl-grammar.peg dist/release/set-theory/predicates/dsl-grammar.js",
+    "clean": "rimraf dist/",
     "test": "node ./scripts/run-unit-tests",
-    "perf": "node ./scripts/run-perf-tests",
+    "bench": "node ./dist/extras/bench/basic-routing.js",
+    "prepare": "npm run self-ref && npm run build",
     "self-ref": "node ./scripts/enable-self-reference"
   },
   "repository": {

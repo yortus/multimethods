@@ -33,6 +33,7 @@
   - [ ] doc/explain naming - this is an imperative return value of what MM should do next, not a declaration of what just happened in current handler.
   - [ ] add note for future addition: more sentinel return values for other builtin behaviours. Such as?
 - [ ] improve error API & strong typing
+- [ ] strictest TSC options in `/test` and `/extras`
 
 
 
