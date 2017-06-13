@@ -1,5 +1,5 @@
 // TODO: better explain how/why this works in external documentation (esp. the synthesized 'crasher' method).
-import {getLongestCommonPrefix, MultimethodError} from '../util';
+import {fatalError, getLongestCommonPrefix} from '../util';
 import {Predicate} from '../set-theory/predicates';
 import Rule from './rule';
 
@@ -28,14 +28,15 @@ export default function disambiguateRoutes(predicate: Predicate, alternateRuleLi
     alternateRuleLists.forEach(cand => {
         let nonCommonRules: Rule[] = cand.slice(prefix.length, -suffix.length);
         let hasMetaRules = nonCommonRules.some(rule => rule.isMetaRule);
-        if (hasMetaRules) throw new MultimethodError(`Multiple paths to '${predicate}' with different meta-rules`);
+        if (hasMetaRules) return fatalError('MULTIPLE_PATHS_TO', predicate);
     });
 
+    // TODO: explain all below more clearly...
     // Synthesize a 'crasher' rule that throws an 'ambiguous' error.
-    let ambiguousFallbacks = alternateRuleLists.map(cand => cand[cand.length - suffix.length - 1]);
-    let ambiguousError = new MultimethodError(`Multiple possible fallbacks from '${predicate}: ${ambiguousFallbacks}`); // TODO: what does this print? use 'inspect' like in disambiguate-rules.ts?
-    function _ambiguous() { throw ambiguousError; }
-    let crasher = new Rule(predicate, _ambiguous);
+    let ambiguousFallbacks = alternateRuleLists.map(cand => cand[cand.length - suffix.length - 1].predicate).join(', ');
+    let crasher = new Rule(predicate, function _ambiguous() {
+        fatalError('MULTIPLE_FALLBACKS_FROM', predicate, ambiguousFallbacks);
+    });
 
     // The final composite rule list == common prefix + crasher + common suffix.
     return ([] as Rule[]).concat(prefix, crasher, suffix);

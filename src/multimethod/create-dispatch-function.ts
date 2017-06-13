@@ -2,9 +2,9 @@ import computePredicateLineages from './compute-predicate-lineages';
 import generateDispatchFunction from './codegen/generate-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
-import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
+import {ANY, toPredicate, toNormalPredicate} from '../set-theory/predicates';
 import {EulerDiagram} from '../set-theory/sets';
-import {MultimethodError} from '../util';
+import {fatalError} from '../util';
 
 
 
@@ -50,8 +50,14 @@ function validateEulerDiagram(eulerDiagram: EulerDiagram<never>, options: Multim
     // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
     let normalizedPredicates = Object.keys(options.rules).map(p => toNormalPredicate(toPredicate(p)));
     let unhandledPredicates = eulerDiagram.sets.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
-    if (unhandledPredicates.length > 0) {
-        // TODO: improve error message...
-        throw new MultimethodError(`Multimethod contains conflicts: ${unhandledPredicates.map(p => p.toString()).join(', ')}`);
+
+    let unhandledCatchall = unhandledPredicates.indexOf(ANY) !== -1;
+    if (unhandledCatchall) {
+        return fatalError('MISSING_CATCHALL');
+    }
+
+    let unhandledIntersections = unhandledPredicates.filter(p => p !== ANY);
+    if (unhandledIntersections.length > 0) {
+        return fatalError('MISSING_INTERSECTIONS', `'${unhandledIntersections.join(`', '`)}'`);
     }
 }

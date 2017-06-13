@@ -1,4 +1,4 @@
-import {MultimethodError} from '../../util';
+import {fatalError} from '../../util';
 const grammar: { parse(text: string): PredicateAST; } = require('./dsl-grammar');
 
 
@@ -24,7 +24,7 @@ export default function parse(source: string): PredicateAST {
         let endCol = ex.location.end.column;
         if (endCol <= startCol) endCol = startCol + 1;
         let indicator = Array(startCol).join(' ') + Array(endCol - startCol + 1).join('^');
-        throw new MultimethodError(`${ex.message}:\n${source}\n${indicator}`);
+        return fatalError('PREDICATE_SYNTAX', `${ex.message}:\n${source}\n${indicator}`);
     }
 }
 

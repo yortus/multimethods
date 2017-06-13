@@ -3,9 +3,24 @@
   - [x] add note for future addition: this option *may* be expanded to allow for specific strict checks
   - [x] current uses of `util.warn` become errors *iff* strictChecks is true, else no error/warning issued.
   - [x] remove all `warn`-related stuff from codebase
-- [ ] add an `errors.ts` file listing all possible errors with a short code and a description with {0} holes
-  - [ ] use these codes when throwing errors (via helper)
-  - [ ] improve the 'MM contains conflicts' error message. i.e., what does it mean? How to fix it?
+
+- [x] add an `fatalError.ts` file listing all possible errors with a short code and a description with {0} holes
+  - [x] use these codes when throwing errors (via helper)
+  - [x] improve the 'MM contains conflicts' error message. i.e., what does it mean? How to fix it?
+    - [x] MM has no catch-all handler, so some calls may no be dispatchable. To resolve this problem, define a handler for the predicate '...'
+    - [x] MM has ambiguities, so some calls may not be dispatchable. To resolve this problem, define handlers for the predicates(s) ${...}
+
+- [ ] split unit tests from perf work.
+  - [ ] perf moves to `/extras/bench`, call with `npm run bench`
+  - [ ] simplify under dirs `/test`
+- [ ] emit to `/dist/release`, `/dist/test`, `/dist/extras`
+
+- [ ] Ensure runtime support for ES5 envs without perf loss
+  - [ ] remove `emitES5` option
+  - [ ] Don't use ES6 libs
+  - [ ] Downlevel ES6 language features
+  - [ ] Ensure 'templates' contain no ES6 to begin with, no avoid surprise behaviour with 'macro' subtitutions
+
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.
   - [ ] use npm `debug` module to sent all debug/trace messages
@@ -17,6 +32,7 @@
 - [ ] rename UNHANDLED to FALLBACK or CASCADE.
   - [ ] doc/explain naming - this is an imperative return value of what MM should do next, not a declaration of what just happened in current handler.
   - [ ] add note for future addition: more sentinel return values for other builtin behaviours. Such as?
+- [ ] improve error API & strong typing
 
 
 

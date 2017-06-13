@@ -1,7 +1,5 @@
-import {MultimethodError} from '../util';
+import {fatalError} from '../util';
 import MultimethodOptions from './multimethod-options';
-import {parsePredicatePattern} from '../set-theory/predicates';
-// TODO: was... remove...import Rule from './rule';
 
 
 
@@ -51,7 +49,7 @@ function validateArity(arity: MultimethodOptions['arity'], staticArity?: Multime
 
     // If *both* static and runtime arities are given, they must match.
     if (staticArity !== undefined && arity !== undefined && staticArity !== arity) {
-        throw new MultimethodError(`arity mismatch`); // TODO: improve diagnostic message
+        return fatalError('ARITY_MISMATCH');
     }
 }
 
@@ -59,31 +57,8 @@ function validateArity(arity: MultimethodOptions['arity'], staticArity?: Multime
 
 
 
-// TODO: is this still an error? IDTS... Remove this...
 function validateRules(rules: MultimethodOptions['rules']) {
-
-    // TODO: ensure no pattern has a capture called 'next'
-    Object.keys(rules).forEach(src => {
-        let captureNames = parsePredicatePattern(src).captureNames;
-        if (captureNames.indexOf('next') === -1) return;
-        throw new MultimethodError(`Predicate '${src}' uses reserved name 'next'`);
+    Object.keys(rules).forEach(_ => {
+        // TODO: anything to validate?
     });
 }
-
-
-
-
-
-// TODO: we no longer provide this default... It's really not a 'general' algorithm. Will now error on same predicates
-// /** Default implementation for returning the more-specific of the two given rules. */
-// function tieBreakFn(a: Rule, b: Rule): Rule | undefined {
-
-//     // All else being equal, localeCompare of pattern comments provides the rule order (comes before == more specific).
-//     let aComment = parsePredicatePattern(a.predicate.toString()).comment;
-//     let bComment = parsePredicatePattern(b.predicate.toString()).comment;
-//     if (aComment.localeCompare(bComment) < 0) return a;
-//     if (bComment.localeCompare(aComment) < 0) return b;
-
-//     // TODO: explain...
-//     return undefined;
-// }

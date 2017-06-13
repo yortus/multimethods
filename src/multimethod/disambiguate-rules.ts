@@ -1,6 +1,5 @@
 // TODO: `tieBreakFn` should be passed in or somehow provided from outside, with builtin fallback/default impl as below.
-import {MultimethodError} from '../util';
-import {inspect} from 'util';
+import {fatalError} from '../util';
 import MultimethodOptions from './multimethod-options';
 import Rule from './rule';
 
@@ -37,16 +36,11 @@ function makeRuleComparator(tieBreakFn: (a: Rule, b: Rule) => Rule|undefined) {
 
         // TODO: general case: use the client-suppied `moreSpecific` function to determine which is more specific...
         let moreSpecificRule = tieBreakFn(ruleA, ruleB);
-        let ruleDiagnostics = `A: ${inspect(ruleA)}, B: ${inspect(ruleB)}`;
-
         if (moreSpecificRule !== ruleA && moreSpecificRule !== ruleB) {
-            let message = `Ambiguous rule ordering - which is more specific of A and B? ${ruleDiagnostics}`;
-            throw new MultimethodError(message);
+            return fatalError('AMBIGUOUS_RULE_ORDER', ruleA.predicate, ruleB.predicate);
         }
-
         if (moreSpecificRule !== tieBreakFn(ruleB, ruleA)) {
-            let message = `Unstable rule ordering - tiebreak function is inconsist: A>B ≠ B<A for ${ruleDiagnostics}.`;
-            throw new MultimethodError(message);
+            return fatalError('UNSTABLE_RULE_ORDER', ruleA.predicate, ruleB.predicate);
         }
 
         return ruleA === moreSpecificRule ? 1 : -1; // NB: sorts from least- to most-specific
