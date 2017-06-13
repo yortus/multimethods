@@ -3,17 +3,15 @@
   - [x] add note for future addition: this option *may* be expanded to allow for specific strict checks
   - [x] current uses of `util.warn` become errors *iff* strictChecks is true, else no error/warning issued.
   - [x] remove all `warn`-related stuff from codebase
-
 - [x] add an `fatalError.ts` file listing all possible errors with a short code and a description with {0} holes
   - [x] use these codes when throwing errors (via helper)
   - [x] improve the 'MM contains conflicts' error message. i.e., what does it mean? How to fix it?
     - [x] MM has no catch-all handler, so some calls may no be dispatchable. To resolve this problem, define a handler for the predicate '...'
     - [x] MM has ambiguities, so some calls may not be dispatchable. To resolve this problem, define handlers for the predicates(s) ${...}
-
-- [ ] split unit tests from perf work.
-  - [ ] perf moves to `/extras/bench`, call with `npm run bench`
-  - [ ] simplify under dirs `/test`
-- [ ] emit to `/dist/release`, `/dist/test`, `/dist/extras`
+- [x] split unit tests from perf work.
+  - [x] perf moves to `/extras/bench`, call with `npm run bench`
+  - [x] simplify under dirs `/test`
+- [x] emit to `/dist/release`, `/dist/test`, `/dist/extras`
 
 - [ ] Ensure runtime support for ES5 envs without perf loss
   - [ ] remove `emitES5` option
