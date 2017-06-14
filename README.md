@@ -56,6 +56,13 @@
 
 
 
+## Compatibility
+- TL;DR: Node.js 6+, recent browsers, IE11
+- Assumes environment supports ES5
+- some ES6 runtime things are used, but only if supported by IE11 (Map, WeakMap, Object.setPrototypeOf)
+- One thing won't work in IE11: Multimethod instanceof Function 
+
+
 
 ## The Pattern DSL
 

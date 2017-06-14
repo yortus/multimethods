@@ -42,6 +42,7 @@
   - [ ] TODO: coposing metarule handlers...
   - [ ] replaces tieBreakFn / moreSpecific - remove all refs in code
   - [ ] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
+  - [ ] remove predicate comment support - they were not really 'comments' since they affected semantics
 
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.
@@ -73,7 +74,10 @@
   - [ ] TODO: investigate alternatives... current form:   +ve = type-consistency   -ve = intellisense
   - [ ] remove dep on `util.format`
 
+- [ ] max strictness in `tsconfig.json` for src, tests and extras
+  - [ ] are there any new strictness flags to add?
 
+- [ ] TODO: investigate `Multimethod instanceof Function` workaround for IE11
 
 
 ## Notes
