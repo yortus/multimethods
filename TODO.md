@@ -12,9 +12,8 @@
   - [x] perf moves to `/extras/bench`, call with `npm run bench`
   - [x] simplify under dirs `/test`
 - [x] emit to `/dist/release`, `/dist/test`, `/dist/extras`
-
-- [ ] Ensure runtime support for ES5 envs without perf loss
-  - [ ] remove `emitES5` option
+- [x] Ensure runtime support for ES5 envs without perf loss
+  - [x] remove `emitES5` option
   - [x] Don't use ES6 libs in `/src` (but can use them in `/test` and `/extras`)
   - [x] Downlevel ES6 language features `/src` (but not in `/test` and `/extras`)
   - [x] Ensure 'templates' contain no ES6 to begin with, to avoid surprise behaviour with 'macro' subtitutions
@@ -27,6 +26,7 @@
       - [x] let/const
       - [x] Map & Set basic usage
       - [x] Object.setPrototypeOf
+  - [x] ensure benchmarks have not suffered
 
 - [ ] TODO: Helper(s) to compose handlers manually
   - [ ] TODO: composing normal handlers...

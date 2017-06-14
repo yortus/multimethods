@@ -17,7 +17,6 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let toDiscriminant = options.toDiscriminant || ((...args: any[]) => args.map(arg => (arg || '').toString()).join(''));
     let unhandled = options.hasOwnProperty('unhandled') ? options.unhandled : {}; // TODO: export a lib-defined UNHANDLED const
     let rules = options.rules || {};
-    let emitES5 = options.emitES5 === true;
     let moreSpecific = options.moreSpecific || (() => undefined);
     let trace = options.trace === true;
     let strictChecks = options.strictChecks === true;
@@ -33,7 +32,6 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
         toDiscriminant,
         unhandled,
         rules,
-        emitES5,
         moreSpecific,
         trace,
         strictChecks

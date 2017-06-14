@@ -110,18 +110,15 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
         DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : ''
     });
 
-    // TODO: temp testing... specialise for arity...
+    // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
     if (typeof options.arity === 'number') {
         let paramNames = [];
         for (let i = 0; i < options.arity; ++i) paramNames.push('$' + i);
         source = source.replace(/ELLIPSIS_([A-Z]+)/g, paramNames.join(', '));
     }
-    else if (options.emitES5) {
+    else {
         source = downlevelES6Rest(source);
         source = downlevelES6Spread(source);
-    }
-    else {
-        source = source.replace(/ELLIPSIS_([A-Z]+)/g, (_substr, varName: string) => `...${varName}`);
     }
 
     // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere

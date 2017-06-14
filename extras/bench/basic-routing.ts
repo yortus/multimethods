@@ -119,8 +119,7 @@ const tests = [
             let bComment = b.predicate.split('#')[1] || '';
             if (aComment.localeCompare(bComment) < 0) return a;
             if (bComment.localeCompare(aComment) < 0) return b;
-        },
-        emitES5: false
+        }
     });
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));

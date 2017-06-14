@@ -117,8 +117,7 @@ describe('Constructing a Multimethod instance', () => {
                 if (aComment.localeCompare(bComment) < 0) return a;
                 if (bComment.localeCompare(aComment) < 0) return b;
             },
-            strictChecks: false,
-            emitES5: true
+            strictChecks: false
         });
 //        configure({warnings: 'default'});
 

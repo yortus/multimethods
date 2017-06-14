@@ -83,7 +83,6 @@ describe('MULTIMETHOD II: Constructing a Multimethod instance', () => {
         timing: 'sync',
         rules: ruleSet,
         unhandled: UNHANDLED,
-        emitES5: true,
         moreSpecific: (a, b) => {
             let aComment = a.predicate.split('#')[1] || '';
             let bComment = b.predicate.split('#')[1] || '';
