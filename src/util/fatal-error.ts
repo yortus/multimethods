@@ -47,3 +47,13 @@ class MultimethodError extends Error {
         Object.setPrototypeOf(this, MultimethodError.prototype);
     }
 }
+
+
+
+
+
+declare global {
+    interface Object {
+        setPrototypeOf(o: any, proto: object | null): any;
+    }
+}

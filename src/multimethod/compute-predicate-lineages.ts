@@ -3,7 +3,7 @@ import disambiguateRules from './disambiguate-rules';
 import MultimethodOptions from './multimethod-options';
 import Rule from './rule';
 import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
-import {EulerDiagram, Set} from '../set-theory/sets';
+import {EulerDiagram, EulerSet} from '../set-theory/sets';
 
 
 
@@ -117,7 +117,7 @@ function distributeRulesOverSets<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[]
  * list of predicates arranged in walk-order (i.e., from the root to the descendent).
  * [1] See: https://en.wikipedia.org/wiki/Glossary_of_graph_theory#Walks
  */
-function getAlternateLineagesForSet(set: Set): Predicate[][] {
+function getAlternateLineagesForSet(set: EulerSet): Predicate[][] {
     let allRoutes = ([] as Predicate[][]).concat(...set.supersets.map(getAlternateLineagesForSet));
     if (allRoutes.length === 0) {
 

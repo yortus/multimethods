@@ -27,7 +27,6 @@ let GET_CAPTURES: (discriminant: string) => {};
 let CALL_METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
 
 
-// TODO: note ES6 in source here - spread and rest (...MM_ARGS), arrow functions
 // TODO: explain important norms in the template function...
 // TODO: don't need to dedent any more!
 // TODO: put more explanatory comments inside, and strip them out to maximise inlining potential
@@ -56,7 +55,7 @@ export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_
             };
         }
         else {
-            var next: Function = () => UNHANDLED;
+            var next: Function = function () { return UNHANDLED; };
         }
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
@@ -91,7 +90,7 @@ export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_
     // TODO: trace...
     if (IS_TRACING) {
         if (isPromise(result)) {
-            result = result.then((rs: any) => {
+            result = result.then(function (rs: any) {
                 console.log(`==> Leave '${TRACE_LABEL}'`);
                 console.log(`      Handled? ${rs === UNHANDLED ? ' NO' : `YES, type is ${typeof rs}]`}`);
                 return rs;
@@ -114,13 +113,13 @@ export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_
             if (IS_PURE_ASYNC) {
 
                 // All methods in this MM are asynchronous
-                result = result.then((rs: any) => DELEGATE_NEXT(discriminant, rs, ELLIPSIS_MMARGS));
+                result = result.then(function (rs: any) { return DELEGATE_NEXT(discriminant, rs, ELLIPSIS_MMARGS); });
             }
             else {
 
                 // Methods may be sync or async, and we must differentiate at runtime
                 if (isPromise(result)) {
-                    result = result.then((rs: any) => DELEGATE_NEXT(discriminant, rs, ELLIPSIS_MMARGS));
+                    result = result.then(function (rs: any) { return DELEGATE_NEXT(discriminant, rs, ELLIPSIS_MMARGS); });
                 }
                 else {
                     result = DELEGATE_NEXT(discriminant, result, ELLIPSIS_MMARGS);

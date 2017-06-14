@@ -199,6 +199,7 @@ function createMultimethodClass(staticArity?: MultimethodOptions['arity']): Mult
             return instance;
         }
 
+        // TODO: explain this for ES6 envs, and degraded behaviour for ES5 envs
         static [Symbol.hasInstance](value: any) {
             if (staticArity) {
                 return value && value[CTOR] === Multimethod;
@@ -214,5 +215,29 @@ function createMultimethodClass(staticArity?: MultimethodOptions['arity']): Mult
 
 
 
+// TODO: for ES5 envs...
+if (typeof Symbol === 'undefined') {
+    let defn: any = (description: string) => `$$${description}$$`;
+    defn.hasInstance = defn('hasInstance'); // dummy value; won't do anything
+    Symbol = defn;
+}
+
+
+
+
+
 // TODO: ...
 const CTOR = Symbol('ctor');
+
+
+
+
+
+// TODO: ...
+declare global {
+    interface SymbolConstructor {
+        (description?: string | number): symbol;
+        readonly hasInstance: symbol;
+    }
+    var Symbol: SymbolConstructor;
+}

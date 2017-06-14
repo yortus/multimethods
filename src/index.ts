@@ -7,7 +7,7 @@ export {parsePredicatePattern, PredicateAST, toIdentifier, toMatchFunction, toNo
 export {default as intersect} from './set-theory/sets/intersect';
 
 
-export {EulerDiagram, Set} from './set-theory/sets';
+export {EulerDiagram, EulerSet} from './set-theory/sets';
 
 
 

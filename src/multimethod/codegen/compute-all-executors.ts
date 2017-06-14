@@ -8,7 +8,7 @@ import {toIdentifier, parsePredicatePattern, toNormalPredicate} from '../../set-
 import replaceAll from './transforms/replace-all';
 import routeExecutorTemplate from './route-executor-template';
 import Rule from '../rule';
-import {EulerDiagram, Set} from '../../set-theory/sets';
+import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 
 
 
@@ -65,7 +65,7 @@ export default function computeAllExecutors(eulerDiagram: EulerDiagram<Lineage>,
 
 
 // TODO: ...
-function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Lineage, rule: Rule, options: MultimethodOptions) {
+function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lineage, rule: Rule, options: MultimethodOptions) {
 
     // TODO: to get copypasta'd code working... revise...
     let i = set.lineage.indexOf(rule);
@@ -139,7 +139,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Li
 
 
 // TODO: ...
-function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, set: Set & Lineage, rule: Rule) {
+function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lineage, rule: Rule) {
     let ruleNode = eulerDiagram.get(rule.predicate);
     let ruleIndex = ruleNode.lineage.indexOf(rule);
     let ruleIdentifier = toIdentifier(ruleNode.predicate);

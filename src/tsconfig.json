@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
-        "lib": ["es6"],
+        "lib": ["es5", "es2015.collection"],
         "removeComments": false,
         "sourceMap": true,
         "declaration": true,

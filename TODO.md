@@ -15,15 +15,32 @@
 
 - [ ] Ensure runtime support for ES5 envs without perf loss
   - [ ] remove `emitES5` option
-  - [ ] Don't use ES6 libs in `/src` (but can use them in `/test` and `/extras`)
-  - [ ] Downlevel ES6 language features `/src` (but not in `/test` and `/extras`)
-  - [ ] Ensure 'templates' contain no ES6 to begin with, no avoid surprise behaviour with 'macro' subtitutions
-    - [ ] carefully audit all generated code for possible ES6 usage:
-      - [ ] arrow functions
-      - [ ] let/const
-      - [ ] rest/spread
-      - [ ] ES6 runtime - Promise, Symbol, string functions, etc
-      - [ ] other - check&whitelist every line to rule out anything missed above
+  - [x] Don't use ES6 libs in `/src` (but can use them in `/test` and `/extras`)
+  - [x] Downlevel ES6 language features `/src` (but not in `/test` and `/extras`)
+  - [x] Ensure 'templates' contain no ES6 to begin with, to avoid surprise behaviour with 'macro' subtitutions
+    - [x] carefully audit all generated code for possible ES6 usage:
+      - [x] arrow functions
+      - [x] rest/spread
+      - [x] ES6 runtime - Promise, Symbol, string functions, etc
+      - [x] other - check&whitelist every line to rule out anything missed above
+    - [x] EXCEPTIONS (supported even in IE11):
+      - [x] let/const
+      - [x] Map & Set basic usage
+      - [x] Object.setPrototypeOf
+
+- [ ] TODO: Helper(s) to compose handlers manually
+  - [ ] TODO: composing normal handlers...
+  - [ ] TODO: coposing metarule handlers...
+  - [ ] replaces tieBreakFn / moreSpecific - remove all refs in code
+  - [ ] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
+
+- [ ] TODO: revise codegen
+  - [ ] always output codegen in debug mode
+  - [ ] investigate: can it be made more understandable/idiomatic?
+    - [ ] TODO: findings & actions...
+    - [ ] remove unnecessary .toStrings on predicates (which are simply strings at runtime, but tagged at compile-time)
+  - [ ] inventigate: can the source 'stitching together' be made more template-like?
+    - [ ] TODO: findings & actions...
 
 - [ ] UNHANDLED --> FALLBACK
   - [ ] explain in README what FALLBACK sentinel means (imperative, not declarative)

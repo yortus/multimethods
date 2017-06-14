@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {EulerDiagram, Set, intersect, toNormalPredicate, ANY, toPredicate} from 'multimethods';
+import {EulerDiagram, EulerSet, intersect, toNormalPredicate, ANY, toPredicate} from 'multimethods';
 
 
 describe('Traversing an euler diagram', () => {
@@ -37,7 +37,7 @@ describe('Traversing an euler diagram', () => {
 
 
 /** Helper function that enumerates all edges in an euler diagram. */
-function getAllEdges(set: Set): {parent: Set; child: Set}[] {
+function getAllEdges(set: EulerSet): {parent: EulerSet; child: EulerSet}[] {
     let direct = set.subsets.map(spec => ({parent: set, child: spec}));
     let all = direct.concat(...set.subsets.map(getAllEdges)); 
     return all;

@@ -1,6 +1,6 @@
 import {NormalPredicate} from '../predicates';
 import intersect from './intersect';
-import Set from './set';
+import EulerSet from './euler-set';
 
 
 
@@ -13,14 +13,14 @@ import Set from './set';
  * Inserts `insertee` into the euler diagram subgraph rooted at `ancestor`, preserving all invariants
  * relating to the arrangement of sets. `insertee`'s predicate is assumed to be a proper
  * subset of `ancestor`'s predicate, and `insertee` must not hold the 'empty' predicate '∅'.
- * @param {Set} insertee - the new set to be inserted into the euler diagram below `ancestor`.
- * @param {Set} ancestor - the 'root' set of the euler diagram subgraph in which `insertee` belongs.
- * @param {(predicate: Predicate) => Set} setFor - a function that returns the set for
+ * @param {EulerSet} insertee - the new set to be inserted into the euler diagram below `ancestor`.
+ * @param {EulerSet} ancestor - the 'root' set of the euler diagram subgraph in which `insertee` belongs.
+ * @param {(predicate: Predicate) => EulerSet} setFor - a function that returns the set for
  *        a given predicate. It is expected to return the same instance when passed the same predicate for
  *        the same euler diagram. When `insertee` overlaps an existing set in the subgraph, this function
  *        is used to synthesize the additional intersection set(s).
  */
-export default function insertAsDescendent(insertee: Set, ancestor: Set, setFor: (predicate: NormalPredicate) => Set) {
+export default function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (predicate: NormalPredicate) => EulerSet) {
 
     // Determine the set relationship between `insertee` and each of the `ancestor` set's existing children.
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
@@ -37,7 +37,7 @@ export default function insertAsDescendent(insertee: Set, ancestor: Set, setFor:
 
             return comparands;
         },
-        <{set: Set; intersection: Set}[]> []
+        <{set: EulerSet; intersection: EulerSet}[]> []
     );
 
     // If the `ancestor` pattern has no existing children that are non-disjoint
@@ -82,7 +82,7 @@ export default function insertAsDescendent(insertee: Set, ancestor: Set, setFor:
 
 
 /** Checks if parent/child links exist directly between `set` and `child`. */
-function hasChild(set: Set, child: Set): boolean {
+function hasChild(set: EulerSet, child: EulerSet): boolean {
     return set.subsets.indexOf(child) !== -1;
 }
 
@@ -91,7 +91,7 @@ function hasChild(set: Set, child: Set): boolean {
 
 
 /** Ensures parent/child links exist directly between `set` and `child`. */
-function insertChild(set: Set, child: Set) {
+function insertChild(set: EulerSet, child: EulerSet) {
     // NB: If the child is already there, make this a no-op.
     if (hasChild(set, child)) return;
     set.subsets.push(child);
@@ -103,7 +103,7 @@ function insertChild(set: Set, child: Set) {
 
 
 /** Removes the existing parent/child links between `set` and `child`. */
-function removeChild(set: Set, child: Set) {
+function removeChild(set: EulerSet, child: EulerSet) {
     set.subsets.splice(set.subsets.indexOf(child), 1);
     child.supersets.splice(child.supersets.indexOf(set), 1);
 }

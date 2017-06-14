@@ -4,4 +4,4 @@
 
 
 export {default as EulerDiagram} from './euler-diagram';
-export {default as Set} from './set';
+export {default as EulerSet} from './euler-set';

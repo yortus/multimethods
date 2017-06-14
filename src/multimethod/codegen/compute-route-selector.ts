@@ -1,6 +1,6 @@
 import {toIdentifier} from '../../set-theory/predicates';
 import RouteExecutor from './route-executor';
-import {EulerDiagram, Set} from '../../set-theory/sets';
+import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 import {WithExecutors} from './compute-all-executors';
 
 
@@ -67,15 +67,15 @@ export type RouteSelector = (discriminant: string) => RouteExecutor;
 
 
 /** Helper function to generate source code for part of the dispatcher function used for route selection. */
-function generateSelectorSourceCode(from: Set & WithExecutors, nestDepth: number) {
+function generateSelectorSourceCode(from: EulerSet & WithExecutors, nestDepth: number) {
     let subsets = from.subsets;
 
     // Make the indenting string corresponding to the given `nestDepth`.
-    let indent = '    '.repeat(nestDepth);
+    let indent = Array(nestDepth + 1).join('    '); // ES5 equivalent to ES6 '    '.repeat(nestDepth)
 
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
-    subsets.forEach((set: Set & WithExecutors, i) => {
+    subsets.forEach((set: EulerSet & WithExecutors, i) => {
         let predicateIdentifier = toIdentifier(set.predicate);
         let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${predicateIdentifier}(discriminant)) `;
 

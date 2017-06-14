@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {EulerDiagram, Set, toPredicate} from 'multimethods';
+import {EulerDiagram, EulerSet, toPredicate} from 'multimethods';
 
 
 describe('Constructing an euler diagram', () => {
@@ -159,6 +159,6 @@ describe('Constructing an euler diagram', () => {
 
 
 /** Helper function that converts an EulerDiagram to a simple nested object with predicate sources for keys */
-function setToObj(set: Set): {} {
+function setToObj(set: EulerSet): {} {
     return set.subsets.reduce((obj, set) => (obj[set.predicate.toString()] = setToObj(set), obj), {});
 }

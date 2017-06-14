@@ -1,6 +1,6 @@
 import insertAsDescendent from './[todo-was-insert-as-descendent]';
 import {Predicate, toPredicate, toNormalPredicate, NormalPredicate, ANY} from '../predicates';
-import Set from './set';
+import EulerSet from './euler-set';
 
 
 
@@ -70,16 +70,16 @@ export default class EulerDiagram<T> {
 
 
     /** Holds the root set of the euler diagram. */
-    universe: Set & T;
+    universe: EulerSet & T;
 
 
     /** Holds a snapshot of all the sets in the euler diagram at the time of construction. */
-    sets: Array<Set & T>;
+    sets: Array<EulerSet & T>;
 
 
     // TODO: temp testing... doc... looks up the set for the given predicate. returns undefined if not found.
     // algo: exact match using canonical form of given Predicate/string
-    get(predicate: string): Set & T {
+    get(predicate: string): EulerSet & T {
         let p = toNormalPredicate(toPredicate(predicate));
         let result = this.sets.filter(set => set.predicate === p)[0];
         return result;
@@ -90,7 +90,7 @@ export default class EulerDiagram<T> {
     // TODO: better name? It maps the props AND assigns props back to sets (like a mixin)
     // - augment? addProps?
 
-    augment<U>(callback: (set: Set & T) => U): EulerDiagram<T & U> {
+    augment<U>(callback: (set: EulerSet & T) => U): EulerDiagram<T & U> {
         return augmentEulerDiagram(this, callback);
     }
 }
@@ -105,9 +105,9 @@ function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: Predicat
     // Create the setFor() function to return the set corresponding to a given pattern,
     // creating it on demand if it doesn't already exist. This function ensures that every
     // request for the same pattern gets the same singleton set.
-    let setLookup = new Map<NormalPredicate, Set & T>();
+    let setLookup = new Map<NormalPredicate, EulerSet & T>();
     let setFor = (predicate: NormalPredicate) => {
-        if (!setLookup.has(predicate)) setLookup.set(predicate, <Set & T> new Set(predicate));
+        if (!setLookup.has(predicate)) setLookup.set(predicate, <EulerSet & T> new EulerSet(predicate));
         return setLookup.get(predicate)!;
     }
 
@@ -122,7 +122,8 @@ function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: Predicat
         .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
 
     // Finally, compute the `sets` property.
-    eulerDiagram.sets = Array.from(setLookup.values());
+    let sets: Array<EulerSet & T> = eulerDiagram.sets = [];
+    setLookup.forEach(value => sets.push(value));
 }
 
 
@@ -130,11 +131,11 @@ function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: Predicat
 
 
 /** Internal helper function used to implement EulerDiagram#map. */
-function augmentEulerDiagram<T, U>(eulerDiagram: EulerDiagram<T>, callback: (set: Set & T) => U): EulerDiagram<T & U> {
+function augmentEulerDiagram<T, U>(eulerDiagram: EulerDiagram<T>, callback: (set: EulerSet & T) => U): EulerDiagram<T & U> {
 
     // Clone the bare euler diagram.
     let oldSets = eulerDiagram.sets;
-    let newSets = oldSets.map(old => new Set(old.predicate)) as Array<Set & T & U>;
+    let newSets = oldSets.map(old => new EulerSet(old.predicate)) as Array<EulerSet & T & U>;
     let oldToNew = oldSets.reduce((map, old, i) => map.set(old, newSets[i]), new Map());
     newSets.forEach((set, i) => {
         set.supersets = oldSets[i].supersets.map(gen => oldToNew.get(gen));
