@@ -10,6 +10,9 @@ import {Multimethod, meta, util} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
+// 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.76 seconds    (~1316000 req/sec)   Target is now ES5 (was ES6). Codegen changed accordingly.
+// 2017-06-13   LAJESTIC    Dispatched 1000000 requests in 0.803 seconds   (~1245000 req/sec)   Various (minor) tweaks after coming back to project.
+
 // 2016-12-02   LAJESTIC    Dispatched 1000000 requests in 0.789 seconds   (~1267000 req/sec)   more tweaks of string functions (surroundedWith). NB: diminishing returns.
 // 2016-12-01   LAJESTIC    Dispatched 1000000 requests in 0.812 seconds   (~1232000 req/sec)   more tweaks of string functions (startsWith, endsWith, containsSlash)
 // 2016-12-01   LAJESTIC    Dispatched 1000000 requests in 0.898 seconds   (~1114000 req/sec)   after some profile-based optimisations (eg removing useless deopted IIAFE below, adding custom indexOf fn)
@@ -116,7 +119,8 @@ const tests = [
             let bComment = b.predicate.split('#')[1] || '';
             if (aComment.localeCompare(bComment) < 0) return a;
             if (bComment.localeCompare(aComment) < 0) return b;
-        }
+        },
+        emitES5: false
     });
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));

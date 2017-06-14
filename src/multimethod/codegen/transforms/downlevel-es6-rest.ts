@@ -3,17 +3,21 @@
 
 
 
-// TODO: ...
+// TODO: ... note limitations:
+// - basically a macro expansion for ELLIPSIS as a restDecl
+// - only works for var named ELLIPSIS_XXX
+// - only works for funcExpr with a rest param, with '{' on same line, followed by body on next line
 export default function downlevelES6Rest(source: string): string {
     // TODO: ensure no other kinds of rest left behind afterward...
 
     // Matches (non-arrow) function headers with a rest argument
-    const REGEX = /function([^(]*)\((.*?),\s*\.\.\.[^)]+\)\s*{\n(\s*)/gi;
+    const REGEX = /function([^(]*)\((.*?)(?:,\s*)?ELLIPSIS_([A-Z]+)\s*\)\s*{\n(\s*)/g;
 
-    // ES5 equivalent for initialising the rest argument MM_ARGS
-    const REST = `for (var MM_ARGS = [], len = arguments.length, i = 2; i < len; ++i) MM_ARGS.push(arguments[i]);`;
+    return source.replace(REGEX, (_substr, funcName: string, firstArgs: string, varName: string, indent: string) => {
+        let firstArgCount = firstArgs ? firstArgs.split(',').length : 0;
 
-    return source.replace(REGEX, (_substr, funcName: string, firstArgs: string, indent: string) => {
-        return `function ${funcName}(${firstArgs}) {\n${indent}${REST}\n${indent}`;
+        // ES5 equivalent for initialising the rest argument MM_ARGS
+        let rest = `for (var ${varName} = [], len = arguments.length, i = ${firstArgCount}; i < len; ++i) ${varName}.push(arguments[i]);`;
+        return `function ${funcName}(${firstArgs}) {\n${indent}${rest}\n${indent}`;
     });
 }

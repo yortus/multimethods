@@ -15,9 +15,18 @@
 
 - [ ] Ensure runtime support for ES5 envs without perf loss
   - [ ] remove `emitES5` option
-  - [ ] Don't use ES6 libs
-  - [ ] Downlevel ES6 language features
+  - [ ] Don't use ES6 libs in `/src` (but can use them in `/test` and `/extras`)
+  - [ ] Downlevel ES6 language features `/src` (but not in `/test` and `/extras`)
   - [ ] Ensure 'templates' contain no ES6 to begin with, no avoid surprise behaviour with 'macro' subtitutions
+    - [ ] carefully audit all generated code for possible ES6 usage:
+      - [ ] arrow functions
+      - [ ] let/const
+      - [ ] rest/spread
+      - [ ] ES6 runtime - Promise, Symbol, string functions, etc
+      - [ ] other - check&whitelist every line to rule out anything missed above
+
+- [ ] UNHANDLED --> FALLBACK
+  - [ ] explain in README what FALLBACK sentinel means (imperative, not declarative)
 
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.

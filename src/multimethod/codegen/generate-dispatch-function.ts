@@ -22,7 +22,8 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
 
     let wholeSource = [selectorSource, ...t2.sets.map(set => set.source)].join('\n');
 
-//    console.log(wholeSource);
+// TODO: temp testing... remove
+//console.log(wholeSource);
 
 
     // Bring things into local scope that are ref'd from eval'ed code. NB: the source code
