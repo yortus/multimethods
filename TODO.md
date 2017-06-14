@@ -43,18 +43,6 @@
   - [ ] replaces tieBreakFn / moreSpecific - remove all refs in code
   - [ ] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
 
-- [ ] TODO: revise codegen
-  - [ ] fix dispatchFunction (see TODOs on lines 56-57 of `generate-dispatch-function.ts`)
-  - [ ] always output codegen in debug mode
-  - [ ] investigate: can it be made more understandable/idiomatic?
-    - [ ] TODO: findings & actions...
-    - [ ] remove unnecessary .toStrings on predicates (which are simply strings at runtime, but tagged at compile-time)
-  - [ ] inventigate: can the source 'stitching together' be made more template-like?
-    - [ ] TODO: findings & actions...
-
-- [ ] TODO: fix meta() function
-  - [ ] should detect whether used as a wrapper function around a handler, or as a property decorator
-
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.
   - [ ] use npm `debug` module to sent all debug/trace messages
@@ -69,6 +57,21 @@
 - [ ] improve error API & strong typing
 - [ ] strictest TSC options in `/test` and `/extras`
 
+- [ ] TODO: revise codegen
+  - [ ] fix dispatchFunction (see TODOs on lines 56-57 of `generate-dispatch-function.ts`)
+  - [ ] always output codegen in debug mode
+  - [ ] investigate: can it be made more understandable/idiomatic?
+    - [ ] TODO: findings & actions...
+    - [ ] remove unnecessary .toStrings on predicates (which are simply strings at runtime, but tagged at compile-time)
+  - [ ] inventigate: can the source 'stitching together' be made more template-like?
+    - [ ] TODO: findings & actions...
+
+- [ ] TODO: fix meta() function
+  - [ ] should detect whether used as a wrapper function around a handler, or as a property decorator
+
+- [ ] TODO: improve `fatalError.ts`
+  - [ ] TODO: investigate alternatives... current form:   +ve = type-consistency   -ve = intellisense
+  - [ ] remove dep on `util.format`
 
 
 
