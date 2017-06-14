@@ -1,5 +1,6 @@
 import computeAllExecutors from './compute-all-executors';
 import computeRouteSelector from './compute-route-selector';
+import {fatalError} from '../../util';
 import {Lineage} from '../compute-predicate-lineages';
 import * as predicates from '../../set-theory/predicates';
 import MultimethodOptions from '../multimethod-options';
@@ -33,7 +34,7 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     const toDiscriminant = normalisedOptions.toDiscriminant;
     const isPromise = util.isPromiseLike;
     isPromise; // Suppress TS6133 decl never used
-    const UNHANDLED = normalisedOptions.unhandled;
+    const FALLBACK = normalisedOptions.FALLBACK;
     const toMatchFunction = predicates.toMatchFunction;
     toMatchFunction; // Suppress TS6133 decl never used
     const parsePredicate = predicates.parsePredicatePattern;
@@ -58,7 +59,8 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     let dispatchFunction: Function = function _dispatch($0: any) {
         let discriminant = toDiscriminant($0);
         let executeRoute = selectRoute(discriminant);
-        let result = executeRoute(discriminant, UNHANDLED, $0);
+        let result = executeRoute(discriminant, FALLBACK, $0);
+        if (result === FALLBACK) return fatalError('UNHANDLED');
         return result;
     };
 

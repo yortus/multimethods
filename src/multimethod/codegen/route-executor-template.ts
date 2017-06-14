@@ -12,7 +12,7 @@ let isPromise: (x: any) => boolean;
 
 
 // TODO: explain each of these in turn...
-let UNHANDLED: any;
+let FALLBACK: any;
 let IS_TRACING: boolean;
 let TRACE_LABEL: string;
 let ENDS_PARTITION: boolean;
@@ -33,7 +33,7 @@ let CALL_METHOD: (...args: any[]) => any; // Method signature, NB: context is pa
 export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_MMARGS: any[]) {
 
     // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
-    if (result !== UNHANDLED) {
+    if (result !== FALLBACK) {
         return result;
     }
 
@@ -51,11 +51,11 @@ export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_
     if (IS_META_RULE) {
         if (HAS_DOWNSTREAM) {
             var next: Function = function (ELLIPSIS_MMARGS: any[]) {
-                return DELEGATE_DOWNSTREAM(discriminant, UNHANDLED, ELLIPSIS_MMARGS);
+                return DELEGATE_DOWNSTREAM(discriminant, FALLBACK, ELLIPSIS_MMARGS);
             };
         }
         else {
-            var next: Function = function () { return UNHANDLED; };
+            var next: Function = function () { return FALLBACK; };
         }
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
@@ -92,13 +92,13 @@ export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_
         if (isPromise(result)) {
             result = result.then(function (rs: any) {
                 console.log(`==> Leave '${TRACE_LABEL}'`);
-                console.log(`      Handled? ${rs === UNHANDLED ? ' NO' : `YES, type is ${typeof rs}]`}`);
+                console.log(`      Handled? ${rs === FALLBACK ? ' NO' : `YES, type is ${typeof rs}]`}`);
                 return rs;
             });
         }
         else {
             console.log(`==> Leave '${TRACE_LABEL}'`);
-            console.log(`      Handled? ${result === UNHANDLED ? ' NO' : `YES, type is ${typeof result}]`}`);
+            console.log(`      Handled? ${result === FALLBACK ? ' NO' : `YES, type is ${typeof result}]`}`);
         }
     }
 

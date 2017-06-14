@@ -1,3 +1,4 @@
+import DEFAULT_FALLBACK from './fallback';
 import {fatalError} from '../util';
 import MultimethodOptions from './multimethod-options';
 
@@ -15,7 +16,7 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let arity = options.arity !== undefined ? options.arity : staticArity !== undefined ? staticArity : 'variadic';
     let timing = options.timing || 'mixed';
     let toDiscriminant = options.toDiscriminant || ((...args: any[]) => args.map(arg => (arg || '').toString()).join(''));
-    let unhandled = options.hasOwnProperty('unhandled') ? options.unhandled : {}; // TODO: export a lib-defined UNHANDLED const
+    let FALLBACK = 'FALLBACK' in options ? options.FALLBACK : DEFAULT_FALLBACK;
     let rules = options.rules || {};
     let moreSpecific = options.moreSpecific || (() => undefined);
     let trace = options.trace === true;
@@ -30,7 +31,7 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
         arity,
         timing,
         toDiscriminant,
-        unhandled,
+        FALLBACK,
         rules,
         moreSpecific,
         trace,

@@ -49,10 +49,12 @@
 - eager or lazy?
 
 
-## pros/cons for custom UNHANDLED value
-- CON: builtin handlers don't know which UNHANDLED to use - can't assume the default one will work
-- CON: if the default HANDLER always works in addition to a user-defd one, then checking for UNHANDLED value becomes more complicated
-- PRO: why? use case? Can decide that undefined means UNHANDLED, or null, or false or falsy.
+## The FALLBACK sentinel
+- When a handler returns `FALLBACK` (or a `Promise` thereof), it instructs the library to call the next-best matching handler for the same inputs. And so on until either a handler returns a non-`FALLBACK` value (which becomes the return value of the MM call), or the last matching handler returns `FALLBACK`, which causes an 'unhandled' error to be thrown.
+- lib provides a default for this, which is exported as `FALLBACK`
+- clients can provide their own `FALLBACK` value via MM options
+
+
 
 
 ## The Pattern DSL

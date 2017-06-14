@@ -51,8 +51,8 @@ function validateEulerDiagram(eulerDiagram: EulerDiagram<never>, options: Multim
     let normalizedPredicates = Object.keys(options.rules).map(p => toNormalPredicate(toPredicate(p)));
     let unhandledPredicates = eulerDiagram.sets.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
 
-    let unhandledCatchall = unhandledPredicates.indexOf(ANY) !== -1;
-    if (unhandledCatchall) {
+    let hasUnhandledCatchall = unhandledPredicates.indexOf(ANY) !== -1;
+    if (hasUnhandledCatchall) {
         return fatalError('MISSING_CATCHALL');
     }
 

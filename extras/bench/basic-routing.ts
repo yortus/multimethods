@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {Multimethod, meta, util} from 'multimethods';
+import {Multimethod, meta, util, FALLBACK} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -10,6 +10,7 @@ import {Multimethod, meta, util} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
+// 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.782 seconds   (~1279000 req/sec)   adjustments after making MMs throw if final result is FALLBACK.
 // 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.76 seconds    (~1316000 req/sec)   Target is now ES5 (was ES6). Codegen changed accordingly.
 // 2017-06-13   LAJESTIC    Dispatched 1000000 requests in 0.803 seconds   (~1245000 req/sec)   Various (minor) tweaks after coming back to project.
 
@@ -35,15 +36,15 @@ import {Multimethod, meta, util} from 'multimethods';
 
 // Declare test configuration.
 const COUNT = 1000000;
-const UNHANDLED: any = {};
 
 
 // Declare the test rule set.
 const ruleSet = {
+    '...': () => 'UNHANDLED',
     '/foo': () => 'foo',
     '/bar': () => 'bar',
     '/baz': () => 'baz',
-    '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
+    '/*a*': meta(($req, _, next) => `---${ifFallback(next($req), 'NONE')}---`),
 
     'a/*': () => `starts with 'a'`,
     '*/b': () => `ends with 'b'`,
@@ -51,21 +52,21 @@ const ruleSet = {
 
     'c/*': () => `starts with 'c'`,
     '*/d': () => `ends with 'd'`,
-    'c/d': () => UNHANDLED,
+    'c/d': () => FALLBACK,
 
     'api/... #a': () => `fallback`,
     'api/... #b': () => `fallback`,
-    'api/fo*o': () => UNHANDLED,
-    'api/fo* #2': meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
-    'api/fo* #1': meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
-    'api/foo ': meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
+    'api/fo*o': () => FALLBACK,
+    'api/fo* #2': meta(($req, _, next) => `fo2-(${ifFallback(next($req), 'NONE')})`),
+    'api/fo* #1': meta(($req, _, next) => `fo1-(${ifFallback(next($req), 'NONE')})`),
+    'api/foo ': meta(($req, _, next) => `${ifFallback(next($req), 'NONE')}!`),
     'api/foo': () => 'FOO',
     'api/foot': () => 'FOOt',
     'api/fooo': () => 'fooo',
-    'api/bar': () => UNHANDLED,
+    'api/bar': () => FALLBACK,
 
     // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-    'zzz/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+    'zzz/{...rest}': meta(($req, {rest}, next) => `${ifFallback(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
     'zzz/b*z': ($req) => `${$req.address}`,
     'zzz/./*': () => 'forty-two'
 };
@@ -111,7 +112,6 @@ const tests = [
     let mm = new Multimethod({
         rules: ruleSet,
         toDiscriminant: r => r.address,
-        unhandled: UNHANDLED,
         arity: 1,
         timing: 'sync',
         moreSpecific: (a, b) => {
@@ -124,12 +124,9 @@ const tests = [
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));
     let responses = tests.map(test => test.split(' ==> ')[1]);
-    responses.forEach((res, i) => { if (res === 'UNHANDLED') responses[i] = <any> UNHANDLED; });
-
 
     // Start timer.
     let start = new Date().getTime();
-
 
     // Loop over the tests.
     for (let i = 0; i < COUNT; ++i) {
@@ -139,10 +136,8 @@ const tests = [
         assert.equal(actualResponse, responses[index]);
     }
 
-
     // Stop timer.
     let stop = new Date().getTime();
-
 
     // Output performance results.
     let sec = (stop - start) / 1000;
@@ -152,6 +147,6 @@ const tests = [
 
 
 // TODO: doc helper...
-function ifUnhandled(lhs, rhs) {
-    return lhs === UNHANDLED ? rhs : lhs;
+function ifFallback(lhs, rhs) {
+    return lhs === FALLBACK ? rhs : lhs;
 }

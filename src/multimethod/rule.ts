@@ -34,8 +34,8 @@ TODO:... fix comment...
      *        a builtin name such as `$req` or `$next`. Capture values and/or builtin values are passed as the actual
      *        parameters to the `handler` function upon invocation. The handler may return its result synchronously or
      *        asynchronously. An asynchronous handler must return a Promises/A+ instance whose eventual value holds
-     *        the handler's response. Any non-UNHANDLED (eventual) return value from `handler` is interpreted as a
-     *        response. An `UNHANDLED` (eventual) return value signifies that the handler declined to respond to the
+     *        the handler's response. Any non-FALLBACK (eventual) return value from `handler` is interpreted as a
+     *        response. A `FALLBACK` (eventual) return value signifies that the handler declined to respond to the
      *        given request, even if the pattern matched the request's address.
      */
     constructor(predicatePattern: string, method: Function) {

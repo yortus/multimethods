@@ -32,9 +32,9 @@ export interface Lineage {
 export default function computePredicateLineages<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[], normalisedOptions: MultimethodOptions): EulerDiagram<T & Lineage> {
 
     // Every route begins with this universal rule. It matches all discriminants,
-    // and its method just returns the 'unhandled' sentinel value.
-    const universalFallbackRule = new Rule(ANY, function _unhandled() {
-        return normalisedOptions.unhandled;
+    // and its method just returns the `FALLBACK` sentinel value.
+    const universalFallbackRule = new Rule(ANY, function _universalFallback() {
+        return normalisedOptions.FALLBACK;
     });
 
     // Find the equal-best rules corresponding to each pattern in the euler diagram, sorted least- to most-specific in each

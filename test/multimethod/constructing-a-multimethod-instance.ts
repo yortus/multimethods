@@ -5,7 +5,7 @@
 
 
 import {expect} from 'chai';
-import {Multimethod, meta, util} from 'multimethods';
+import {Multimethod, meta, util, FALLBACK} from 'multimethods';
 // TODO: rename these tests in filename and describe() ? this is more about invoking the Multimethod, not constructing it...
 // TODO: more multimethod tests? for other files?
 
@@ -16,13 +16,6 @@ import {Multimethod, meta, util} from 'multimethods';
 // - [ ] one decorator and some non-decorators for same pattern
 // - [ ] decorators along ambiguous paths (same decorators on all paths)
 // - [x] decorators along ambiguous paths (not same decorators on all paths) - c/d
-
-
-
-
-
-// TODO: temp testing...
-const UNHANDLED: any = {};
 
 
 
@@ -43,7 +36,7 @@ describe('Constructing a Multimethod instance', () => {
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
             '/baz': () => val('baz'),
-            '/*a*': meta(async (rq, _, next) => val(`---${await ifUnhandled(await next(), () => err('no downstream!'))}---`)),
+            '/*a*': meta(async (rq, _, next) => val(`---${await ifFallback(await next(), () => err('no downstream!'))}---`)),
 
             'a/*': () => val(`starts with 'a'`),
             '*/b': () => val(`ends with 'b'`),
@@ -51,21 +44,21 @@ describe('Constructing a Multimethod instance', () => {
 
             'c/*': () => val(`starts with 'c'`),
             '*/d': () => err(`don't end with 'd'!`),
-            'c/d': () => val(UNHANDLED),
+            'c/d': () => val(FALLBACK),
 
             'api/... #a': () => val(`fallback`),
             'api/... #b': () => val(`fallback`), // TODO: temp testing, remove this...
-            'api/fo*o': () => val(UNHANDLED),
-            'api/fo* #2': meta(async (rq, _, next) => val(`fo2-(${ifUnhandled(await next(rq), 'NONE')})`)),
-            'api/fo* #1': meta(async (rq, _, next) => val(`fo1-(${ifUnhandled(await next(rq), 'NONE')})`)),
-            'api/foo ': meta(async (rq, _, next) => val(`${ifUnhandled(await next(rq), 'NONE')}!`)),
+            'api/fo*o': () => val(FALLBACK),
+            'api/fo* #2': meta(async (rq, _, next) => val(`fo2-(${ifFallback(await next(rq), 'NONE')})`)),
+            'api/fo* #1': meta(async (rq, _, next) => val(`fo1-(${ifFallback(await next(rq), 'NONE')})`)),
+            'api/foo ': meta(async (rq, _, next) => val(`${ifFallback(await next(rq), 'NONE')}!`)),
             'api/foo': () => val('FOO'),
             'api/foot': () => val('FOOt'),
             'api/fooo': () => val('fooo'),
-            'api/bar': () => val(UNHANDLED),
+            'api/bar': () => val(FALLBACK),
 
             'zzz/{...rest}': meta(async (rq, {rest}, next) => {
-                return val(`${ifUnhandled(await next({address: rest.split('').reverse().join('')}), 'NONE')}`);
+                return val(`${ifFallback(await next({address: rest.split('').reverse().join('')}), 'NONE')}`);
             }),
             'zzz/b*z': (rq) => val(`${rq.address}`),
             'zzz/./*': () => val('forty-two')
@@ -76,12 +69,12 @@ describe('Constructing a Multimethod instance', () => {
             `/bar ==> ---bar---`,
             `/baz ==> ---baz---`,
             `/quux ==> ERROR: nothing matches!`,
-            `quux ==> UNHANDLED`,
+            `quux ==> ERROR: Multimethod dispatch failure...`,
             `/qaax ==> ERROR: no downstream!`,
             `/a ==> ERROR: no downstream!`,
-            `a ==> UNHANDLED`,
+            `a ==> ERROR: Multimethod dispatch failure...`,
             `/ ==> ERROR: nothing matches!`,
-            ` ==> UNHANDLED`,
+            ` ==> ERROR: Multimethod dispatch failure...`,
 
             `a/foo ==> starts with 'a'`,
             `foo/b ==> ends with 'b'`,
@@ -106,11 +99,9 @@ describe('Constructing a Multimethod instance', () => {
         ];
 
         // TODO: doc...
-//        configure({warnings: 'off'});
         let multimethod = new Multimethod({
             toDiscriminant: (r: any) => r.address,
             rules: ruleSet,
-            unhandled: UNHANDLED,
             moreSpecific: (a, b) => {
                 let aComment = a.predicate.split('#')[1] || '';
                 let bComment = b.predicate.split('#')[1] || '';
@@ -119,20 +110,18 @@ describe('Constructing a Multimethod instance', () => {
             },
             strictChecks: false
         });
-//        configure({warnings: 'default'});
 
         tests.forEach(test => it(test, async () => {
             let address = test.split(' ==> ')[0];
             let request = {address};
             let expected = test.split(' ==> ')[1];
-            if (expected === 'UNHANDLED') expected = <any> UNHANDLED;
             let actual: string;
             try {
                 let res = multimethod(request);
                 actual = util.isPromiseLike(res) ? await (res) : res;
             }
             catch (ex) {
-                actual = 'ERROR: ' + ex.message;
+                actual = 'ERROR: ' +  ex.message;
                 if (expected.slice(-3) === '...') {
                     actual = actual.slice(0, expected.length - 3) + '...';
                 }
@@ -144,8 +133,8 @@ describe('Constructing a Multimethod instance', () => {
 
 
 // TODO: doc helper...
-function ifUnhandled(lhs, rhs) {
-    if (lhs !== UNHANDLED) return lhs;
+function ifFallback(lhs, rhs) {
+    if (lhs !== FALLBACK) return lhs;
     if (typeof rhs === 'function') rhs = rhs();
     return rhs;
 }

@@ -9,7 +9,7 @@ interface MultimethodOptions {
     arity: number | 'variadic';
     timing: 'mixed' | 'async' | 'sync';
     toDiscriminant: Function;
-    unhandled: any;
+    FALLBACK: any;
     rules: {[predicatePattern: string]: Function};
 
     // TODO: rename to tiebreak...

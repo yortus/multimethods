@@ -28,6 +28,15 @@
       - [x] Object.setPrototypeOf
   - [x] ensure benchmarks have not suffered
 
+- [x] UNHANDLED --> FALLBACK
+  - [x] export the default FALLBACK sentinel value
+  - [x] replace refs everywhere
+  - [x] fix 'unhandled' option
+  - [x] explain in README what FALLBACK sentinel means (imperative, not declarative)
+  - [x] what happens when last handler returns FALLBACK?
+    - [x] FALLBACK should not be observable to clients; it is an internal dispatch imperative
+    - [x] throw an unhandled dispatch error (new case in `fatalErrors.ts`)
+
 - [ ] TODO: Helper(s) to compose handlers manually
   - [ ] TODO: composing normal handlers...
   - [ ] TODO: coposing metarule handlers...
@@ -35,6 +44,7 @@
   - [ ] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
 
 - [ ] TODO: revise codegen
+  - [ ] fix dispatchFunction (see TODOs on lines 56-57 of `generate-dispatch-function.ts`)
   - [ ] always output codegen in debug mode
   - [ ] investigate: can it be made more understandable/idiomatic?
     - [ ] TODO: findings & actions...
@@ -42,8 +52,8 @@
   - [ ] inventigate: can the source 'stitching together' be made more template-like?
     - [ ] TODO: findings & actions...
 
-- [ ] UNHANDLED --> FALLBACK
-  - [ ] explain in README what FALLBACK sentinel means (imperative, not declarative)
+- [ ] TODO: fix meta() function
+  - [ ] should detect whether used as a wrapper function around a handler, or as a property decorator
 
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.
