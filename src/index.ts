@@ -22,11 +22,10 @@ export {default as FALLBACK} from './multimethod/fallback';
 
 
 // TODO: temp testing...
+import metaHandlers from './multimethod/meta-handlers';
 export function meta<T extends Function>(fn: T) {
-    const IS_META = '__meta';
-    // TODO: use a symbol...
     // TODO: ensure it is a function, etc
-    (fn as any)[IS_META] = true;
+    metaHandlers.set(fn, true);
     return fn;
 }
 

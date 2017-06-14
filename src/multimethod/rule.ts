@@ -1,5 +1,6 @@
 // TODO: review all comments and terminology in here...
 // TODO: explain what decorators are here, or refer to docs elsewhere (and write them).
+import metaHandlers from './meta-handlers';
 import {Predicate, toPredicate} from '../set-theory/predicates';
 //import checkConsequentSignature from './check-consequent-signature';
 
@@ -46,7 +47,7 @@ TODO:... fix comment...
 
 // TODO: temp testing... will we (can we?) still check sig at runtime?
         //checkConsequentSignature(method, pattern);
-        this.isMetaRule = (method as any)[IS_META] === true;
+        this.isMetaRule = metaHandlers.has(this.method);
     }
 
 
@@ -61,10 +62,3 @@ TODO:... fix comment...
     /** Indicates whether the consequent function represents a decorator. Decorators have a '$next' formal parameter */
     isMetaRule: boolean;
 }
-
-
-
-
-
-// TODO: copypasta with index.ts. Factor out this const into a symbol in its own file
-const IS_META = '__meta';
