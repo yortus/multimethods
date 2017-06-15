@@ -1,5 +1,6 @@
 # Multimethods
 
+
 ## Design Goals
 - fast dispatch with minimal runtime overhead
 - strong typing
@@ -11,11 +12,11 @@
 - Good diagnostics
 - Highly interoperable with other libs and code
 
+
 ## Future Work
 - the `strictChecks` option may be changed to `true | false | { <specific checks...> }`
 - diagnostics: early detection of potential runtime error on FALLBACK when multiple possible fallbacks exist
-
-
+- generator MMs - iterable functions ala ES6 generators, but with MM dispatch
 
 
 ## Multimethods
