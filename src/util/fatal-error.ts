@@ -13,7 +13,6 @@ function fatalError(error: 'MULTIPLE_FALLBACKS_FROM', predicate: string, fallbac
 function fatalError(error: 'MULTIPLE_PATHS_TO', predicate: string): never;
 function fatalError(error: 'PREDICATE_SYNTAX', message: string): never;
 function fatalError(error: 'UNHANDLED'): never;
-function fatalError(error: 'UNSTABLE_RULE_ORDER', ruleA: string, ruleB: string): never;
 function fatalError(error: keyof typeof messages, ...params: (string|number)[]): never {
     throw new MultimethodError(format(messages[error], ...params));
 }
@@ -31,7 +30,6 @@ export const messages = {
     'MULTIPLE_PATHS_TO': `Multiple paths to '%s' with different meta-rules`,
     'PREDICATE_SYNTAX': `Predicate syntax error: %s`,
     'UNHANDLED': `Multimethod dispatch failure: call was unhandled for the given arguments`,
-    'UNSTABLE_RULE_ORDER': `Unstable rule ordering - tiebreak function is inconsist: A>B ≠ B<A for A='%s' and B='%s'`,
 }
 
 

@@ -40,8 +40,9 @@
 - [ ] TODO: Helper(s) to compose handlers manually
   - [ ] TODO: composing normal handlers...
   - [ ] TODO: coposing metarule handlers...
-  - [ ] replaces tieBreakFn / moreSpecific - remove all refs in code
   - [ ] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
+    - [ ] remove all references to `tiebreak` function in code/comments
+    - [ ] simplify code that previously used tiebreak stuff, if/where possible
   - [ ] remove predicate comment support - they were not really 'comments' since they affected semantics
 
 - [ ] add option `debug: boolean`

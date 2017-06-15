@@ -1,6 +1,4 @@
-// TODO: `tieBreakFn` should be passed in or somehow provided from outside, with builtin fallback/default impl as below.
 import {fatalError} from '../util';
-import MultimethodOptions from './multimethod-options';
 import Rule from './rule';
 
 
@@ -15,8 +13,7 @@ import Rule from './rule';
  * @param {Rule[]} candidates - the list of rules of equal specificity to be sorted.
  * @returns {Rule[]} a copy of the given rule list, sorted from least- to most-specific.
  */
-export default function disambiguateRules(candidates: Rule[], normalisedOptions: MultimethodOptions): Rule[] {
-    const ruleComparator = makeRuleComparator(normalisedOptions.moreSpecific);
+export default function disambiguateRules(candidates: Rule[]): Rule[] {
     return candidates.slice().sort(ruleComparator);
 }
 
@@ -24,19 +21,16 @@ export default function disambiguateRules(candidates: Rule[], normalisedOptions:
 
 
 
-// TODO: ...
-function makeRuleComparator(tieBreakFn: (a: Rule, b: Rule) => Rule|undefined) {
-
-    /** Performs pairwise sorting of two rules, using the convention of Array#sort's `compareFn` parameter. */
-    return function ruleComparator(ruleA: Rule, ruleB: Rule) {
+/** Performs pairwise sorting of two rules, using the convention of Array#sort's `compareFn` parameter. */
+function ruleComparator(ruleA: Rule, ruleB: Rule) {
 
 // TODO: was... removing this logic in favour of simpler chaining rule:
 // - rules are ambiguous unless they belong to the same chain
 // - within a chain, rules to the left execute *before* rules to the right, regardless of regular vs meta
 // TODO: NEEDS TEST CASES TO PROVE IT IS A SOUND STRATEGY AND CODE DOES WHAT IS EXPECTED IN ALL CASES
-        // TODO: special case: a metarule is *always* less specific than a normal rule with the same predicate
-        if (!ruleA.isMetaRule && ruleB.isMetaRule) return 1;  // A is more specific
-        if (ruleA.isMetaRule && !ruleB.isMetaRule) return -1; // B is more specific
+    // TODO: special case: a metarule is *always* less specific than a normal rule with the same predicate
+    if (!ruleA.isMetaRule && ruleB.isMetaRule) return 1;  // A is more specific
+    if (ruleA.isMetaRule && !ruleB.isMetaRule) return -1; // B is more specific
 
 // TODO: temp testing... chains...
 // if both belong to the same chain, then comparison is done by their relative position in the chain:
@@ -48,17 +42,6 @@ if (!!chain && chain === ruleB.chain) {
     return (leftmostRule === ruleA ? 1 : -1) * (ruleA.isMetaRule ? -1 : 1);
 }
 
-
-
-        // TODO: general case: use the client-suppied `moreSpecific` function to determine which is more specific...
-        let moreSpecificRule = tieBreakFn(ruleA, ruleB);
-        if (moreSpecificRule !== ruleA && moreSpecificRule !== ruleB) {
-            return fatalError('AMBIGUOUS_RULE_ORDER', ruleA.predicate, ruleB.predicate);
-        }
-        if (moreSpecificRule !== tieBreakFn(ruleB, ruleA)) {
-            return fatalError('UNSTABLE_RULE_ORDER', ruleA.predicate, ruleB.predicate);
-        }
-
-        return ruleA === moreSpecificRule ? 1 : -1; // NB: sorts from least- to most-specific
-    }
+// TODO: explain...
+    return fatalError('AMBIGUOUS_RULE_ORDER', ruleA.predicate, ruleB.predicate);
 }

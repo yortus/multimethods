@@ -18,7 +18,6 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let toDiscriminant = options.toDiscriminant || ((...args: any[]) => args.map(arg => (arg || '').toString()).join(''));
     let FALLBACK = 'FALLBACK' in options ? options.FALLBACK : DEFAULT_FALLBACK;
     let rules = options.rules || {};
-    let moreSpecific = options.moreSpecific || (() => undefined);
     let trace = options.trace === true;
     let strictChecks = options.strictChecks === true;
 
@@ -33,7 +32,6 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
         toDiscriminant,
         FALLBACK,
         rules,
-        moreSpecific,
         trace,
         strictChecks
     };

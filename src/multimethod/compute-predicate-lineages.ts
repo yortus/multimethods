@@ -41,13 +41,13 @@ export default function computePredicateLineages<T>(eulerDiagram: EulerDiagram<T
     // case. Since the rules are 'equal best', there is no inherent way to recognise their relative specificity. This is
     // where the client-supplied 'tiebreak' function is used. It must provide an unambiguous order in all cases where
     // rules are otherwise of identical specificity.
-    let eulerDiagramWithExactlyMatchingRules = distributeRulesOverSets(eulerDiagram, rules, normalisedOptions);
+    let eulerDiagramWithExactlyMatchingRules = distributeRulesOverSets(eulerDiagram, rules);
 
     // Every set in the euler diagram represents the best-matching pattern for some set of discriminants. Therefore, the set
     // of all possible discriminants may be thought of as being partitioned by a euler diagram into one partition per set,
     // where for each partition, that partition's set holds the most-specific predicate that matches that partition's
     // discriminants. For every such partition, we can concatenate the 'equal best' rules for all the sets along the
-    // routes from the univdersal set to the most-specific set in the partition, thus getting a rule
+    // routes from the universal set to the most-specific set in the partition, thus getting a rule
     // list for each partition, ordered from least- to most-specific, of all the rules that match all the partition's
     // discriminants. One complication here is that there may be multiple routes from the universal set to some other set in the
     // euler diagram, since it is a DAG and may therefore contain 'diamonds'. Since we tolerate no ambiguity, these multiple
@@ -84,7 +84,7 @@ export default function computePredicateLineages<T>(eulerDiagram: EulerDiagram<T
 
 
 // TODO: ...
-function distributeRulesOverSets<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[], normalisedOptions: MultimethodOptions) {
+function distributeRulesOverSets<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[]) {
 
     // Find the equal-best rules corresponding to each pattern in the euler diagram, sorted least- to most-specific in each
     // case. Since the rules are 'equal best', there is no inherent way to recognise their relative specificity. This is
@@ -101,7 +101,7 @@ function distributeRulesOverSets<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[]
          */
         let exactlyMatchingRules = rules.filter(rule => toNormalPredicate(rule.predicate) === toNormalPredicate(set.predicate));
 
-        exactlyMatchingRules = disambiguateRules(exactlyMatchingRules, normalisedOptions); // NB: may throw
+        exactlyMatchingRules = disambiguateRules(exactlyMatchingRules); // NB: may throw
 
         return { exactlyMatchingRules };
     });
