@@ -47,10 +47,14 @@ describe('Constructing a Multimethod instance', () => {
             'c/d': () => val(FALLBACK),
 
             'api/... #a': () => val(`fallback`),
-            'api/... #b': () => val(`fallback`), // TODO: temp testing, remove this...
+//            'api/... #b': () => val(`fallback`), // TODO: temp testing, remove this...
             'api/fo*o': () => val(FALLBACK),
-            'api/fo* #2': meta(async (rq, _, next) => val(`fo2-(${ifFallback(await next(rq), 'NONE')})`)),
-            'api/fo* #1': meta(async (rq, _, next) => val(`fo1-(${ifFallback(await next(rq), 'NONE')})`)),
+            // 'api/fo* #2': meta(async (rq, _, next) => val(`fo2-(${ifFallback(await next(rq), 'NONE')})`)),
+            // 'api/fo* #1': meta(async (rq, _, next) => val(`fo1-(${ifFallback(await next(rq), 'NONE')})`)),
+            'api/fo*': [
+                meta(async (rq, _, next) => val(`fo2-(${ifFallback(await next(rq), 'NONE')})`)),
+                meta(async (rq, _, next) => val(`fo1-(${ifFallback(await next(rq), 'NONE')})`))
+            ],
             'api/foo ': meta(async (rq, _, next) => val(`${ifFallback(await next(rq), 'NONE')}!`)),
             'api/foo': () => val('FOO'),
             'api/foot': () => val('FOOt'),

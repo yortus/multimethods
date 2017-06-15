@@ -58,6 +58,14 @@
 - [ ] improve error API & strong typing
 - [ ] strictest TSC options in `/test` and `/extras`
 
+- [ ] Fix terminology in code and comments
+  - [ ] rule
+  - [ ] predicate (rename from `pattern` in code/codegen/comments)
+  - [ ] regular handler (rename from `method` in code/codegen/comments)
+  - [ ] meta handler (rename from `method` in code/codegen/comments)
+  - [ ] ruleset
+  
+
 - [ ] TODO: revise codegen
   - [ ] fix dispatchFunction (see TODOs on lines 56-57 of `generate-dispatch-function.ts`)
   - [ ] always output codegen in debug mode

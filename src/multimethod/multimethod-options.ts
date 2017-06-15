@@ -10,7 +10,7 @@ interface MultimethodOptions {
     timing: 'mixed' | 'async' | 'sync';
     toDiscriminant: Function;
     FALLBACK: any;
-    rules: {[predicatePattern: string]: Function};
+    rules: { [predicatePattern: string]: Function|Function[]; };
 
     // TODO: rename to tiebreak...
     //   -or- just make ambiguities an unconditional error

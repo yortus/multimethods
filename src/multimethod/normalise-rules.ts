@@ -5,12 +5,28 @@ import MultimethodOptions from './multimethod-options';
 
 
 
+// TODO: move rule validation into here...? like with normaliseOptions...
+
+
+
+
+
 // TODO: ...
 export default function normaliseRules(rules: MultimethodOptions['rules']) {
-    let result = Object.keys(rules).map(predicatePattern => new Rule(predicatePattern, rules[predicatePattern]));
+    let result: Rule[] = [];
+    for (let predicate in rules) {
+        let handler = rules[predicate];
+        if (Array.isArray(handler)) {
+            let chain = handler;
+            for (handler of chain) {
+                let rule = new Rule(predicate, handler);
+                rule.chain = chain;
+                result.push(rule);
+            }
+        }
+        else {
+            result.push(new Rule(predicate, handler));
+        }
+    }
     return result;
 }
-
-
-
-// TODO: move rule validation into here...? like with normaliseOptions...

@@ -54,9 +54,9 @@ const ruleSet = {
     '*/d': () => `ends with 'd'`,
     'c/d': () => FALLBACK,
 
-    'api/... #a': () => `fallback`,
-    'api/... #b': () => `fallback`,
-//    'api/...': compose(() => `fallback`, () => `fallback`),
+    // 'api/... #a': () => `fallback`,
+    // 'api/... #b': () => `fallback`,
+    'api/...': [() => `fallback`, () => `fallback`],
     'api/fo*o': () => FALLBACK,
 
 
@@ -64,10 +64,10 @@ const ruleSet = {
 // ==========
     // 'api/fo* #2': meta(($req, _, next) => `fo2-(${ifFallback(next($req), 'NONE')})`),
     // 'api/fo* #1': meta(($req, _, next) => `fo1-(${ifFallback(next($req), 'NONE')})`),
-    'api/fo*': chain(
+    'api/fo*': [
         meta(($req, _, next) => `fo2-(${ifFallback(next($req), 'NONE')})`),
         meta(($req, _, next) => `fo1-(${ifFallback(next($req), 'NONE')})`)
-    ),
+    ],
 // ==========
 
 

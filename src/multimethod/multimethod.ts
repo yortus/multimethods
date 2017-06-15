@@ -51,7 +51,7 @@ export const NullaryMultimethod = <NullaryMultimethodConstructor> class NullaryM
 export interface NullaryMultimethodOptions<TR> extends MultimethodOptions {
     arity: 0;
     toDiscriminant: () => string;
-    rules: {[predicate: string]: NullaryMethod<TR>};
+    rules: RuleSet<NullaryMethod<TR>>;
 }
 export interface NullaryMethod<TR> {
     (captures: Captures, next: Next): TR;
@@ -75,7 +75,7 @@ export const UnaryMultimethod = <UnaryMultimethodConstructor> class UnaryMultime
 export interface UnaryMultimethodOptions<T0, TR> extends MultimethodOptions {
     arity: 1;
     toDiscriminant: ($0: T0) => string;
-    rules: {[predicate: string]: UnaryMethod<T0, TR>};
+    rules: RuleSet<UnaryMethod<T0, TR>>;
 }
 export interface UnaryMethod<T0, TR> {
     ($0: T0, captures: Captures, next: Next): TR;
@@ -99,7 +99,7 @@ export const BinaryMultimethod = <BinaryMultimethodConstructor> class BinaryMult
 export interface BinaryMultimethodOptions<T0, T1, TR> extends MultimethodOptions {
     arity: 2;
     toDiscriminant: ($0: T0, $1: T1) => string;
-    rules: {[predicate: string]: BinaryMethod<T0, T1, TR>};
+    rules: RuleSet<BinaryMethod<T0, T1, TR>>;
 }
 export interface BinaryMethod<T0, T1, TR> {
     ($0: T0, $1: T1, captures: Captures, next: Next): TR;
@@ -123,7 +123,7 @@ export const TernaryMultimethod = <TernaryMultimethodConstructor> class TernaryM
 export interface TernaryMultimethodOptions<T0, T1, T2, TR> extends MultimethodOptions {
     arity: 3;
     toDiscriminant: ($0: T0, $1: T1, $2: T2) => string;
-    rules: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>};
+    rules: RuleSet<TernaryMethod<T0, T1, T2, TR>>;
 }
 export interface TernaryMethod<T0, T1, T2, TR> {
     ($0: T0, $1: T1, $2: T2, captures: Captures, next: Next): TR;
@@ -147,7 +147,7 @@ export const VariadicMultimethod = <VariadicMultimethodConstructor> class Variad
 export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {
     arity: never;
     toDiscriminant: (...args: T[]) => string;
-    rules: {[predicate: string]: VariadicMethod<T, TR>};
+    rules: RuleSet<VariadicMethod<T, TR>>;
 }
 export interface VariadicMethod<T, TR> {
     (...args: Array<T|Captures|Next>): TR; // TODO: this is best effort, but really needs to be (...args: T[], captures: {[name: string]: string}, next: Function)
@@ -160,6 +160,7 @@ export interface VariadicMethod<T, TR> {
 // TODO: ...
 export type Captures = {[captureName: string]: string};
 export type Next = Function;
+export type RuleSet<T> = { [predicate: string]: T|T[]; };
 
 
 

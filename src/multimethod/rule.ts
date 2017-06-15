@@ -54,11 +54,15 @@ TODO:... fix comment...
     /** The pattern associated with this Method instance. */
     predicate: Predicate;
 
-
+// TODO: rename to `handler` here and everywhere in codegen
     /** The handler associated with this Method instance, exactly as it was provided to the constructor. */
     method: Function;//TODO: type this better...
 
 
+// TODO: remove this one... `Rule` will become an internal concept, and this prop can be replaced by a helper util function
     /** Indicates whether the consequent function represents a decorator. Decorators have a '$next' formal parameter */
     isMetaRule: boolean;
+
+    // TODO: temp testing... formalise...
+    chain?: Function[];
 }
