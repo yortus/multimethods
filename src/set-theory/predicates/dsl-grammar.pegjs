@@ -4,13 +4,12 @@
 
 
 Predicate
-=   elems:Element*   comment:TrailingWhitespace?   !.
+=   elems:Element*   !.
     {
         let signature = elems.map(elem => elem[0]).join('');
         let identifier = 'ℙ' + elems.map(elem => elem[1]).join('');
         let captures = elems.map(elem => elem[2]).filter(elem => !!elem);
-        comment = comment || '';
-        return { signature, identifier, captures, comment };
+        return { signature, identifier, captures };
     }
 
 Element
@@ -27,17 +26,11 @@ Wildcard 'wildcard'
 /   "{"   id:IDENTIFIER   "}"   !("*" / "..." / "…" / "{")              { return ['*', 'ᕽ', id]; }
 
 Literal 'literal'
-=   !TRAILING_WS   c:[a-zA-Z0-9_]                                       { return [c, c, null]; }
-/   !TRAILING_WS   c:" "                                                { return [c, 'ㆍ', null]; }  // (U+318D)
-/   !TRAILING_WS   c:"/"                                                { return [c, 'ﾉ', null]; }  // (U+FF89)
-/   !TRAILING_WS   c:"-"                                                { return [c, 'ￚ', null]; }  // (U+FFDA)
-/   !TRAILING_WS   c:"."                                                { return [c, 'ˌ', null]; }  // (U+02CC)
-
-TrailingWhitespace
-=   TRAILING_WS                                                         { return text().split('#')[1] }
+=   c:[a-zA-Z0-9_]                                                      { return [c, c, null]; }
+/   c:" "                                                               { return [c, 'ㆍ', null]; }  // (U+318D)
+/   c:"/"                                                               { return [c, 'ﾉ', null]; }  // (U+FF89)
+/   c:"-"                                                               { return [c, 'ￚ', null]; }  // (U+FFDA)
+/   c:"."                                                               { return [c, 'ˌ', null]; }  // (U+02CC)
 
 IDENTIFIER
 =   [a-z_$]i   [a-z0-9_$]i*                                             { return text(); }
-
-TRAILING_WS
-=   " "*   ("#"   .*)?   !.

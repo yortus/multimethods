@@ -12,7 +12,7 @@ describe('Constructing a Predicate instance', () => {
         '/api/foo... ==> /api/foo… WITH []',
         '/api/foo/… ==> /api/foo/… WITH []',
         '/api/foo/{…rest} ==> /api/foo/… WITH ["rest"]',
-        '/API/f*## ==> /API/f* WITH []',
+        '/API/f*## ==> ERROR',
         '/api/{foO}O ==> /api/*O WITH ["foO"]',
         '/…/{name}.{ext} ==> /…/*.* WITH ["name", "ext"]',
         '/.../{name}.{ext} ==> /…/*.* WITH ["name", "ext"]',
@@ -22,7 +22,7 @@ describe('Constructing a Predicate instance', () => {
         '{method} {...path} ==> * … WITH ["method", "path"]',
         'GET   /foo ==> GET   /foo WITH []',
         '   GET /foo ==>    GET /foo WITH []',
-        '   /    ==>    / WITH []',
+        '   /    ==>    /    WITH []',
         '& ==> ERROR',
         '/& ==> ERROR',
         '/*** ==> ERROR',
@@ -44,11 +44,13 @@ describe('Constructing a Predicate instance', () => {
         '{}} ==> ERROR',
         '{$} ==> * WITH ["$"]',
         '{...__} ==> … WITH ["__"]',
-        '#comment ==> ',
-        '   #comment ==> ',
-        '# /a/b/c   fsdfsdf ==> ',
-        '/a/b#comment ==> /a/b',
-        '/.../{name}.js   #12 ==> /…/*.js WITH ["name"]',
+
+        // NB: comments were supported until commit b908107. Now these are erorrs.
+        '#comment ==> ERROR',
+        '   #comment ==> ERROR',
+        '# /a/b/c   fsdfsdf ==> ERROR',
+        '/a/b#comment ==> ERROR',
+        '/.../{name}.js   #12 ==> ERROR',
     ];
 
     tests.forEach(test => {
@@ -60,18 +62,15 @@ describe('Constructing a Predicate instance', () => {
             let expectedComment = patternSource.split('#')[1] || '';
             let actualSignature = 'ERROR';
             let actualCaptureNames = [];
-            let actualComment = '';
             try {
                 let pattern = toPredicate(patternSource);
                 let ast = parsePredicatePattern(patternSource);
                 actualSignature = toNormalPredicate(pattern);
                 actualCaptureNames = ast.captureNames;
-                actualComment = ast.comment;
             }
             catch (ex) { }
             expect(actualSignature).equals(expectedSignature);
             expect(actualCaptureNames).to.deep.equal(expectedCaptureNames);
-            expect(actualComment).equals(expectedComment);
         });
     });
 });

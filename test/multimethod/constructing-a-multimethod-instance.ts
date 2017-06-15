@@ -46,17 +46,16 @@ describe('Constructing a Multimethod instance', () => {
             '*/d': () => err(`don't end with 'd'!`),
             'c/d': () => val(FALLBACK),
 
-            'api/... #a': () => val(`fallback`),
-//            'api/... #b': () => val(`fallback`), // TODO: temp testing, remove this...
+            'api/...': () => val(`fallback`),
             'api/fo*o': () => val(FALLBACK),
-            // 'api/fo* #2': meta(async (rq, _, next) => val(`fo2-(${ifFallback(await next(rq), 'NONE')})`)),
-            // 'api/fo* #1': meta(async (rq, _, next) => val(`fo1-(${ifFallback(await next(rq), 'NONE')})`)),
             'api/fo*': [
                 meta(async (rq, _, next) => val(`fo2-(${ifFallback(await next(rq), 'NONE')})`)),
                 meta(async (rq, _, next) => val(`fo1-(${ifFallback(await next(rq), 'NONE')})`))
             ],
-            'api/foo ': meta(async (rq, _, next) => val(`${ifFallback(await next(rq), 'NONE')}!`)),
-            'api/foo': () => val('FOO'),
+            'api/foo': [
+                meta(async (rq, _, next) => val(`${ifFallback(await next(rq), 'NONE')}!`)),
+                () => val('FOO')
+            ],
             'api/foot': () => val('FOOt'),
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(FALLBACK),
@@ -106,12 +105,12 @@ describe('Constructing a Multimethod instance', () => {
         let multimethod = new Multimethod({
             toDiscriminant: (r: any) => r.address,
             rules: ruleSet,
-            moreSpecific: (a, b) => {
-                let aComment = a.predicate.split('#')[1] || '';
-                let bComment = b.predicate.split('#')[1] || '';
-                if (aComment.localeCompare(bComment) < 0) return a;
-                if (bComment.localeCompare(aComment) < 0) return b;
-            },
+            // moreSpecific: (a, b) => {
+            //     let aComment = a.predicate.split('#')[1] || '';
+            //     let bComment = b.predicate.split('#')[1] || '';
+            //     if (aComment.localeCompare(bComment) < 0) return a;
+            //     if (bComment.localeCompare(aComment) < 0) return b;
+            // },
             strictChecks: false
         });
 

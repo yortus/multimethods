@@ -46,10 +46,12 @@ describe('Matching a predicate against a string', () => {
         '{...first} {...rest} MATCHES a/b c/d e/f WITH { first: "a/b c/d", rest: "e/f" }',
         '{first} {...rest} DOES NOT MATCH a/b c/d e/f',
         '{first} {...rest} MATCHES a / b c / d e / f WITH { first: "a", rest: "/ b c / d e / f" }',
-        '  {first}    {...rest}   MATCHES   a    b   WITH { first: "a", rest: "b  " }',
-        '  {first}    {...rest}   MATCHES   a    b WITH { first: "a", rest: "b" }',
-        '  {first}    {...rest}   MATCHES   a      b WITH { first: "a  ", rest: "b" }',
-        '  {first}  /  {...rest}   MATCHES     a  /      b WITH { first: "  a", rest: "    b" }'
+        '  {first}    {...rest}   MATCHES   a    b   WITH { first: "a", rest: "b" }',
+        '  {first}    {...rest}   DOES NOT MATCH   a    b',
+        '  {first}    {...rest}   MATCHES   a      b   WITH { first: "a  ", rest: "b" }',
+        '  {first}    {...rest}   DOES NOT MATCH   a      b',
+        '  {first}  /  {...rest} MATCHES     a  /      b   WITH { first: "  a", rest: "    b  " }',
+        '  {first}  /  {...rest} MATCHES     a  /      b WITH { first: "  a", rest: "    b" }'
     ];
 
     tests.forEach(test => {
