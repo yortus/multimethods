@@ -9,12 +9,6 @@ import normaliseOptions from './normalise-options';
 
 
 
-// TODO: NB: `add` methods are declared for all classes, but are not yet implemented (calls will fail at runtime)
-
-
-
-
-
 // TODO: Base case...
 // TODO: could this be more DRYly represented as an intersection of the other cases?
 export interface MultimethodConstructor {
@@ -36,10 +30,7 @@ export interface MultimethodConstructor {
     new(options?: MultimethodOptions): Multimethod;
 }
 export const Multimethod: MultimethodConstructor = createMultimethodClass(undefined);
-export interface Multimethod extends Function {
-    add(rules: {[predicate: string]: Function}): this;
-    add(predicate: string, method: Function): this;
-}
+export interface Multimethod extends Function { }
 export default Multimethod;
 
 
@@ -55,8 +46,6 @@ export interface NullaryMultimethodConstructor {
 }
 export interface NullaryMultimethod<TR> extends Multimethod {
     (): TR;
-    add(rules: {[predicate: string]: NullaryMethod<TR>}): this;
-    add(predicate: string, method: NullaryMethod<TR>): this;
 }
 export const NullaryMultimethod = <NullaryMultimethodConstructor> class NullaryMultimethod extends createMultimethodClass(0) { };
 export interface NullaryMultimethodOptions<TR> extends MultimethodOptions {
@@ -81,8 +70,6 @@ export interface UnaryMultimethodConstructor {
 }
 export interface UnaryMultimethod<T0, TR> extends Multimethod {
     ($0: T0): TR;
-    add(rules: {[predicate: string]: UnaryMethod<T0, TR>}): this;
-    add(predicate: string, method: UnaryMethod<T0, TR>): this;
 }
 export const UnaryMultimethod = <UnaryMultimethodConstructor> class UnaryMultimethod extends createMultimethodClass(1) { };
 export interface UnaryMultimethodOptions<T0, TR> extends MultimethodOptions {
@@ -107,8 +94,6 @@ export interface BinaryMultimethodConstructor {
 }
 export interface BinaryMultimethod<T0, T1, TR> extends Multimethod {
     ($0: T0, $1: T1): TR;
-    add(rules: {[predicate: string]: BinaryMethod<T0, T1, TR>}): this;
-    add(predicate: string, method: BinaryMethod<T0, T1, TR>): this;
 }
 export const BinaryMultimethod = <BinaryMultimethodConstructor> class BinaryMultimethod extends createMultimethodClass(2) { };
 export interface BinaryMultimethodOptions<T0, T1, TR> extends MultimethodOptions {
@@ -133,8 +118,6 @@ export interface TernaryMultimethodConstructor {
 }
 export interface TernaryMultimethod<T0, T1, T2, TR> extends Multimethod {
     ($0: T0, $1: T1, $2: T2): TR;
-    add(rules: {[predicate: string]: TernaryMethod<T0, T1, T2, TR>}): this;
-    add(predicate: string, method: TernaryMethod<T0, T1, T2, TR>): this;
 }
 export const TernaryMultimethod = <TernaryMultimethodConstructor> class TernaryMultimethod extends createMultimethodClass(3) { };
 export interface TernaryMultimethodOptions<T0, T1, T2, TR> extends MultimethodOptions {
@@ -159,8 +142,6 @@ export interface VariadicMultimethodConstructor {
 }
 export interface VariadicMultimethod<T, TR> extends Multimethod {
     (...args: T[]): TR;
-    add(rules: {[predicate: string]: VariadicMethod<T, TR>}): this;
-    add(predicate: string, method: VariadicMethod<T, TR>): this;
 }
 export const VariadicMultimethod = <VariadicMultimethodConstructor> class VariadicMultimethod extends createMultimethodClass('variadic') { };
 export interface VariadicMultimethodOptions<T, TR> extends MultimethodOptions {

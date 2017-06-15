@@ -17,6 +17,7 @@
 - the `strictChecks` option may be changed to `true | false | { <specific checks...> }`
 - diagnostics: early detection of potential runtime error on FALLBACK when multiple possible fallbacks exist
 - generator MMs - iterable functions ala ES6 generators, but with MM dispatch
+- 'adding' two multimethods to get a new multimethod
 
 
 ## Multimethods
