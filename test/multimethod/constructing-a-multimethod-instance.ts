@@ -1,9 +1,3 @@
-// TODO: mock the console
-
-
-
-
-
 import {expect} from 'chai';
 import {Multimethod, meta, util, FALLBACK} from 'multimethods';
 // TODO: rename these tests in filename and describe() ? this is more about invoking the Multimethod, not constructing it...
@@ -11,32 +5,31 @@ import {Multimethod, meta, util, FALLBACK} from 'multimethods';
 
 
 // TODO: More coverage:
-// - [ ] multiple non-decorator handlers for same pattern
-// - [ ] multiple decorator handlers for same pattern
-// - [ ] one decorator and some non-decorators for same pattern
-// - [ ] decorators along ambiguous paths (same decorators on all paths)
-// - [x] decorators along ambiguous paths (not same decorators on all paths) - c/d
+// - [ ] multiple regular handlers for same predicate
+// - [ ] multiple metahandlers for same predicate
+// - [ ] one meta- and several regular handlers for same predicate
+// - [ ] metahandlers along ambiguous paths (same metahandlers on all paths)
+// - [x] metahandlers along ambiguous paths (not same metahandlers on all paths) - c/d
 
 
 
 
 
-describe('Constructing a Multimethod instance', () => {
+describe('Constructing a Multimethod instance', async () => {
 
     let variants = [
-        { name: 'all synchronous', val: immediateValue, err: immediateError },
-        { name: 'all asynchronous', val: promisedValue, err: promisedError },
-        { name: 'randomized sync/async', val: randomValue, err: randomError }
+        { vname: 'all synchronous', timing: 'sync' as 'sync', val: immediateValue, err: immediateError },
+        { vname: 'all asynchronous', timing: 'async' as 'async', val: promisedValue, err: promisedError },
+        { vname: 'randomized sync/async', timing: 'mixed' as 'mixed', val: randomValue, err: randomError }
     ];
 
-    variants.forEach(variant => describe(`(${variant.name})`, () => {
-        let val = variant.val, err = variant.err;
-        let ruleSet = {
+    variants.forEach(({vname, timing, val, err}) => describe(`(${vname})`, () => {
+        let rules = {
             '/...': () => err('nothing matches!'),
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
             '/baz': () => val('baz'),
-            '/*a*': meta(async (rq, _, next) => val(`---${await ifFallback(await next(), () => err('no downstream!'))}---`)),
+            '/*a*': meta((rq, _, next) => calc(['---', calc(next(rq), rs => rs === FALLBACK ? err('no downstream!') : rs), '---'], concat)),
 
             'a/*': () => val(`starts with 'a'`),
             '*/b': () => val(`ends with 'b'`),
@@ -49,22 +42,43 @@ describe('Constructing a Multimethod instance', () => {
             'api/...': () => val(`fallback`),
             'api/fo*o': () => val(FALLBACK),
             'api/fo*': [
-                meta(async (rq, _, next) => val(`fo2-(${ifFallback(await next(rq), 'NONE')})`)),
-                meta(async (rq, _, next) => val(`fo1-(${ifFallback(await next(rq), 'NONE')})`))
+                meta((rq, _, next) => calc(['fo2-(', calc(next(rq), rs => rs === FALLBACK ? val('NONE') : rs), ')'], concat)),
+                meta((rq, _, next) => calc(['fo1-(', calc(next(rq), rs => rs === FALLBACK ? val('NONE') : rs), ')'], concat))
             ],
             'api/foo': [
-                meta(async (rq, _, next) => val(`${ifFallback(await next(rq), 'NONE')}!`)),
+                meta((rq, _, next) => calc([calc(next(rq), rs => rs === FALLBACK ? val('NONE') : rs), '!'], concat)),
                 () => val('FOO')
             ],
-            'api/foot': () => val('FOOt'),
+            'api/foot': rq => val(`FOOt${rq.address.length}`),
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(FALLBACK),
 
-            'zzz/{...rest}': meta(async (rq, {rest}, next) => {
-                return val(`${ifFallback(await next({address: rest.split('').reverse().join('')}), 'NONE')}`);
+            'zzz/{...rest}': meta((rq, {rest}, next) => {
+                return calc(next({address: rest.split('').reverse().join('')}), rs => rs === FALLBACK ? val('NONE') : rs);
             }),
             'zzz/b*z': (rq) => val(`${rq.address}`),
-            'zzz/./*': () => val('forty-two')
+            'zzz/./*': () => val('forty-two'),
+
+            'CHAIN/{x}': [
+
+                // Wrap subsequent results with ()
+                meta((rq, {x}, next) => calc(['(', next(rq), ')'], concat)),
+
+                // Block any result that starts with '[32'
+                meta((rq, {x}, next) => calc(next(rq), rs => rs.startsWith('[32') ? err('blocked') : rs)),
+
+                // Wrap subsequent results with []
+                meta((rq, {x}, next) => calc(['[', next(rq), ']'], concat)),
+
+                // Return x!x! only if x ends with 'b' , otherwise skip
+                (_, {x}) => val(x.endsWith('b') ? (x + '!').repeat(2) : FALLBACK),
+
+                // Return xxx only if x has length 2, otherwise skip
+                (_, {x}) => val(x.length === 2 ? x.repeat(3) : FALLBACK),
+
+                // Return the string reversed
+                (_, {x}) => val(x.split('').reverse().join(''))
+            ]
         };
 
         let tests = [
@@ -92,20 +106,33 @@ describe('Constructing a Multimethod instance', () => {
             `api/fooo ==> fo2-(fo1-(fooo))`,
             `api/foooo ==> fo2-(fo1-(NONE))`,
             `api/foooot ==> fo2-(fo1-(NONE))`,
-            `api/foot ==> fo2-(fo1-(FOOt))`,
+            `api/foot ==> fo2-(fo1-(FOOt8))`,
             `api/bar ==> fallback`,
 
             `zzz/baz ==> zab`,
             `zzz/booz ==> zoob`,
             `zzz/looz ==> NONE`,
-            `zzz/./{whatever} ==> forty-two`
+            `zzz/./{whatever} ==> forty-two`,
+
+            `CHAIN/a ==> ([a])`,
+            `CHAIN/ab ==> ([ab!ab!])`,
+            `CHAIN/abc ==> ([cba])`,
+            `CHAIN/1 ==> ([1])`,
+            `CHAIN/12 ==> ([121212])`,
+            `CHAIN/123 ==> ERROR: blocked`,
+            `CHAIN/abc123 ==> ERROR: blocked`,
+            `CHAIN/a1b2c3 ==> ([3c2b1a])`,
         ];
 
         // TODO: doc...
         let multimethod = new Multimethod({
             toDiscriminant: (r: any) => r.address,
-            rules: ruleSet,
-            strictChecks: false
+            arity: 1,
+            timing,
+            rules,
+            FALLBACK,
+            strictChecks: false,
+            trace: false
         });
 
         tests.forEach(test => it(test, async () => {
@@ -114,7 +141,9 @@ describe('Constructing a Multimethod instance', () => {
             let expected = test.split(' ==> ')[1];
             let actual: string;
             try {
-                let res = multimethod(request);
+                let res = multimethod(request) as string | Promise<string>;
+                if (timing === 'sync') expect(res).to.not.satisfy(util.isPromiseLike);
+                if (timing === 'async') expect(res).to.satisfy(util.isPromiseLike);
                 actual = util.isPromiseLike(res) ? await (res) : res;
             }
             catch (ex) {
@@ -129,44 +158,24 @@ describe('Constructing a Multimethod instance', () => {
 });
 
 
-// TODO: doc helper...
-function ifFallback(lhs, rhs) {
-    if (lhs !== FALLBACK) return lhs;
-    if (typeof rhs === 'function') rhs = rhs();
-    return rhs;
-}
+// TODO: doc helpers...
+const immediateValue = val => val;
+const immediateError = msg => { throw new Error(msg); };
+const promisedValue = val => new Promise(resolve => setTimeout(() => resolve(val), 5));
+const promisedError = msg => new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), 5));
+const randomValue = val => (Math.random() >= 0.5 ? immediateValue : promisedValue)(val);
+const randomError = msg => (Math.random() >= 0.5 ? immediateError : promisedError)(msg);
 
 
 // TODO: doc helpers...
-function immediateValue(val) {
-    return val;
+function calc(arg: any, cb: (arg: any) => any) {
+    if (Array.isArray(arg)) {
+        if (!arg.some(util.isPromiseLike)) return cb(arg);
+        return Promise.all(arg.map(el => Promise.resolve(el))).then(cb);
+    }
+    if (!util.isPromiseLike(arg)) return cb(arg);
+    return arg.then(cb);
 }
-function immediateError(msg): any {
-    throw new Error(msg);
-}
-
-
-// TODO: doc helpers...
-function promisedValue(val) {
-    return new Promise(resolve => {
-        setTimeout(() => resolve(val), 5);
-    });
-}
-function promisedError(msg) {
-    return new Promise((_, reject) => {
-        setTimeout(() => reject(new Error(msg)), 5);
-    });
-}
-
-
-// TODO: doc helpers...
-function randomValue(val) {
-    let impls = [immediateValue, promisedValue];
-    let impl = impls[Math.floor(Math.random() * impls.length)];
-    return impl(val);
-}
-function randomError(msg) {
-    let impls = [immediateError, promisedError];
-    let impl = impls[Math.floor(Math.random() * impls.length)];
-    return impl(msg);
+function concat(strs: string[]) {
+    return strs.join('');
 }

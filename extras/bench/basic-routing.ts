@@ -77,22 +77,22 @@ const ruleSet = {
 
 // Encode a battery of requests with their expected responses.
 const tests = [
-    // `/foo ==> foo`,
-    // `/bar ==> ---bar---`,
-    // `/baz ==> ---baz---`,
-    // `/quux ==> UNHANDLED`,
-    // `/qaax ==> ---NONE---`,
-    // `/a ==> ---NONE---`,
-    // `/ ==> UNHANDLED`,
+    `/foo ==> foo`,
+    `/bar ==> ---bar---`,
+    `/baz ==> ---baz---`,
+    `/quux ==> UNHANDLED`,
+    `/qaax ==> ---NONE---`,
+    `/a ==> ---NONE---`,
+    `/ ==> UNHANDLED`,
 
-    // `a/foo ==> starts with 'a'`,
-    // `foo/b ==> ends with 'b'`,
-    // `a/b ==> starts with 'a' AND ends with 'b'`,
+    `a/foo ==> starts with 'a'`,
+    `foo/b ==> ends with 'b'`,
+    `a/b ==> starts with 'a' AND ends with 'b'`,
 
-    // `c/foo ==> starts with 'c'`,
-    // `foo/d ==> ends with 'd'`,
+    `c/foo ==> starts with 'c'`,
+    `foo/d ==> ends with 'd'`,
 
-    // `api/ ==> fallback`,
+    `api/ ==> fallback`,
     `api/foo ==> fo2-(fo1-(FOO!))`,
     `api/fooo ==> fo2-(fo1-(fooo))`,
     `api/foooo ==> fo2-(fo1-(NONE))`,
@@ -127,9 +127,9 @@ const tests = [
 
     // Loop over the tests.
     for (let i = 0; i < COUNT; ++i) {
-        let index = 0;//TODO: was... restore... Math.floor(Math.random() * tests.length);
+        let index = Math.floor(Math.random() * tests.length);
         let res = mm(requests[index]);
-        let actualResponse = res; // TODO: was... util.isPromiseLike(res) ? await (res) : res;
+        let actualResponse = res;
         assert.equal(actualResponse, responses[index]);
     }
 

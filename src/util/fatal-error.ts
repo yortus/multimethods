@@ -11,6 +11,7 @@ function fatalError(error: 'MISSING_CATCHALL'): never;
 function fatalError(error: 'MISSING_INTERSECTIONS', intersections: string): never;
 function fatalError(error: 'MULTIPLE_FALLBACKS_FROM', predicate: string, fallbacks: string): never;
 function fatalError(error: 'MULTIPLE_PATHS_TO', predicate: string): never;
+function fatalError(error: 'MIXED_CHAIN', predicate: string): never;
 function fatalError(error: 'PREDICATE_SYNTAX', message: string): never;
 function fatalError(error: 'UNHANDLED'): never;
 function fatalError(error: keyof typeof messages, ...params: (string|number)[]): never {
@@ -26,6 +27,7 @@ export const messages = {
     'ARITY_MISMATCH': `arity mismatch`, // TODO: improve diagnostic message
     'MISSING_CATCHALL': `Multimethod has no catch-all handler, so some calls may not be dispatchable. To resolve this problem, provide a handler for the predicate '...'.`,
     'MISSING_INTERSECTIONS': `Multimethod has ambiguities where some handlers overlap. To resolve this problem, provide handlers for these predicates: %s.`,
+    'MIXED_CHAIN': `Chain for predicate '%s' has metahandler(s) to the right of regular handler(s). Metahandlers must be leftmost in the chain.`,
     'MULTIPLE_FALLBACKS_FROM': `Multiple possible fallbacks from '%s': %s`,
     'MULTIPLE_PATHS_TO': `Multiple paths to '%s' with different meta-rules`,
     'PREDICATE_SYNTAX': `Predicate syntax error: %s`,

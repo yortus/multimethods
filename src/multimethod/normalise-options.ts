@@ -1,5 +1,6 @@
 import DEFAULT_FALLBACK from './fallback';
 import {fatalError} from '../util';
+import metaHandlers from './meta-handlers';
 import MultimethodOptions from './multimethod-options';
 
 
@@ -55,7 +56,17 @@ function validateArity(arity: MultimethodOptions['arity'], staticArity?: Multime
 
 
 function validateRules(rules: MultimethodOptions['rules']) {
-    Object.keys(rules).forEach(_ => {
+    Object.keys(rules).forEach(predicate => {
         // TODO: anything to validate?
+
+        let handler = rules[predicate];
+        if (Array.isArray(handler)) {
+            let chain = handler;
+
+            // ensure first regular handler in chain (if any) comes after last meta handler in chain (if any)
+            if (chain.some((fn, i) => i < chain.length - 1 && !metaHandlers.has(fn) && metaHandlers.has(chain[i + 1]))) {
+                return fatalError('MIXED_CHAIN', predicate);
+            }
+        }
     });
 }
