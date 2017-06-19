@@ -43,7 +43,9 @@
   - [ ] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
     - [ ] remove all references to `tiebreak` function in code/comments
     - [ ] simplify code that previously used tiebreak stuff, if/where possible
-  - [ ] remove predicate comment support - they were not really 'comments' since they affected semantics
+  - [x] remove predicate comment support - they were not really 'comments' since they affected semantics
+  - [ ] enforce 'meta-handlers before regular-handlers in chains' convention. Early error if not.
+    - [ ] explain in docs that this simplifies reading of chains as having left-to-right execution order
 
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.
@@ -60,12 +62,33 @@
 - [ ] strictest TSC options in `/test` and `/extras`
 
 - [ ] Fix terminology in code and comments
+  - [ ] FALLBACK --> CONTINUE
+  - [ ] next --> forward/fwd
   - [ ] rule
   - [ ] predicate (rename from `pattern` in code/codegen/comments)
   - [ ] regular handler (rename from `method` in code/codegen/comments)
   - [ ] meta handler (rename from `method` in code/codegen/comments)
   - [ ] ruleset
-  
+
+- [ ] Add/revise tests
+  - [ ] Early MM validation errors:
+    - [ ] illegal chain (regular handlers before meta handlers)
+    - [ ] ambiguous rules
+    - [ ] arity mismatch
+    - [ ] TODO: more checks...
+  - [ ] MM dispatch results:
+    - [ ] regular rules only
+    - [ ] overlapping rules
+    - [ ] catch-all meta rule
+    - [ ] chain of regular rules
+    - [ ] catch-all metarule chain
+    - [ ] mixed chain
+    - [ ] limited metarule
+    - [ ] misc rules
+    - [ ] TODO: more cases...
+
+
+
 
 - [ ] TODO: revise codegen
   - [ ] fix dispatchFunction (see TODOs on lines 56-57 of `generate-dispatch-function.ts`)
