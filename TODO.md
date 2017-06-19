@@ -37,15 +37,21 @@
     - [x] FALLBACK should not be observable to clients; it is an internal dispatch imperative
     - [x] throw an unhandled dispatch error (new case in `fatalErrors.ts`)
 
-- [ ] TODO: Helper(s) to compose handlers manually
-  - [ ] TODO: composing normal handlers...
-  - [ ] TODO: coposing metarule handlers...
-  - [ ] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
-    - [ ] remove all references to `tiebreak` function in code/comments
-    - [ ] simplify code that previously used tiebreak stuff, if/where possible
+- [x] TODO: Helper(s) to compose handlers manually
+  - [x] permit listing regular handlers in an array ('chain')
+  - [x] permit listing metahandlers in an array ('chain')
+  - [x] permit mixing metahandlers and regular handlers in an array ('chain')
+    - [x] implement special ordering laws and validate them
+  - [x] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
+    - [x] remove all references to `tiebreak` and `moreSpecific` function in code/comments
+    - [x] simplify code that previously used tiebreak stuff, if/where possible
   - [x] remove predicate comment support - they were not really 'comments' since they affected semantics
-  - [ ] enforce 'meta-handlers before regular-handlers in chains' convention. Early error if not.
-    - [ ] explain in docs that this simplifies reading of chains as having left-to-right execution order
+  - [x] enforce 'meta-handlers before regular-handlers in chains' convention. Early error if not.
+    - [x] explain in docs that this simplifies reading of chains as having left-to-right execution order
+
+- [ ] revise FALLBACK
+  - [ ] change to CONTINUE
+  - [ ] don't allow overriding; remove from MMOptions (check this will work with routist first)
 
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.

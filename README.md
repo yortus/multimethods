@@ -57,6 +57,16 @@
 - clients can provide their own `FALLBACK` value via MM options
 
 
+## Handlers
+- regular handlers (functions)
+- metahandlers (specially marked functions)
+- chains of handlers (arrays)
+  - may be all regular, all meta, or a mix
+  - if mixed, all metahandlers must be contiguous and leftmost in the chain array. This restriction is to simplify understanding dispatch of chains. It means that the handlers will execute in left-to-right order across the chain array. I.e. in a chain:
+    - (a) the metahandlers are all less specific than the regular handlers (so leftmost executes first)
+    - (b) the metahandlers are increasing order of specificity from left-to-right (so leftmost executes first)
+    - (c) the regular handlers are decreasing order of specificity from left-to-right (so leftmost executes first)
+
 
 ## Compatibility
 - TL;DR: Node.js 6+, recent browsers, IE11
