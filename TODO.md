@@ -49,9 +49,9 @@
   - [x] enforce 'meta-handlers before regular-handlers in chains' convention. Early error if not.
     - [x] explain in docs that this simplifies reading of chains as having left-to-right execution order
 
-- [ ] revise FALLBACK
-  - [ ] change to CONTINUE
-  - [ ] don't allow overriding; remove from MMOptions (check this will work with routist first)
+- [x] revise FALLBACK
+  - [x] change to CONTINUE
+  - [x] don't allow overriding; remove from MMOptions (check this will work with routist first)
 
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.
@@ -68,7 +68,7 @@
 - [ ] strictest TSC options in `/test` and `/extras`
 
 - [ ] Fix terminology in code and comments
-  - [ ] FALLBACK --> CONTINUE
+  - [x] FALLBACK --> CONTINUE
   - [ ] next --> forward/fwd
   - [ ] rule
   - [ ] predicate (rename from `pattern` in code/codegen/comments)

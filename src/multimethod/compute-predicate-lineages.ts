@@ -1,6 +1,6 @@
+import {CONTINUE} from './sentinels';
 import disambiguateRoutes from './disambiguate-routes';
 import {fatalError} from '../util';
-import MultimethodOptions from './multimethod-options';
 import Rule from './rule';
 import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
 import {EulerDiagram, EulerSet} from '../set-theory/sets';
@@ -26,12 +26,12 @@ export interface Lineage {
  * of discriminants matched by the corresponding euler diagram set's predicate. Routes are an important internal concept,
  * because each route represents the ordered list of matching methods for any given discriminant.
  */
-export default function computePredicateLineages<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[], normalisedOptions: MultimethodOptions): EulerDiagram<T & Lineage> {
+export default function computePredicateLineages<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[]): EulerDiagram<T & Lineage> {
 
     // Every route begins with this universal rule. It matches all discriminants,
-    // and its handler simply returns the `FALLBACK` sentinel value.
+    // and its handler simply returns the `CONTINUE` sentinel value.
     const universalFallbackRule = new Rule(ANY, function _universalFallback() {
-        return normalisedOptions.FALLBACK;
+        return CONTINUE;
     });
 
     // Find the equal-best rules corresponding to each pattern in the euler diagram, sorted least- to most-specific in each case.

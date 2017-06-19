@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {Multimethod, meta, util, FALLBACK, chain} from 'multimethods';
+import {Multimethod, meta, util, CONTINUE} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -10,7 +10,7 @@ import {Multimethod, meta, util, FALLBACK, chain} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
-// 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.782 seconds   (~1279000 req/sec)   adjustments after making MMs throw if final result is FALLBACK.
+// 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.782 seconds   (~1279000 req/sec)   adjustments after making MMs throw if final result is CONTINUE.
 // 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.76 seconds    (~1316000 req/sec)   Target is now ES5 (was ES6). Codegen changed accordingly.
 // 2017-06-13   LAJESTIC    Dispatched 1000000 requests in 0.803 seconds   (~1245000 req/sec)   Various (minor) tweaks after coming back to project.
 
@@ -44,7 +44,7 @@ const ruleSet = {
     '/foo': () => 'foo',
     '/bar': () => 'bar',
     '/baz': () => 'baz',
-    '/*a*': meta(($req, _, next) => `---${ifFallback(next($req), 'NONE')}---`),
+    '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
 
     'a/*': () => `starts with 'a'`,
     '*/b': () => `ends with 'b'`,
@@ -52,24 +52,24 @@ const ruleSet = {
 
     'c/*': () => `starts with 'c'`,
     '*/d': () => `ends with 'd'`,
-    'c/d': () => FALLBACK,
+    'c/d': () => CONTINUE,
 
     'api/...': [() => `fallback`, () => `fallback`],
-    'api/fo*o': () => FALLBACK,
+    'api/fo*o': () => CONTINUE,
     'api/fo*': [
-        meta(($req, _, next) => `fo2-(${ifFallback(next($req), 'NONE')})`),
-        meta(($req, _, next) => `fo1-(${ifFallback(next($req), 'NONE')})`)
+        meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
+        meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`)
     ],
     'api/foo': [
-        meta(($req, _, next) => `${ifFallback(next($req), 'NONE')}!`),
+        meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
         () => 'FOO'
     ],
     'api/foot': () => 'FOOt',
     'api/fooo': () => 'fooo',
-    'api/bar': () => FALLBACK,
+    'api/bar': () => CONTINUE,
 
     // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-    'zzz/{...rest}': meta(($req, {rest}, next) => `${ifFallback(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+    'zzz/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
     'zzz/b*z': ($req) => `${$req.address}`,
     'zzz/./*': () => 'forty-two'
 };
@@ -144,6 +144,6 @@ const tests = [
 
 
 // TODO: doc helper...
-function ifFallback(lhs, rhs) {
-    return lhs === FALLBACK ? rhs : lhs;
+function ifUnhandled(lhs, rhs) {
+    return lhs === CONTINUE ? rhs : lhs;
 }

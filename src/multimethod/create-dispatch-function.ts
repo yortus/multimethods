@@ -26,7 +26,7 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
     let normalisedRules = normaliseRules(normalisedOptions.rules);
 
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
-    let eulerDiagramWithLineages = computePredicateLineages(eulerDiagram, normalisedRules, normalisedOptions);
+    let eulerDiagramWithLineages = computePredicateLineages(eulerDiagram, normalisedRules);
 
     // TODO: ...
     let dispatchFunction = generateDispatchFunction(eulerDiagramWithLineages, normalisedOptions);

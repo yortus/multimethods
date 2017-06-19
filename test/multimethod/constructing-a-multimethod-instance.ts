@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Multimethod, meta, util, FALLBACK} from 'multimethods';
+import {Multimethod, meta, util, CONTINUE} from 'multimethods';
 // TODO: rename these tests in filename and describe() ? this is more about invoking the Multimethod, not constructing it...
 // TODO: more multimethod tests? for other files?
 
@@ -29,7 +29,7 @@ describe('Constructing a Multimethod instance', async () => {
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
             '/baz': () => val('baz'),
-            '/*a*': meta((rq, _, next) => calc(['---', calc(next(rq), rs => rs === FALLBACK ? err('no downstream!') : rs), '---'], concat)),
+            '/*a*': meta((rq, _, next) => calc(['---', calc(next(rq), rs => rs === CONTINUE ? err('no downstream!') : rs), '---'], concat)),
 
             'a/*': () => val(`starts with 'a'`),
             '*/b': () => val(`ends with 'b'`),
@@ -37,24 +37,24 @@ describe('Constructing a Multimethod instance', async () => {
 
             'c/*': () => val(`starts with 'c'`),
             '*/d': () => err(`don't end with 'd'!`),
-            'c/d': () => val(FALLBACK),
+            'c/d': () => val(CONTINUE),
 
             'api/...': () => val(`fallback`),
-            'api/fo*o': () => val(FALLBACK),
+            'api/fo*o': () => val(CONTINUE),
             'api/fo*': [
-                meta((rq, _, next) => calc(['fo2-(', calc(next(rq), rs => rs === FALLBACK ? val('NONE') : rs), ')'], concat)),
-                meta((rq, _, next) => calc(['fo1-(', calc(next(rq), rs => rs === FALLBACK ? val('NONE') : rs), ')'], concat))
+                meta((rq, _, next) => calc(['fo2-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat)),
+                meta((rq, _, next) => calc(['fo1-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat))
             ],
             'api/foo': [
-                meta((rq, _, next) => calc([calc(next(rq), rs => rs === FALLBACK ? val('NONE') : rs), '!'], concat)),
+                meta((rq, _, next) => calc([calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), '!'], concat)),
                 () => val('FOO')
             ],
             'api/foot': rq => val(`FOOt${rq.address.length}`),
             'api/fooo': () => val('fooo'),
-            'api/bar': () => val(FALLBACK),
+            'api/bar': () => val(CONTINUE),
 
             'zzz/{...rest}': meta((rq, {rest}, next) => {
-                return calc(next({address: rest.split('').reverse().join('')}), rs => rs === FALLBACK ? val('NONE') : rs);
+                return calc(next({address: rest.split('').reverse().join('')}), rs => rs === CONTINUE ? val('NONE') : rs);
             }),
             'zzz/b*z': (rq) => val(`${rq.address}`),
             'zzz/./*': () => val('forty-two'),
@@ -71,10 +71,10 @@ describe('Constructing a Multimethod instance', async () => {
                 meta((rq, {x}, next) => calc(['[', next(rq), ']'], concat)),
 
                 // Return x!x! only if x ends with 'b' , otherwise skip
-                (_, {x}) => val(x.endsWith('b') ? (x + '!').repeat(2) : FALLBACK),
+                (_, {x}) => val(x.endsWith('b') ? (x + '!').repeat(2) : CONTINUE),
 
                 // Return xxx only if x has length 2, otherwise skip
-                (_, {x}) => val(x.length === 2 ? x.repeat(3) : FALLBACK),
+                (_, {x}) => val(x.length === 2 ? x.repeat(3) : CONTINUE),
 
                 // Return the string reversed
                 (_, {x}) => val(x.split('').reverse().join(''))
@@ -130,7 +130,6 @@ describe('Constructing a Multimethod instance', async () => {
             arity: 1,
             timing,
             rules,
-            FALLBACK,
             strictChecks: false,
             trace: false
         });

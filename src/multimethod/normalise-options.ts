@@ -1,4 +1,3 @@
-import DEFAULT_FALLBACK from './fallback';
 import {fatalError} from '../util';
 import metaHandlers from './meta-handlers';
 import MultimethodOptions from './multimethod-options';
@@ -17,7 +16,6 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let arity = options.arity !== undefined ? options.arity : staticArity !== undefined ? staticArity : 'variadic';
     let timing = options.timing || 'mixed';
     let toDiscriminant = options.toDiscriminant || ((...args: any[]) => args.map(arg => (arg || '').toString()).join(''));
-    let FALLBACK = 'FALLBACK' in options ? options.FALLBACK : DEFAULT_FALLBACK;
     let rules = options.rules || {};
     let trace = options.trace === true;
     let strictChecks = options.strictChecks === true;
@@ -31,7 +29,6 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
         arity,
         timing,
         toDiscriminant,
-        FALLBACK,
         rules,
         trace,
         strictChecks

@@ -83,7 +83,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 
     // For each rule, we reuse the source code template below. But first we need to compute a number of
     // values for substitution into the template. A few notes on these substitutions:
-    // - `nextRuleName` is used for cascading evaluation, i.e. when the current rule handler returns FALLBACK.
+    // - `nextRuleName` is used for cascading evaluation, i.e. when the current rule handler returns CONTINUE.
     // - `downstreamRuleName` refers to the first rule in the next more-specific partition (see JSDoc notes at top
     //   of this file). It is substituted in as the value of `$next` when a meta-rule's method is called.
     // - `handlerArgs` is a hash keyed by all possible parameter names a rule's raw handler may use, and whose
