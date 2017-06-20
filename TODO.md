@@ -56,6 +56,7 @@
 - [ ] add option `debug: boolean`
   - [ ] replaces `trace` option. Remove that.
   - [ ] use npm `debug` module to sent all debug/trace messages
+    - [ ] why not events? ANS: They are node.js-specific.
   - [ ] remove 'trace' code from executor function; replace with wrapper functions on all handlers when in debug mode
   - [ ] if `strictChecks===false` and `debug===true`, still do strict checks but just output to debug() and continue
 - [ ] remove add() method. Multimethods are immutable.
