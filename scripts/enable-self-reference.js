@@ -2,6 +2,16 @@ var fs = require('fs');
 var path = require('path');
 
 
-// Add multimethods.js and multimethods.d.ts to our own node_modules folder, so it can require() itself (e.g. in tests).
-fs.writeFileSync(path.join(__dirname, '../node_modules/multimethods.js'), `module.exports = require('..');`);
-fs.writeFileSync(path.join(__dirname, '../node_modules/multimethods.d.ts'), `export * from '..';`);
+
+
+
+// Create a symlink at `node_modules/multimethods` pointing to `dist/release`
+try {
+    var linkFrom = path.join(__dirname, '../node_modules/multimethods');
+    var linkTo = path.join(__dirname, '../dist/release');
+    fs.symlinkSync(linkTo, linkFrom, 'junction');
+}
+catch (err) {
+    // An EEXIST error implies we already have a self-ref, in which case we ignore and continue. 
+    if (err.code !== 'EEXIST') throw err;
+}
