@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {Multimethod, meta, util, CONTINUE} from 'multimethods';
+import {Multimethod, meta, CONTINUE} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 

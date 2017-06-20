@@ -1,4 +1,3 @@
-import {getLongestCommonPrefix, isPromiseLike}  from './util';
 
 // TODO: export the later ones? They are only used in unit tests. Could we do equivalent tests through public API?
 export {parsePredicatePattern, PredicateAST, toIdentifier, toMatchFunction, toNormalPredicate, ANY, toPredicate} from './set-theory/predicates';
@@ -28,13 +27,3 @@ export function meta<T extends Function>(fn: T) {
     metaHandlers.set(fn, true);
     return fn;
 }
-
-
-
-
-
-// TODO: doc...
-export const util = {
-    getLongestCommonPrefix,
-    isPromiseLike
-};

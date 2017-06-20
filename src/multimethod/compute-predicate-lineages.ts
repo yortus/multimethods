@@ -1,6 +1,6 @@
 import {CONTINUE} from './sentinels';
 import disambiguateRoutes from './disambiguate-routes';
-import {fatalError} from '../util';
+import fatalError from '../util/fatal-error';
 import Rule from './rule';
 import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
 import {EulerDiagram, EulerSet} from '../set-theory/sets';

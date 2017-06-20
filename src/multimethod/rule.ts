@@ -2,7 +2,6 @@
 // TODO: explain what decorators are here, or refer to docs elsewhere (and write them).
 import metaHandlers from './meta-handlers';
 import {Predicate, toPredicate} from '../set-theory/predicates';
-//import checkConsequentSignature from './check-consequent-signature';
 
 
 

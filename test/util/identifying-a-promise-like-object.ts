@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {util} from 'multimethods';
+import isPromiseLike from 'multimethods/util/is-promise-like';
 
 
 describe('Identifying a Promise-like object', () => {
@@ -27,7 +27,7 @@ describe('Identifying a Promise-like object', () => {
         it(test, () => {
             let testVal = eval(`(${test.slice(3)})`);
             let expected = test[0] === 'T' ? true : false;
-            let actual = util.isPromiseLike(testVal);
+            let actual = isPromiseLike(testVal);
             expect(actual).equals(expected);
         });
     });

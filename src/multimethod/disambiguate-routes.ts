@@ -1,5 +1,6 @@
 // TODO: better explain how/why this works in external documentation (esp. the synthesized 'crasher' method).
-import {fatalError, getLongestCommonPrefix} from '../util';
+import fatalError from '../util/fatal-error';
+import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import {Predicate} from '../set-theory/predicates';
 import Rule from './rule';
 

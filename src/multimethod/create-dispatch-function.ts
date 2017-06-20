@@ -4,7 +4,7 @@ import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
 import {ANY, toPredicate, toNormalPredicate} from '../set-theory/predicates';
 import {EulerDiagram} from '../set-theory/sets';
-import {fatalError} from '../util';
+import fatalError from '../util/fatal-error';
 
 
 

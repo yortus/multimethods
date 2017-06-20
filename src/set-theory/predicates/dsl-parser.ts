@@ -1,4 +1,4 @@
-import {fatalError} from '../../util';
+import fatalError from '../../util/fatal-error';
 const grammar: { parse(text: string): PredicateAST; } = require('./dsl-grammar');
 
 

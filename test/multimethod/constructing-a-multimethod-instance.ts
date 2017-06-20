@@ -1,5 +1,6 @@
 import {expect} from 'chai';
-import {Multimethod, meta, util, CONTINUE} from 'multimethods';
+import {Multimethod, meta, CONTINUE} from 'multimethods';
+import isPromiseLike from 'multimethods/util/is-promise-like';
 // TODO: rename these tests in filename and describe() ? this is more about invoking the Multimethod, not constructing it...
 // TODO: more multimethod tests? for other files?
 
@@ -141,9 +142,9 @@ describe('Constructing a Multimethod instance', async () => {
             let actual: string;
             try {
                 let res = multimethod(request) as string | Promise<string>;
-                if (timing === 'sync') expect(res).to.not.satisfy(util.isPromiseLike);
-                if (timing === 'async') expect(res).to.satisfy(util.isPromiseLike);
-                actual = util.isPromiseLike(res) ? await (res) : res;
+                if (timing === 'sync') expect(res).to.not.satisfy(isPromiseLike);
+                if (timing === 'async') expect(res).to.satisfy(isPromiseLike);
+                actual = isPromiseLike(res) ? await (res) : res;
             }
             catch (ex) {
                 actual = 'ERROR: ' +  ex.message;
@@ -169,11 +170,10 @@ const randomError = msg => (Math.random() >= 0.5 ? immediateError : promisedErro
 // TODO: doc helpers...
 function calc(arg: any, cb: (arg: any) => any) {
     if (Array.isArray(arg)) {
-        if (!arg.some(util.isPromiseLike)) return cb(arg);
+        if (!arg.some(isPromiseLike)) return cb(arg);
         return Promise.all(arg.map(el => Promise.resolve(el))).then(cb);
     }
-    if (!util.isPromiseLike(arg)) return cb(arg);
-    return arg.then(cb);
+    return isPromiseLike(arg) ? arg.then(cb) : cb(arg);
 }
 function concat(strs: string[]) {
     return strs.join('');

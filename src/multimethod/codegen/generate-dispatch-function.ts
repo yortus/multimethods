@@ -1,12 +1,12 @@
 import computeAllExecutors from './compute-all-executors';
 import computeRouteSelector from './compute-route-selector';
-import {fatalError} from '../../util';
+import fatalError from '../../util/fatal-error';
 import {Lineage} from '../compute-predicate-lineages';
 import * as predicates from '../../set-theory/predicates';
 import MultimethodOptions from '../multimethod-options';
 import * as sentinels from '../sentinels';
 import {EulerDiagram} from '../../set-theory/sets';
-import * as util from '../../util';
+import isPromiseLike from '../../util/is-promise-like';
 
 
 
@@ -33,7 +33,7 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     // appear in the transpiled JavaScript for this module. This is because TypeScript may rename modules to try to preserve
     // ES6 module semantics.
     const toDiscriminant = normalisedOptions.toDiscriminant;
-    const isPromise = util.isPromiseLike;
+    const isPromise = isPromiseLike;
     isPromise; // Suppress TS6133 decl never used
     const CONTINUE = sentinels.CONTINUE;
     CONTINUE; // Suppress TS6133 decl never used
