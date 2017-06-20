@@ -1,3 +1,4 @@
+import debug, {DEOPT} from '../../util/debug';
 import parse, {PredicateAST} from './dsl-parser';
 import Predicate from './predicate';
 
@@ -114,10 +115,7 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
         case 'lit{…cap}lit':
 
         default:
-            // TODO: alert on match functions that don't get optimised... either remove this or formalise it as a warning...
-            //       - probably remove, since 'optimisations' are fardly possible beyond the simpler cases already handled above (i.e. there are diminishing returns)
-            console.log(`=====>   NOT OPTIMISED   ${simplifiedPatternSignature}   ('${predicate}')`);
-
+            debug(`${DEOPT} Cannot optimise match function for predicate '%s' (%s)`, predicate, simplifiedPatternSignature);
             let regexp = makeRegExpForPattern(predicateAST);
             return s => {
                 let matches = s.match(regexp);

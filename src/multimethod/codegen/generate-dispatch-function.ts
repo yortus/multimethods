@@ -1,5 +1,6 @@
 import computeAllExecutors from './compute-all-executors';
 import computeRouteSelector from './compute-route-selector';
+import debug, {EMIT, DISPATCH} from '../../util/debug';
 import fatalError from '../../util/fatal-error';
 import {Lineage} from '../compute-predicate-lineages';
 import * as predicates from '../../set-theory/predicates';
@@ -21,12 +22,12 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     // the cascading, and possibly asynchronous, evaluation of the route.
     let t2 = computeAllExecutors(eulerDiagram, normalisedOptions);
     let selectorSource = computeRouteSelector(t2);
-
     let wholeSource = [selectorSource, ...t2.sets.map(set => set.source)].join('\n');
 
-// TODO: temp testing... remove
-//console.log(wholeSource);
-
+    // TODO: doc...
+    if (debug.enabled) {
+        for (let line of wholeSource.split('\n')) debug(`${EMIT} %s`, line);
+    }
 
     // Bring things into local scope that are ref'd from eval'ed code. NB: the source code
     // for eval cannot safely refer directly to expressions like `util.isPromiseLike`, since the `util` identifier may not
@@ -66,6 +67,24 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
         return result;
     };
 
+
+// TODO: temp testing...
+if (debug.enabled) {
+    let oldDispatch = dispatchFunction;
+    dispatchFunction = function _dispatch(...args: any[]) {
+        debug(`${DISPATCH} Call   args=%o   discriminant='%s'`, args, toDiscriminant(...args));
+        let result = oldDispatch(...args);
+        let isAsync = isPromiseLike(result);
+        return andThen(result, result => {
+            debug(`${DISPATCH} Return%s   result=%o`, isAsync ? '   ASYNC' : '', result);
+            debug('');
+            return result;
+        });
+    }
+}
+
+
+
     // TODO: temp testing... fix arity handling... but what about variadic?
     if (typeof normalisedOptions.arity === 'number') {
         let paramNames = [];
@@ -77,4 +96,13 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
 
     // All done.
     return dispatchFunction;
+}
+
+
+
+
+
+// TODO: copypasta - move to util
+function andThen(val: any, cb: (val: any) => any) {
+    return isPromiseLike(val) ? val.then(cb) : cb(val);
 }

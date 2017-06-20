@@ -40,19 +40,16 @@ let predicates = eulerDiagram.sets.map(set => set.predicate);
         '};',
         ...predicates.map(p => `var matches${toIdentifier(p)} = toMatchFunction(eulerDiagram.get('${p}').predicate.toString());`),
     ];
+    let source = lines.join('\n') + '\n';
+    return source;
 
-    // FOR DEBUGGING: uncomment the following line to see the generated code for each route selector at runtime.
-    // console.log(`\n\n\n================ ROUTE SELECTOR ================\n${lines.join('\n')}`);
-
+// TODO: revise/move elsewhere...
     // Evaluate the source code, and return its result, which is the route selector function. The use of eval here is
     // safe. There are no untrusted inputs substituted into the source. More importantly, the use of eval here allows
     // for route selection code that is both more readable and more efficient, since it is tailored specifically to the
     // given euler diagram, rather than having to be generalized for all possible cases.
     // let fn = eval(`(() => {\n${lines.join('\n')}\n})`)();
     // return fn;
-
-    let source = lines.join('\n') + '\n';
-    return source;
 }
 
 

@@ -1,5 +1,9 @@
-import Rule from './rule';
+import {CONTINUE} from './sentinels';
+import debug, {DISPATCH} from '../util/debug';
+import isPromiseLike from '../util/is-promise-like';
+import metaHandlers from './meta-handlers';
 import MultimethodOptions from './multimethod-options';
+import Rule from './rule';
 
 
 
@@ -21,12 +25,51 @@ export default function normaliseRules(rules: MultimethodOptions['rules']) {
             for (handler of chain) {
                 let rule = new Rule(predicate, handler);
                 rule.chain = chain;
+                if (debug.enabled) instrument(rule);
                 result.push(rule);
             }
         }
         else {
-            result.push(new Rule(predicate, handler));
+            let rule = new Rule(predicate, handler);
+            if (debug.enabled) instrument(rule);
+            result.push(rule);
         }
     }
     return result;
+}
+
+
+
+
+
+// TODO: doc...
+function instrument(rule: Rule) {
+    let handler = rule.method;
+    let chainIndex = rule.chain ? rule.chain.indexOf(handler) : -1;
+    let ruleInfo = `rule=${rule.predicate}${rule.chain ? ` [${chainIndex}]` : ''}   type=${rule.isMetaRule ? 'meta' : 'regular'}`;
+    let wrapped = function(...args: any[]) {
+        let next = rule.isMetaRule ? args.pop() : null;
+        let captures = args.pop();
+        debug(`${DISPATCH} Enter   %s${captures ? '   captures=%o' : ''}`, ruleInfo, captures);
+        let result = rule.isMetaRule ? handler(...args, captures, next) : handler(...args, captures);
+        let isAsync = isPromiseLike(result);
+        return andThen(result, result => {
+            let resultInfo = result === CONTINUE ? '   result=CONTINUE' : ''
+            debug(`${DISPATCH} Leave   %s%s%s`, ruleInfo, isAsync ? '   ASYNC' : '', resultInfo);
+            return result;
+        });
+    };
+
+    rule.method = wrapped;
+    if (rule.chain) rule.chain[chainIndex] = wrapped;
+    if (rule.isMetaRule) metaHandlers.set(wrapped, true);
+}
+
+
+
+
+
+// TODO: copypasta - move to util
+function andThen(val: any, cb: (val: any) => any) {
+    return isPromiseLike(val) ? val.then(cb) : cb(val);
 }

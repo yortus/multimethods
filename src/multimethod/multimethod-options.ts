@@ -9,9 +9,6 @@ export default interface MultimethodOptions {
     toDiscriminant: Function;
     rules: { [predicatePattern: string]: Function|Function[]; };
 
-    // TODO: doc/improve...
-    trace: boolean;
-
     // TODO: doc...
     strictChecks: boolean;
 }

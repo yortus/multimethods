@@ -16,7 +16,15 @@ import isPromiseLike from 'multimethods/util/is-promise-like';
 
 
 
-describe('Constructing a Multimethod instance', async () => {
+describe('Constructing a Multimethod instance', () => {
+
+    // TODO: doc helpers...
+    const immediateValue = val => val;
+    const immediateError = msg => { throw new Error(msg); };
+    const promisedValue = val => new Promise(resolve => setTimeout(() => resolve(val), 5));
+    const promisedError = msg => new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), 5));
+    const randomValue = val => (Math.random() >= 0.5 ? immediateValue : promisedValue)(val);
+    const randomError = msg => (Math.random() >= 0.5 ? immediateError : promisedError)(msg);
 
     let variants = [
         { vname: 'all synchronous', timing: 'sync' as 'sync', val: immediateValue, err: immediateError },
@@ -131,8 +139,7 @@ describe('Constructing a Multimethod instance', async () => {
             arity: 1,
             timing,
             rules,
-            strictChecks: false,
-            trace: false
+            strictChecks: false
         });
 
         tests.forEach(test => it(test, async () => {
@@ -156,15 +163,6 @@ describe('Constructing a Multimethod instance', async () => {
         }));
     }));
 });
-
-
-// TODO: doc helpers...
-const immediateValue = val => val;
-const immediateError = msg => { throw new Error(msg); };
-const promisedValue = val => new Promise(resolve => setTimeout(() => resolve(val), 5));
-const promisedError = msg => new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), 5));
-const randomValue = val => (Math.random() >= 0.5 ? immediateValue : promisedValue)(val);
-const randomError = msg => (Math.random() >= 0.5 ? immediateError : promisedError)(msg);
 
 
 // TODO: doc helpers...

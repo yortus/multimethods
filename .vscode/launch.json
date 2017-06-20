@@ -17,6 +17,9 @@
                 "--colors",
                 "${workspaceRoot}/dist/test/**/*.js"
             ],
+            "env": {
+                "DEBUG": "multimethods"
+            },
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
@@ -26,7 +29,10 @@
             "program": "${workspaceRoot}/dist/extras/bench/basic-routing.js",
             "outFiles": [
                 "${workspaceRoot}/dist/**/*.js"
-            ]
+            ],
+            "env": {
+                "DEBUG": "multimethods"
+            }
         }
     ]
 }

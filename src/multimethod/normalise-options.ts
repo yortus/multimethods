@@ -17,7 +17,6 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let timing = options.timing || 'mixed';
     let toDiscriminant = options.toDiscriminant || ((...args: any[]) => args.map(arg => (arg || '').toString()).join(''));
     let rules = options.rules || {};
-    let trace = options.trace === true;
     let strictChecks = options.strictChecks === true;
 
     // TODO: more validation, eg signatures of given rules, legal arity, legal timing, legal discriminant, etc
@@ -30,7 +29,6 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
         timing,
         toDiscriminant,
         rules,
-        trace,
         strictChecks
     };
 }

@@ -1,4 +1,5 @@
-import {format} from 'util';
+import debug, {FATAL} from './debug';
+import {format} from 'util';  // TODO: ensure this node.js dep doesn't prevent clientside use (eg via webpack)
 export default fatalError;
 
 
@@ -15,7 +16,9 @@ function fatalError(error: 'MIXED_CHAIN', predicate: string): never;
 function fatalError(error: 'PREDICATE_SYNTAX', message: string): never;
 function fatalError(error: 'UNHANDLED'): never;
 function fatalError(error: keyof typeof messages, ...params: (string|number)[]): never {
-    throw new MultimethodError(format(messages[error], ...params));
+    let message = format(messages[error], ...params);
+    debug(`${FATAL} %s`, message);
+    throw new MultimethodError(message);
 }
 
 

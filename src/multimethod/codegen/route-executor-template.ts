@@ -13,8 +13,6 @@ let isPromise: (x: any) => boolean;
 
 // TODO: explain each of these in turn...
 let CONTINUE: any;
-let IS_TRACING: boolean;
-let TRACE_LABEL: string;
 let ENDS_PARTITION: boolean;
 let HAS_CAPTURES: boolean;
 let IS_META_RULE: boolean;
@@ -37,16 +35,6 @@ export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_
         return result;
     }
 
-    // TODO: trace...
-    if (IS_TRACING) {
-        if (IS_META_RULE) {
-            console.log(`==> Enter '${TRACE_LABEL}' [METARULE]`);
-        }
-        else {
-            console.log(`==> Enter '${TRACE_LABEL}'`);
-        }
-    }
-
     // TODO: call method in most efficient way...
     if (IS_META_RULE) {
         if (HAS_DOWNSTREAM) {
@@ -59,12 +47,6 @@ export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_
         }
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
-
-            // TODO: trace...
-            if (IS_TRACING) {
-                console.log(`      Captures: ${JSON.stringify(captures)}`);
-            }
-            
             result = CALL_METHOD(ELLIPSIS_MMARGS, captures, next);
         }
         else {
@@ -74,31 +56,10 @@ export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_
     else {
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
-
-            // TODO: trace...
-            if (IS_TRACING) {
-                console.log(`      Captures: ${JSON.stringify(captures)}`);
-            }
-
             result = CALL_METHOD(ELLIPSIS_MMARGS, captures);
         }
         else {
             result = CALL_METHOD(ELLIPSIS_MMARGS);
-        }
-    }
-
-    // TODO: trace...
-    if (IS_TRACING) {
-        if (isPromise(result)) {
-            result = result.then(function (rs: any) {
-                console.log(`==> Leave '${TRACE_LABEL}'`);
-                console.log(`      Handled? ${rs === CONTINUE ? ' NO' : `YES, type is ${typeof rs}]`}`);
-                return rs;
-            });
-        }
-        else {
-            console.log(`==> Leave '${TRACE_LABEL}'`);
-            console.log(`      Handled? ${result === CONTINUE ? ' NO' : `YES, type is ${typeof result}]`}`);
         }
     }
 

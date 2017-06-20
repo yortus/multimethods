@@ -10,7 +10,9 @@
     "build:peg": "pegjs -o dist/release/set-theory/predicates/dsl-grammar.js src/set-theory/predicates/dsl-grammar.pegjs",
     "clean": "rimraf dist/",
     "test": "node ./scripts/run-unit-tests",
+    "test:debug": "cross-env DEBUG=multimethods node ./scripts/run-unit-tests",
     "bench": "node ./dist/extras/bench/basic-routing.js",
+    "bench:debug": "cross-env DEBUG=multimethods node ./dist/extras/bench/basic-routing.js",
     "prepare": "npm run self-ref && npm run build",
     "self-ref": "node ./scripts/enable-self-reference"
   },
@@ -49,6 +51,7 @@
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.0",
     "chai": "^4.0.2",
+    "cross-env": "^5.0.1",
     "mocha": "^3.4.2",
     "pegjs": "^0.10.0",
     "rimraf": "^2.6.1",
