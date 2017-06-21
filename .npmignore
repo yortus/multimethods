@@ -11,3 +11,5 @@ extras/
 *.peg
 *.log
 tsconfig.json
+README.md
+TODO.md
