@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {Multimethod, meta, CONTINUE} from 'multimethods';
+import {Multimethod, meta, CONTINUE, validate} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -118,6 +118,7 @@ const tests = [
         arity: 1,
         timing: 'sync'
     });
+    // validate(mm);
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));
     let responses = tests.map(test => test.split(' ==> ')[1]);

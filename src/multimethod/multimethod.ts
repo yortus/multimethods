@@ -30,7 +30,9 @@ export interface MultimethodConstructor {
     new(options?: MultimethodOptions): Multimethod;
 }
 export const Multimethod: MultimethodConstructor = createMultimethodClass(undefined);
-export interface Multimethod extends Function { }
+export interface Multimethod extends Function {
+    _options: MultimethodOptions;
+}
 export default Multimethod;
 
 
@@ -177,6 +179,7 @@ function createMultimethodClass(staticArity?: MultimethodOptions['arity']): Mult
 
             // TODO: ...
             let instance: any = createDispatchFunction(normalisedOptions);
+            instance._options = normalisedOptions; // TODO: add typing and/or docs for this?
             instance[CTOR] = Multimethod;
             return instance;
         }

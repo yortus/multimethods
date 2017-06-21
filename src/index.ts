@@ -15,6 +15,7 @@ export {EulerDiagram, EulerSet} from './set-theory/sets';
 // TODO: temp testing...
 export * from './multimethod';
 export {CONTINUE} from './multimethod/sentinels';
+export {default as validate} from './multimethod/validate';
 
 
 

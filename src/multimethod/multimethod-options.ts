@@ -8,7 +8,4 @@ export default interface MultimethodOptions {
     timing: 'mixed' | 'async' | 'sync';
     toDiscriminant: Function;
     rules: { [predicatePattern: string]: Function|Function[]; };
-
-    // TODO: doc...
-    strictChecks: boolean;
 }

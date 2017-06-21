@@ -138,8 +138,7 @@ describe('Constructing a Multimethod instance', () => {
             toDiscriminant: (r: any) => r.address,
             arity: 1,
             timing,
-            rules,
-            strictChecks: false
+            rules
         });
 
         tests.forEach(test => it(test, async () => {

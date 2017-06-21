@@ -27,7 +27,6 @@
       - [x] Map & Set basic usage
       - [x] Object.setPrototypeOf
   - [x] ensure benchmarks have not suffered
-
 - [x] UNHANDLED --> FALLBACK
   - [x] export the default FALLBACK sentinel value
   - [x] replace refs everywhere
@@ -36,7 +35,6 @@
   - [x] what happens when last handler returns FALLBACK?
     - [x] FALLBACK should not be observable to clients; it is an internal dispatch imperative
     - [x] throw an unhandled dispatch error (new case in `fatalErrors.ts`)
-
 - [x] TODO: Helper(s) to compose handlers manually
   - [x] permit listing regular handlers in an array ('chain')
   - [x] permit listing metahandlers in an array ('chain')
@@ -48,28 +46,37 @@
   - [x] remove predicate comment support - they were not really 'comments' since they affected semantics
   - [x] enforce 'meta-handlers before regular-handlers in chains' convention. Early error if not.
     - [x] explain in docs that this simplifies reading of chains as having left-to-right execution order
-
 - [x] revise FALLBACK
   - [x] change to CONTINUE
   - [x] don't allow overriding; remove from MMOptions (check this will work with routist first)
+- [x] add `debug` logging using the `debug` module
+  - [x] replaces `trace` option. Remove that.
+  - [x] use npm `debug` module to sent all debug/trace messages
+    - [x] why not events? ANS: They are node.js-specific.
+  - [x] remove 'trace' code from executor function; replace with wrapper functions on all handlers when in debug mode
+  - [x] turn `strictChecks` checks into debug warnings and remove `strictChecks` option
+- [x] export a `validate(mm): void` function that does strict checking and throws a list of errors on failure
+  - [x] remove the `strictChecks` option
+  - [x] move what were the strict checks into the validate function
 
-- [ ] add option `debug: boolean`
-  - [ ] replaces `trace` option. Remove that.
-  - [ ] use npm `debug` module to sent all debug/trace messages
-    - [ ] why not events? ANS: They are node.js-specific.
-  - [ ] remove 'trace' code from executor function; replace with wrapper functions on all handlers when in debug mode
-  - [ ] if `strictChecks===false` and `debug===true`, still do strict checks but just output to debug() and continue
+- [ ] do proper emit for the dispatch function - currently it is hardcoded to unary arity.
+  - [ ] put it through same emit steps as executor template function
+  - [ ] make a templates dir and put templates in there?
+
 - [ ] remove add() method. Multimethods are immutable.
+  - [x] remove add method
   - [ ] document that multimethods are immutable and why. e.g. can emit fast code for them.
   - [ ] add note for future addition: export helper functions to 'add' multimethods to create a new multimethod
-- [ ] rename UNHANDLED to FALLBACK or CASCADE.
+
+- [ ] rename UNHANDLED
+  - [x] rename to CONTINUE
   - [ ] doc/explain naming - this is an imperative return value of what MM should do next, not a declaration of what just happened in current handler.
   - [ ] add note for future addition: more sentinel return values for other builtin behaviours. Such as?
 - [ ] improve error API & strong typing
 - [ ] strictest TSC options in `/test` and `/extras`
 
 - [ ] Fix terminology in code and comments
-  - [x] FALLBACK --> CONTINUE
+  - [x] UNHANDLED --> CONTINUE
   - [ ] next --> forward/fwd
   - [ ] rule
   - [ ] predicate (rename from `pattern` in code/codegen/comments)
