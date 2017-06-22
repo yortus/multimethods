@@ -95,20 +95,21 @@ A valid pattern string conforms to the following rules:
 - Two captures may not occupy adjacent positions in a pattern.
 - Patterns may have trailing whitespace, which is removed.
 - Whitespace consists of spaces and/or comments.
+#### Deprecated/removed:
 - A comment begins with `#` and continues to the end of the string.
 - The special pattern `∅` is permitted. It represents a pattern that matches no addresses.
 
 
 ## Pattern DSL Examples
 
-- `'/foo'` matches only the literal address `'/foo'` and nothing else
-- `'/foo/*'` matches `'/foo/bar'` and `'/foo/'` but not `'/foo'` or `'/foo/bar/baz'`
-- `'/foo...'` (or `'/foo…'`) matches `'/foo'`, `'/foo/bar'` and `'/foo/bar/baz'`
-- `'{...path}/{name}.{ext}` matches `'/api/foo/bar.html'` with `{path: '/api/foo', name: 'bar', ext: 'baz' }`
-- `'*{...path}'` is invalid (two adjacent captures)
-- `'...'` (or `'…'`) matches all addresses
-- `'*'` matches all addresses that do not contain `'/'`
-- `'∅'` matches no addresses
+- `/foo` matches only the literal address `/foo` and nothing else
+- `/foo/*` matches `/foo/bar` and `/foo/` but not `/foo` or `/foo/bar/baz`
+- `/foo...` (or `/foo…`) matches `/foo`, `/foo/bar` and `/foo/bar/baz`
+- `{...path}/{name}.{ext}` matches `/api/foo/bar.html` with `{path: '/api/foo', name: 'bar', ext: 'baz' }`
+- `*{...path}` is invalid (two adjacent captures)
+- `...` (or `…`) matches all addresses
+- `*` matches all addresses that do not contain `/`
+- `∅` matches no addresses
 
 
 ## Glossary

@@ -59,9 +59,58 @@
   - [x] remove the `strictChecks` option
   - [x] move what were the strict checks into the validate function
 
+
+
+
+
+- [ ] Update predicate special character handling
+  - [ ] use URI ref: https://tools.ietf.org/html/rfc3986
+  - [ ] TODO: char pool yet to classify:
+    - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
+    - [ ] Others: `% ^ ~ < > " |`
+  - [ ] treat the following as literal match characters:
+    - [ ] `a-z A-Z 0-9 _ . - /`  (already supported)
+    - [ ] `~` (unreserved in URIs - so may commonly appear in URLs)
+    - [ ] `: ? = & #` (commonly appear in URIs as delimiters)
+    - [ ] `[ ] @` (also used in some URI schemes according to RFC3986#1.1.2)
+    - [ ] `+` is this always unescaped to space? The RFC lists it as a reserved demiliter
+  - [ ] TODO: revise whether to treat the following as literal match characters. List pros/cons
+    - [ ] <space> (already supported)
+  - [ ] TODO: Implement the following operators:
+    - [ ] `*` wildcard
+    - [ ] `...` globstar
+      - [ ] TODO: change back to `**`? Pros: One less special char. Cons: Ambiguous?
+      - [ ] Use single unicode 'letter' char for `**` : U+156F `ᕯ`
+    - [ ] `{...}` wildcard/globstar named capture
+  - [ ] TODO: Reserve the following characters for future use:
+    - [ ] TODO: union/or: `|`?
+    - [ ] TODO: alternatives
+    - [ ] TODO: zero or one
+    - [ ] TODO: escape sequence
+  
+  - [ ] TODO: Reserve the following characters to be always illegal in predicates:
+    - [ ] doc why to have this: so client have a few special characters for augmenting predicates for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the predicate
+    - [ ] TODO: ` `
+
+  - [ ] TODO: Support escape sequences for any character as follows:
+
+
+
+
+- [ ] Use/support ES6 `class` syntax for defining multimethods
+  - [ ] TODO: MM = static class, you call the constructor, not an instance
+    - [ ] prevent instantiation
+    - [ ] allow calling the class ctor like a function (no `new`)
+      - [ ] TODO: is this even permitted with ES6 classes?
+
+
+
+
+
 - [ ] do proper emit for the dispatch function - currently it is hardcoded to unary arity.
   - [ ] put it through same emit steps as executor template function
   - [ ] make a templates dir and put templates in there?
+  - [ ] add basic tests for correct arg passing for variadic, nullary, unary, binary and ternary MMs
 
 - [ ] remove add() method. Multimethods are immutable.
   - [x] remove add method
