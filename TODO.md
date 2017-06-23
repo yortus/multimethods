@@ -66,8 +66,13 @@
 - [ ] Update predicate special character handling
   - [ ] use URI ref: https://tools.ietf.org/html/rfc3986
   - [ ] TODO: char pool yet to classify:
-    - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
-    - [ ] Others: `% ^ ~ < > " |`
+
+    - [ ] unallocated: `% ^ < > | ! $ ' " ( ) + , ;`
+                          was:
+                          - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
+                          - [ ] Others: `% ^ ~ < > " |`
+
+
   - [ ] treat the following as literal match characters:
     - [ ] `a-z A-Z 0-9 _ . - /`  (already supported)
     - [ ] `~` (unreserved in URIs - so may commonly appear in URLs)
@@ -83,14 +88,17 @@
       - [ ] Use single unicode 'letter' char for `**` : U+156F `ᕯ`
     - [ ] `{...}` wildcard/globstar named capture
   - [ ] TODO: Reserve the following characters for future use:
+    - `( ) |`
     - [ ] TODO: union/or: `|`?
-    - [ ] TODO: alternatives
-    - [ ] TODO: zero or one
-    - [ ] TODO: escape sequence
-  
-  - [ ] TODO: Reserve the following characters to be always illegal in predicates:
+    - [ ] TODO: alternatives `(abc|def|123)`
+    - [ ] TODO: zero or one `(abc?)`
+    - [ ] TODO: escape sequence `('$30?!')` or `("it's")` or `(u0213)` or `my( )site` (literal space)
+
+    - [ ] general reserve: ``    
+    
+  - [ ] TODO: Reserve the following characters to be always illegal in predicates (unless escaped):
     - [ ] doc why to have this: so client have a few special characters for augmenting predicates for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the predicate
-    - [ ] TODO: ` `
+    - [ ] TODO: `; < >`
 
   - [ ] TODO: Support escape sequences for any character as follows:
 
