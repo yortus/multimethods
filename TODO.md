@@ -58,6 +58,11 @@
 - [x] export a `validate(mm): void` function that does strict checking and throws a list of errors on failure
   - [x] remove the `strictChecks` option
   - [x] move what were the strict checks into the validate function
+- [x] SKIPPED: Use/support ES6 `class` syntax for defining multimethods
+  - [x] SKIPPED: MM = static class, you call the constructor, not an instance
+    - [x] SKIPPED: prevent instantiation
+    - [x] SKIPPED: allow calling the class ctor like a function (no `new`)
+      - [x] is this even permitted with ES6 classes? Ans: NO
 
 
 
@@ -71,7 +76,6 @@
                           was:
                           - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
                           - [ ] Others: `% ^ ~ < > " |`
-
 
   - [ ] treat the following as literal match characters:
     - [ ] `a-z A-Z 0-9 _ . - /`  (already supported)
@@ -106,12 +110,10 @@
 
 
 
+- [ ] export an `extend` function that takes a MM and a rules hash and returns a new multimethod
+  - [ ] use `super` in chains to control overriding behaviour w.r.t. original MM
 
-- [ ] Use/support ES6 `class` syntax for defining multimethods
-  - [ ] TODO: MM = static class, you call the constructor, not an instance
-    - [ ] prevent instantiation
-    - [ ] allow calling the class ctor like a function (no `new`)
-      - [ ] TODO: is this even permitted with ES6 classes?
+
 
 
 
