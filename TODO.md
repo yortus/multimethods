@@ -97,8 +97,10 @@
     - [ ] general reserve: ``    
     
   - [ ] TODO: Reserve the following characters to be always illegal in predicates (unless escaped):
-    - [ ] doc why to have this: so client have a few special characters for augmenting predicates for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the predicate
-    - [ ] TODO: `; < >`
+    - [ ] doc why to have this:
+      - [ ] so client have a few special characters for augmenting predicates for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the predicate
+      - [ ] for safely putting other props in same hash as rules, eg `$toDiscriminant` or similar
+    - [ ] TODO: `$ ; < >`
 
   - [ ] TODO: Support escape sequences for any character as follows:
 
