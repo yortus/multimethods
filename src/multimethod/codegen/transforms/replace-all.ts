@@ -6,7 +6,7 @@
 // TODO: ...
 export default function replaceAll(source: string, replacements: {[identifier: string]: string}): string {
     let identifiers = Object.keys(replacements);
-    let regexs = identifiers.map(id => new RegExp(id.replace(/\$/g, '\\$'), 'g'));
+    let regexs = identifiers.map(id => new RegExp(id.replace(/\$/g, '\\$'), 'g')); // NB: any '$' chars in IDs must be escaped in RexExps
     for (let i = 0; i < identifiers.length; ++i) {
         let id = identifiers[i];
         let regex = regexs[i];

@@ -1,5 +1,5 @@
-import downlevelES6Rest from './transforms/downlevel-es6-rest';
-import downlevelES6Spread from './transforms/downlevel-es6-spread';
+import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
+import strengthReduceES6RestSpread from './transforms/strength-reduce-es6-rest-spread';
 import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
 import {Lineage} from '../compute-predicate-lineages';
@@ -71,9 +71,6 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
     let i = set.lineage.indexOf(rule);
     let rules = set.lineage;
 
-    // TODO: start with the template...
-    let source = getNormalisedFunctionSource(routeExecutorTemplate);
-
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
     let predicateIdentifier = toIdentifier(set.predicate);
@@ -88,6 +85,12 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
     //   of this file). It is substituted in as the value of `$next` when a meta-rule's method is called.
     // - `handlerArgs` is a hash keyed by all possible parameter names a rule's raw handler may use, and whose
     //   values are the source code for the argument corresponding to each parameter.
+
+    // TODO: start with the template...
+    let source = getNormalisedFunctionSource(routeExecutorTemplate);
+
+    // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
+    source = replaceAll(source, {'ELLIPSIS_': '...'});
 
     // TODO: ... all booleans
     source = eliminateDeadCode(source, {
@@ -110,13 +113,10 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 
     // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
     if (typeof options.arity === 'number') {
-        let paramNames = [];
-        for (let i = 0; i < options.arity; ++i) paramNames.push('$' + i);
-        source = source.replace(/ELLIPSIS_([A-Z]+)/g, paramNames.join(', '));
+        source = strengthReduceES6RestSpread(source, 'MMARGS', '_', options.arity);
     }
     else {
-        source = downlevelES6Rest(source);
-        source = downlevelES6Spread(source);
+        source = downlevelES6RestSpread(source);
     }
 
     // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
