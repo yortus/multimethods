@@ -58,7 +58,7 @@ import EulerSet from './euler-set';
  *      \
  *        bar
  */
-export default class EulerDiagram<T> {
+export default class EulerDiagram<T = {}> {
 
 
     /**

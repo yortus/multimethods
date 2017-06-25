@@ -6,7 +6,7 @@ import {Lineage} from '../compute-predicate-lineages';
 import MultimethodOptions from '../multimethod-options';
 import {toIdentifier, parsePredicatePattern, toNormalPredicate} from '../../set-theory/predicates';
 import replaceAll from './transforms/replace-all';
-import routeExecutorTemplate from './route-executor-template';
+import routeExecutorTemplate from './templates/route-executor-template';
 import Rule from '../rule';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 

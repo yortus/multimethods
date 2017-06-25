@@ -16,7 +16,7 @@ import debug, {VALIDATE} from '../util/debug';
 export default function createDispatchFunction(normalisedOptions: MultimethodOptions) {
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the rule set.
-    let eulerDiagram = new EulerDiagram<never>(Object.keys(normalisedOptions.rules).map(pattern => toPredicate(pattern)));
+    let eulerDiagram = new EulerDiagram(Object.keys(normalisedOptions.rules).map(pattern => toPredicate(pattern)));
 
     // TODO: explain...
     if (debug.enabled) {
