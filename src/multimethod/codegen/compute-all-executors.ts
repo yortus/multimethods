@@ -16,8 +16,8 @@ import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 
 // TODO: temp testing...
 export interface WithExecutors {
-    source: string;
-    entryPoint: string;
+    executorSource: string;
+    executorName: string;
 };
 
 
@@ -46,16 +46,16 @@ export default function computeAllExecutors(eulerDiagram: EulerDiagram<Lineage>,
         // TODO: doc...
         let rulesWithDuplicatesRemoved = set.lineage.filter(rule => rule.isMetaRule || eulerDiagram.get(rule.predicate) === set);
         let sources = rulesWithDuplicatesRemoved.map(rule => getSourceCodeForRule(eulerDiagram, set, rule, options) + '\n');
-        let source = [`// ========== EXECUTORS FOR ${set.predicate} ==========\n`].concat(sources).join('');
+        let executorSource = [`// ========== EXECUTORS FOR ${set.predicate} ==========\n`].concat(sources).join('');
 
         // TODO: temp testing...
         // The 'entry point' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
         // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
         let rules = set.lineage;
         let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
-        let entryPoint = getNameForRule(eulerDiagram, set, entryPointRule);
+        let executorName = getNameForRule(eulerDiagram, set, entryPointRule);
 
-        return <WithExecutors> { source, entryPoint };
+        return <WithExecutors> { executorSource, executorName };
     });
     return augmentedEulerDiagram;
 }
@@ -104,7 +104,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 
     // TODO: ... all strings
     source = replaceAll(source, {
-        METHOD_NAME: getNameForRule(eulerDiagram, set, rule),
+        FUNCTION_NAME: getNameForRule(eulerDiagram, set, rule),
         GET_CAPTURES: getCaptures,
         CALL_METHOD: callMethod,
         DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(eulerDiagram, set, downstreamRule) : '',

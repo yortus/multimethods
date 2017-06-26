@@ -3,6 +3,9 @@
 
 
 
+// TODO: explain... basically removes if/then branches that are 100% dead code according to the constants provided.
+// TODO: explain limited circumstances where this works:
+// - if (CONST) {\n<...>} else {\n<...>}
 // TODO: assumes consistent 4-space block indents, simple conditions... relax any of these?
 export default function eliminateDeadCode(normalisedFunctionSource: string, consts: {[name: string]: boolean}): string {
     const MATCH_IF = /^(\s*)if \((\!?)([a-zA-Z$_][a-zA-Z0-9$_]*)\) {$/;

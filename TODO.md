@@ -107,6 +107,28 @@
     - [ ] TODO: `$ ; < >`
 
   - [ ] TODO: Support escape sequences for any character as follows:
+    - [ ] TODO: ...
+
+  - [ ] TODO: special rules for spaces?
+
+  - [ ] Examples:
+
+  ```
+i have spaces
+i( )have( )spaces
+i[ ]have[ ]spaces
+i+have+spaces
+
+literal [+] sign
+it(')s about time
+it[']s about time
+GET http://blah.com
+GET [ ] http://blah.com
+GET+http://blah.com
+http://app.co[#]some-id
+http://app.co/things?item=t[[100]]
+(ab*c|a*bc)def
+  ```
 
 
 
@@ -138,6 +160,9 @@
 
 - [ ] Fix terminology in code and comments
   - [x] UNHANDLED --> CONTINUE
+  - [ ] dispatch
+  - [ ] selector
+  - [ ] executor
   - [ ] next --> forward/fwd
   - [ ] rule
   - [ ] predicate (rename from `pattern` in code/codegen/comments)

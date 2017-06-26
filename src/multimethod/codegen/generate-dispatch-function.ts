@@ -1,7 +1,14 @@
+import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
+import strengthReduceES6RestSpread from './transforms/strength-reduce-es6-rest-spread';
+import eliminateDeadCode from './transforms/eliminate-dead-code';
+import getNormalisedFunctionSource from './get-normalised-function-source';
+import replaceAll from './transforms/replace-all';
+
 import computeAllExecutors from './compute-all-executors';
 import computeRouteSelector from './compute-route-selector';
-import debug, {EMIT, DISPATCH} from '../../util/debug';
-import fatalError from '../../util/fatal-error';
+import debug, {EMIT, /*DISPATCH*/} from '../../util/debug';
+import dispatchFunctionTemplate from './templates/dispatch-function-template';
+import * as fatalErrorUtil from '../../util/fatal-error';
 import {Lineage} from '../compute-predicate-lineages';
 import * as predicates from '../../set-theory/predicates';
 import MultimethodOptions from '../multimethod-options';
@@ -20,9 +27,11 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     // Generate the combined source code for handling the route. This includes local variable declarations for
     // all rules' matchers and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of the route.
+    let functionName = `MM${multimethodCounter++}`;
     let t2 = computeAllExecutors(eulerDiagram, normalisedOptions);
     let selectorSource = computeRouteSelector(t2);
-    let wholeSource = [selectorSource, ...t2.sets.map(set => set.source)].join('\n');
+    let dispatchSource = getSourceCodeForDispatchFunction(functionName, normalisedOptions);
+    let wholeSource = [dispatchSource, selectorSource, ...t2.sets.map(set => set.executorSource)].join('\n');
 
     // TODO: doc...
     if (debug.enabled) {
@@ -34,14 +43,17 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     // appear in the transpiled JavaScript for this module. This is because TypeScript may rename modules to try to preserve
     // ES6 module semantics.
     const toDiscriminant = normalisedOptions.toDiscriminant;
+    toDiscriminant; // Suppress TS6133 decl never used
     const isPromise = isPromiseLike;
     isPromise; // Suppress TS6133 decl never used
     const CONTINUE = sentinels.CONTINUE;
     CONTINUE; // Suppress TS6133 decl never used
-    const toMatchFunction = predicates.toMatchFunction;
+    const toMatchFunction = predicates.toMatchFunction;             //      <===== refd in selectExecutor
     toMatchFunction; // Suppress TS6133 decl never used
     const parsePredicate = predicates.parsePredicatePattern;
     parsePredicate; // Suppress TS6133 decl never used
+    const fatalError = fatalErrorUtil.default;
+    fatalError; // Suppress TS6133 decl never used
 
 
 // TODO: review comments below (copypasta'd from old code)
@@ -53,46 +65,42 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     // the use of eval here allows for route handler code that is both more readable and more efficient, since it is
     // tailored specifically to the route being evaluated, rather than having to be generalized for all possible cases.
 
+
+
+
     // Generate a function that, given a discriminant, returns the executor for the best-matching route.
-    let selectRoute = eval(`(function () {\n${wholeSource}\nreturn _selectExecutor;\n})`)(); // TODO: brittle - don't assume name _selectExecutor 
-
-    // Generate the overall dispatch function for the multimethod.
-    // TODO: support arity properly... don't assume arity === 1 like done below...
-    // TODO: use rest/spread and the transforms used in generating the executors...
-    let dispatchFunction: Function = function _dispatch($0: any) {
-        let discriminant = toDiscriminant($0);
-        let executeRoute = selectRoute(discriminant);
-        let result = executeRoute(discriminant, CONTINUE, $0);
-        if (result === CONTINUE) return fatalError('UNHANDLED');
-        return result;
-    };
-
-
-// TODO: temp testing...
-if (debug.enabled) {
-    let oldDispatch = dispatchFunction;
-    dispatchFunction = function _dispatch(...args: any[]) {
-        debug(`${DISPATCH} Call   args=%o   discriminant='%s'`, args, toDiscriminant(...args));
-        let result = oldDispatch(...args);
-        let isAsync = isPromiseLike(result);
-        return andThen(result, result => {
-            debug(`${DISPATCH} Return%s   result=%o`, isAsync ? '   ASYNC' : '', result);
-            debug('');
-            return result;
-        });
-    }
-}
+    let dispatchFunction = eval(`(function () {\n${wholeSource}\nreturn ${functionName};\n})`)();
 
 
 
-    // TODO: temp testing... fix arity handling... but what about variadic?
-    if (typeof normalisedOptions.arity === 'number') {
-        let paramNames = [];
-        for (let i = 0; i < normalisedOptions.arity; ++i) paramNames.push('$' + i);
-        let source = dispatchFunction.toString();
-        source = source.replace(/\$0/g, paramNames.join(', '));
-        dispatchFunction = eval(`(${source})`);
-    }
+
+
+// TODO: temp testing... RESTORE...
+// if (debug.enabled) {
+//     let oldDispatch = dispatchFunction;
+//     dispatchFunction = function _dispatch(...args: any[]) {
+//         debug(`${DISPATCH} Call   args=%o   discriminant='%s'`, args, toDiscriminant(...args));
+//         let result = oldDispatch(...args);
+//         let isAsync = isPromiseLike(result);
+//         return andThen(result, result => {
+//             debug(`${DISPATCH} Return%s   result=%o`, isAsync ? '   ASYNC' : '', result);
+//             debug('');
+//             return result;
+//         });
+//     }
+// }
+
+
+
+// TODO: remove?
+    // // TODO: temp testing... fix arity handling... but what about variadic?
+    // if (typeof normalisedOptions.arity === 'number') {
+    //     let paramNames = [];
+    //     for (let i = 0; i < normalisedOptions.arity; ++i) paramNames.push('$' + i);
+    //     let source = dispatchFunction.toString();
+    //     source = source.replace(/\$0/g, paramNames.join(', '));
+    //     dispatchFunction = eval(`(${source})`);
+    // }
 
     // All done.
     return dispatchFunction;
@@ -103,6 +111,58 @@ if (debug.enabled) {
 
 
 // TODO: copypasta - move to util
-function andThen(val: any, cb: (val: any) => any) {
-    return isPromiseLike(val) ? val.then(cb) : cb(val);
+// function andThen(val: any, cb: (val: any) => any) {
+//     return isPromiseLike(val) ? val.then(cb) : cb(val);
+// }
+
+
+
+
+
+
+
+
+
+
+// TODO: temp testing...
+function getSourceCodeForDispatchFunction(functionName: string, options: MultimethodOptions) {
+
+    // TODO: start with the template...
+    let source = getNormalisedFunctionSource(dispatchFunctionTemplate);
+
+    // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
+    source = replaceAll(source, {'ELLIPSIS_': '...'});
+
+    // TODO: ... all booleans
+    source = eliminateDeadCode(source, { /* NB: none yet */ });
+
+    // TODO: ... all strings
+    source = replaceAll(source, {
+        FUNCTION_NAME: functionName,
+        SELECT_ROUTE: `selectExecutor` // TODO: temp testing... how to know this name?
+    });
+
+    // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
+    if (typeof options.arity === 'number') {
+        source = strengthReduceES6RestSpread(source, 'MMARGS', '_', options.arity);
+    }
+    else {
+        source = downlevelES6RestSpread(source);
+    }
+
+    // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
+    // if (captureNames.length > 0) {
+    //     source = source + `\nvar ${getCaptures} = toMatchFunction(eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].predicate.toString());` // TODO: too long and complex! fix me!!!
+    // }
+    // source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].method;`;
+
+    // All done for this iteration.
+    return `// ========== DISPATCH FUNCTION ==========\n${source}`;
 }
+
+
+
+
+
+// TODO: doc...
+let multimethodCounter = 0;

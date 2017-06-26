@@ -4,15 +4,13 @@ import RouteExecutor from '../route-executor';
 
 
 
-// TODO: how to ensure this is defined? Just doc?
-let isPromise: (x: any) => boolean;
-
-
-
-
-
+// TODO: these must be in the lexical environment when the template is eval'd:
 // TODO: explain each of these in turn...
+let isPromise: (x: any) => boolean;
 let CONTINUE: any;
+
+// TODO: these are replacement placeholders.
+// TODO: explain each of these in turn...
 let ENDS_PARTITION: boolean;
 let HAS_CAPTURES: boolean;
 let IS_META_RULE: boolean;
@@ -23,12 +21,15 @@ let DELEGATE_DOWNSTREAM: RouteExecutor;
 let DELEGATE_NEXT: RouteExecutor;
 let GET_CAPTURES: (discriminant: string) => {};
 let CALL_METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
+// FUNCTION_NAME is also replaced
+
+
+
 
 
 // TODO: explain important norms in the template function...
-// TODO: don't need to dedent any more!
-// TODO: put more explanatory comments inside, and strip them out to maximise inlining potential
-export default function METHOD_NAME(discriminant: string, result: any, ELLIPSIS_MMARGS: any[]) {
+// TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
+export default function FUNCTION_NAME(discriminant: string, result: any, ELLIPSIS_MMARGS: any[]) {
 
     // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
     if (result !== CONTINUE) {
