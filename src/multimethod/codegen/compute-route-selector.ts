@@ -1,6 +1,7 @@
-import {toIdentifier} from '../../set-theory/predicates';
-import RouteExecutor from './route-executor';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
+import RouteExecutor from './route-executor';
+import repeatString from '../../util/repeat-string';
+import {toIdentifier} from '../../set-theory/predicates';
 import {WithExecutors} from './compute-all-executors';
 
 
@@ -68,7 +69,7 @@ function generateSelectorSourceCode(from: EulerSet & WithExecutors, nestDepth: n
     let subsets = from.subsets;
 
     // Make the indenting string corresponding to the given `nestDepth`.
-    let indent = Array(nestDepth + 1).join('    '); // ES5 equivalent to ES6 '    '.repeat(nestDepth)
+    let indent = repeatString('    ', nestDepth);
 
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
