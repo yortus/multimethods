@@ -1,7 +1,7 @@
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 import RouteExecutor from './route-executor';
 import repeatString from '../../util/repeat-string';
-import {toIdentifier} from '../../set-theory/predicates';
+import {toIdentifierParts} from '../../set-theory/predicates';
 import {WithExecutors} from './compute-all-executors';
 
 
@@ -39,7 +39,7 @@ let predicates = eulerDiagram.sets.map(set => set.predicate);
         'function selectExecutor(discriminant) {',
         ...generateSelectorSourceCode(eulerDiagram.universe, 1),
         '};',
-        ...predicates.map(p => `var matches${toIdentifier('ℙ', p)} = toMatchFunction(eulerDiagram.get('${p}').predicate.toString());`),
+        ...predicates.map(p => `var matches${'ℙ' + toIdentifierParts(p)} = toMatchFunction(eulerDiagram.get('${p}').predicate.toString());`),
     ];
     let source = lines.join('\n') + '\n';
     return source;
@@ -74,7 +74,7 @@ function generateSelectorSourceCode(from: EulerSet & WithExecutors, nestDepth: n
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
     subsets.forEach((set: EulerSet & WithExecutors, i) => {
-        let predicateIdentifier = toIdentifier('ℙ', set.predicate);
+        let predicateIdentifier = 'ℙ' + toIdentifierParts(set.predicate);
         let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${predicateIdentifier}(discriminant)) `;
 
         if (set.subsets.length === 0) {

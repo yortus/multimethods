@@ -4,7 +4,7 @@ import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
 import {Lineage} from '../compute-predicate-lineages';
 import MultimethodOptions from '../multimethod-options';
-import {toIdentifier, parsePredicatePattern, toNormalPredicate} from '../../set-theory/predicates';
+import {toIdentifierParts, parsePredicatePattern, toNormalPredicate} from '../../set-theory/predicates';
 import replaceAll from './transforms/replace-all';
 import routeExecutorTemplate from './templates/route-executor-template';
 import Rule from '../rule';
@@ -73,7 +73,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
-    let predicateIdentifier = toIdentifier('ℙ', set.predicate);
+    let predicateIdentifier = 'ℙ' + toIdentifierParts(set.predicate);
     let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${predicateIdentifier}`;
     let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${predicateIdentifier}`;
     let captureNames = parsePredicatePattern(rule.predicate.toString()).captureNames;
@@ -137,10 +137,10 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lineage, rule: Rule) {
     let ruleNode = eulerDiagram.get(rule.predicate);
     let ruleIndex = ruleNode.lineage.indexOf(rule);
-    let ruleIdentifier = toIdentifier('ℙ', ruleNode.predicate);
+    let ruleIdentifier = 'ℙ' + toIdentifierParts(ruleNode.predicate);
 
     if (rule.isMetaRule) {
-        let nodeIdentifier = toIdentifier('ℙ', set.predicate);
+        let nodeIdentifier = 'ℙ' + toIdentifierParts(set.predicate);
         return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleIdentifier}Within${nodeIdentifier}`;
     }
     else {
