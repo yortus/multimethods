@@ -73,7 +73,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
-    let predicateIdentifier = toIdentifier(set.predicate);
+    let predicateIdentifier = toIdentifier('ℙ', set.predicate);
     let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${predicateIdentifier}`;
     let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${predicateIdentifier}`;
     let captureNames = parsePredicatePattern(rule.predicate.toString()).captureNames;
@@ -137,10 +137,10 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lineage, rule: Rule) {
     let ruleNode = eulerDiagram.get(rule.predicate);
     let ruleIndex = ruleNode.lineage.indexOf(rule);
-    let ruleIdentifier = toIdentifier(ruleNode.predicate);
+    let ruleIdentifier = toIdentifier('ℙ', ruleNode.predicate);
 
     if (rule.isMetaRule) {
-        let nodeIdentifier = toIdentifier(set.predicate);
+        let nodeIdentifier = toIdentifier('ℙ', set.predicate);
         return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleIdentifier}Within${nodeIdentifier}`;
     }
     else {
