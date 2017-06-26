@@ -6,7 +6,7 @@ import replaceAll from './transforms/replace-all';
 
 import computeAllExecutors from './compute-all-executors';
 import computeRouteSelector from './compute-route-selector';
-import debug, {EMIT, /*DISPATCH*/} from '../../util/debug';
+import debug, {EMIT, DISPATCH} from '../../util/debug';
 import dispatchFunctionTemplate from './templates/dispatch-function-template';
 import * as fatalErrorUtil from '../../util/fatal-error';
 import {Lineage} from '../compute-predicate-lineages';
@@ -42,13 +42,13 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     // for eval cannot safely refer directly to expressions like `util.isPromiseLike`, since the `util` identifier may not
     // appear in the transpiled JavaScript for this module. This is because TypeScript may rename modules to try to preserve
     // ES6 module semantics.
-    const toDiscriminant = normalisedOptions.toDiscriminant;
-    toDiscriminant; // Suppress TS6133 decl never used
+    const computeDiscriminant = normalisedOptions.toDiscriminant;
+    computeDiscriminant; // Suppress TS6133 decl never used
     const isPromise = isPromiseLike;
     isPromise; // Suppress TS6133 decl never used
     const CONTINUE = sentinels.CONTINUE;
     CONTINUE; // Suppress TS6133 decl never used
-    const toMatchFunction = predicates.toMatchFunction;             //      <===== refd in selectExecutor
+    const toMatchFunction = predicates.toMatchFunction;             //      <===== refd in selectBestImplementation
     toMatchFunction; // Suppress TS6133 decl never used
     const parsePredicate = predicates.parsePredicatePattern;
     parsePredicate; // Suppress TS6133 decl never used
@@ -76,31 +76,23 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
 
 
 // TODO: temp testing... RESTORE...
-// if (debug.enabled) {
-//     let oldDispatch = dispatchFunction;
-//     dispatchFunction = function _dispatch(...args: any[]) {
-//         debug(`${DISPATCH} Call   args=%o   discriminant='%s'`, args, toDiscriminant(...args));
-//         let result = oldDispatch(...args);
-//         let isAsync = isPromiseLike(result);
-//         return andThen(result, result => {
-//             debug(`${DISPATCH} Return%s   result=%o`, isAsync ? '   ASYNC' : '', result);
-//             debug('');
-//             return result;
-//         });
-//     }
-// }
+if (debug.enabled) {
+    let oldDispatch = dispatchFunction;
+    dispatchFunction = function _dispatch(...args: any[]) {
+        debug(`${DISPATCH} Call   args=%o   discriminant='%s'`, args, computeDiscriminant(...args));
+        let result = oldDispatch(...args);
+        let isAsync = isPromiseLike(result);
+        return andThen(result, result => {
+            debug(`${DISPATCH} Return%s   result=%o`, isAsync ? '   ASYNC' : '', result);
+            debug('');
+            return result;
+        });
+    }
+}
 
 
 
-// TODO: remove?
-    // // TODO: temp testing... fix arity handling... but what about variadic?
-    // if (typeof normalisedOptions.arity === 'number') {
-    //     let paramNames = [];
-    //     for (let i = 0; i < normalisedOptions.arity; ++i) paramNames.push('$' + i);
-    //     let source = dispatchFunction.toString();
-    //     source = source.replace(/\$0/g, paramNames.join(', '));
-    //     dispatchFunction = eval(`(${source})`);
-    // }
+
 
     // All done.
     return dispatchFunction;
@@ -111,9 +103,9 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
 
 
 // TODO: copypasta - move to util
-// function andThen(val: any, cb: (val: any) => any) {
-//     return isPromiseLike(val) ? val.then(cb) : cb(val);
-// }
+function andThen(val: any, cb: (val: any) => any) {
+    return isPromiseLike(val) ? val.then(cb) : cb(val);
+}
 
 
 
@@ -139,7 +131,7 @@ function getSourceCodeForDispatchFunction(functionName: string, options: Multime
     // TODO: ... all strings
     source = replaceAll(source, {
         FUNCTION_NAME: functionName,
-        SELECT_ROUTE: `selectExecutor` // TODO: temp testing... how to know this name?
+        SELECT_IMPL: `selectBestImplementation` // TODO: temp testing... how to know this name?
     });
 
     // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
@@ -154,7 +146,7 @@ function getSourceCodeForDispatchFunction(functionName: string, options: Multime
     // if (captureNames.length > 0) {
     //     source = source + `\nvar ${getCaptures} = toMatchFunction(eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].predicate.toString());` // TODO: too long and complex! fix me!!!
     // }
-    // source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].method;`;
+    // source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].handler;`;
 
     // All done for this iteration.
     return `// ========== DISPATCH FUNCTION ==========\n${source}`;

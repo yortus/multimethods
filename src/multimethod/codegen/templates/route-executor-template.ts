@@ -20,7 +20,7 @@ let HAS_DOWNSTREAM: boolean;
 let DELEGATE_DOWNSTREAM: RouteExecutor;
 let DELEGATE_NEXT: RouteExecutor;
 let GET_CAPTURES: (discriminant: string) => {};
-let CALL_METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
+let CALL_HANDLER: (...args: any[]) => any; // Method signature, NB: context is passed last!
 // FUNCTION_NAME is also replaced
 
 
@@ -48,19 +48,19 @@ export default function FUNCTION_NAME(discriminant: string, result: any, ELLIPSI
         }
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
-            result = CALL_METHOD(ELLIPSIS_MMARGS, captures, next);
+            result = CALL_HANDLER(ELLIPSIS_MMARGS, captures, next);
         }
         else {
-            result = CALL_METHOD(ELLIPSIS_MMARGS, undefined, next);
+            result = CALL_HANDLER(ELLIPSIS_MMARGS, undefined, next);
         }
     }
     else {
         if (HAS_CAPTURES) {
             var captures = GET_CAPTURES(discriminant);
-            result = CALL_METHOD(ELLIPSIS_MMARGS, captures);
+            result = CALL_HANDLER(ELLIPSIS_MMARGS, captures);
         }
         else {
-            result = CALL_METHOD(ELLIPSIS_MMARGS);
+            result = CALL_HANDLER(ELLIPSIS_MMARGS);
         }
     }
 

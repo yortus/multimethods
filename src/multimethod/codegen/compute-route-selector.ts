@@ -36,10 +36,10 @@ let predicates = eulerDiagram.sets.map(set => set.predicate);
     // housing all the conditional logic for selecting the best route handler based on address matching.
     let lines = [
         '// ========== SELECTOR FUNCTION ==========',
-        'function selectExecutor(discriminant) {',
+        'function selectBestImplementation(discriminant) {',
         ...generateSelectorSourceCode(eulerDiagram.universe, 1),
         '};',
-        ...predicates.map(p => `var matches${'ℙ' + toIdentifierParts(p)} = toMatchFunction(eulerDiagram.get('${p}').predicate.toString());`),
+        ...predicates.map(p => `var isMatchː${toIdentifierParts(p)} = toMatchFunction(eulerDiagram.get('${p}').predicate);`),
     ];
     let source = lines.join('\n') + '\n';
     return source;
@@ -74,8 +74,7 @@ function generateSelectorSourceCode(from: EulerSet & WithExecutors, nestDepth: n
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
     subsets.forEach((set: EulerSet & WithExecutors, i) => {
-        let predicateIdentifier = 'ℙ' + toIdentifierParts(set.predicate);
-        let condition = `${indent}${i > 0 ? 'else ' : ''}if (matches${predicateIdentifier}(discriminant)) `;
+        let condition = `${indent}${i > 0 ? 'else ' : ''}if (isMatchː${toIdentifierParts(set.predicate)}(discriminant)) `;
 
         if (set.subsets.length === 0) {
             lines.push(`${condition}return ${set.executorName};`);

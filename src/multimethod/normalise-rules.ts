@@ -44,7 +44,7 @@ export default function normaliseRules(rules: MultimethodOptions['rules']) {
 
 // TODO: doc...
 function instrument(rule: Rule) {
-    let handler = rule.method;
+    let handler = rule.handler;
     let chainIndex = rule.chain ? rule.chain.indexOf(handler) : -1;
     let ruleInfo = `rule=${rule.predicate}${rule.chain ? ` [${chainIndex}]` : ''}   type=${rule.isMetaRule ? 'meta' : 'regular'}`;
     let wrapped = function(...args: any[]) {
@@ -60,7 +60,7 @@ function instrument(rule: Rule) {
         });
     };
 
-    rule.method = wrapped;
+    rule.handler = wrapped;
     if (rule.chain) rule.chain[chainIndex] = wrapped;
     if (rule.isMetaRule) metaHandlers.set(wrapped, true);
 }

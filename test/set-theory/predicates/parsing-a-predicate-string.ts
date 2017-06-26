@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {parsePredicatePattern, PredicateAST} from 'multimethods'; // TODO: these exports are lib internals - expose them differently? eg under util or something like that?
 
 
-describe('Parsing a predicate pattern', () => {
+describe('Parsing a predicate string', () => {
 
     let tests = [
         '∅ ==> {signature: "", identifier: "", captures: []}',

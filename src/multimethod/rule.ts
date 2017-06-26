@@ -8,10 +8,10 @@ import {Predicate, toPredicate} from '../set-theory/predicates';
 
 
 /**
- * A Rule represents a single behaviour within a multimethod. It consists of a predicate and a method. The predicate
+ * A Rule represents a single behaviour within a multimethod. It consists of a predicate and a handler. The predicate
  * is a pattern that matches the set of discriminant values for which the method is applicable. The predicate also
  * determines the rule's specificity relative to other rules that are also applicable for a given discriminant. The
- * method is a function that receives the multimethod's arguments, and implements the desired behaviour. Rules may be
+ * handler is a function that receives the multimethod's arguments, and implements the desired behaviour. Rules may be
  * either normal rules, or meta-rules.
  * TODO: explain normal/meta...
  */
@@ -20,8 +20,8 @@ export default class Rule {
 
     /**
      * Constructs a Rule instance.
-     * @param {string} patternSource - The source string for the rule's predicate pattern.
-     * @param {Function} method - a function that implements the rule's behaviour.
+     * @param {string} predicateSource - The source string for the rule's predicate.
+     * @param {Function} handler - a function that implements the rule's behaviour.
 
 
 
@@ -38,24 +38,21 @@ TODO:... fix comment...
      *        response. A `CONTINUE` (eventual) return value signifies that the handler declined to respond to the
      *        given request, even if the pattern matched the request's address.
      */
-    constructor(predicatePattern: string, method: Function) {
-
-        // Construct the pattern instance, and assign the pattern and method properties.
-        this.predicate = toPredicate(predicatePattern); // NB: may throw
-        this.method = method;
+    constructor(predicateSource: string, method: Function) {
+        this.predicate = toPredicate(predicateSource); // NB: may throw
+        this.handler = method;
 
 // TODO: temp testing... will we (can we?) still check sig at runtime?
         //checkConsequentSignature(method, pattern);
-        this.isMetaRule = metaHandlers.has(this.method);
+        this.isMetaRule = metaHandlers.has(this.handler);
     }
 
 
-    /** The pattern associated with this Method instance. */
+    /** The predicate associated with this Rule instance, exactly as it was provided to the constructor. */
     predicate: Predicate;
 
-// TODO: rename to `handler` here and everywhere in codegen
-    /** The handler associated with this Method instance, exactly as it was provided to the constructor. */
-    method: Function;//TODO: type this better...
+    /** The handler associated with this Rule instance, exactly as it was provided to the constructor. */
+    handler: Function;//TODO: type this better...
 
 
 // TODO: remove this one... `Rule` will become an internal concept, and this prop can be replaced by a helper util function

@@ -111,6 +111,10 @@
 
   - [ ] TODO: special rules for spaces?
 
+  - [ ] TODO: doc use of special chars in emitted MM code
+    - [ ] `ᐟ` (U+141F) to differentiate otherwise-equivalent identifiers
+    - [ ] `ː` (U+02D0) to visually separate parts of an identifier
+
   - [ ] Examples:
 
   ```

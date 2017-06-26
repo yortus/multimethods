@@ -141,7 +141,7 @@ function ruleComparator(ruleA: Rule, ruleB: Rule) {
     // Comparing two metarules in the same chain: the leftmost one is less specific.
     let chain = ruleA.chain;
     if (!!chain && chain === ruleB.chain) {
-        let leftmostRule = chain.indexOf(ruleA.method) < chain.indexOf(ruleB.method) ? ruleA : ruleB;
+        let leftmostRule = chain.indexOf(ruleA.handler) < chain.indexOf(ruleB.handler) ? ruleA : ruleB;
         return (leftmostRule === ruleA ? 1 : -1) * (ruleA.isMetaRule ? -1 : 1);
     }
 

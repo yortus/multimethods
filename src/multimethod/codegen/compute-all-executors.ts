@@ -5,6 +5,7 @@ import getNormalisedFunctionSource from './get-normalised-function-source';
 import {Lineage} from '../compute-predicate-lineages';
 import MultimethodOptions from '../multimethod-options';
 import {toIdentifierParts, parsePredicatePattern, toNormalPredicate} from '../../set-theory/predicates';
+import repeatString from '../../util/repeat-string';
 import replaceAll from './transforms/replace-all';
 import routeExecutorTemplate from './templates/route-executor-template';
 import Rule from '../rule';
@@ -49,7 +50,7 @@ export default function computeAllExecutors(eulerDiagram: EulerDiagram<Lineage>,
         let executorSource = [`// ========== EXECUTORS FOR ${set.predicate} ==========\n`].concat(sources).join('');
 
         // TODO: temp testing...
-        // The 'entry point' rule is the one whose method we call to begin the cascading evaluation of the route. It is the
+        // The 'entry point' rule is the one whose handler we call to begin the cascading evaluation of the route. It is the
         // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
         let rules = set.lineage;
         let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
@@ -73,9 +74,9 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
-    let predicateIdentifier = 'ℙ' + toIdentifierParts(set.predicate);
-    let getCaptures = `get${i ? 'Rule' + (i + 1) : ''}CapturesFor${predicateIdentifier}`;
-    let callMethod = `call${i ? 'Rule' + (i + 1) : ''}MethodFor${predicateIdentifier}`;
+    let predicateIdentifier = toIdentifierParts(set.predicate);
+    let getCaptures = `getCapturesː${predicateIdentifier}${repeatString('ᐟ', i)}`;
+    let handlerName = `callHandlerː${predicateIdentifier}${repeatString('ᐟ', i)}`;
     let captureNames = parsePredicatePattern(rule.predicate.toString()).captureNames;
 
     // For each rule, we reuse the source code template below. But first we need to compute a number of
@@ -106,7 +107,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
     source = replaceAll(source, {
         FUNCTION_NAME: getNameForRule(eulerDiagram, set, rule),
         GET_CAPTURES: getCaptures,
-        CALL_METHOD: callMethod,
+        CALL_HANDLER: handlerName,
         DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(eulerDiagram, set, downstreamRule) : '',
         DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : ''
     });
@@ -121,9 +122,9 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 
     // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
     if (captureNames.length > 0) {
-        source = source + `\nvar ${getCaptures} = toMatchFunction(eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].predicate.toString());` // TODO: too long and complex! fix me!!!
+        source = source + `\nvar ${getCaptures} = toMatchFunction(eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].predicate);` // TODO: too long and complex! fix me!!!
     }
-    source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].method;`;
+    source = source + `\nvar ${handlerName} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].handler;`;
 
     // All done for this iteration.
     return source;
@@ -137,13 +138,13 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lineage, rule: Rule) {
     let ruleNode = eulerDiagram.get(rule.predicate);
     let ruleIndex = ruleNode.lineage.indexOf(rule);
-    let ruleIdentifier = 'ℙ' + toIdentifierParts(ruleNode.predicate);
+    let ruleIdentifier = toIdentifierParts(ruleNode.predicate);
 
     if (rule.isMetaRule) {
-        let nodeIdentifier = 'ℙ' + toIdentifierParts(set.predicate);
-        return `tryMetaRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleIdentifier}Within${nodeIdentifier}`;
+        let nodeIdentifier = toIdentifierParts(set.predicate);
+        return `doː${nodeIdentifier}ːviaMetaː${ruleIdentifier}${repeatString('ᐟ', ruleIndex)}`;
     }
     else {
-        return `tryRule${ruleIndex ? ruleIndex + 1 : ''}For${ruleIdentifier}`;
+        return `doː${ruleIdentifier}${repeatString('ᐟ', ruleIndex)}`;
     }
 }
