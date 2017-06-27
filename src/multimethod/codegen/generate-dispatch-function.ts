@@ -3,7 +3,7 @@ import strengthReduceES6RestSpread from './transforms/strength-reduce-es6-rest-s
 import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
 import replaceAll from './transforms/replace-all';
-
+import computeRuleReferenceSource from './compute-rule-reference-source';
 import computeThunkTable from './compute-all-thunks';
 import computeThunkSelector from './compute-thunk-selector';
 import debug, {EMIT, DISPATCH} from '../../util/debug';
@@ -28,10 +28,20 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     // all rules' matchers and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of the route.
     let functionName = `MM${multimethodCounter++}`;
-    let t2 = computeThunkTable(eulerDiagram, normalisedOptions);
-    let selectorSource = computeThunkSelector(t2);
     let dispatchSource = getSourceCodeForDispatchFunction(functionName, normalisedOptions);
-    let wholeSource = [dispatchSource, selectorSource, `// ========== THUNK TABLE ==========`, ...t2.sets.map(set => set.thunkSource)].join('\n');
+    let thunks = computeThunkTable(eulerDiagram, normalisedOptions);
+    let thunkSelectorSource = computeThunkSelector(thunks);
+    let ruleReferences = computeRuleReferenceSource(eulerDiagram);
+    let wholeSource = [
+        `// ========== MULTIMETHOD DISPATCH FUNCTION ==========`,
+        dispatchSource,
+        `// ========== THUNK SELECTOR FUNCTION ==========`,
+        thunkSelectorSource,
+        `// ========== THUNK TABLE ==========`,
+        ...thunks.sets.map(set => set.thunkSource),
+        `// ========== RULE REFERENCES ==========`, // TODO: rename...
+        ruleReferences
+    ].join('\n');
 
     // TODO: doc...
     if (debug.enabled) {
@@ -69,7 +79,7 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
 
 
     // Generate a function that, given a discriminant, returns the executor for the best-matching route.
-    let dispatchFunction = eval(`(function () {\n${wholeSource}\nreturn ${functionName};\n})`)();
+    let dispatchFunction: Function = eval(`(function () {\n${wholeSource}\nreturn ${functionName};\n})`)();
 
 
 
@@ -149,7 +159,7 @@ function getSourceCodeForDispatchFunction(functionName: string, options: Multime
     // source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].handler;`;
 
     // All done for this iteration.
-    return `// ========== MULTIMETHOD DISPATCH FUNCTION ==========\n${source}`;
+    return source;
 }
 
 

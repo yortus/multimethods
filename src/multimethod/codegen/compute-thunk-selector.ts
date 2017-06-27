@@ -1,6 +1,5 @@
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 import repeatString from '../../util/repeat-string';
-import Thunk from './thunk';
 import {toIdentifierParts} from '../../set-theory/predicates';
 import {WithThunks} from './compute-all-thunks';
 
@@ -18,53 +17,23 @@ import {WithThunks} from './compute-all-thunks';
  */
 export default function computeThunkSelector(eulerDiagram: EulerDiagram<WithThunks>) {
 
-// TODO: revise comments...
-    // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
-    // TODO: extra doc - explain opt here that match functions never have captures due to using normalised forms...
-    //let patternNames = eulerDiagram.sets.map(set => set.pattern.identifier);
-
-// TODO: temp testing... HACKY BUGGY brittle B/C assumes eulerDiagram.sets has identical pattern order as `candidates` object keys...    
-// TODO: how otherwise to link candidates back to patterns, since they just preserve rule names that were derived from pattern identifiers, but are no longer necessarily the same
-// TODO: maybe use a Map again... but that won't work on ES5?? (but can shim)
-let predicates = eulerDiagram.sets.map(set => set.predicate);
-
-    // // Generate a unique pretty name for each pattern, suitable for use in the generated source code.
-    // let patternNames = patterns.map(p => p.identifier);
-
-    // Generate the combined source code for selecting the best route handler. This includes local variable declarations
+    // Generate the combined source code for selecting the best thunk. This includes local variable declarations
     // for all the match functions and all the candidate route handler functions, as well as the dispatcher function
     // housing all the conditional logic for selecting the best route handler based on address matching.
     let lines = [
-        '// ========== THUNK SELECTOR FUNCTION ==========',
         'function selectThunk(discriminant) {',
         ...generateSelectorSourceCode(eulerDiagram.universe, 1),
         '};',
-        ...predicates.map(p => `var isMatchː${toIdentifierParts(p)} = toMatchFunction(eulerDiagram.get('${p}').predicate);`),
     ];
     let source = lines.join('\n') + '\n';
     return source;
-
-// TODO: revise/move elsewhere...
-    // Evaluate the source code, and return its result, which is the route selector function. The use of eval here is
-    // safe. There are no untrusted inputs substituted into the source. More importantly, the use of eval here allows
-    // for route selection code that is both more readable and more efficient, since it is tailored specifically to the
-    // given euler diagram, rather than having to be generalized for all possible cases.
-    // let fn = eval(`(() => {\n${lines.join('\n')}\n})`)();
-    // return fn;
 }
 
 
 
 
 
-/** A RouteSelector function takes a discriminant string and returns the best-matching route executor for it. */
-export type RouteSelector = (discriminant: string) => Thunk;
-
-
-
-
-
-/** Helper function to generate source code for part of the dispatcher function used for route selection. */
+/** Helper function to generate source code for the thunk selector function. */
 function generateSelectorSourceCode(from: EulerSet & WithThunks, nestDepth: number) {
     let subsets = from.subsets;
 

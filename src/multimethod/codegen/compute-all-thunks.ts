@@ -4,7 +4,7 @@ import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
 import {Lineage} from '../compute-predicate-lineages';
 import MultimethodOptions from '../multimethod-options';
-import {toIdentifierParts, parsePredicatePattern, toNormalPredicate} from '../../set-theory/predicates';
+import {toIdentifierParts, parsePredicatePattern} from '../../set-theory/predicates';
 import repeatString from '../../util/repeat-string';
 import replaceAll from './transforms/replace-all';
 import thunkFunctionTemplate from './templates/thunk-function-template';
@@ -45,8 +45,7 @@ export default function computeAllThunks(eulerDiagram: EulerDiagram<Lineage>, op
     let augmentedEulerDiagram = eulerDiagram.augment(set => {
 
         // TODO: doc...
-        let rulesWithDuplicatesRemoved = set.lineage.filter(rule => rule.isMetaRule || eulerDiagram.get(rule.predicate) === set);
-        let sources = rulesWithDuplicatesRemoved.map(rule => getSourceCodeForRule(eulerDiagram, set, rule, options) + '\n');
+        let sources = set.lineage.map(rule => getSourceCodeForRule(eulerDiagram, set, rule, options) + '\n');
         let thunkSource = sources.join('');
 
         // TODO: temp testing...
@@ -68,6 +67,10 @@ export default function computeAllThunks(eulerDiagram: EulerDiagram<Lineage>, op
 // TODO: ...
 function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lineage, rule: Rule, options: MultimethodOptions) {
 
+    // TODO: copypasta 3000 - extract helper fn?
+    // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
+    if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) return '';
+
     // TODO: to get copypasta'd code working... revise...
     let i = set.lineage.indexOf(rule);
     let rules = set.lineage;
@@ -75,8 +78,8 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
     let predicateIdentifier = toIdentifierParts(set.predicate);
-    let getCaptures = `getCapturesː${predicateIdentifier}${repeatString('ᐟ', i)}`;
-    let handlerName = `callHandlerː${predicateIdentifier}${repeatString('ᐟ', i)}`;
+    let getCaptures = `getCapturesː${predicateIdentifier}${repeatString('ᐟ', i)}`; // TODO: must match ruleRefs emit - store in eulerDiagram?
+    let handlerName = `callHandlerː${predicateIdentifier}${repeatString('ᐟ', i)}`; // TODO: must match ruleRefs emit - store in eulerDiagram?
     let captureNames = parsePredicatePattern(rule.predicate.toString()).captureNames;
 
     // For each rule, we reuse the source code template below. But first we need to compute a number of
@@ -119,12 +122,6 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
     else {
         source = downlevelES6RestSpread(source);
     }
-
-    // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
-    if (captureNames.length > 0) {
-        source = source + `\nvar ${getCaptures} = toMatchFunction(eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].predicate);` // TODO: too long and complex! fix me!!!
-    }
-    source = source + `\nvar ${handlerName} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].handler;`;
 
     // All done for this iteration.
     return source;
