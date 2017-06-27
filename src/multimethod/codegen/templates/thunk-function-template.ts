@@ -1,4 +1,4 @@
-import RouteExecutor from '../route-executor';
+import Thunk from '../thunk';
 
 
 
@@ -17,8 +17,8 @@ let IS_META_RULE: boolean;
 let IS_PURE_SYNC: boolean;
 let IS_PURE_ASYNC: boolean;
 let HAS_DOWNSTREAM: boolean;
-let DELEGATE_DOWNSTREAM: RouteExecutor;
-let DELEGATE_NEXT: RouteExecutor;
+let DELEGATE_DOWNSTREAM: Thunk;
+let DELEGATE_NEXT: Thunk;
 let GET_CAPTURES: (discriminant: string) => {};
 let CALL_HANDLER: (...args: any[]) => any; // Method signature, NB: context is passed last!
 // FUNCTION_NAME is also replaced

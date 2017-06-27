@@ -163,6 +163,8 @@ http://app.co/things?item=t[[100]]
 - [ ] strictest TSC options in `/test` and `/extras`
 
 - [ ] Fix terminology in code and comments
+  - [ ] executor --> implementation, behaviour, case, effective handler, override, overload, subfunction, method, form, shape, mode
+  - [ ] no such thing as a metarule, only a meta-handler
   - [x] UNHANDLED --> CONTINUE
   - [ ] dispatch
   - [ ] selector
@@ -195,6 +197,7 @@ http://app.co/things?item=t[[100]]
 
 
 - [ ] TODO: revise codegen
+  - [ ] move all `isMatch`, `getCaptures`, and `callHandler` vars to one place at the end of emit
   - [ ] fix dispatchFunction (see TODOs on lines 56-57 of `generate-dispatch-function.ts`)
   - [ ] always output codegen in debug mode
   - [ ] investigate: can it be made more understandable/idiomatic?

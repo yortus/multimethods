@@ -4,8 +4,8 @@ import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
 import replaceAll from './transforms/replace-all';
 
-import computeAllExecutors from './compute-all-executors';
-import computeRouteSelector from './compute-route-selector';
+import computeThunkTable from './compute-all-thunks';
+import computeThunkSelector from './compute-thunk-selector';
 import debug, {EMIT, DISPATCH} from '../../util/debug';
 import dispatchFunctionTemplate from './templates/dispatch-function-template';
 import * as fatalErrorUtil from '../../util/fatal-error';
@@ -28,10 +28,10 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
     // all rules' matchers and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of the route.
     let functionName = `MM${multimethodCounter++}`;
-    let t2 = computeAllExecutors(eulerDiagram, normalisedOptions);
-    let selectorSource = computeRouteSelector(t2);
+    let t2 = computeThunkTable(eulerDiagram, normalisedOptions);
+    let selectorSource = computeThunkSelector(t2);
     let dispatchSource = getSourceCodeForDispatchFunction(functionName, normalisedOptions);
-    let wholeSource = [dispatchSource, selectorSource, ...t2.sets.map(set => set.executorSource)].join('\n');
+    let wholeSource = [dispatchSource, selectorSource, `// ========== THUNK TABLE ==========`, ...t2.sets.map(set => set.thunkSource)].join('\n');
 
     // TODO: doc...
     if (debug.enabled) {
@@ -131,7 +131,7 @@ function getSourceCodeForDispatchFunction(functionName: string, options: Multime
     // TODO: ... all strings
     source = replaceAll(source, {
         FUNCTION_NAME: functionName,
-        SELECT_IMPL: `selectBestImplementation` // TODO: temp testing... how to know this name?
+        SELECT_THUNK: `selectThunk` // TODO: temp testing... how to know this name?
     });
 
     // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
@@ -149,7 +149,7 @@ function getSourceCodeForDispatchFunction(functionName: string, options: Multime
     // source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].handler;`;
 
     // All done for this iteration.
-    return `// ========== DISPATCH FUNCTION ==========\n${source}`;
+    return `// ========== MULTIMETHOD DISPATCH FUNCTION ==========\n${source}`;
 }
 
 

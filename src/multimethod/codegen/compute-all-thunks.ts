@@ -7,7 +7,7 @@ import MultimethodOptions from '../multimethod-options';
 import {toIdentifierParts, parsePredicatePattern, toNormalPredicate} from '../../set-theory/predicates';
 import repeatString from '../../util/repeat-string';
 import replaceAll from './transforms/replace-all';
-import routeExecutorTemplate from './templates/route-executor-template';
+import thunkFunctionTemplate from './templates/thunk-function-template';
 import Rule from '../rule';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 
@@ -16,9 +16,9 @@ import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 
 
 // TODO: temp testing...
-export interface WithExecutors {
-    executorSource: string;
-    executorName: string;
+export interface WithThunks {
+    thunkSource: string;
+    thunkName: string;
 };
 
 
@@ -40,23 +40,23 @@ export interface WithExecutors {
  * @param {Rule[]} rules - the list of rules comprising the route, ordered from least- to most-specific.
  * @returns {Method} the composite method for the route.
  */
-export default function computeAllExecutors(eulerDiagram: EulerDiagram<Lineage>, options: MultimethodOptions) {
+export default function computeAllThunks(eulerDiagram: EulerDiagram<Lineage>, options: MultimethodOptions) {
 
     let augmentedEulerDiagram = eulerDiagram.augment(set => {
 
         // TODO: doc...
         let rulesWithDuplicatesRemoved = set.lineage.filter(rule => rule.isMetaRule || eulerDiagram.get(rule.predicate) === set);
         let sources = rulesWithDuplicatesRemoved.map(rule => getSourceCodeForRule(eulerDiagram, set, rule, options) + '\n');
-        let executorSource = [`// ========== EXECUTORS FOR ${set.predicate} ==========\n`].concat(sources).join('');
+        let thunkSource = sources.join('');
 
         // TODO: temp testing...
         // The 'entry point' rule is the one whose handler we call to begin the cascading evaluation of the route. It is the
         // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
         let rules = set.lineage;
         let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
-        let executorName = getNameForRule(eulerDiagram, set, entryPointRule);
+        let thunkName = getNameForRule(eulerDiagram, set, entryPointRule);
 
-        return <WithExecutors> { executorSource, executorName };
+        return <WithThunks> { thunkSource, thunkName };
     });
     return augmentedEulerDiagram;
 }
@@ -88,7 +88,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
     //   values are the source code for the argument corresponding to each parameter.
 
     // TODO: start with the template...
-    let source = getNormalisedFunctionSource(routeExecutorTemplate);
+    let source = getNormalisedFunctionSource(thunkFunctionTemplate);
 
     // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
     source = replaceAll(source, {'ELLIPSIS_': '...'});
@@ -142,9 +142,9 @@ function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lin
 
     if (rule.isMetaRule) {
         let nodeIdentifier = toIdentifierParts(set.predicate);
-        return `doː${nodeIdentifier}ːviaMetaː${ruleIdentifier}${repeatString('ᐟ', ruleIndex)}`;
+        return `thunkː${nodeIdentifier}ːviaMetaː${ruleIdentifier}${repeatString('ᐟ', ruleIndex)}`;
     }
     else {
-        return `doː${ruleIdentifier}${repeatString('ᐟ', ruleIndex)}`;
+        return `thunkː${ruleIdentifier}${repeatString('ᐟ', ruleIndex)}`;
     }
 }

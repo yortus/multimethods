@@ -1,4 +1,4 @@
-import RouteExecutor from '../route-executor';
+import Thunk from '../thunk';
 
 
 
@@ -12,7 +12,7 @@ let fatalError: (error: string) => never;
 
 // TODO: these are replacement placeholders.
 // TODO: explain each of these in turn...
-let SELECT_IMPL: (discriminant: string) => RouteExecutor;
+let SELECT_THUNK: (discriminant: string) => Thunk;
 // FUNCTION_NAME is also replaced
 
 
@@ -23,7 +23,7 @@ let SELECT_IMPL: (discriminant: string) => RouteExecutor;
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
 export default function FUNCTION_NAME(ELLIPSIS_MMARGS: any[]) {
     let discriminant = computeDiscriminant(ELLIPSIS_MMARGS);
-    let bestImplementation = SELECT_IMPL(discriminant);
-    let result = bestImplementation(discriminant, CONTINUE, ELLIPSIS_MMARGS);
+    let implementation = SELECT_THUNK(discriminant);
+    let result = implementation(discriminant, CONTINUE, ELLIPSIS_MMARGS);
     return result === CONTINUE ? fatalError('UNHANDLED') : result;
 };

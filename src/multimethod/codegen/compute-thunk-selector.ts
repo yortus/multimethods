@@ -1,8 +1,8 @@
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
-import RouteExecutor from './route-executor';
 import repeatString from '../../util/repeat-string';
+import Thunk from './thunk';
 import {toIdentifierParts} from '../../set-theory/predicates';
-import {WithExecutors} from './compute-all-executors';
+import {WithThunks} from './compute-all-thunks';
 
 
 
@@ -16,7 +16,7 @@ import {WithExecutors} from './compute-all-executors';
  * @param {EulerDiagram} eulerDiagram - The arrangement of patterns on which to base the returned selector function.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function computeRouteSelector(eulerDiagram: EulerDiagram<WithExecutors>) {
+export default function computeThunkSelector(eulerDiagram: EulerDiagram<WithThunks>) {
 
 // TODO: revise comments...
     // Get all the patterns in the taxomony as a list, and their corresponding executors in a parallel list.
@@ -35,8 +35,8 @@ let predicates = eulerDiagram.sets.map(set => set.predicate);
     // for all the match functions and all the candidate route handler functions, as well as the dispatcher function
     // housing all the conditional logic for selecting the best route handler based on address matching.
     let lines = [
-        '// ========== SELECTOR FUNCTION ==========',
-        'function selectBestImplementation(discriminant) {',
+        '// ========== THUNK SELECTOR FUNCTION ==========',
+        'function selectThunk(discriminant) {',
         ...generateSelectorSourceCode(eulerDiagram.universe, 1),
         '};',
         ...predicates.map(p => `var isMatchː${toIdentifierParts(p)} = toMatchFunction(eulerDiagram.get('${p}').predicate);`),
@@ -58,14 +58,14 @@ let predicates = eulerDiagram.sets.map(set => set.predicate);
 
 
 /** A RouteSelector function takes a discriminant string and returns the best-matching route executor for it. */
-export type RouteSelector = (discriminant: string) => RouteExecutor;
+export type RouteSelector = (discriminant: string) => Thunk;
 
 
 
 
 
 /** Helper function to generate source code for part of the dispatcher function used for route selection. */
-function generateSelectorSourceCode(from: EulerSet & WithExecutors, nestDepth: number) {
+function generateSelectorSourceCode(from: EulerSet & WithThunks, nestDepth: number) {
     let subsets = from.subsets;
 
     // Make the indenting string corresponding to the given `nestDepth`.
@@ -73,11 +73,11 @@ function generateSelectorSourceCode(from: EulerSet & WithExecutors, nestDepth: n
 
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
-    subsets.forEach((set: EulerSet & WithExecutors, i) => {
+    subsets.forEach((set: EulerSet & WithThunks, i) => {
         let condition = `${indent}${i > 0 ? 'else ' : ''}if (isMatchː${toIdentifierParts(set.predicate)}(discriminant)) `;
 
         if (set.subsets.length === 0) {
-            lines.push(`${condition}return ${set.executorName};`);
+            lines.push(`${condition}return ${set.thunkName};`);
             return;
         }
 
@@ -90,6 +90,6 @@ function generateSelectorSourceCode(from: EulerSet & WithExecutors, nestDepth: n
     });
 
     // Add a line to select the fallback predicate if none of the more specialised predicates matched the discriminant.
-    lines.push(`${indent}return ${from.executorName};`);
+    lines.push(`${indent}return ${from.thunkName};`);
     return lines;
 }
