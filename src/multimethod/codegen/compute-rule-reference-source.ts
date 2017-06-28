@@ -17,18 +17,18 @@ export default function computeRuleReferenceSource(eulerDiagram: EulerDiagram<Li
     let captureLines: string[] = [];
     eulerDiagram.sets.forEach(set => {
         let p = set.predicate;
-        for (let i = 0; i < set.lineage.length; ++i) {
+        for (let i = 0; i < set.matchingRules.length; ++i) {
 
             // TODO: copypasta 3000 - extract helper fn?
             // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
-            let rule = set.lineage[i];
+            let rule = set.matchingRules[i];
             if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) continue;
 
             let hasCaptures = parsePredicatePattern(rule.predicate).captureNames.length > 0;
             if (!hasCaptures) continue;
 
             let varName = `getCapturesː${toIdentifierParts(p)}${repeatString('ᐟ', i)}`;
-            captureLines.push(`var ${varName} = toMatchFunction(eulerDiagram.get('${p}').lineage[${i}].predicate);`);
+            captureLines.push(`var ${varName} = toMatchFunction(eulerDiagram.get('${p}').matchingRules[${i}].predicate);`);
         }
     });
 
@@ -36,15 +36,15 @@ export default function computeRuleReferenceSource(eulerDiagram: EulerDiagram<Li
     let handlerLines: string[] = [];
     eulerDiagram.sets.forEach(set => {
         let p = set.predicate;
-        for (let i = 0; i < set.lineage.length; ++i) {
+        for (let i = 0; i < set.matchingRules.length; ++i) {
 
             // TODO: copypasta 3000 - extract helper fn?
             // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
-            let rule = set.lineage[i];
+            let rule = set.matchingRules[i];
             if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) continue;
 
             let varName = `callHandlerː${toIdentifierParts(p)}${repeatString('ᐟ', i)}`;
-            handlerLines.push(`var ${varName} = eulerDiagram.get('${p}').lineage[${i}].handler;`);
+            handlerLines.push(`var ${varName} = eulerDiagram.get('${p}').matchingRules[${i}].handler;`);
         }
     });
 

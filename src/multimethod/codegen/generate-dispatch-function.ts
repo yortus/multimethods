@@ -152,12 +152,6 @@ function getSourceCodeForDispatchFunction(functionName: string, options: Multime
         source = downlevelES6RestSpread(source);
     }
 
-    // TODO: temp testing... brittle!!! use real code -> toString -> augment -> eval like elsewhere
-    // if (captureNames.length > 0) {
-    //     source = source + `\nvar ${getCaptures} = toMatchFunction(eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].predicate.toString());` // TODO: too long and complex! fix me!!!
-    // }
-    // source = source + `\nvar ${callMethod} = eulerDiagram.get('${toNormalPredicate(set.predicate)}').lineage[${i}].handler;`;
-
     // All done for this iteration.
     return source;
 }

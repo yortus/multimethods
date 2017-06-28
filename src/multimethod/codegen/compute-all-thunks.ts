@@ -45,13 +45,13 @@ export default function computeAllThunks(eulerDiagram: EulerDiagram<LineageII>, 
     let augmentedEulerDiagram = eulerDiagram.augment(set => {
 
         // TODO: doc...
-        let sources = set.lineage.map(rule => getSourceCodeForRule(eulerDiagram, set, rule, options) + '\n');
+        let sources = set.matchingRules.map(rule => getSourceCodeForRule(eulerDiagram, set, rule, options) + '\n');
         let thunkSource = sources.join('');
 
         // TODO: temp testing...
         // The 'entry point' rule is the one whose handler we call to begin the cascading evaluation of the route. It is the
         // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
-        let rules = set.lineage;
+        let rules = set.matchingRules;
         let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
         let thunkName = getNameForRule(eulerDiagram, set, entryPointRule);
 
@@ -72,8 +72,8 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) return '';
 
     // TODO: to get copypasta'd code working... revise...
-    let i = set.lineage.indexOf(rule);
-    let rules = set.lineage;
+    let i = set.matchingRules.map(r => r.handler).indexOf(rule.handler);
+    let rules = set.matchingRules;
 
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
@@ -134,7 +134,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
 // TODO: ...
 function getNameForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerSet & LineageII, rule: Rule) {
     let ruleNode = eulerDiagram.get(rule.predicate);
-    let ruleIndex = ruleNode.lineage.indexOf(rule);
+    let ruleIndex = ruleNode.matchingRules.map(r => r.handler).indexOf(rule.handler);
     let ruleIdentifier = toIdentifierParts(ruleNode.predicate);
 
     if (rule.isMetaRule) {

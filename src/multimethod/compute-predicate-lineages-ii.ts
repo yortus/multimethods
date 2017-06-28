@@ -14,7 +14,7 @@ import {Lineage} from './compute-predicate-lineages';
 
 
 // TODO: temp testing...
-export interface LineageII extends Lineage {
+export interface LineageII {
     matchingRules: EmitInfo[];
 }
 export type EmitInfo = Rule & {
@@ -42,7 +42,7 @@ export default function computePredicateLineagesII<T>(eulerDiagram: EulerDiagram
             let callHandlerVarName = `callHandlerː${toIdentifierParts(rule.predicate)}${repeatString('ᐟ', i)}`;
             let callHandlerVarDecl: string|null = null;
             if (rule.isMetaRule || eulerDiagram.get(rule.predicate) === set) {
-                callHandlerVarDecl = `var ${callHandlerVarName} = eulerDiagram.get('${rule.predicate}').lineage[${i}].handler;`;
+                callHandlerVarDecl = `var ${callHandlerVarName} = eulerDiagram.get('${rule.predicate}').matchingRules[${i}].handler;`;
             }
 
 
