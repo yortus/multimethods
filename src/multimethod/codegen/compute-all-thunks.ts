@@ -2,7 +2,7 @@ import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
 import strengthReduceES6RestSpread from './transforms/strength-reduce-es6-rest-spread';
 import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
-import {Lineage} from '../compute-predicate-lineages';
+import {LineageII} from '../compute-predicate-lineages-ii';
 import MultimethodOptions from '../multimethod-options';
 import {toIdentifierParts, parsePredicatePattern} from '../../set-theory/predicates';
 import repeatString from '../../util/repeat-string';
@@ -40,7 +40,7 @@ export interface WithThunks {
  * @param {Rule[]} rules - the list of rules comprising the route, ordered from least- to most-specific.
  * @returns {Method} the composite method for the route.
  */
-export default function computeAllThunks(eulerDiagram: EulerDiagram<Lineage>, options: MultimethodOptions) {
+export default function computeAllThunks(eulerDiagram: EulerDiagram<LineageII>, options: MultimethodOptions) {
 
     let augmentedEulerDiagram = eulerDiagram.augment(set => {
 
@@ -65,7 +65,7 @@ export default function computeAllThunks(eulerDiagram: EulerDiagram<Lineage>, op
 
 
 // TODO: ...
-function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lineage, rule: Rule, options: MultimethodOptions) {
+function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerSet & LineageII, rule: Rule, options: MultimethodOptions) {
 
     // TODO: copypasta 3000 - extract helper fn?
     // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
@@ -132,7 +132,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet
 
 
 // TODO: ...
-function getNameForRule(eulerDiagram: EulerDiagram<Lineage>, set: EulerSet & Lineage, rule: Rule) {
+function getNameForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerSet & LineageII, rule: Rule) {
     let ruleNode = eulerDiagram.get(rule.predicate);
     let ruleIndex = ruleNode.lineage.indexOf(rule);
     let ruleIdentifier = toIdentifierParts(ruleNode.predicate);

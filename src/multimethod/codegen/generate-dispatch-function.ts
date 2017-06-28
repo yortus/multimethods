@@ -9,7 +9,7 @@ import computeThunkSelector from './compute-thunk-selector';
 import debug, {EMIT, DISPATCH} from '../../util/debug';
 import dispatchFunctionTemplate from './templates/dispatch-function-template';
 import * as fatalErrorUtil from '../../util/fatal-error';
-import {Lineage} from '../compute-predicate-lineages';
+import {LineageII} from '../compute-predicate-lineages-ii';
 import * as predicates from '../../set-theory/predicates';
 import MultimethodOptions from '../multimethod-options';
 import * as sentinels from '../sentinels';
@@ -21,7 +21,7 @@ import isPromiseLike from '../../util/is-promise-like';
 
 
 // TODO: ...
-export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Lineage>, normalisedOptions: MultimethodOptions) {
+export default function generateDispatchFunction(eulerDiagram: EulerDiagram<LineageII>, normalisedOptions: MultimethodOptions) {
 
     // TODO: ...
     // Generate the combined source code for handling the route. This includes local variable declarations for

@@ -86,10 +86,9 @@ export default class EulerDiagram<T = {}> {
     }
 
 
-    // TODO: temp testing... doc...
+    // TODO: temp testing... doc... returns a NEW augmented euler set, leaving original one unchanged
     // TODO: better name? It maps the props AND assigns props back to sets (like a mixin)
     // - augment? addProps?
-
     augment<U>(callback: (set: EulerSet & T) => U): EulerDiagram<T & U> {
         return augmentEulerDiagram(this, callback);
     }

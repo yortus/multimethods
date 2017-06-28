@@ -1,5 +1,5 @@
 import {EulerDiagram} from '../../set-theory/sets';
-import {Lineage} from '../compute-predicate-lineages';
+import {LineageII} from '../compute-predicate-lineages-ii';
 import repeatString from '../../util/repeat-string';
 import {toIdentifierParts, parsePredicatePattern} from '../../set-theory/predicates';
 
@@ -7,7 +7,7 @@ import {toIdentifierParts, parsePredicatePattern} from '../../set-theory/predica
 
 
 
-export default function computeRuleReferenceSource(eulerDiagram: EulerDiagram<Lineage>) {
+export default function computeRuleReferenceSource(eulerDiagram: EulerDiagram<LineageII>) {
 
     // TODO: doc... isMatch:XXX
     let predicates = eulerDiagram.sets.map(set => set.predicate);

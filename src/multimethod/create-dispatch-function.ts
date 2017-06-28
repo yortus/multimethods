@@ -1,4 +1,5 @@
 import computePredicateLineages from './compute-predicate-lineages';
+import computePredicateLineagesII from './compute-predicate-lineages-ii';
 import generateDispatchFunction from './codegen/generate-dispatch-function';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
@@ -29,8 +30,9 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
 
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
     let eulerDiagramWithLineages = computePredicateLineages(eulerDiagram, normalisedRules);
+    let eulerDiagramWithLineagesII = computePredicateLineagesII(eulerDiagramWithLineages);
 
     // TODO: ...
-    let dispatchFunction = generateDispatchFunction(eulerDiagramWithLineages, normalisedOptions);
+    let dispatchFunction = generateDispatchFunction(eulerDiagramWithLineagesII, normalisedOptions);
     return dispatchFunction;
 }
