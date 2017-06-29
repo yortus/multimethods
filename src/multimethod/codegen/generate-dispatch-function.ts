@@ -1,13 +1,10 @@
 import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
 import strengthReduceES6RestSpread from './transforms/strength-reduce-es6-rest-spread';
-import eliminateDeadCode from './transforms/eliminate-dead-code';
-import getNormalisedFunctionSource from './get-normalised-function-source';
-import replaceAll from './transforms/replace-all';
 import computeRuleReferenceSource from './compute-rule-reference-source';
 import computeThunkTable from './compute-all-thunks';
 import computeThunkSelector from './compute-thunk-selector';
 import debug, {EMIT, DISPATCH} from '../../util/debug';
-import dispatchFunctionTemplate from './templates/dispatch-function-template';
+import {emitDispatchFunction} from './emit';
 import * as fatalErrorUtil from '../../util/fatal-error';
 import {LineageII} from '../compute-predicate-lineages-ii';
 import * as predicates from '../../set-theory/predicates';
@@ -129,16 +126,12 @@ function andThen(val: any, cb: (val: any) => any) {
 // TODO: temp testing...
 function getSourceCodeForDispatchFunction(functionName: string, options: MultimethodOptions) {
 
-    // TODO: start with the template...
-    let source = getNormalisedFunctionSource(dispatchFunctionTemplate);
-
-    // TODO: ... all strings
-    source = replaceAll(source, {
-        ELLIPSIS_: '...', // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
-        FUNCTION_NAME: functionName,
-        SELECT_THUNK: `selectThunk` // TODO: temp testing... how to know this name?
+    let source = emitDispatchFunction(functionName, {
+        computeDiscriminant: 'computeDiscriminant',
+        SELECT_IMPLEMENTATION: 'selectThunk', // TODO: temp testing... how to know this name?
+        CONTINUE: 'CONTINUE',
+        fatalError: 'fatalError'
     });
-    source = eliminateDeadCode(source);
 
     // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
     if (typeof options.arity === 'number') {

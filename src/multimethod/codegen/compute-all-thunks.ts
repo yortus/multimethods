@@ -4,7 +4,7 @@ import {LineageII} from '../compute-predicate-lineages-ii';
 import MultimethodOptions from '../multimethod-options';
 import {toIdentifierParts} from '../../set-theory/predicates';
 import repeatString from '../../util/repeat-string';
-import emitThunkFunction from './templates/thunk-function-template';
+import {emitThunkFunction} from './emit';
 import Rule from '../rule';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 
