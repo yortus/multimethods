@@ -1,5 +1,3 @@
-import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
-import strengthReduceES6RestSpread from './transforms/strength-reduce-es6-rest-spread';
 import {LineageII} from '../compute-predicate-lineages-ii';
 import MultimethodOptions from '../multimethod-options';
 import {toIdentifierParts} from '../../set-theory/predicates';
@@ -83,8 +81,8 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     // - `handlerArgs` is a hash keyed by all possible parameter names a rule's raw handler may use, and whose
     //   values are the source code for the argument corresponding to each parameter.
 
-    // TODO: start with the template...
-    let source = emitThunkFunction(getNameForRule(eulerDiagram, set, rule), {
+    // TODO: fix arity cast below when MMOptions type is fixed
+    let source = emitThunkFunction(getNameForRule(eulerDiagram, set, rule), options.arity as number|undefined, {
         isPromise: 'isPromise',
         CONTINUE: 'CONTINUE',
 
@@ -101,14 +99,6 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
         IS_PURE_SYNC: options.timing === 'sync',
         IS_PURE_ASYNC: options.timing === 'async'
     });
-
-    // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
-    if (typeof options.arity === 'number') {
-        source = strengthReduceES6RestSpread(source, 'MMARGS', '_', options.arity);
-    }
-    else {
-        source = downlevelES6RestSpread(source);
-    }
 
     // All done for this iteration.
     return source;

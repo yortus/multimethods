@@ -1,5 +1,3 @@
-import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
-import strengthReduceES6RestSpread from './transforms/strength-reduce-es6-rest-spread';
 import computeRuleReferenceSource from './compute-rule-reference-source';
 import computeThunkTable from './compute-all-thunks';
 import computeThunkSelector from './compute-thunk-selector';
@@ -126,20 +124,13 @@ function andThen(val: any, cb: (val: any) => any) {
 // TODO: temp testing...
 function getSourceCodeForDispatchFunction(functionName: string, options: MultimethodOptions) {
 
-    let source = emitDispatchFunction(functionName, {
+    // TODO: fix arity cast below when MMOptions type is fixed
+    let source = emitDispatchFunction(functionName, options.arity as number|undefined, {
         computeDiscriminant: 'computeDiscriminant',
         SELECT_IMPLEMENTATION: 'selectThunk', // TODO: temp testing... how to know this name?
         CONTINUE: 'CONTINUE',
         fatalError: 'fatalError'
     });
-
-    // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
-    if (typeof options.arity === 'number') {
-        source = strengthReduceES6RestSpread(source, 'MMARGS', '_', options.arity);
-    }
-    else {
-        source = downlevelES6RestSpread(source);
-    }
 
     // All done for this iteration.
     return source;

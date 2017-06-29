@@ -5,9 +5,9 @@ import Thunk from '../thunk';
 
 
 // TODO: ========== The actual template ==========
-// TODO: explain important norms in the template function... eg '$' var
+// TODO: explain important norms in the template function... eg '$', __VARARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
-export const template = function __FUNCNAME__(discriminant: string, result: any, __ELLIPSIS__MMARGS: any[]) {
+export const template = function __FUNCNAME__(discriminant: string, result: any, __VARARGS__: any[]) {
 
     // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
     if (result !== $.CONTINUE) {
@@ -17,8 +17,8 @@ export const template = function __FUNCNAME__(discriminant: string, result: any,
     // TODO: call method in most efficient way...
     if ($.IS_META_RULE) {
         if ($.HAS_DOWNSTREAM) {
-            var next: Function = function (__ELLIPSIS__MMARGS: any[]) {
-                return $.DELEGATE_DOWNSTREAM(discriminant, $.CONTINUE, __ELLIPSIS__MMARGS);
+            var next: Function = function (__VARARGS__: any[]) {
+                return $.DELEGATE_DOWNSTREAM(discriminant, $.CONTINUE, __VARARGS__);
             };
         }
         else {
@@ -26,19 +26,19 @@ export const template = function __FUNCNAME__(discriminant: string, result: any,
         }
         if ($.HAS_CAPTURES) {
             var captures = $.GET_CAPTURES(discriminant);
-            result = $.CALL_HANDLER(__ELLIPSIS__MMARGS, captures, next);
+            result = $.CALL_HANDLER(__VARARGS__, captures, next);
         }
         else {
-            result = $.CALL_HANDLER(__ELLIPSIS__MMARGS, undefined, next);
+            result = $.CALL_HANDLER(__VARARGS__, undefined, next);
         }
     }
     else {
         if ($.HAS_CAPTURES) {
             var captures = $.GET_CAPTURES(discriminant);
-            result = $.CALL_HANDLER(__ELLIPSIS__MMARGS, captures);
+            result = $.CALL_HANDLER(__VARARGS__, captures);
         }
         else {
-            result = $.CALL_HANDLER(__ELLIPSIS__MMARGS);
+            result = $.CALL_HANDLER(__VARARGS__);
         }
     }
 
@@ -47,22 +47,22 @@ export const template = function __FUNCNAME__(discriminant: string, result: any,
         if ($.IS_PURE_SYNC) {
 
             // All methods in this MM are synchronous
-            result = $.DELEGATE_NEXT(discriminant, result, __ELLIPSIS__MMARGS);
+            result = $.DELEGATE_NEXT(discriminant, result, __VARARGS__);
         }
         else {
             if ($.IS_PURE_ASYNC) {
 
                 // All methods in this MM are asynchronous
-                result = result.then(function (rs: any) { return $.DELEGATE_NEXT(discriminant, rs, __ELLIPSIS__MMARGS); });
+                result = result.then(function (rs: any) { return $.DELEGATE_NEXT(discriminant, rs, __VARARGS__); });
             }
             else {
 
                 // Methods may be sync or async, and we must differentiate at runtime
                 if ($.isPromise(result)) {
-                    result = result.then(function (rs: any) { return $.DELEGATE_NEXT(discriminant, rs, __ELLIPSIS__MMARGS); });
+                    result = result.then(function (rs: any) { return $.DELEGATE_NEXT(discriminant, rs, __VARARGS__); });
                 }
                 else {
-                    result = $.DELEGATE_NEXT(discriminant, result, __ELLIPSIS__MMARGS);
+                    result = $.DELEGATE_NEXT(discriminant, result, __VARARGS__);
                 }
             }
         }

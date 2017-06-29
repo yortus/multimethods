@@ -1,3 +1,4 @@
+import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
 import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
 import replaceAll from './transforms/replace-all';
@@ -9,8 +10,8 @@ import * as thunkFunction from './templates/thunk-function-template';
 
 
 // TODO: doc...
-export function emitDispatchFunction(name: string, env: Env<dispatchFunction.VariablesInScope>) {
-    return emitFromTemplate(dispatchFunction.template, name, env);
+export function emitDispatchFunction(name: string, arity: number|undefined, env: Env<dispatchFunction.VariablesInScope>) {
+    return emitFromTemplate(dispatchFunction.template, name, arity, env);
 }
 
 
@@ -18,8 +19,8 @@ export function emitDispatchFunction(name: string, env: Env<dispatchFunction.Var
 
 
 // TODO: doc...
-export function emitThunkFunction(name: string, env: ThunkFunctionEnv) {
-    return emitFromTemplate(thunkFunction.template, name, env);
+export function emitThunkFunction(name: string, arity: number|undefined, env: ThunkFunctionEnv) {
+    return emitFromTemplate(thunkFunction.template, name, arity, env);
 }
 
 
@@ -48,17 +49,18 @@ export type Env<Vars = {}, Bools = {}> = {[K in keyof Vars]: string} & {[K in ke
 
 
 // TODO: doc helper...
-function emitFromTemplate<TEnv>(templateFunction: Function, name: string, env: TEnv) {
+function emitFromTemplate<TEnv>(templateFunction: Function, name: string, arity: number|undefined, env: TEnv) {
 
     // Prepare textual substitutions
     let replacements = {} as {[x: string]: string};
     Object.keys(env).forEach((k: keyof TEnv) => replacements['$.' + k] = env[k].toString());
-    replacements.__ELLIPSIS__ = '...'; // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
+    replacements.__VARARGS__ = '...__VARARGS__'; // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
     replacements.__FUNCNAME__ = name;
 
     // Generate source code
     let source = getNormalisedFunctionSource(templateFunction);
     source = replaceAll(source, replacements);
     source = eliminateDeadCode(source);
+    source = downlevelES6RestSpread(source, arity);
     return source;
 }

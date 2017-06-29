@@ -10,10 +10,10 @@
 // - if (!true) {\n[...]} [else {\n[...]}]
 // - if (!false) {\n[...]} [else {\n[...]}]
 // TODO: assumes consistent 4-space block indents, simple conditions... relax any of these?
-export default function eliminateDeadCode(normalisedFunctionSource: string): string {
+export default function eliminateDeadCode(source: string): string {
     const MATCH_IF = /^(\s*)if \((\!?)((?:true)|(?:false))\) {$/;
     const MATCH_ELSE = /^(\s*)else {$/;
-    let inLines = normalisedFunctionSource.split('\n');
+    let inLines = source.split('\n');
     let outLines: string[] = [];
     while (inLines.length > 0) {
         let inLine = inLines.shift()!;
