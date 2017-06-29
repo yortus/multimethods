@@ -1,6 +1,6 @@
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
+import {LineageII} from '../compute-predicate-lineages-ii';
 import repeatString from '../../util/repeat-string';
-import {toIdentifierParts} from '../../set-theory/predicates';
 import {WithThunks} from './compute-all-thunks';
 
 
@@ -15,7 +15,7 @@ import {WithThunks} from './compute-all-thunks';
  * @param {EulerDiagram} eulerDiagram - The arrangement of patterns on which to base the returned selector function.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function computeThunkSelector(eulerDiagram: EulerDiagram<WithThunks>) {
+export default function computeThunkSelector(eulerDiagram: EulerDiagram<LineageII & WithThunks>) {
 
     // Generate the combined source code for selecting the best thunk. This includes local variable declarations
     // for all the match functions and all the candidate route handler functions, as well as the dispatcher function
@@ -34,7 +34,7 @@ export default function computeThunkSelector(eulerDiagram: EulerDiagram<WithThun
 
 
 /** Helper function to generate source code for the thunk selector function. */
-function generateSelectorSourceCode(from: EulerSet & WithThunks, nestDepth: number) {
+function generateSelectorSourceCode(from: EulerSet & LineageII & WithThunks, nestDepth: number) {
     let subsets = from.subsets;
 
     // Make the indenting string corresponding to the given `nestDepth`.
@@ -42,8 +42,8 @@ function generateSelectorSourceCode(from: EulerSet & WithThunks, nestDepth: numb
 
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
-    subsets.forEach((set: EulerSet & WithThunks, i) => {
-        let condition = `${indent}${i > 0 ? 'else ' : ''}if (isMatchː${toIdentifierParts(set.predicate)}(discriminant)) `;
+    subsets.forEach((set: EulerSet & LineageII & WithThunks, i) => {
+        let condition = `${indent}${i > 0 ? 'else ' : ''}if (${set.isMatchVarName}(discriminant)) `;
 
         if (set.subsets.length === 0) {
             lines.push(`${condition}return ${set.thunkName};`);

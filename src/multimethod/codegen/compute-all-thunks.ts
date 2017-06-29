@@ -4,7 +4,7 @@ import eliminateDeadCode from './transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
 import {LineageII} from '../compute-predicate-lineages-ii';
 import MultimethodOptions from '../multimethod-options';
-import {toIdentifierParts, parsePredicatePattern} from '../../set-theory/predicates';
+import {toIdentifierParts} from '../../set-theory/predicates';
 import repeatString from '../../util/repeat-string';
 import replaceAll from './transforms/replace-all';
 import thunkFunctionTemplate from './templates/thunk-function-template';
@@ -67,20 +67,16 @@ export default function computeAllThunks(eulerDiagram: EulerDiagram<LineageII>, 
 // TODO: ...
 function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerSet & LineageII, rule: Rule, options: MultimethodOptions) {
 
-    // TODO: copypasta 3000 - extract helper fn?
-    // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
-    if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) return '';
-
     // TODO: to get copypasta'd code working... revise...
     let i = set.matchingRules.map(r => r.handler).indexOf(rule.handler);
     let rules = set.matchingRules;
 
+    // TODO: explain... put a self-describing boolean var in the data structure...
+    if (!set.matchingRules[i].callHandlerVarDecl) return '';
+    //TODO: was... if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) return '';
+
     // TODO: temp testing...
     let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
-    let predicateIdentifier = toIdentifierParts(set.predicate);
-    let getCaptures = `getCapturesː${predicateIdentifier}${repeatString('ᐟ', i)}`; // TODO: must match ruleRefs emit - store in eulerDiagram?
-    let handlerName = `callHandlerː${predicateIdentifier}${repeatString('ᐟ', i)}`; // TODO: must match ruleRefs emit - store in eulerDiagram?
-    let captureNames = parsePredicatePattern(rule.predicate.toString()).captureNames;
 
     // For each rule, we reuse the source code template below. But first we need to compute a number of
     // values for substitution into the template. A few notes on these substitutions:
@@ -99,7 +95,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     // TODO: ... all booleans
     source = eliminateDeadCode(source, {
         ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
-        HAS_CAPTURES: captureNames.length > 0,
+        HAS_CAPTURES: set.matchingRules[i].getCapturesVarDecl !== null,
         IS_META_RULE: rule.isMetaRule,
         HAS_DOWNSTREAM: downstreamRule != null,
         IS_PURE_SYNC: options.timing === 'sync',
@@ -109,8 +105,8 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     // TODO: ... all strings
     source = replaceAll(source, {
         FUNCTION_NAME: getNameForRule(eulerDiagram, set, rule),
-        GET_CAPTURES: getCaptures,
-        CALL_HANDLER: handlerName,
+        GET_CAPTURES: set.matchingRules[i].getCapturesVarName,
+        CALL_HANDLER: set.matchingRules[i].callHandlerVarName,
         DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(eulerDiagram, set, downstreamRule) : '',
         DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : ''
     });

@@ -6,7 +6,7 @@ import Rule from './rule';
 import {EulerDiagram, /*EulerSet*/} from '../set-theory/sets';
 
 import repeatString from '../util/repeat-string';
-import {toIdentifierParts, /*parsePredicatePattern*/} from '../set-theory/predicates';
+import {toIdentifierParts, parsePredicatePattern} from '../set-theory/predicates';
 import {Lineage} from './compute-predicate-lineages';
 
 
@@ -16,12 +16,14 @@ import {Lineage} from './compute-predicate-lineages';
 // TODO: temp testing...
 export interface LineageII {
     matchingRules: EmitInfo[];
+    isMatchVarName: string;
+    isMatchVarDecl: string|null;
 }
 export type EmitInfo = Rule & {
     callHandlerVarName: string;
     callHandlerVarDecl: string|null;
-    // getCapturesVarName: string|null;
-    // getCapturesVarDecl: string|null;
+    getCapturesVarName: string;
+    getCapturesVarDecl: string|null;
     // thunkFunctionName: string;
     // thunkFunctionDecl: string;
 };
@@ -37,12 +39,22 @@ export default function computePredicateLineagesII<T>(eulerDiagram: EulerDiagram
 
         let matchingRules = set.lineage.map((rule, i) => {
 
-
-            // TODO: put these (or at least second one) in snippets template function
-            let callHandlerVarName = `callHandlerː${toIdentifierParts(rule.predicate)}${repeatString('ᐟ', i)}`;
+            let callHandlerVarName = `callHandlerː${toIdentifierParts(set.predicate)}${repeatString('ᐟ', i)}`;
+            let getCapturesVarName = `getCapturesː${toIdentifierParts(set.predicate)}${repeatString('ᐟ', i)}`;
             let callHandlerVarDecl: string|null = null;
+            let getCapturesVarDecl: string|null = null;
+
+            // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
             if (rule.isMetaRule || eulerDiagram.get(rule.predicate) === set) {
-                callHandlerVarDecl = `var ${callHandlerVarName} = eulerDiagram.get('${rule.predicate}').matchingRules[${i}].handler;`;
+                // TODO: move this emit string into snippets template function and extract from there
+                callHandlerVarDecl = `var ${callHandlerVarName} = eulerDiagram.get('${set.predicate}').matchingRules[${i}].handler;`;
+
+                let hasCaptures = parsePredicatePattern(rule.predicate).captureNames.length > 0;
+                if (hasCaptures) {
+                    // TODO: line too long!
+                    // TODO: move this emit string into snippets template function and extract from there
+                    getCapturesVarDecl = `var ${getCapturesVarName} = toMatchFunction(eulerDiagram.get('${set.predicate}').matchingRules[${i}].predicate);`;
+                }
             }
 
 
@@ -50,12 +62,16 @@ export default function computePredicateLineagesII<T>(eulerDiagram: EulerDiagram
             return {
                 ...rule,
                 callHandlerVarName,
-                callHandlerVarDecl
+                callHandlerVarDecl,
+                getCapturesVarName,
+                getCapturesVarDecl
             };
         });
 
+        let isMatchVarName = `isMatchː${toIdentifierParts(set.predicate)}`;
+        let isMatchVarDecl = `var ${isMatchVarName} = toMatchFunction(eulerDiagram.get('${set.predicate}').predicate);`;
 
-        return {matchingRules};
+        return {matchingRules, isMatchVarName, isMatchVarDecl};
         
     });
 

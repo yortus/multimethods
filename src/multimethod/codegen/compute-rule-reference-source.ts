@@ -1,7 +1,5 @@
 import {EulerDiagram} from '../../set-theory/sets';
 import {LineageII} from '../compute-predicate-lineages-ii';
-import repeatString from '../../util/repeat-string';
-import {toIdentifierParts, parsePredicatePattern} from '../../set-theory/predicates';
 
 
 
@@ -10,41 +8,25 @@ import {toIdentifierParts, parsePredicatePattern} from '../../set-theory/predica
 export default function computeRuleReferenceSource(eulerDiagram: EulerDiagram<LineageII>) {
 
     // TODO: doc... isMatch:XXX
-    let predicates = eulerDiagram.sets.map(set => set.predicate);
-    let isMatchLines = predicates.map(p => `var isMatchː${toIdentifierParts(p)} = toMatchFunction(eulerDiagram.get('${p}').predicate);`);
+    let isMatchLines = eulerDiagram.sets.map(s => s.isMatchVarDecl);
 
     // TODO: doc... getCaptures:XXX
     let captureLines: string[] = [];
     eulerDiagram.sets.forEach(set => {
-        let p = set.predicate;
         for (let i = 0; i < set.matchingRules.length; ++i) {
-
-            // TODO: copypasta 3000 - extract helper fn?
-            // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
             let rule = set.matchingRules[i];
-            if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) continue;
-
-            let hasCaptures = parsePredicatePattern(rule.predicate).captureNames.length > 0;
-            if (!hasCaptures) continue;
-
-            let varName = `getCapturesː${toIdentifierParts(p)}${repeatString('ᐟ', i)}`;
-            captureLines.push(`var ${varName} = toMatchFunction(eulerDiagram.get('${p}').matchingRules[${i}].predicate);`);
+            if (!rule.getCapturesVarDecl) continue;
+            captureLines.push(rule.getCapturesVarDecl);
         }
     });
 
     // TODO: doc... callHandler:XXX
     let handlerLines: string[] = [];
     eulerDiagram.sets.forEach(set => {
-        let p = set.predicate;
         for (let i = 0; i < set.matchingRules.length; ++i) {
-
-            // TODO: copypasta 3000 - extract helper fn?
-            // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
             let rule = set.matchingRules[i];
-            if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) continue;
-
-            let varName = `callHandlerː${toIdentifierParts(p)}${repeatString('ᐟ', i)}`;
-            handlerLines.push(`var ${varName} = eulerDiagram.get('${p}').matchingRules[${i}].handler;`);
+            if (!rule.callHandlerVarDecl) continue;
+            handlerLines.push(rule.callHandlerVarDecl);
         }
     });
 
