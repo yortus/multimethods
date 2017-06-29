@@ -1,9 +1,9 @@
-import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
-import eliminateDeadCode from './transforms/eliminate-dead-code';
+import downlevelES6RestSpread from './source-transforms/downlevel-es6-rest-spread';
+import eliminateDeadCode from './source-transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
-import replaceAll from './transforms/replace-all';
-import * as dispatchFunction from './templates/dispatch-function-template';
-import * as thunkFunction from './templates/thunk-function-template';
+import replaceAll from './source-transforms/replace-all';
+import * as dispatchFunction from './source-templates/dispatch-function-template';
+import * as thunkFunction from './source-templates/thunk-function-template';
 
 
 
