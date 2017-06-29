@@ -89,27 +89,24 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     // TODO: start with the template...
     let source = getNormalisedFunctionSource(thunkFunctionTemplate);
 
-    // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
-    source = replaceAll(source, {'ELLIPSIS_': '...'});
-
-    // TODO: ... all booleans
-    source = eliminateDeadCode(source, {
-        ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
-        HAS_CAPTURES: set.matchingRules[i].getCapturesVarDecl !== null,
-        IS_META_RULE: rule.isMetaRule,
-        HAS_DOWNSTREAM: downstreamRule != null,
-        IS_PURE_SYNC: options.timing === 'sync',
-        IS_PURE_ASYNC: options.timing === 'async'
-    });
-
     // TODO: ... all strings
     source = replaceAll(source, {
+        ELLIPSIS_: '...', // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
         FUNCTION_NAME: getNameForRule(eulerDiagram, set, rule),
         GET_CAPTURES: set.matchingRules[i].getCapturesVarName,
         CALL_HANDLER: set.matchingRules[i].callHandlerVarName,
         DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(eulerDiagram, set, downstreamRule) : '',
-        DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : ''
+        DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : '',
+
+        // Statically known booleans --> 'true'/'false' literals (for dead code elimination in next step)
+        ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule ? 'true' : 'false',
+        HAS_CAPTURES: set.matchingRules[i].getCapturesVarDecl !== null ? 'true' : 'false',
+        IS_META_RULE: rule.isMetaRule ? 'true' : 'false',
+        HAS_DOWNSTREAM: downstreamRule != null ? 'true' : 'false',
+        IS_PURE_SYNC: options.timing === 'sync' ? 'true' : 'false',
+        IS_PURE_ASYNC: options.timing === 'async' ? 'true' : 'false'
     });
+    source = eliminateDeadCode(source);
 
     // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
     if (typeof options.arity === 'number') {

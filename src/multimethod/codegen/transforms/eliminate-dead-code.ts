@@ -3,12 +3,15 @@
 
 
 
-// TODO: explain... basically removes if/then branches that are 100% dead code according to the constants provided.
+// TODO: explain... basically removes if/then branches that are statically dead code.
 // TODO: explain limited circumstances where this works:
-// - if (CONST) {\n<...>} else {\n<...>}
+// - if (true) {\n[...]} [else {\n[...]}]
+// - if (false) {\n[...]} [else {\n[...]}]
+// - if (!true) {\n[...]} [else {\n[...]}]
+// - if (!false) {\n[...]} [else {\n[...]}]
 // TODO: assumes consistent 4-space block indents, simple conditions... relax any of these?
-export default function eliminateDeadCode(normalisedFunctionSource: string, consts: {[name: string]: boolean}): string {
-    const MATCH_IF = /^(\s*)if \((\!?)([a-zA-Z$_][a-zA-Z0-9$_]*)\) {$/;
+export default function eliminateDeadCode(normalisedFunctionSource: string): string {
+    const MATCH_IF = /^(\s*)if \((\!?)((?:true)|(?:false))\) {$/;
     const MATCH_ELSE = /^(\s*)else {$/;
     let inLines = normalisedFunctionSource.split('\n');
     let outLines: string[] = [];
@@ -16,15 +19,15 @@ export default function eliminateDeadCode(normalisedFunctionSource: string, cons
         let inLine = inLines.shift()!;
 
         let matches = MATCH_IF.exec(inLine);
-        if (!matches || !consts.hasOwnProperty(matches[3])) {
+        if (!matches) {
             outLines.push(inLine);
             continue;
         }
 
         let indent = matches[1];
         let isNegated = matches[2] === '!';
-        let constName = matches[3];
-        let isElided = consts[constName] === isNegated;
+        let isTrueLiteral = matches[3] === 'true';
+        let isTrueCond = (!isNegated && isTrueLiteral) || (isNegated && !isTrueLiteral);
         let blockLines: string[] = [];
         let blockClose = indent + '}';
 
@@ -32,13 +35,13 @@ export default function eliminateDeadCode(normalisedFunctionSource: string, cons
             blockLines.push(inLine.slice(4));
         }
 
-        if (!isElided) {
-            outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n'), consts));
+        if (isTrueCond) {
+            outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n')));
         }
 
         // TODO: handle 'else' blocks...
         if (inLines.length > 0 && MATCH_ELSE.test(inLines[0])) {
-            inLines[0] = `${indent}if (${isNegated ? '' : '!'}${constName}) {`;
+            inLines[0] = `${indent}if (${isTrueCond ? 'false' : 'true'}) {`;
         }
     }
 

@@ -132,17 +132,13 @@ function getSourceCodeForDispatchFunction(functionName: string, options: Multime
     // TODO: start with the template...
     let source = getNormalisedFunctionSource(dispatchFunctionTemplate);
 
-    // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
-    source = replaceAll(source, {'ELLIPSIS_': '...'});
-
-    // TODO: ... all booleans
-    source = eliminateDeadCode(source, { /* NB: none yet */ });
-
     // TODO: ... all strings
     source = replaceAll(source, {
+        ELLIPSIS_: '...', // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
         FUNCTION_NAME: functionName,
         SELECT_THUNK: `selectThunk` // TODO: temp testing... how to know this name?
     });
+    source = eliminateDeadCode(source);
 
     // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
     if (typeof options.arity === 'number') {
