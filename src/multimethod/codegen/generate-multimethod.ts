@@ -16,14 +16,14 @@ import isPromiseLike from '../../util/is-promise-like';
 
 
 // TODO: ...
-export default function generateDispatchFunction(eulerDiagram: EulerDiagram<LineageII>, normalisedOptions: MultimethodOptions) {
+export default function generateMultimethod(eulerDiagram: EulerDiagram<LineageII>, normalisedOptions: MultimethodOptions) {
 
     // TODO: ...
     // Generate the combined source code for handling the route. This includes local variable declarations for
     // all rules' matchers and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of the route.
-    let functionName = `MM${multimethodCounter++}`;
-    let dispatchSource = getSourceCodeForDispatchFunction(functionName, normalisedOptions);
+    let multimethodName = `MM${multimethodCounter++}`;
+    let dispatchSource = getSourceCodeForDispatchFunction(multimethodName, normalisedOptions);
     let thunks = computeThunkTable(eulerDiagram, normalisedOptions);
     let thunkSelectorSource = computeThunkSelector(thunks);
     let ruleReferences = computeRuleReferenceSource(eulerDiagram);
@@ -74,7 +74,7 @@ export default function generateDispatchFunction(eulerDiagram: EulerDiagram<Line
 
 
     // Generate a function that, given a discriminant, returns the executor for the best-matching route.
-    let dispatchFunction: Function = eval(`(function () {\n${wholeSource}\nreturn ${functionName};\n})`)();
+    let dispatchFunction: Function = eval(`(function () {\n${wholeSource}\nreturn ${multimethodName};\n})`)();
 
 
 

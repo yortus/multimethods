@@ -1,6 +1,6 @@
 import computePredicateLineages from './compute-predicate-lineages';
 import computePredicateLineagesII from './compute-predicate-lineages-ii';
-import generateDispatchFunction from './codegen/generate-dispatch-function';
+import generateMultimethod from './codegen/generate-multimethod';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
 import {toPredicate} from '../set-theory/predicates';
@@ -33,6 +33,6 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
     let eulerDiagramWithLineagesII = computePredicateLineagesII(eulerDiagramWithLineages);
 
     // TODO: ...
-    let dispatchFunction = generateDispatchFunction(eulerDiagramWithLineagesII, normalisedOptions);
+    let dispatchFunction = generateMultimethod(eulerDiagramWithLineagesII, normalisedOptions);
     return dispatchFunction;
 }
