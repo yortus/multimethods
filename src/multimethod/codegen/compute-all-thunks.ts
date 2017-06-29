@@ -1,13 +1,10 @@
 import downlevelES6RestSpread from './transforms/downlevel-es6-rest-spread';
 import strengthReduceES6RestSpread from './transforms/strength-reduce-es6-rest-spread';
-import eliminateDeadCode from './transforms/eliminate-dead-code';
-import getNormalisedFunctionSource from './get-normalised-function-source';
 import {LineageII} from '../compute-predicate-lineages-ii';
 import MultimethodOptions from '../multimethod-options';
 import {toIdentifierParts} from '../../set-theory/predicates';
 import repeatString from '../../util/repeat-string';
-import replaceAll from './transforms/replace-all';
-import thunkFunctionTemplate from './templates/thunk-function-template';
+import emitThunkFunction from './templates/thunk-function-template';
 import Rule from '../rule';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 
@@ -87,26 +84,23 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     //   values are the source code for the argument corresponding to each parameter.
 
     // TODO: start with the template...
-    let source = getNormalisedFunctionSource(thunkFunctionTemplate);
+    let source = emitThunkFunction(getNameForRule(eulerDiagram, set, rule), {
+        isPromise: 'isPromise',
+        CONTINUE: 'CONTINUE',
 
-    // TODO: ... all strings
-    source = replaceAll(source, {
-        ELLIPSIS_: '...', // TODO: explain: by convention; prevents tsc build from downleveling `...` to equiv ES5 in templates (since we do that better below)
-        FUNCTION_NAME: getNameForRule(eulerDiagram, set, rule),
         GET_CAPTURES: set.matchingRules[i].getCapturesVarName,
         CALL_HANDLER: set.matchingRules[i].callHandlerVarName,
         DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(eulerDiagram, set, downstreamRule) : '',
         DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : '',
 
         // Statically known booleans --> 'true'/'false' literals (for dead code elimination in next step)
-        ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule ? 'true' : 'false',
-        HAS_CAPTURES: set.matchingRules[i].getCapturesVarDecl !== null ? 'true' : 'false',
-        IS_META_RULE: rule.isMetaRule ? 'true' : 'false',
-        HAS_DOWNSTREAM: downstreamRule != null ? 'true' : 'false',
-        IS_PURE_SYNC: options.timing === 'sync' ? 'true' : 'false',
-        IS_PURE_ASYNC: options.timing === 'async' ? 'true' : 'false'
+        ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
+        HAS_CAPTURES: set.matchingRules[i].getCapturesVarDecl !== null,
+        IS_META_RULE: rule.isMetaRule,
+        HAS_DOWNSTREAM: downstreamRule != null,
+        IS_PURE_SYNC: options.timing === 'sync',
+        IS_PURE_ASYNC: options.timing === 'async'
     });
-    source = eliminateDeadCode(source);
 
     // TODO: temp testing... specialise for fixed arities, or simulate ES6 rest/spread for variadic case...
     if (typeof options.arity === 'number') {
