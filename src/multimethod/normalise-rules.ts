@@ -1,7 +1,7 @@
 import {CONTINUE} from './sentinels';
 import debug, {DISPATCH} from '../util/debug';
 import isPromiseLike from '../util/is-promise-like';
-import metaHandlers from './meta-handlers';
+import isMetaHandler from './is-meta-handler';
 import MultimethodOptions from './multimethod-options';
 import Rule from './rule';
 
@@ -46,12 +46,12 @@ export default function normaliseRules(rules: MultimethodOptions['rules']) {
 function instrument(rule: Rule) {
     let handler = rule.handler;
     let chainIndex = rule.chain ? rule.chain.indexOf(handler) : -1;
-    let ruleInfo = `rule=${rule.predicate}${rule.chain ? ` [${chainIndex}]` : ''}   type=${rule.isMetaRule ? 'meta' : 'regular'}`;
+    let ruleInfo = `rule=${rule.predicate}${rule.chain ? ` [${chainIndex}]` : ''}   type=${isMetaHandler(handler) ? 'meta' : 'regular'}`;
     let wrapped = function(...args: any[]) {
-        let next = rule.isMetaRule ? args.pop() : null;
+        let next = isMetaHandler(handler) ? args.pop() : null;
         let captures = args.pop();
         debug(`${DISPATCH} Enter   %s${captures ? '   captures=%o' : ''}`, ruleInfo, captures);
-        let result = rule.isMetaRule ? handler(...args, captures, next) : handler(...args, captures);
+        let result = isMetaHandler(handler) ? handler(...args, captures, next) : handler(...args, captures);
         let isAsync = isPromiseLike(result);
         return andThen(result, result => {
             let resultInfo = result === CONTINUE ? '   result=CONTINUE' : ''
@@ -62,7 +62,7 @@ function instrument(rule: Rule) {
 
     rule.handler = wrapped;
     if (rule.chain) rule.chain[chainIndex] = wrapped;
-    if (rule.isMetaRule) metaHandlers.set(wrapped, true);
+    if (isMetaHandler(handler)) isMetaHandler(wrapped, true);
 }
 
 

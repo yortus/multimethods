@@ -1,6 +1,5 @@
 // TODO: review all comments and terminology in here...
 // TODO: explain what decorators are here, or refer to docs elsewhere (and write them).
-import metaHandlers from './meta-handlers';
 import {Predicate, toPredicate} from '../set-theory/predicates';
 
 
@@ -41,10 +40,6 @@ TODO:... fix comment...
     constructor(predicateSource: string, method: Function) {
         this.predicate = toPredicate(predicateSource); // NB: may throw
         this.handler = method;
-
-// TODO: temp testing... will we (can we?) still check sig at runtime?
-        //checkConsequentSignature(method, pattern);
-        this.isMetaRule = metaHandlers.has(this.handler);
     }
 
 
@@ -53,11 +48,6 @@ TODO:... fix comment...
 
     /** The handler associated with this Rule instance, exactly as it was provided to the constructor. */
     handler: Function;//TODO: type this better...
-
-
-// TODO: remove this one... `Rule` will become an internal concept, and this prop can be replaced by a helper util function
-    /** Indicates whether the consequent function represents a decorator. Decorators have a '$next' formal parameter */
-    isMetaRule: boolean;
 
     // TODO: temp testing... formalise...
     chain?: Function[];

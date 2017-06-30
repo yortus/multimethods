@@ -8,6 +8,7 @@ import {EulerDiagram, /*EulerSet*/} from '../set-theory/sets';
 import repeatString from '../util/repeat-string';
 import {toIdentifierParts, parsePredicatePattern} from '../set-theory/predicates';
 import {Lineage} from './compute-predicate-lineages';
+import isMetaHandler from './is-meta-handler';
 
 
 
@@ -45,7 +46,7 @@ export default function computePredicateLineagesII<T>(eulerDiagram: EulerDiagram
             let getCapturesVarDecl: string|null = null;
 
             // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
-            if (rule.isMetaRule || eulerDiagram.get(rule.predicate) === set) {
+            if (isMetaHandler(rule.handler) || eulerDiagram.get(rule.predicate) === set) {
                 // TODO: move this emit string into snippets template function and extract from there
                 callHandlerVarDecl = `var ${callHandlerVarName} = eulerDiagram.get('${set.predicate}').matchingRules[${i}].handler;`;
 

@@ -22,9 +22,9 @@ export {default as validate} from './multimethod/validate';
 
 
 // TODO: temp testing...
-import metaHandlers from './multimethod/meta-handlers';
+import isMetaHandler from './multimethod/is-meta-handler';
 export function meta<T extends Function>(fn: T) {
     // TODO: ensure it is a function, etc
-    metaHandlers.set(fn, true);
+    isMetaHandler(fn, true);
     return fn;
 }

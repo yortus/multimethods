@@ -3,6 +3,7 @@ import fatalError from '../util/fatal-error';
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import {Predicate} from '../set-theory/predicates';
 import Rule from './rule';
+import isMetaHandler from './is-meta-handler';
 
 
 
@@ -28,7 +29,7 @@ export default function disambiguateRoutes(predicate: Predicate, alternateRuleLi
     // Ensure the non-common parts contain NO meta-rules.
     alternateRuleLists.forEach(cand => {
         let nonCommonRules: Rule[] = cand.slice(prefix.length, -suffix.length);
-        let hasMetaRules = nonCommonRules.some(rule => rule.isMetaRule);
+        let hasMetaRules = nonCommonRules.some(rule => isMetaHandler(rule.handler));
         if (hasMetaRules) return fatalError('MULTIPLE_PATHS_TO', predicate);
     });
 

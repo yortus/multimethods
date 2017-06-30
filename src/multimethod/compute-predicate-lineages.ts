@@ -4,6 +4,7 @@ import fatalError from '../util/fatal-error';
 import Rule from './rule';
 import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
 import {EulerDiagram, EulerSet} from '../set-theory/sets';
+import isMetaHandler from './is-meta-handler';
 
 
 
@@ -134,15 +135,15 @@ function getAlternateLineagesForSet(set: EulerSet): Predicate[][] {
 function ruleComparator(ruleA: Rule, ruleB: Rule) {
 
     // Comparing a metarule and a regular rule: the metarule is always less specific.
-    if (!ruleA.isMetaRule && ruleB.isMetaRule) return 1;  // A is more specific
-    if (ruleA.isMetaRule && !ruleB.isMetaRule) return -1; // B is more specific
+    if (!isMetaHandler(ruleA.handler) && isMetaHandler(ruleB.handler)) return 1;  // A is more specific
+    if (isMetaHandler(ruleA.handler) && !isMetaHandler(ruleB.handler)) return -1; // B is more specific
 
     // Comparing two regular rules in the same chain: the leftmost one is more specific.
     // Comparing two metarules in the same chain: the leftmost one is less specific.
     let chain = ruleA.chain;
     if (!!chain && chain === ruleB.chain) {
         let leftmostRule = chain.indexOf(ruleA.handler) < chain.indexOf(ruleB.handler) ? ruleA : ruleB;
-        return (leftmostRule === ruleA ? 1 : -1) * (ruleA.isMetaRule ? -1 : 1);
+        return (leftmostRule === ruleA ? 1 : -1) * (isMetaHandler(ruleA.handler) ? -1 : 1);
     }
 
     // Anything else is ambiguous

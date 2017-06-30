@@ -5,6 +5,7 @@ import repeatString from '../../util/repeat-string';
 import {emitThunkFunction} from './emit';
 import Rule from '../rule';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
+import isMetaHandler from '../is-meta-handler';
 
 
 
@@ -47,7 +48,7 @@ export default function computeAllThunks(eulerDiagram: EulerDiagram<LineageII>, 
         // The 'entry point' rule is the one whose handler we call to begin the cascading evaluation of the route. It is the
         // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
         let rules = set.matchingRules;
-        let entryPointRule = rules.filter(rule => rule.isMetaRule).pop() || rules[0];
+        let entryPointRule = rules.filter(rule => isMetaHandler(rule.handler)).pop() || rules[0];
         let thunkName = getNameForRule(eulerDiagram, set, entryPointRule);
 
         return <WithThunks> { thunkSource, thunkName };
@@ -71,7 +72,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     //TODO: was... if (!rule.isMetaRule && eulerDiagram.get(rule.predicate) !== set) return '';
 
     // TODO: temp testing...
-    let downstreamRule = rules.filter((_, j) => (j === 0 || rules[j].isMetaRule) && j < i).pop();
+    let downstreamRule = rules.filter((_, j) => (j === 0 || isMetaHandler(rules[j].handler)) && j < i).pop();
 
     // For each rule, we reuse the source code template below. But first we need to compute a number of
     // values for substitution into the template. A few notes on these substitutions:
@@ -92,9 +93,9 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
         DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : '',
 
         // Statically known booleans --> 'true'/'false' literals (for dead code elimination in next step)
-        ENDS_PARTITION: i === rules.length - 1 || rules[i + 1].isMetaRule,
+        ENDS_PARTITION: i === rules.length - 1 || isMetaHandler(rules[i + 1].handler),
         HAS_CAPTURES: set.matchingRules[i].getCapturesVarDecl !== null,
-        IS_META_RULE: rule.isMetaRule,
+        IS_META_RULE: isMetaHandler(rule.handler),
         HAS_DOWNSTREAM: downstreamRule != null,
         IS_PURE_SYNC: options.timing === 'sync',
         IS_PURE_ASYNC: options.timing === 'async'
@@ -114,7 +115,7 @@ function getNameForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerSet & L
     let ruleIndex = ruleNode.matchingRules.map(r => r.handler).indexOf(rule.handler);
     let ruleIdentifier = toIdentifierParts(ruleNode.predicate);
 
-    if (rule.isMetaRule) {
+    if (isMetaHandler(rule.handler)) {
         let nodeIdentifier = toIdentifierParts(set.predicate);
         return `thunkː${nodeIdentifier}ːviaMetaː${ruleIdentifier}${repeatString('ᐟ', ruleIndex)}`;
     }
