@@ -1,6 +1,7 @@
 import {CONTINUE} from './sentinels';
 import fatalError from '../util/fatal-error';
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
+import getLongestCommonSuffix from '../util/get-longest-common-suffix';
 import Rule from './rule';
 import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
 import {EulerDiagram, EulerSet} from '../set-theory/sets';
@@ -119,7 +120,7 @@ function distributeRulesOverSets<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[]
 /**
  * Enumerates every possible walk[1] in the euler diagram from the root to the given `set`. Each walk is represented as a
  * list of predicates arranged in walk-order (i.e., from the root to the descendent).
- * [1] See: https://en.wikipedia.org/wiki/Glossary_of_graph_theory#Walks
+ * [1] See: https://en.wikipedia.org/wiki/Glossary_of_graph_theory#walk
  */
 function getAlternateLineagesForSet(set: EulerSet): Predicate[][] {
     let allRoutes = ([] as Predicate[][]).concat(...set.supersets.map(getAlternateLineagesForSet));
@@ -174,7 +175,7 @@ function disambiguateRoutes(predicate: Predicate, alternateRuleLists: Rule[][]):
 
     // Find the longest common prefix and suffix of all the alternatives.
     let prefix = getLongestCommonPrefix(alternateRuleLists);
-    let suffix = getLongestCommonPrefix(alternateRuleLists.map(cand => cand.slice().reverse())).reverse();
+    let suffix = getLongestCommonSuffix(alternateRuleLists);
 
     // TODO: possible for prefix and suffix to overlap? What to do?
 
