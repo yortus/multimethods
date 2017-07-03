@@ -1,6 +1,6 @@
 import {CONTINUE} from './sentinels';
-import disambiguateRoutes from './disambiguate-routes';
 import fatalError from '../util/fatal-error';
+import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import Rule from './rule';
 import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
 import {EulerDiagram, EulerSet} from '../set-theory/sets';
@@ -99,6 +99,13 @@ function distributeRulesOverSets<T>(eulerDiagram: EulerDiagram<T>, rules: Rule[]
         // (iv) Anything else is ambiguous and results in an error
         exactlyMatchingRules.sort(ruleComparator); // NB: may throw
 
+// TODO: temp testing remove...
+// if (exactlyMatchingRules.length > 1) {
+//     if (exactlyMatchingRules.every(r => !!r.chain)) {
+//         debugger;
+//     }
+// }
+
         // Return the sorted rule list in an object. These objects will be merged into the augmented euler diagram.
         return { exactlyMatchingRules };
     });
@@ -148,4 +155,43 @@ function ruleComparator(ruleA: Rule, ruleB: Rule) {
 
     // Anything else is ambiguous
     return fatalError('AMBIGUOUS_RULE_ORDER', ruleA.predicate, ruleB.predicate);
+}
+
+
+
+
+
+// TODO revise & explain this better, including internal comments. What is this for? When does it work/not work & why?
+/**
+ * Returns a single unambiguous rule list composed from the common parts of the given `alternateRuleLists`. Throws an
+ * error if no unambiguous single rule list can be formed (e.g. because the alternative rule lists have different
+ * meta-rules in their non-common sections).
+ */
+function disambiguateRoutes(predicate: Predicate, alternateRuleLists: Rule[][]): Rule[] {
+
+    // If there is only one rule list, return it as-is.
+    if (alternateRuleLists.length === 1) return alternateRuleLists[0];
+
+    // Find the longest common prefix and suffix of all the alternatives.
+    let prefix = getLongestCommonPrefix(alternateRuleLists);
+    let suffix = getLongestCommonPrefix(alternateRuleLists.map(cand => cand.slice().reverse())).reverse();
+
+    // TODO: possible for prefix and suffix to overlap? What to do?
+
+    // Ensure the non-common parts contain NO meta-rules.
+    alternateRuleLists.forEach(cand => {
+        let nonCommonRules: Rule[] = cand.slice(prefix.length, -suffix.length);
+        let hasMetaRules = nonCommonRules.some(rule => isMetaHandler(rule.handler));
+        if (hasMetaRules) return fatalError('MULTIPLE_PATHS_TO', predicate);
+    });
+
+    // TODO: explain all below more clearly...
+    // Synthesize a 'crasher' rule that throws an 'ambiguous' error.
+    let ambiguousFallbacks = alternateRuleLists.map(cand => cand[cand.length - suffix.length - 1].predicate).join(', ');
+    let crasher = new Rule(predicate, function _ambiguous() {
+        fatalError('MULTIPLE_FALLBACKS_FROM', predicate, ambiguousFallbacks);
+    });
+
+    // The final composite rule list == common prefix + crasher + common suffix.
+    return ([] as Rule[]).concat(prefix, crasher, suffix);
 }

@@ -12,7 +12,7 @@ import * as ruleReferences from './source-templates/rule-references-template';
 
 
 // TODO: temp testing... remove...
-let x = emitRuleReferences({
+let x = XemitRuleReferences({
     PREDICATE_STRING_LITERAL: '"/foo"',
     MATCH: '__isMatch',
     CALL_HANDLER: '__callHandler',
@@ -47,7 +47,7 @@ export function emitThunkFunction(name: string, arity: number|undefined, env: Th
 
 
 // TODO: doc...
-export function emitRuleReferences(env: RuleReferencesEnv) {
+export function XemitRuleReferences(env: RuleReferencesEnv) {
     return emitFromTemplate(ruleReferences.template, '', undefined, env);
 }
 

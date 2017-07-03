@@ -20,9 +20,9 @@ import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
 // TODO: ...
 export default function normaliseRules(rules: MultimethodOptions['rules']) {
 
-    // TODO: temp tesing...
-    // - ensure all rules have valid predicates
-    // - ensure no two rules have the same normalised predicate
+    // TODO: doc these new invariants:
+    // - all rules have valid predicates
+    // - no two rules have the same normalised predicate (use chains for this scenario)
     let deduped = {} as {[s: string]: string[]};
     Object.keys(rules).forEach(predicateSource => {
         let p = toPredicate(predicateSource);

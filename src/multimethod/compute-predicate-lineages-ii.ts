@@ -1,12 +1,7 @@
-//import {CONTINUE} from './sentinels';
-//import disambiguateRoutes from './disambiguate-routes';
-//import fatalError from '../util/fatal-error';
 import Rule from './rule';
-//import {Predicate, toNormalPredicate, ANY} from '../set-theory/predicates';
-import {EulerDiagram, /*EulerSet*/} from '../set-theory/sets';
-
+import {EulerDiagram} from '../set-theory/sets';
 import repeatString from '../util/repeat-string';
-import {toIdentifierParts, parsePredicatePattern} from '../set-theory/predicates';
+import {toIdentifierParts, parsePredicatePattern, toMatchFunction} from '../set-theory/predicates';
 import {Lineage} from './compute-predicate-lineages';
 import isMetaHandler from './is-meta-handler';
 
@@ -17,16 +12,14 @@ import isMetaHandler from './is-meta-handler';
 // TODO: temp testing...
 export interface LineageII {
     matchingRules: EmitInfo[];
-    isMatchVarName: string;
-    isMatchVarDecl: string|null;
+
+    identifier: string;
+    isMatch(discriminant: string): boolean;
+    getCaptures(discriminant: string): {[captureName: string]: string};
 }
 export type EmitInfo = Rule & {
     callHandlerVarName: string;
     callHandlerVarDecl: string|null;
-    getCapturesVarName: string;
-    getCapturesVarDecl: string|null;
-    // thunkFunctionName: string;
-    // thunkFunctionDecl: string;
 };
 
 
@@ -41,39 +34,23 @@ export default function computePredicateLineagesII<T>(eulerDiagram: EulerDiagram
         let matchingRules = set.lineage.map((rule, i) => {
 
             let callHandlerVarName = `callHandlerː${toIdentifierParts(set.predicate)}${repeatString('ᐟ', i)}`;
-            let getCapturesVarName = `getCapturesː${toIdentifierParts(set.predicate)}${repeatString('ᐟ', i)}`;
             let callHandlerVarDecl: string|null = null;
-            let getCapturesVarDecl: string|null = null;
 
             // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
             if (isMetaHandler(rule.handler) || eulerDiagram.get(rule.predicate) === set) {
                 // TODO: move this emit string into snippets template function and extract from there
                 callHandlerVarDecl = `var ${callHandlerVarName} = eulerDiagram.get('${set.predicate}').matchingRules[${i}].handler;`;
-
-                let hasCaptures = parsePredicatePattern(rule.predicate).captureNames.length > 0;
-                if (hasCaptures) {
-                    // TODO: line too long!
-                    // TODO: move this emit string into snippets template function and extract from there
-                    getCapturesVarDecl = `var ${getCapturesVarName} = toMatchFunction(eulerDiagram.get('${set.predicate}').matchingRules[${i}].predicate);`;
-                }
             }
 
-
-
-            return {
-                ...rule,
-                callHandlerVarName,
-                callHandlerVarDecl,
-                getCapturesVarName,
-                getCapturesVarDecl
-            };
+            return {...rule, callHandlerVarName, callHandlerVarDecl};
         });
 
-        let isMatchVarName = `isMatchː${toIdentifierParts(set.predicate)}`;
-        let isMatchVarDecl = `var ${isMatchVarName} = toMatchFunction(eulerDiagram.get('${set.predicate}').predicate);`;
+        let identifier = toIdentifierParts(set.predicate);
+        let isMatch = toMatchFunction(set.predicate) as any; // TODO: doc casting effect here falsy->boolean (not quite accurate but works for conditionals)
+        let hasCaptures = parsePredicatePattern(set.lineage[0].predicate).captureNames.length > 0;
+        let getCaptures = hasCaptures ? toMatchFunction(set.lineage[0].predicate) as any : null; // TODO: cleanup - remove lineage[0] ref
 
-        return {matchingRules, isMatchVarName, isMatchVarDecl};
-        
+        return {matchingRules, identifier, isMatch, getCaptures};
     });
 
     return result;

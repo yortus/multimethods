@@ -43,7 +43,7 @@ function generateSelectorSourceCode(from: EulerSet & LineageII & WithThunks, nes
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
     subsets.forEach((set: EulerSet & LineageII & WithThunks, i) => {
-        let condition = `${indent}${i > 0 ? 'else ' : ''}if (${set.isMatchVarName}(discriminant)) `;
+        let condition = `${indent}${i > 0 ? 'else ' : ''}if (isMatchː${set.identifier}(discriminant)) `;
 
         if (set.subsets.length === 0) {
             lines.push(`${condition}return ${set.thunkName};`);
