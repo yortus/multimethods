@@ -3,7 +3,6 @@ import computePredicateLineagesII from './compute-predicate-lineages-ii';
 import generateMultimethod from './codegen/generate-multimethod';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
-import {toPredicate} from '../set-theory/predicates';
 import {EulerDiagram} from '../set-theory/sets';
 import {validateEulerDiagram} from './validate';
 import debug, {VALIDATE} from '../util/debug';
@@ -16,17 +15,17 @@ import debug, {VALIDATE} from '../util/debug';
 /** Internal function used to generate the RuleSet#execute method. */
 export default function createDispatchFunction(normalisedOptions: MultimethodOptions) {
 
+    // TODO: ...
+    let normalisedRules = normaliseRules(normalisedOptions.rules);
+
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the rule set.
-    let eulerDiagram = new EulerDiagram(Object.keys(normalisedOptions.rules).map(pattern => toPredicate(pattern)));
+    let eulerDiagram = new EulerDiagram(normalisedRules.map(rule => rule.predicate));
 
     // TODO: explain...
     if (debug.enabled) {
         let problems = validateEulerDiagram(eulerDiagram, normalisedOptions);
         problems.forEach(problem => debug(`${VALIDATE} %s`, problem));
     }
-
-    // TODO: ...
-    let normalisedRules = normaliseRules(normalisedOptions.rules);
 
     // Find every possible functionally-distinct route that any discriminant can take through the rule set.
     let eulerDiagramWithLineages = computePredicateLineages(eulerDiagram, normalisedRules);
