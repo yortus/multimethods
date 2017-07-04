@@ -174,14 +174,13 @@ function disambiguateRoutes(predicate: Predicate, alternateRuleLists: Rule[][]):
     if (alternateRuleLists.length === 1) return alternateRuleLists[0];
 
     // Find the longest common prefix and suffix of all the alternatives.
+    // TODO: possible for prefix and suffix to overlap? What to do?
     let prefix = getLongestCommonPrefix(alternateRuleLists);
     let suffix = getLongestCommonSuffix(alternateRuleLists);
 
-    // TODO: possible for prefix and suffix to overlap? What to do?
-
     // Ensure the non-common parts contain NO meta-rules.
     alternateRuleLists.forEach(cand => {
-        let nonCommonRules: Rule[] = cand.slice(prefix.length, -suffix.length);
+        let nonCommonRules: Rule[] = cand.slice(prefix.length, cand.length - suffix.length);
         let hasMetaRules = nonCommonRules.some(rule => isMetaHandler(rule.handler));
         if (hasMetaRules) return fatalError('MULTIPLE_PATHS_TO', predicate);
     });
