@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {toPredicate, parsePredicatePattern, toNormalPredicate} from 'multimethods';
+import {toPredicate, parsePredicateSource, toNormalPredicate} from 'multimethods';
 
 
 describe('Constructing a Predicate instance', () => {
@@ -64,7 +64,7 @@ describe('Constructing a Predicate instance', () => {
             let actualCaptureNames = [];
             try {
                 let pattern = toPredicate(patternSource);
-                let ast = parsePredicatePattern(patternSource);
+                let ast = parsePredicateSource(patternSource);
                 actualSignature = toNormalPredicate(pattern);
                 actualCaptureNames = ast.captureNames;
             }

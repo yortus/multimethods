@@ -55,7 +55,7 @@ export default function generateMultimethod(eulerDiagram: EulerDiagram<LineageII
     CONTINUE; // Suppress TS6133 decl never used
     const toMatchFunction = predicates.toMatchFunction;             //      <===== refd in selectBestImplementation
     toMatchFunction; // Suppress TS6133 decl never used
-    const parsePredicate = predicates.parsePredicatePattern;
+    const parsePredicate = predicates.parsePredicateSource;
     parsePredicate; // Suppress TS6133 decl never used
     const fatalError = fatalErrorUtil.default;
     fatalError; // Suppress TS6133 decl never used

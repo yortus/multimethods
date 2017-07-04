@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {parsePredicatePattern, PredicateAST} from 'multimethods'; // TODO: these exports are lib internals - expose them differently? eg under util or something like that?
+import {parsePredicateSource, PredicateAST} from 'multimethods'; // TODO: these exports are lib internals - expose them differently? eg under util or something like that?
 
 
 describe('Parsing a predicate string', () => {
@@ -60,7 +60,7 @@ describe('Parsing a predicate string', () => {
             let expectedError = '';// TODO: implement this...
             let actual: PredicateAST|string = 'ERROR';
             try {
-                actual = parsePredicatePattern(pattern);
+                actual = parsePredicateSource(pattern);
             }
             catch (ex) { }
             expect(actual).to.deep.equal(expected);

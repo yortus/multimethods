@@ -1,7 +1,7 @@
 import Rule from './rule';
 import {EulerDiagram} from '../set-theory/sets';
 import repeatString from '../util/repeat-string';
-import {toIdentifierParts, parsePredicatePattern, toMatchFunction} from '../set-theory/predicates';
+import {toIdentifierParts, parsePredicateSource, toMatchFunction} from '../set-theory/predicates';
 import {Lineage} from './compute-predicate-lineages';
 import isMetaHandler from './is-meta-handler';
 
@@ -47,7 +47,7 @@ export default function computePredicateLineagesII<T>(eulerDiagram: EulerDiagram
 
         let identifier = toIdentifierParts(set.predicate);
         let isMatch = toMatchFunction(set.predicate) as any; // TODO: doc casting effect here falsy->boolean (not quite accurate but works for conditionals)
-        let hasCaptures = parsePredicatePattern(set.lineage[0].predicate).captureNames.length > 0;
+        let hasCaptures = parsePredicateSource(set.lineage[0].predicate).captureNames.length > 0;
         let getCaptures = hasCaptures ? toMatchFunction(set.lineage[0].predicate) as any : null; // TODO: cleanup - remove lineage[0] ref
 
         return {matchingRules, identifier, isMatch, getCaptures};
