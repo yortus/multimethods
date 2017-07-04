@@ -62,13 +62,13 @@ describe('Constructing a Multimethod instance', () => {
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(CONTINUE),
 
-            'zzz/{...rest}': meta((rq, {rest}, next) => {
+            'zz/z/{...rest}': meta((rq, {rest}, next) => {
                 return calc(next({address: rest.split('').reverse().join('')}), rs => rs === CONTINUE ? val('NONE') : rs);
             }),
-            'zzz/b*z': (rq) => val(`${rq.address}`),
-            'zzz/./*': () => val('forty-two'),
+            'zz/z/b*z': (rq) => val(`${rq.address}`),
+            'zz/z/./*': () => val('forty-two'),
 
-            'CHAIN/{x}': [
+            'CHAIN-{x}': [
 
                 // Wrap subsequent results with ()
                 meta((rq, {x}, next) => calc(['(', next(rq), ')'], concat)),
@@ -118,19 +118,19 @@ describe('Constructing a Multimethod instance', () => {
             `api/foot ==> fo2-(fo1-(FOOt8))`,
             `api/bar ==> fallback`,
 
-            `zzz/baz ==> zab`,
-            `zzz/booz ==> zoob`,
-            `zzz/looz ==> NONE`,
-            `zzz/./{whatever} ==> forty-two`,
+            `zz/z/baz ==> zab`,
+            `zz/z/booz ==> zoob`,
+            `zz/z/looz ==> NONE`,
+            `zz/z/./{whatever} ==> forty-two`,
 
-            `CHAIN/a ==> ([a])`,
-            `CHAIN/ab ==> ([ab!ab!])`,
-            `CHAIN/abc ==> ([cba])`,
-            `CHAIN/1 ==> ([1])`,
-            `CHAIN/12 ==> ([121212])`,
-            `CHAIN/123 ==> ERROR: blocked`,
-            `CHAIN/abc123 ==> ERROR: blocked`,
-            `CHAIN/a1b2c3 ==> ([3c2b1a])`,
+            `CHAIN-a ==> ([a])`,
+            `CHAIN-ab ==> ([ab!ab!])`,
+            `CHAIN-abc ==> ([cba])`,
+            `CHAIN-1 ==> ([1])`,
+            `CHAIN-12 ==> ([121212])`,
+            `CHAIN-123 ==> ERROR: blocked`,
+            `CHAIN-abc123 ==> ERROR: blocked`,
+            `CHAIN-a1b2c3 ==> ([3c2b1a])`,
         ];
 
         // TODO: doc...

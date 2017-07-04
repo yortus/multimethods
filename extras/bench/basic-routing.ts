@@ -70,9 +70,9 @@ const ruleSet = {
     'api/bar': () => CONTINUE,
 
     // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-    'zzz/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
-    'zzz/b*z': ($req) => `${$req.address}`,
-    'zzz/./*': () => 'forty-two'
+    'zz/z/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+    'zz/z/b*z': ($req) => `${$req.address}`,
+    'zz/z/./*': () => 'forty-two'
 };
 
 
@@ -101,10 +101,10 @@ const tests = [
     `api/foot ==> fo2-(fo1-(FOOt))`,
     `api/bar ==> fallback`,
 
-    `zzz/baz ==> zab`,
-    `zzz/booz ==> zoob`,
-    `zzz/looz ==> NONE`,
-    `zzz/./{whatever} ==> forty-two`
+    `zz/z/baz ==> zab`,
+    `zz/z/booz ==> zoob`,
+    `zz/z/looz ==> NONE`,
+    `zz/z/./{whatever} ==> forty-two`
 ];
 
 
