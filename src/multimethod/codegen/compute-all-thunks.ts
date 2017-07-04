@@ -90,7 +90,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
         GET_CAPTURES: `getCapturesː${eulerDiagram.get(rule.predicate).identifier}`,
         CALL_HANDLER: set.matchingRules[i].callHandlerVarName,
         DELEGATE_DOWNSTREAM: downstreamRule ? getNameForRule(eulerDiagram, set, downstreamRule) : '',
-        DELEGATE_NEXT: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : '',
+        DELEGATE_FALLBACK: i < rules.length - 1 ? getNameForRule(eulerDiagram, set, rules[i + 1]) : '',
 
         // Statically known booleans --> 'true'/'false' literals (for dead code elimination in next step)
         ENDS_PARTITION: i === rules.length - 1 || isMetaHandler(rules[i + 1].handler),

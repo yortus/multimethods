@@ -47,22 +47,22 @@ export const template = function __FUNCNAME__(discriminant: string, result: any,
         if ($.IS_PURE_SYNC) {
 
             // All methods in this MM are synchronous
-            result = $.DELEGATE_NEXT(discriminant, result, __VARARGS__);
+            result = $.DELEGATE_FALLBACK(discriminant, result, __VARARGS__);
         }
         else {
             if ($.IS_PURE_ASYNC) {
 
                 // All methods in this MM are asynchronous
-                result = result.then(function (rs: any) { return $.DELEGATE_NEXT(discriminant, rs, __VARARGS__); });
+                result = result.then(function (rs: any) { return $.DELEGATE_FALLBACK(discriminant, rs, __VARARGS__); });
             }
             else {
 
                 // Methods may be sync or async, and we must differentiate at runtime
                 if ($.isPromise(result)) {
-                    result = result.then(function (rs: any) { return $.DELEGATE_NEXT(discriminant, rs, __VARARGS__); });
+                    result = result.then(function (rs: any) { return $.DELEGATE_FALLBACK(discriminant, rs, __VARARGS__); });
                 }
                 else {
-                    result = $.DELEGATE_NEXT(discriminant, result, __VARARGS__);
+                    result = $.DELEGATE_FALLBACK(discriminant, result, __VARARGS__);
                 }
             }
         }
@@ -88,7 +88,7 @@ export interface VariablesInScope {
     isPromise: (x: any) => boolean;
     CONTINUE: any;
     DELEGATE_DOWNSTREAM: Thunk;
-    DELEGATE_NEXT: Thunk;
+    DELEGATE_FALLBACK: Thunk;
     GET_CAPTURES: (discriminant: string) => {};
     CALL_HANDLER: (...args: any[]) => any; // Method signature, NB: context is passed last!
 }
