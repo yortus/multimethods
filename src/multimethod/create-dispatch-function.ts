@@ -12,7 +12,7 @@ import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
 import isMetaHandler from './is-meta-handler';
 import fatalError from '../util/fatal-error';
-import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse} from '../set-theory/predicates';
+import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate, Predicate} from '../set-theory/predicates';
 import {CONTINUE} from './sentinels';
 
 
@@ -59,7 +59,7 @@ interface MMInfo {
     nodes: MMNode[];
 }
 interface MMNode {
-    predicate: NormalPredicate;
+    predicate: Predicate;
     handlers: Function[];
     fallback: MMNode|null;
 
@@ -76,23 +76,29 @@ interface MMNode {
 function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: MultimethodOptions): MMInfo {
 
     // Augment sets with exactly-matching handlers in most- to least-specific order.
-    let euler2 = eulerDiagram.augment(set => ({handlers: getExactlyMatchingHandlers(set.predicate, normalisedOptions.rules)}));
+    let euler2 = eulerDiagram.augment(set => {
+        let predicateInRule = findMatchingPredicateInRules(set.predicate, normalisedOptions.rules) || set.predicate;
 
-    // TODO: create one node for each set. Leave `fallback` null for now
-    // let isMatch = toMatchFunction(set.predicate) as any; // TODO: doc casting effect here falsy->boolean (not quite accurate but works for conditionals)
-    // let hasCaptures = parsePredicatePattern(set.lineage[0].predicate).captureNames.length > 0;
-    // let getCaptures = hasCaptures ? toMatchFunction(set.lineage[0].predicate) as any : null; // TODO: cleanup - remove lineage[0] ref
+        // Find the index in the chain where meta-handlers end and regular handlers begin.
+        let chain = normalisedOptions.rules[predicateInRule] || [];
+        if (!Array.isArray(chain)) chain = [chain];
+        let i = 0;
+        while (i < chain.length && isMetaHandler(chain[i])) ++i;
+        // TODO: explain ordering: regular handlers from left-to-right; then meta-handlers from right-to-left
+        let handlers = chain.slice(i).concat(chain.slice(0, i).reverse());
 
- 
+        return {predicateInRule, handlers};
+    });
 
+    // TODO: create one node for each set. Leave `fallback` null for now.
     let nodes: MMNode[] = euler2.sets.map(set => ({
-        predicate: set.predicate,
-        handlers: getExactlyMatchingHandlers(set.predicate, normalisedOptions.rules),
+        predicate: set.predicateInRule,
+        handlers: set.handlers,
         fallback: null,
 
         identifier: toIdentifierParts(set.predicate),
         isMatch: toMatchFunction(set.predicate),
-        getCaptures: parse(set.predicate).captureNames.length ? toMatchFunction(set.predicate) as any : null
+        getCaptures: parse(set.predicateInRule).captureNames.length ? toMatchFunction(set.predicateInRule) as any : null
     }));
 
     // Go back over the nodes and work out the correct `fallback` node. There must be precisely one (except for the root).
@@ -143,23 +149,19 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
 
 
 // TODO: doc...
-function getExactlyMatchingHandlers(normalisedPredicate: NormalPredicate, rules: MultimethodOptions['rules']) {
-    for (let predicate in rules) {
-        if (toNormalPredicate(predicate as any) !== normalisedPredicate) continue;
-        let chain = rules[predicate];
-        if (!Array.isArray(chain)) chain = [chain];
+function findMatchingPredicateInRules(normalisedPredicate: NormalPredicate, rules: MultimethodOptions['rules']) {
+    for (let key in rules) {
+        let predicate = toPredicate(key);
 
-        // Find the index in the chain where meta-handlers end and regular handlers begin
-        let i = 0;
-        while (i < chain.length && isMetaHandler(chain[i])) ++i;
+        // Skip until we find the right predicate.
+        if (toNormalPredicate(predicate) !== normalisedPredicate) continue;
 
-        // TODO: explain ordering: regular handlers from left-to-right; then meta-handlers from right-to-left
-        let result = chain.slice(i).concat(chain.slice(0, i).reverse());
-        return result;
+        // Found it!
+        return predicate;
     }
 
-    // If we get here, there are no handlers for the given predicate (it is probably a synthesized one).
-    return [];
+    // If we get here, there is no matching predicate in the given `rules`.
+    return null;
 }
 
 
