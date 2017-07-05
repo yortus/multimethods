@@ -1,12 +1,9 @@
-// import computePredicateLineages from './compute-predicate-lineages';
-// import computePredicateLineagesII from './compute-predicate-lineages-ii';
-// import generateMultimethod from './codegen/generate-multimethod';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
 import {EulerDiagram, EulerSet} from '../set-theory/sets';
 import {toNormalPredicate, NormalPredicate} from '../set-theory/predicates';
-// import {validateEulerDiagram} from './validate';
-// import debug, {VALIDATE} from '../util/debug';
+import {validateEulerDiagram} from './validate';
+import debug, {DISPATCH, EMIT, VALIDATE} from '../util/debug';
 
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
@@ -32,12 +29,17 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the rule set.
     let eulerDiagram = new EulerDiagram(normalisedRules.map(rule => rule.predicate));
 
+    // TODO: explain...
+    if (debug.enabled) {
+        let problems = validateEulerDiagram(eulerDiagram, normalisedOptions);
+        problems.forEach(problem => debug(`${VALIDATE} %s`, problem));
+    }
+
+
 
 // TODO: temp testing...
-let multimethodName = `MM${multimethodCounter++}`;
-let dispatcher = emitDispatcher(multimethodName, normalisedOptions);
-
 let mminfo = createMMInfo(eulerDiagram, normalisedOptions);
+let dispatcher = emitDispatcher(mminfo);
 let thunkSelector = emitThunkSelector(mminfo);
 let thunks = mminfo.nodes.map(n => n.thunkSource).join('\n\n\n');
 let isMatch = mminfo.nodes.map((n, i) => `var isMatchː${n.identifier} = mminfo.nodes[${i}].isMatch;`).join('\n');
@@ -55,9 +57,13 @@ let handler = mminfo.nodes.reduce(
 ).join('\n');
 
 let source = [
+    `// ========== MULTIMETHOD DISPATCHER ==========`,
     dispatcher,
+    `// ========== THUNK SELECTOR ==========`,
     thunkSelector,
+    `// ========== THUNKS ==========`,
     thunks,
+    `// ========== ENVIRONMENT ==========`,
     `var toDiscriminant = mminfo.options.toDiscriminant;`,
     isMatch,
     getCaptures,
@@ -65,14 +71,34 @@ let source = [
 ].join('\n\n\n') + '\n';
 
 
-let mm = emitAll(multimethodName, source, {mminfo, CONTINUE, fatalError, isPromiseLike});
+// TODO: doc...
+if (debug.enabled) {
+    for (let line of source.split('\n')) debug(`${EMIT} %s`, line);
+}
+
+
+let mm = emitAll(source, {mminfo, CONTINUE, fatalError, isPromiseLike});
+
+// TODO: temp testing... neaten/improve emit of wrapper?
+if (debug.enabled) {
+    let oldmm = mm;
+    mm = function _dispatch(...args: any[]) {
+        debug(`${DISPATCH} Call   discriminant='%s'   args=%o`, normalisedOptions.toDiscriminant(...args), args);
+        let result = oldmm(...args);
+        let isAsync = isPromiseLike(result);
+        return andThen(result, result => {
+            debug(`${DISPATCH} Return%s   result=%o`, isAsync ? '   ASYNC' : '', result);
+            debug('');
+            return result;
+        });
+    }
+}
+
 return mm;
 
 
 function emitAll(
-    multimethodName: string,
     source: string,
-
     env: {
         mminfo: MMInfo,
         CONTINUE: any,
@@ -86,7 +112,7 @@ function emitAll(
     let abc = xyz
         .toString()
         .replace(/\$0/g, source)
-        .replace(/\$1/g, multimethodName);
+        .replace(/\$1/g, env.mminfo.name);
 
     let mm: Function = eval(`(${abc})`)();
     return mm;
@@ -108,19 +134,15 @@ function emitAll(
 
 
 
-    // // TODO: explain...
-    // if (debug.enabled) {
-    //     let problems = validateEulerDiagram(eulerDiagram, normalisedOptions);
-    //     problems.forEach(problem => debug(`${VALIDATE} %s`, problem));
-    // }
+}
 
-    // // Find every possible functionally-distinct route that any discriminant can take through the rule set.
-    // let eulerDiagramWithLineages = computePredicateLineages(eulerDiagram, normalisedRules);
-    // let eulerDiagramWithLineagesII = computePredicateLineagesII(eulerDiagramWithLineages);
 
-    // // TODO: ...
-    // let dispatchFunction = generateMultimethod(eulerDiagramWithLineagesII, normalisedOptions);
-    // return dispatchFunction;
+
+
+
+// TODO: copypasta - move to util
+function andThen(val: any, cb: (val: any) => any) {
+    return isPromiseLike(val) ? val.then(cb) : cb(val);
 }
 
 
@@ -129,6 +151,7 @@ function emitAll(
 
 // TODO: doc...
 interface MMInfo {
+    name: string;
     options: MultimethodOptions;
     nodes: MMNode[];
     root: MMNode;
@@ -245,8 +268,9 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
     });
 
     // TODO: all together...
+    let name = `MM${multimethodCounter++}`;
     let root = nodes[euler2.sets.indexOf(euler2.universe)];
-    return {options: normalisedOptions, nodes, root};
+    return {name, options: normalisedOptions, nodes, root};
 }
 
 
@@ -445,9 +469,9 @@ function emitThunkSelectorBlock(node: MMNode, nestDepth: number) {
 
 
 // TODO: temp testing...
-function emitDispatcher(functionName: string, options: MultimethodOptions) {
+function emitDispatcher(mminfo: MMInfo) {
 
-    let source = emitDispatchFunction(functionName, options.arity as number|undefined, {
+    let source = emitDispatchFunction(mminfo.name, mminfo.options.arity as number|undefined, {
         TO_DISCRIMINANT: 'toDiscriminant',
         SELECT_THUNK: 'selectThunk', // TODO: temp testing... how to know this name?
         CONTINUE: 'CONTINUE',
