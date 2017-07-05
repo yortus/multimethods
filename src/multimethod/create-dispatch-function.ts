@@ -1,12 +1,12 @@
-import computePredicateLineages from './compute-predicate-lineages';
-import computePredicateLineagesII from './compute-predicate-lineages-ii';
-import generateMultimethod from './codegen/generate-multimethod';
+// import computePredicateLineages from './compute-predicate-lineages';
+// import computePredicateLineagesII from './compute-predicate-lineages-ii';
+// import generateMultimethod from './codegen/generate-multimethod';
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
 import {EulerDiagram, EulerSet} from '../set-theory/sets';
 import {toNormalPredicate, NormalPredicate} from '../set-theory/predicates';
-import {validateEulerDiagram} from './validate';
-import debug, {VALIDATE} from '../util/debug';
+// import {validateEulerDiagram} from './validate';
+// import debug, {VALIDATE} from '../util/debug';
 
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
@@ -16,6 +16,7 @@ import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPre
 import {CONTINUE} from './sentinels';
 import {emitThunkFunction, emitDispatchFunction} from './codegen/emit';
 import repeatString from '../util/repeat-string';
+import isPromiseLike from '../util/is-promise-like';
 
 
 
@@ -39,12 +40,15 @@ let dispatcher = emitDispatcher(multimethodName, normalisedOptions);
 let mminfo = createMMInfo(eulerDiagram, normalisedOptions);
 let thunkSelector = emitThunkSelector(mminfo);
 let thunks = mminfo.nodes.map(n => n.thunkSource).join('\n\n\n');
-let isMatch = mminfo.nodes.map((n, i) => `var isMatch:${n.identifier} = mminfo.nodes[${i}].isMatch;`).join('\n');
-let getCaptures = mminfo.nodes.map((n, i) => `var getCaptures:${n.identifier} = mminfo.nodes[${i}].getCaptures;`).join('\n');
+let isMatch = mminfo.nodes.map((n, i) => `var isMatchː${n.identifier} = mminfo.nodes[${i}].isMatch;`).join('\n');
+let getCaptures = mminfo.nodes
+    .map((n, i) => `var getCapturesː${n.identifier} = mminfo.nodes[${i}].getCaptures;`)
+    .filter((_, i) => mminfo.nodes[i].getCaptures != null)
+    .join('\n');
 
 let handler = mminfo.nodes.reduce(
     (lines, n, i) => n.handlers.reduce(
-        (lines, _, j) => lines.concat(`var handler:${n.identifier}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].handlers[${j}];`),
+        (lines, _, j) => lines.concat(`var handlerː${n.identifier}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].handlers[${j}];`),
         lines
     ),
     [] as string[]
@@ -58,23 +62,46 @@ let source = [
     getCaptures,
     handler,
 ].join('\n\n\n') + '\n';
-source;
+
+
+let mm = emitAll(multimethodName, source, mminfo, normalisedOptions.toDiscriminant, CONTINUE, fatalError, isPromiseLike);
+return mm;
+
+
+function emitAll(
+    multimethodName: string,
+    source: string,
+
+    mminfo: MMInfo,
+    toDiscriminant: Function,
+    CONTINUE: any,
+    fatalError: Function,
+    isPromise: Function,
+) {
+
+    // Suppress TS6133 decl never used for above locals, which *are* referenced in the source code eval'ed below.
+    [mminfo, toDiscriminant, CONTINUE, fatalError, isPromise];
+
+    // TODO: doc...
+    let mm = eval(`(function () {\n${source}\nreturn ${multimethodName};\n})`)();
+    return mm;
+}
 
 
 
-    // TODO: explain...
-    if (debug.enabled) {
-        let problems = validateEulerDiagram(eulerDiagram, normalisedOptions);
-        problems.forEach(problem => debug(`${VALIDATE} %s`, problem));
-    }
+    // // TODO: explain...
+    // if (debug.enabled) {
+    //     let problems = validateEulerDiagram(eulerDiagram, normalisedOptions);
+    //     problems.forEach(problem => debug(`${VALIDATE} %s`, problem));
+    // }
 
-    // Find every possible functionally-distinct route that any discriminant can take through the rule set.
-    let eulerDiagramWithLineages = computePredicateLineages(eulerDiagram, normalisedRules);
-    let eulerDiagramWithLineagesII = computePredicateLineagesII(eulerDiagramWithLineages);
+    // // Find every possible functionally-distinct route that any discriminant can take through the rule set.
+    // let eulerDiagramWithLineages = computePredicateLineages(eulerDiagram, normalisedRules);
+    // let eulerDiagramWithLineagesII = computePredicateLineagesII(eulerDiagramWithLineages);
 
-    // TODO: ...
-    let dispatchFunction = generateMultimethod(eulerDiagramWithLineagesII, normalisedOptions);
-    return dispatchFunction;
+    // // TODO: ...
+    // let dispatchFunction = generateMultimethod(eulerDiagramWithLineagesII, normalisedOptions);
+    // return dispatchFunction;
 }
 
 
