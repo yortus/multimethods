@@ -37,38 +37,42 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
 
 
 
-// TODO: temp testing...
-let mminfo = createMMInfo(eulerDiagram, normalisedOptions);
-let dispatcher = emitDispatcher(mminfo);
-let thunkSelector = emitThunkSelector(mminfo);
-let thunks = mminfo.nodes.map(n => n.thunkSource).join('\n\n\n');
-let isMatch = mminfo.nodes.map((n, i) => `var isMatchː${n.identifier} = mminfo.nodes[${i}].isMatch;`).join('\n');
-let getCaptures = mminfo.nodes
-    .map((n, i) => `var getCapturesː${n.identifier} = mminfo.nodes[${i}].getCaptures;`)
-    .filter((_, i) => mminfo.nodes[i].getCaptures != null)
-    .join('\n');
+    // TODO: temp testing...
+    let mminfo = createMMInfo(eulerDiagram, normalisedOptions);
+    let dispatcher = emitDispatcher(mminfo);
+    let thunkSelector = emitThunkSelector(mminfo);
+    let thunks = mminfo.nodes.map(n => n.thunkSource).join('\n\n\n');
+    let isMatch = mminfo.nodes.map((n, i) => `var isMatchː${n.identifier} = mminfo.nodes[${i}].isMatch;`).join('\n');
+    let getCaptures = mminfo.nodes
+        .map((n, i) => `var getCapturesː${n.identifier} = mminfo.nodes[${i}].getCaptures;`)
+        .filter((_, i) => mminfo.nodes[i].getCaptures != null)
+        .join('\n');
 
-let handler = mminfo.nodes.reduce(
-    (lines, n, i) => n.handlers.reduce(
-        (lines, _, j) => lines.concat(`var handlerː${n.identifier}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].handlers[${j}];`),
-        lines
-    ),
-    [] as string[]
-).join('\n');
+    let handler = mminfo.nodes.reduce(
+        (lines, n, i) => n.handlers.reduce(
+            (lines, _, j) => lines.concat(`var handlerː${n.identifier}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].handlers[${j}];`),
+            lines
+        ),
+        [] as string[]
+    ).join('\n');
 
-let source = [
-    `// ========== MULTIMETHOD DISPATCHER ==========`,
-    dispatcher,
-    `// ========== THUNK SELECTOR ==========`,
-    thunkSelector,
-    `// ========== THUNKS ==========`,
-    thunks,
-    `// ========== ENVIRONMENT ==========`,
-    `var toDiscriminant = mminfo.options.toDiscriminant;`,
-    isMatch,
-    getCaptures,
-    handler,
-].join('\n\n\n') + '\n';
+    // TODO: revise comment... terminology has changed
+    // Generate the combined source code for handling the route. This includes local variable declarations for
+    // all rules' matchers and methods, as well as the interdependent function declarations that perform
+    // the cascading, and possibly asynchronous, evaluation of the route.
+    let source = [
+        `// ========== MULTIMETHOD DISPATCHER ==========`,
+        dispatcher,
+        `// ========== THUNK SELECTOR ==========`,
+        thunkSelector,
+        `// ========== THUNKS ==========`,
+        thunks,
+        `// ========== ENVIRONMENT ==========`,
+        `var toDiscriminant = mminfo.options.toDiscriminant;`,
+        isMatch,
+        getCaptures,
+        handler,
+    ].join('\n\n\n') + '\n';
 
 
 // TODO: doc...
@@ -114,6 +118,13 @@ function emitAll(
         .replace(/\$0/g, source)
         .replace(/\$1/g, env.mminfo.name);
 
+    // TODO: revise comment...
+    // Evaluate the source code, and return its result, which is the multimethod dispatch function. The use of eval
+    // here is safe. There are no untrusted inputs substituted into the source. The client-provided handler
+    // functions can do anything (so may be considered untrusted), but that has nothing to do with the use of 'eval'
+    // here, since they would need to be called by the dispatcher whether or not eval was used. More importantly,
+    // the use of eval here allows for multimethod dispatch code that is both more readable and more efficient, since it is
+    // tailored specifically to the options of this multimethod, rather than having to be generalized for all possible cases.
     let mm: Function = eval(`(${abc})`)();
     return mm;
 
@@ -327,7 +338,20 @@ function insertAsLeastSpecificRegularHandler(orderedHandlers: Function[], handle
 
 
 
-// TODO: doc...
+// TODO: rewrite comments. Esp signature of route executor matches signature of multimethod (as per provided Options)
+/**
+ * Generates the virtual method, called a 'thunk', for the given node.
+ * In the absence of meta-handlers, the logic for the virtual method is straightforward: execute each matching handler
+ * in turn, from the most- to the least-specific, until one produces a result. With meta-handlers, the logic becomes more
+ * complex, because a meta-handler must run *before* more-specific handlers, with those more specific
+ * handlers being wrapped into a callback function and passed to the meta-handler. To account for this, we perform
+ * an order-preserving partitioning of all matching handlers for the node, with each meta-handler starting a new
+ * partition. Within each partition, we use the simple cascading logic outlined above for the straightforward case.
+ * However, each partition as a whole is executed in reverse-order (least to most specific), with the next (more-specific)
+ * partition being passed as the `next` parameter to the meta-handler starting the previous (less-specific) partition.
+ * @param {node} MMNode - contains the list of matching handlers for the node's predicate, ordered from most- to least-specific.
+ * @returns {Thunk} the virtual method for the node.
+ */
 function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
     const mostSpecificNode = node;
     let allHandlers = [] as {handler: Function, node: MMNode, localIndex: number}[];

@@ -87,8 +87,17 @@ declare const $: VariablesInScope & BooleanConstants;
 export interface VariablesInScope {
     isPromiseLike: (x: any) => boolean;
     CONTINUE: any;
+
+    // TODO: revise comment...
+    /*
+        refers to the first rule in the next more-specific partition (see JSDoc notes at top
+        of this file). It is substituted in as the value of `$next` when a meta-rule's method is called.
+    */
     DELEGATE_DOWNSTREAM: Thunk;
+
+    /* used for cascading evaluation, i.e. when the thunk's immediate handler returns CONTINUE. */
     DELEGATE_FALLBACK: Thunk;
+
     GET_CAPTURES: (discriminant: string) => {};
     CALL_HANDLER: (...args: any[]) => any; // Method signature, NB: context is passed last!
 }
