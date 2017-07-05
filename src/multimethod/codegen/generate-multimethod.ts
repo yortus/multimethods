@@ -47,8 +47,8 @@ export default function generateMultimethod(eulerDiagram: EulerDiagram<LineageII
     // for eval cannot safely refer directly to expressions like `util.isPromiseLike`, since the `util` identifier may not
     // appear in the transpiled JavaScript for this module. This is because TypeScript may rename modules to try to preserve
     // ES6 module semantics.
-    const computeDiscriminant = normalisedOptions.toDiscriminant;
-    computeDiscriminant; // Suppress TS6133 decl never used
+    const toDiscriminant = normalisedOptions.toDiscriminant;
+    toDiscriminant; // Suppress TS6133 decl never used
     const isPromise = isPromiseLike;
     isPromise; // Suppress TS6133 decl never used
     const CONTINUE = sentinels.CONTINUE;
@@ -84,7 +84,7 @@ export default function generateMultimethod(eulerDiagram: EulerDiagram<LineageII
 if (debug.enabled) {
     let oldDispatch = dispatchFunction;
     dispatchFunction = function _dispatch(...args: any[]) {
-        debug(`${DISPATCH} Call   args=%o   discriminant='%s'`, args, computeDiscriminant(...args));
+        debug(`${DISPATCH} Call   args=%o   discriminant='%s'`, args, toDiscriminant(...args));
         let result = oldDispatch(...args);
         let isAsync = isPromiseLike(result);
         return andThen(result, result => {
@@ -124,12 +124,11 @@ function andThen(val: any, cb: (val: any) => any) {
 // TODO: temp testing...
 function getSourceCodeForDispatchFunction(functionName: string, options: MultimethodOptions) {
 
-    // TODO: fix arity cast below when MMOptions type is fixed
     let source = emitDispatchFunction(functionName, options.arity as number|undefined, {
-        computeDiscriminant: 'computeDiscriminant',
-        SELECT_IMPLEMENTATION: 'selectThunk', // TODO: temp testing... how to know this name?
+        TO_DISCRIMINANT: 'toDiscriminant',
+        SELECT_THUNK: 'selectThunk', // TODO: temp testing... how to know this name?
         CONTINUE: 'CONTINUE',
-        fatalError: 'fatalError'
+        FATAL_ERROR: 'fatalError'
     });
 
     // All done for this iteration.

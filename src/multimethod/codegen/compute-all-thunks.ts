@@ -81,8 +81,6 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     //   of this file). It is substituted in as the value of `$next` when a meta-rule's method is called.
     // - `handlerArgs` is a hash keyed by all possible parameter names a rule's raw handler may use, and whose
     //   values are the source code for the argument corresponding to each parameter.
-
-    // TODO: fix arity cast below when MMOptions type is fixed
     let source = emitThunkFunction(getNameForRule(eulerDiagram, set, rule), options.arity as number|undefined, {
         isPromise: 'isPromise',
         CONTINUE: 'CONTINUE',
