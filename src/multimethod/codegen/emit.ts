@@ -1,29 +1,9 @@
 import downlevelES6RestSpread from './source-transforms/downlevel-es6-rest-spread';
 import eliminateDeadCode from './source-transforms/eliminate-dead-code';
 import getNormalisedFunctionSource from './get-normalised-function-source';
-import processSpecialComments from './source-transforms/process-special-comments';
 import replaceAll from './source-transforms/replace-all';
 import * as dispatchFunction from './source-templates/dispatch-function-template';
 import * as thunkFunction from './source-templates/thunk-function-template';
-import * as ruleReferences from './source-templates/rule-references-template';
-
-
-
-
-
-// TODO: temp testing... remove...
-let x = XemitRuleReferences({
-    PREDICATE_STRING_LITERAL: '"/foo"',
-    MATCH: '__isMatch',
-    CALL_HANDLER: '__callHandler',
-    GET_CAPTURES: '__getCaptures',
-    EULER_DIAGRAM: 'mminfo',
-    TO_MATCH_FUNCTION: '__toMatchFn',
-
-    IS_FIRST_RULE: true,
-    HAS_CAPTURES: true,
-});
-x;
 
 
 
@@ -47,18 +27,8 @@ export function emitThunkFunction(name: string, arity: number|undefined, env: Th
 
 
 // TODO: doc...
-export function XemitRuleReferences(env: RuleReferencesEnv) {
-    return emitFromTemplate(ruleReferences.template, '', undefined, env);
-}
-
-
-
-
-
-// TODO: doc...
 export type DispatchFunctionEnv = Env<dispatchFunction.VariablesInScope>;
 export type ThunkFunctionEnv = Env<thunkFunction.VariablesInScope, thunkFunction.BooleanConstants>
-export type RuleReferencesEnv = Env<ruleReferences.VariablesInScope, ruleReferences.BooleanConstants>
 
 
 
@@ -82,7 +52,6 @@ function emitFromTemplate<TEnv>(templateFunction: Function, name: string, arity:
 
     // Generate source code
     let source = getNormalisedFunctionSource(templateFunction);
-    source = processSpecialComments(source);
     source = replaceAll(source, replacements);
     source = eliminateDeadCode(source);
     source = downlevelES6RestSpread(source, arity);

@@ -1,4 +1,4 @@
-import insertAsDescendent from './[todo-was-insert-as-descendent]';
+import insertAsDescendent from './insert-as-descendent';
 import {Predicate, toPredicate, toNormalPredicate, NormalPredicate, ANY} from '../predicates';
 import EulerSet from './euler-set';
 
