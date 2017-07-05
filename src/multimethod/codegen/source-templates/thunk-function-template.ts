@@ -58,7 +58,7 @@ export const template = function __FUNCNAME__(discriminant: string, result: any,
             else {
 
                 // Methods may be sync or async, and we must differentiate at runtime
-                if ($.isPromise(result)) {
+                if ($.isPromiseLike(result)) {
                     result = result.then(function (rs: any) { return $.DELEGATE_FALLBACK(discriminant, rs, __VARARGS__); });
                 }
                 else {
@@ -85,7 +85,7 @@ declare const $: VariablesInScope & BooleanConstants;
 // TODO: these must be in the lexical environment when the template is eval'd:
 // TODO: explain each of these in turn...
 export interface VariablesInScope {
-    isPromise: (x: any) => boolean;
+    isPromiseLike: (x: any) => boolean;
     CONTINUE: any;
     DELEGATE_DOWNSTREAM: Thunk;
     DELEGATE_FALLBACK: Thunk;

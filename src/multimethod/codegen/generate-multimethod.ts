@@ -9,7 +9,7 @@ import * as predicates from '../../set-theory/predicates';
 import MultimethodOptions from '../multimethod-options';
 import * as sentinels from '../sentinels';
 import {EulerDiagram} from '../../set-theory/sets';
-import isPromiseLike from '../../util/is-promise-like';
+import isPromiseLikeX from '../../util/is-promise-like';
 
 
 
@@ -49,8 +49,8 @@ export default function generateMultimethod(eulerDiagram: EulerDiagram<LineageII
     // ES6 module semantics.
     const toDiscriminant = normalisedOptions.toDiscriminant;
     toDiscriminant; // Suppress TS6133 decl never used
-    const isPromise = isPromiseLike;
-    isPromise; // Suppress TS6133 decl never used
+    const isPromiseLike = isPromiseLikeX;
+    isPromiseLike; // Suppress TS6133 decl never used
     const CONTINUE = sentinels.CONTINUE;
     CONTINUE; // Suppress TS6133 decl never used
     const toMatchFunction = predicates.toMatchFunction;             //      <===== refd in selectBestImplementation
@@ -109,7 +109,7 @@ if (debug.enabled) {
 
 // TODO: copypasta - move to util
 function andThen(val: any, cb: (val: any) => any) {
-    return isPromiseLike(val) ? val.then(cb) : cb(val);
+    return isPromiseLikeX(val) ? val.then(cb) : cb(val);
 }
 
 

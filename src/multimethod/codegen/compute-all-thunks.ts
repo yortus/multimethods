@@ -82,7 +82,7 @@ function getSourceCodeForRule(eulerDiagram: EulerDiagram<LineageII>, set: EulerS
     // - `handlerArgs` is a hash keyed by all possible parameter names a rule's raw handler may use, and whose
     //   values are the source code for the argument corresponding to each parameter.
     let source = emitThunkFunction(getNameForRule(eulerDiagram, set, rule), options.arity as number|undefined, {
-        isPromise: 'isPromise',
+        isPromiseLike: 'isPromiseLike',
         CONTINUE: 'CONTINUE',
 
         GET_CAPTURES: `getCapturesː${eulerDiagram.get(rule.predicate).identifier}`,

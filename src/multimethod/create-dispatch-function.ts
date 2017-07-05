@@ -58,13 +58,14 @@ let source = [
     dispatcher,
     thunkSelector,
     thunks,
+    `var toDiscriminant = mminfo.options.toDiscriminant;`,
     isMatch,
     getCaptures,
     handler,
 ].join('\n\n\n') + '\n';
 
 
-let mm = emitAll(multimethodName, source, mminfo, normalisedOptions.toDiscriminant, CONTINUE, fatalError, isPromiseLike);
+let mm = emitAll(multimethodName, source, {mminfo, CONTINUE, fatalError, isPromiseLike});
 return mm;
 
 
@@ -72,19 +73,37 @@ function emitAll(
     multimethodName: string,
     source: string,
 
-    mminfo: MMInfo,
-    toDiscriminant: Function,
-    CONTINUE: any,
-    fatalError: Function,
-    isPromise: Function,
+    env: {
+        mminfo: MMInfo,
+        CONTINUE: any,
+        fatalError: Function,
+        isPromiseLike: Function,
+    }
 ) {
 
-    // Suppress TS6133 decl never used for above locals, which *are* referenced in the source code eval'ed below.
-    [mminfo, toDiscriminant, CONTINUE, fatalError, isPromise];
+    let $0: any;
+    let $1: any;
+    let abc = xyz
+        .toString()
+        .replace(/\$0/g, source)
+        .replace(/\$1/g, multimethodName);
 
-    // TODO: doc...
-    let mm = eval(`(function () {\n${source}\nreturn ${multimethodName};\n})`)();
+    let mm: Function = eval(`(${abc})`)();
     return mm;
+
+
+    function xyz() {
+        let {mminfo, CONTINUE, fatalError, isPromiseLike} = env;
+
+        // Suppress TS6133 decl never used for above locals, which *are* referenced in the source code eval'ed below.
+        [mminfo, CONTINUE, fatalError, isPromiseLike];
+
+        $0
+
+        return $1;
+    }
+
+
 }
 
 
@@ -110,8 +129,9 @@ function emitAll(
 
 // TODO: doc...
 interface MMInfo {
-    root: MMNode;
+    options: MultimethodOptions;
     nodes: MMNode[];
+    root: MMNode;
 }
 interface MMNode {
     predicate: Predicate;
@@ -218,13 +238,15 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
         node.thunkSource = thunks.thunkSource;
     });
 
+    // TODO: children...
     nodes.forEach((node, i) => {
         let set = euler2.sets[i];
         node.children = set.subsets.map((subset: any) => nodes[euler2.sets.indexOf(subset)]); // TODO: why cast needed?
     });
 
+    // TODO: all together...
     let root = nodes[euler2.sets.indexOf(euler2.universe)];
-    return {root, nodes};
+    return {options: normalisedOptions, nodes, root};
 }
 
 
@@ -301,7 +323,7 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
 
         // TODO: temp testing...
         return emitThunkFunction(getNameForThunk(i), options.arity as number|undefined, { // TODO: fix cast after Options type is fixed
-            isPromise: 'isPromise',
+            isPromiseLike: 'isPromiseLike',
             CONTINUE: 'CONTINUE',
             GET_CAPTURES: `getCapturesː${node.identifier}`,
             CALL_HANDLER: `handlerː${node.identifier}${repeatString('ᐟ', localIndex)}`,
