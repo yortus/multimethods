@@ -69,6 +69,7 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
         thunks,
         `// ========== ENVIRONMENT ==========`,
         `var toDiscriminant = mminfo.options.toDiscriminant;`,
+        `var EMPTY_OBJECT = Object.freeze({});`,
         isMatch,
         getCaptures,
         handler,
@@ -409,8 +410,9 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
 
         // TODO: temp testing...
         return emitThunkFunction(getNameForThunk(i), options.arity as number|undefined, { // TODO: fix cast after Options type is fixed
-            isPromiseLike: 'isPromiseLike',
+            IS_PROMISE: 'isPromiseLike',
             CONTINUE: 'CONTINUE',
+            EMPTY_OBJECT: 'EMPTY_OBJECT',
             GET_CAPTURES: `getCapturesː${node.identifier}`,
             CALL_HANDLER: `handlerː${node.identifier}${repeatString('ᐟ', localIndex)}`,
             DELEGATE_DOWNSTREAM: downstream ? getNameForThunk(allHandlers.indexOf(downstream)) : '',
@@ -421,8 +423,8 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
             HAS_CAPTURES: node.getCaptures != null,
             IS_META_RULE: isMetaHandler(handler),
             HAS_DOWNSTREAM: downstream != null,
-            IS_PURE_SYNC: options.timing === 'sync',
-            IS_PURE_ASYNC: options.timing === 'async'
+            IS_NEVER_ASYNC: options.timing === 'sync',
+            IS_ALWAYS_ASYNC: options.timing === 'async'
         });
     });
 
