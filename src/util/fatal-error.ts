@@ -6,7 +6,6 @@ export default fatalError;
 
 
 
-function fatalError(error: 'AMBIGUOUS_RULE_ORDER', ruleA: string, ruleB: string): never;
 function fatalError(error: 'ARITY_MISMATCH'): never;
 function fatalError(error: 'DUPLICATE_PREDICATE', normalised: string, predicates: string): never;
 function fatalError(error: 'MULTIPLE_FALLBACKS_FROM', predicate: string, fallbacks: string): never;
@@ -26,12 +25,11 @@ function fatalError(error: keyof typeof messages, ...params: (string|number)[]):
 
 
 export const messages = {
-    'AMBIGUOUS_RULE_ORDER': `Ambiguous rule ordering - which is more specific of '%s' and '%s'?`,
     'ARITY_MISMATCH': `arity mismatch`, // TODO: improve diagnostic message
-    'DUPLICATE_PREDICATE': `The predicate '%s' is duplicated across multiple rules: %s. To resolve this, use a handler chain.`,
+    'DUPLICATE_PREDICATE': `The predicate '%s' is duplicated across multiple methods: %s. To resolve this, use a method chain.`,
     'MIXED_CHAIN': `Chain for predicate '%s' has metahandler(s) to the right of regular handler(s). Metahandlers must be leftmost in the chain.`,
     'MULTIPLE_FALLBACKS_FROM': `Multiple possible fallbacks from '%s': %s`,
-    'MULTIPLE_PATHS_TO': `Multiple paths to '%s' with different meta-rules`,
+    'MULTIPLE_PATHS_TO': `Multiple paths to '%s' with different meta-methods`,
     'PREDICATE_SYNTAX': `Predicate syntax error: %s`,
     'UNHANDLED': `Multimethod dispatch failure: call was unhandled for the given arguments`,
     'VALIDATION': `Multimethod validation failed. The following problems were found: %s`,

@@ -1,6 +1,6 @@
 import fatalError from '../../util/fatal-error';
 import MultimethodOptions from './multimethod-options';
-import isMetaHandler from './is-meta-handler';
+import isMetaMethod from './is-meta-method';
 
 
 
@@ -16,18 +16,18 @@ export default function normaliseOptions(options?: Partial<MultimethodOptions>, 
     let arity = options.arity !== undefined ? options.arity : staticArity !== undefined ? staticArity : 'variadic';
     let timing = options.timing || 'mixed';
     let toDiscriminant = options.toDiscriminant || ((...args: any[]) => args.map(arg => (arg || '').toString()).join(''));
-    let rules = options.rules || {};
+    let methods = options.methods || {};
 
-    // TODO: more validation, eg signatures of given rules, legal arity, legal timing, legal discriminant, etc
+    // TODO: more validation, eg signatures of given methods, legal arity, legal timing, legal discriminant, etc
     validateArity(arity, staticArity);
-    validateRules(rules);
+    validateMethods(methods);
 
     // TODO: ...
     return {
         arity,
         timing,
         toDiscriminant,
-        rules
+        methods
     };
 }
 
@@ -48,16 +48,16 @@ function validateArity(arity: MultimethodOptions['arity'], staticArity?: Multime
 
 
 
-function validateRules(rules: MultimethodOptions['rules']) {
-    Object.keys(rules).forEach(predicate => {
+function validateMethods(methods: MultimethodOptions['methods']) {
+    Object.keys(methods).forEach(predicate => {
         // TODO: anything to validate?
 
-        let handler = rules[predicate];
-        if (Array.isArray(handler)) {
-            let chain = handler;
+        let method = methods[predicate];
+        if (Array.isArray(method)) {
+            let chain = method;
 
-            // ensure first regular handler in chain (if any) comes after last meta handler in chain (if any)
-            if (chain.some((fn, i) => i < chain.length - 1 && !isMetaHandler(fn) && isMetaHandler(chain[i + 1]))) {
+            // ensure first regular method in chain (if any) comes after last meta-method in chain (if any)
+            if (chain.some((fn, i) => i < chain.length - 1 && !isMetaMethod(fn) && isMetaMethod(chain[i + 1]))) {
                 return fatalError('MIXED_CHAIN', predicate);
             }
         }

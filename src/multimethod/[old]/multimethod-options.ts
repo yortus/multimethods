@@ -7,5 +7,5 @@ export default interface MultimethodOptions {
     arity: number | 'variadic';
     timing: 'mixed' | 'async' | 'sync';
     toDiscriminant: Function;
-    rules: { [predicatePattern: string]: Function|Function[]; };
+    methods: { [predicatePattern: string]: Function|Function[]; };
 }

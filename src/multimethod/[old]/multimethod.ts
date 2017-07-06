@@ -9,7 +9,7 @@ export default multimethod;
 
 // --------------------------------------------------
 export type Captures = {[captureName: string]: string};
-export type Rules<THandler extends Function> = { [predicate: string]: THandler|THandler[]; };
+export type Methods<TMethod extends Function> = { [predicate: string]: TMethod|TMethod[]; };
 
 
 
@@ -24,23 +24,23 @@ export interface Options {
     // TODO: alt names: unambiguous explicit exact definite precise complete whole exhaustive strict
     strict?: undefined|boolean;
     toDiscriminant: Function;
-    rules: Rules<Function>;
+    methods: Methods<Function>;
 }
 export interface UnaryOptions<T0, TR> extends Options {
     toDiscriminant: (_0: T0) => string;
-    rules: Rules<(_0: T0, captures: Captures, next: (_0: T0) => TR) => TR>;
+    methods: Methods<(_0: T0, captures: Captures, next: (_0: T0) => TR) => TR>;
 }
 export interface BinaryOptions<T0, T1, TR> extends Options {
     toDiscriminant: (_0: T0, _1: T1) => string;
-    rules: Rules<(_0: T0, _1: T1, captures: Captures, next: (_0: T0, _1: T1) => TR) => TR>;
+    methods: Methods<(_0: T0, _1: T1, captures: Captures, next: (_0: T0, _1: T1) => TR) => TR>;
 }
 export interface TernaryOptions<T0, T1, T2, TR> extends Options {
     toDiscriminant: (_0: T0, _1: T1, _2: T2) => string;
-    rules: Rules<(_0: T0, _1: T1, _2: T2, captures: Captures, next: (_0: T0, _1: T1, _2: T2) => TR) => TR>;
+    methods: Methods<(_0: T0, _1: T1, _2: T2, captures: Captures, next: (_0: T0, _1: T1, _2: T2) => TR) => TR>;
 }
 export interface VariadicOptions<T, TR> extends Options {
     toDiscriminant: (...args: T[]) => string;
-    rules: Rules<(...args: Array<T|Captures|((...args: T[]) => TR)>) => TR>;
+    methods: Methods<(...args: Array<T|Captures|((...args: T[]) => TR)>) => TR>;
     // TODO: ^--- the `...args` type is best effort, but really needs to be (...args: T[], captures: {[name: string]: string}, next: Next)
 }
 
@@ -69,7 +69,7 @@ function multimethod(options: Options) {
         arity: options.arity || 'variadic',
         timing: options.async ? (options.async === 'always' ? 'async' : 'sync') : 'mixed',
         toDiscriminant: options.toDiscriminant,
-        rules: options.rules
+        methods: options.methods
     };
 
     // Create a new options object incorporating all defaults.

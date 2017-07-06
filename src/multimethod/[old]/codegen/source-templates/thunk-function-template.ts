@@ -22,7 +22,7 @@ export const template = function __FUNCNAME__(discriminant: string, result: {}|P
     }
 
     // TODO: call method in most efficient way...
-    if (!$.IS_META_RULE) {
+    if (!$.IS_META_METHOD) {
         result = $.CALL_HANDLER(__VARARGS__, captures);
     }
     else {
@@ -86,8 +86,8 @@ export interface VariablesInScope {
 
     // TODO: revise comment...
     /*
-        refers to the first rule in the next more-specific partition (see JSDoc notes at top
-        of this file). It is substituted in as the value of `$next` when a meta-rule's method is called.
+        refers to the first method in the next more-specific partition (see JSDoc notes at top
+        of this file). It is substituted in as the value of `forward` when a meta-method is called.
     */
     DELEGATE_DOWNSTREAM: Thunk;
 
@@ -103,7 +103,7 @@ export interface VariablesInScope {
 export interface BooleanConstants {
     ENDS_PARTITION: boolean;
     HAS_CAPTURES: boolean;
-    IS_META_RULE: boolean;
+    IS_META_METHOD: boolean;
     IS_ALWAYS_ASYNC: boolean;
     IS_NEVER_ASYNC: boolean;
     HAS_DOWNSTREAM: boolean;

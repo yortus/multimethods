@@ -33,7 +33,7 @@ describe('Constructing a Multimethod instance', () => {
     ];
 
     variants.forEach(({vname, async, val, err}) => describe(`(${vname})`, () => {
-        let rules = {
+        let methods = {
             '/...': () => err('nothing matches!'),
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
@@ -138,7 +138,7 @@ describe('Constructing a Multimethod instance', () => {
             arity: 1,
             toDiscriminant: (r: any) => r.address,
             async,
-            rules
+            methods
         });
 
         tests.forEach(test => it(test, async () => {

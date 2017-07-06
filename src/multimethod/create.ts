@@ -27,7 +27,7 @@ function create(options: Options) {
         arity: options.arity || 'variadic',
         timing: options.async === undefined ? 'mixed' : (options.async === true ? 'async' : 'sync'),
         toDiscriminant: options.toDiscriminant || (() => { throw new Error('Implement default discriminant!') }), // TODO: implement...
-        rules: options.methods || {}
+        methods: options.methods || {}
     };
 
     // Create a new options object incorporating all defaults.

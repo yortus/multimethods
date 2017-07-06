@@ -39,41 +39,46 @@ import MM, {meta, CONTINUE, validate} from 'multimethods';
 const COUNT = 1000000;
 
 
-// Declare the test rule set.
-const ruleSet = {
-    '...': () => 'UNHANDLED',
-    '/foo': () => 'foo',
-    '/bar': () => 'bar',
-    '/baz': () => 'baz',
-    '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
+// Declare the test multimethod
+const mm = MM({
+    toDiscriminant: (r: {address: string}) => r.address,
+    methods: {
+        '...': () => 'UNHANDLED',
+        '/foo': () => 'foo',
+        '/bar': () => 'bar',
+        '/baz': () => 'baz',
+        '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
 
-    'a/*': () => `starts with 'a'`,
-    '*/b': () => `ends with 'b'`,
-    'a/b': () => `starts with 'a' AND ends with 'b'`,
+        'a/*': () => `starts with 'a'`,
+        '*/b': () => `ends with 'b'`,
+        'a/b': () => `starts with 'a' AND ends with 'b'`,
 
-    'c/*': () => `starts with 'c'`,
-    '*/d': () => `ends with 'd'`,
-    'c/d': () => CONTINUE,
+        'c/*': () => `starts with 'c'`,
+        '*/d': () => `ends with 'd'`,
+        'c/d': () => CONTINUE,
 
-    'api/...': [() => `fallback`, () => `fallback`],
-    'api/fo*o': () => CONTINUE,
-    'api/fo*': [
-        meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
-        meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`)
-    ],
-    'api/foo': [
-        meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
-        () => 'FOO'
-    ],
-    'api/foot': () => 'FOOt',
-    'api/fooo': () => 'fooo',
-    'api/bar': () => CONTINUE,
+        'api/...': [() => `fallback`, () => `fallback`],
+        'api/fo*o': () => CONTINUE,
+        'api/fo*': [
+            meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
+            meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`)
+        ],
+        'api/foo': [
+            meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
+            () => 'FOO'
+        ],
+        'api/foot': () => 'FOOt',
+        'api/fooo': () => 'fooo',
+        'api/bar': () => CONTINUE,
 
-    // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-    'zz/z/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
-    'zz/z/b*z': ($req) => `${$req.address}`,
-    'zz/z/./*': () => 'forty-two'
-};
+        // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
+        'zz/z/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+        'zz/z/b*z': ($req) => `${$req.address}`,
+        'zz/z/./*': () => 'forty-two'
+    },
+    arity: 1,
+    async: 'never'
+});
 
 
 // Encode a battery of requests with their expected responses.
@@ -113,13 +118,6 @@ const tests = [
 
     // Set up the tests.
     console.log(`Running perf test: basic routing...`);
-    let mm = MM({
-        rules: ruleSet,
-        toDiscriminant: (r: {address: string}) => r.address,
-        arity: 1,
-        async: 'never'
-    });
-    // validate(mm);
     let addresses = tests.map(test => test.split(' ==> ')[0]);
     let requests = addresses.map(address => ({address}));
     let responses = tests.map(test => test.split(' ==> ')[1]);

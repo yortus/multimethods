@@ -1,5 +1,5 @@
 import MultimethodOptions from './multimethod-options';
-import normaliseRules from './normalise-rules';
+import normaliseMethods from './normalise-methods';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 import {toNormalPredicate, NormalPredicate} from '../../set-theory/predicates';
 import {validateEulerDiagram} from './validate';
@@ -7,7 +7,7 @@ import debug, {DISPATCH, EMIT, VALIDATE} from '../../util/debug';
 
 import getLongestCommonPrefix from '../../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../../util/get-longest-common-suffix';
-import isMetaHandler from './is-meta-handler';
+import isMetaMethod from './is-meta-method';
 import fatalError from '../../util/fatal-error';
 import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate, Predicate} from '../../set-theory/predicates';
 import {CONTINUE} from './sentinels';
@@ -19,15 +19,15 @@ import isPromiseLike from '../../util/is-promise-like';
 
 
 
-// TODO: review all comments here - eg refs to 'RuleSet' should be updated to Multimethod, etc
-/** Internal function used to generate the RuleSet#execute method. */
+// TODO: review all comments here
+/** TODO: doc... */
 export default function createDispatchFunction(normalisedOptions: MultimethodOptions) {
 
     // TODO: ...
-    let normalisedRules = normaliseRules(normalisedOptions.rules);
+    let normalisedMethods = normaliseMethods(normalisedOptions.methods);
 
-    // Generate a taxonomic arrangement of all the predicate patterns that occur in the rule set.
-    let eulerDiagram = new EulerDiagram(Object.keys(normalisedRules).map(toPredicate));
+    // Generate a taxonomic arrangement of all the predicate patterns that occur in the `methods` hash.
+    let eulerDiagram = new EulerDiagram(Object.keys(normalisedMethods).map(toPredicate));
 
     // TODO: explain...
     if (debug.enabled) {
@@ -57,9 +57,9 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
     ).join('\n');
 
     // TODO: revise comment... terminology has changed
-    // Generate the combined source code for handling the route. This includes local variable declarations for
-    // all rules' matchers and methods, as well as the interdependent function declarations that perform
-    // the cascading, and possibly asynchronous, evaluation of the route.
+    // Generate the combined source code for the multimethod. This includes local variable declarations for
+    // all predicates and methods, as well as the interdependent function declarations that perform
+    // the cascading, and possibly asynchronous, evaluation of each multimethod call.
     let source = [
         `// ========== MULTIMETHOD DISPATCHER ==========`,
         dispatcher,
@@ -190,16 +190,16 @@ interface MMNode {
 // TODO: temp testing...
 // TODO: reuse/revise old comments below, all from computePredicateLineages()...
 // (1):
-    // Every route begins with this universal rule. It matches all discriminants,
-    // and its handler simply returns the `CONTINUE` sentinel value.
+    // Every route begins with the universal predicate. It matches all discriminants,
+    // and its method simply returns the `CONTINUE` sentinel value.
 
 // (2):
     // Every set in the euler diagram represents the best-matching pattern for some set of discriminants. Therefore, the set
     // of all possible discriminants may be thought of as being partitioned by an euler diagram into one partition per set,
     // where for each partition, that partition's set holds the most-specific predicate that matches that partition's
-    // discriminants. For every such partition, we can concatenate the 'equal best' rules for all the sets along the
-    // routes from the universal set to the most-specific set in the partition, thus getting a rule
-    // list for each partition, ordered from least- to most-specific, of all the rules that match all the partition's
+    // discriminants. For every such partition, we can concatenate the 'equal best' methods for all the sets along the
+    // routes from the universal set to the most-specific set in the partition, thus getting a method
+    // list for each partition, ordered from least- to most-specific, of all the methods that match all the partition's
     // discriminants. One complication here is that there may be multiple routes from the universal set to some other set in the
     // euler diagram, since it is a DAG and may therefore contain 'diamonds'. Since we tolerate no ambiguity, these multiple
     // routes must be effectively collapsed down to a single unambiguous route. The details of this are in the
@@ -207,51 +207,51 @@ interface MMNode {
 
 // (3):
     // Returns a mapping of every possible route through the given euler diagram, keyed by predicate. There is one route for each
-    // set in the euler diagram. A route is simply a list of rules, ordered from least- to most-specific, that all match the set
+    // set in the euler diagram. A route is simply a list of methods, ordered from least- to most-specific, that all match the set
     // of discriminants matched by the corresponding euler diagram set's predicate. Routes are an important internal concept,
     // because each route represents the ordered list of matching methods for any given discriminant.
 
 // (4):
-    // Get all the rules in the rule set whose normalized predicate exactly matches that of the given set's predicate.
-    // Some sets may have no matching rules, because the euler diagram may include predicates that are not in the
-    // original ruleset for the following cases:
-    // (i) the always-present root predicate '…', which may be in the rule set.
-    // (ii) predicates synthesized at the intersection of overlapping (i.e. non-disjoint) predicates in the rule set.
+    // Get all the methods in the methods hash whose normalized predicate exactly matches that of the given set's predicate.
+    // Some sets may have no matching methods, because the euler diagram may include predicates that are not in the
+    // original methods hash for the following cases:
+    // (i) the always-present root predicate '…', which may be in the methods hash.
+    // (ii) predicates synthesized at the intersection of overlapping (i.e. non-disjoint) predicates in the methods hash.
 
 // (5):
-    // We now have an array of rules whose predicates are all equivalent. To sort these rules from least- to most-
-    // specific, we use a comparator that orders any two given 'equivalent' rules according to the following laws:
-    // (i) A metarule is always less specific than a regular rule
-    // (ii) For two regular rules in the same chain, the leftmost rule is more specific
-    // (iii) For two metarules in the same chain, the leftmost rule is less specific
+    // We now have an array of methods whose predicates are all equivalent. To sort these methods from least- to most-
+    // specific, we use a comparator that orders any two given 'equivalent' methods according to the following laws:
+    // (i) A meta-method is always less specific than a regular method
+    // (ii) For two regular methods in the same chain, the leftmost method is more specific
+    // (iii) For two meta-methods in the same chain, the leftmost method is less specific
     // (iv) Anything else is ambiguous and results in an error
 
 function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: MultimethodOptions): MMInfo {
 
     // Augment sets with exactly-matching handlers in most- to least-specific order.
     let euler2 = eulerDiagram.augment(set => {
-        let predicateInRule = findMatchingPredicateInRules(set.predicate, normalisedOptions.rules) || set.predicate;
+        let predicateInHash = findMatchingPredicateInMethods(set.predicate, normalisedOptions.methods) || set.predicate;
 
         // Find the index in the chain where meta-handlers end and regular handlers begin.
-        let chain = normalisedOptions.rules[predicateInRule] || [];
+        let chain = normalisedOptions.methods[predicateInHash] || [];
         if (!Array.isArray(chain)) chain = [chain];
         let i = 0;
-        while (i < chain.length && isMetaHandler(chain[i])) ++i;
+        while (i < chain.length && isMetaMethod(chain[i])) ++i;
         // TODO: explain ordering: regular handlers from left-to-right; then meta-handlers from right-to-left
         let handlers = chain.slice(i).concat(chain.slice(0, i).reverse());
 
-        return {predicateInRule, handlers};
+        return {predicateInHash, handlers};
     });
 
     // TODO: create one node for each set. Leave everything from `fallback` onward null for now.
     let nodes: MMNode[] = euler2.sets.map(set => ({
-        predicate: set.predicateInRule,
+        predicate: set.predicateInHash,
         handlers: set.handlers,
         fallback: null,
 
         identifier: toIdentifierParts(set.predicate),
         isMatch: toMatchFunction(set.predicate),
-        getCaptures: parse(set.predicateInRule).captureNames.length ? toMatchFunction(set.predicateInRule) as any : null,
+        getCaptures: parse(set.predicateInHash).captureNames.length ? toMatchFunction(set.predicateInHash) as any : null,
 
         thunkName: '', // TODO: leave for now...
         thunkSource: '', // TODO: leave for now...
@@ -289,7 +289,7 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
             // Ensure the divergent sets contain NO meta-handlers.
             pathsFromRoot.forEach(path => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
-                let hasMetaHandlers = divergentSets.some(set => set.handlers.some(h => isMetaHandler(h)));
+                let hasMetaHandlers = divergentSets.some(set => set.handlers.some(h => isMetaMethod(h)));
                 if (hasMetaHandlers) return fatalError('MULTIPLE_PATHS_TO', node.predicate);
             });
 
@@ -328,8 +328,8 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
 
 
 // TODO: doc...
-function findMatchingPredicateInRules(normalisedPredicate: NormalPredicate, rules: MultimethodOptions['rules']) {
-    for (let key in rules) {
+function findMatchingPredicateInMethods(normalisedPredicate: NormalPredicate, methods: MultimethodOptions['methods']) {
+    for (let key in methods) {
         let predicate = toPredicate(key);
 
         // Skip until we find the right predicate.
@@ -339,7 +339,7 @@ function findMatchingPredicateInRules(normalisedPredicate: NormalPredicate, rule
         return predicate;
     }
 
-    // If we get here, there is no matching predicate in the given `rules`.
+    // If we get here, there is no matching predicate in the given `methods`.
     return null;
 }
 
@@ -369,7 +369,7 @@ function getAllPathsFromRootToSet<T extends EulerSet>(set: T): T[][] {
 // TODO: doc...
 function insertAsLeastSpecificRegularHandler(orderedHandlers: Function[], handler: Function) {
     let i = 0;
-    while (i < orderedHandlers.length && !isMetaHandler(orderedHandlers[i])) ++i;
+    while (i < orderedHandlers.length && !isMetaMethod(orderedHandlers[i])) ++i;
     orderedHandlers.splice(i, 0, handler);
 }
 
@@ -401,12 +401,12 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
 
     let sources = allHandlers.map(({handler, node, localIndex}, i) => {
 
-        // To avoid unnecessary duplication, skip emit for regular rules that are less specific that the set's predicate, since these will be handled in their own set.
-        if (!isMetaHandler(handler) && node !== mostSpecificNode) return '';
+        // To avoid unnecessary duplication, skip emit for regular methods that are less specific that the set's predicate, since these will be handled in their own set.
+        if (!isMetaMethod(handler) && node !== mostSpecificNode) return '';
 
         // TODO: temp testing... explain!!
         let isFinalHandler = i === allHandlers.length - 1;
-        let downstream = allHandlers.filter(({handler}, j) => (j === 0 || isMetaHandler(handler)) && j < i).pop();
+        let downstream = allHandlers.filter(({handler}, j) => (j === 0 || isMetaMethod(handler)) && j < i).pop();
 
         // TODO: temp testing...
         return emitThunkFunction(getNameForThunk(i), options.arity as number|undefined, { // TODO: fix cast after Options type is fixed
@@ -419,9 +419,9 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
             DELEGATE_FALLBACK: isFinalHandler ? '' : getNameForThunk(i + 1),
 
             // Statically known booleans --> 'true'/'false' literals (for dead code elimination)
-            ENDS_PARTITION: isFinalHandler || isMetaHandler(allHandlers[i + 1].handler),
+            ENDS_PARTITION: isFinalHandler || isMetaMethod(allHandlers[i + 1].handler),
             HAS_CAPTURES: node.getCaptures != null,
-            IS_META_RULE: isMetaHandler(handler),
+            IS_META_METHOD: isMetaMethod(handler),
             HAS_DOWNSTREAM: downstream != null,
             IS_NEVER_ASYNC: options.timing === 'sync',
             IS_ALWAYS_ASYNC: options.timing === 'async'
@@ -431,9 +431,9 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
     // TODO: thunk names and sources...
 
     // TODO: temp testing...
-    // The 'entry point' rule is the one whose handler we call to begin the cascading evaluation of the route. It is the
-    // least-specific meta-rule, or if there are no meta-rules, it is the most-specific ordinary rule.
-    let entryPoint = allHandlers.filter(el => isMetaHandler(el.handler)).pop() || allHandlers[0];
+    // The 'entry point' method is the one whose method we call to begin the cascading evaluation of the route. It is the
+    // least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
+    let entryPoint = allHandlers.filter(el => isMetaMethod(el.handler)).pop() || allHandlers[0];
     let thunkName = getNameForThunk(allHandlers.indexOf(entryPoint));
     return {
         thunkName,
@@ -444,7 +444,7 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
     function getNameForThunk(i: number): string {
         let el = allHandlers[i];
         let baseName = `${el.node.identifier}${repeatString('ᐟ', el.localIndex)}`;
-        if (isMetaHandler(el.handler) && (el.node !== mostSpecificNode || el.localIndex > 0)) {
+        if (isMetaMethod(el.handler) && (el.node !== mostSpecificNode || el.localIndex > 0)) {
             return `thunkː${mostSpecificNode.identifier}ːviaː${baseName}`;
         }
         else {
