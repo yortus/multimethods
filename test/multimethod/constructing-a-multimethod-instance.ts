@@ -27,8 +27,8 @@ describe('Constructing a Multimethod instance', () => {
     const randomError = msg => (Math.random() >= 0.5 ? immediateError : promisedError)(msg);
 
     let variants = [
-        { vname: 'all synchronous', async: 'never', val: immediateValue, err: immediateError },
-        { vname: 'all asynchronous', async: 'always', val: promisedValue, err: promisedError },
+        { vname: 'all synchronous', async: false, val: immediateValue, err: immediateError },
+        { vname: 'all asynchronous', async: true, val: promisedValue, err: promisedError },
         { vname: 'randomized sync/async', async: undefined, val: randomValue, err: randomError }
     ];
 

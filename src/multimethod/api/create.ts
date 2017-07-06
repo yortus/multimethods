@@ -1,6 +1,6 @@
-import createDispatchFunction from './[old]/create-dispatch-function';
-import MultimethodOptions from './[old]/multimethod-options';
-import normaliseOptions from './[old]/normalise-options';
+import createDispatchFunction from '../[old]/create-dispatch-function';
+import MultimethodOptions from '../[old]/multimethod-options';
+import normaliseOptions from '../[old]/normalise-options';
 import Options from './options';
 export default create;
 
