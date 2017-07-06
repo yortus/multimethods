@@ -1,7 +1,8 @@
+import check from '../check';
+
 import createDispatchFunction from '../[old]/create-dispatch-function';
 import MultimethodOptions from '../[old]/multimethod-options';
 import normaliseOptions from '../[old]/normalise-options';
-import validate from '../[old]/validate';
 import Options from './options';
 export default create;
 
@@ -23,6 +24,9 @@ function create<T, TR>(options: {async: true} & VariadicOptions<T, TR | Promise<
 function create<T, TR>(options: VariadicOptions<T, TR | Promise<TR>>): (...args: T[]) => TR | Promise<TR>;
 function create(options: Options) {
 
+    // TODO: temp testing...
+    check(options);
+
     // TODO: temp convertion while transitioning options types
     let mmopts: MultimethodOptions = {
         arity: options.arity || 'variadic',
@@ -33,11 +37,6 @@ function create(options: Options) {
 
     // Create a new options object incorporating all defaults.
     let normalisedOptions = normaliseOptions(mmopts);
-
-// TODO: temp testing...
-if (options.strict) {
-    validate({_options: mmopts});
-}
 
     // TODO: ...
     let instance = createDispatchFunction(normalisedOptions);

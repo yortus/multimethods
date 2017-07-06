@@ -7,14 +7,29 @@ import {format} from 'util';  // TODO: ensure this node.js dep doesn't prevent c
 
 namespace fatalError {
 
-    export function ARITY_MISMATCH() {
-        let fmt = `arity mismatch`;
-        return error(format(fmt));
-    }
-
     export function DUPLICATE_PREDICATE(normalised: string, predicates: string) {
         let fmt = `The predicate '%s' is duplicated across multiple methods: %s. To resolve this, use a method chain.`;
         return error(format(fmt, normalised, predicates));
+    }
+
+    export function INVALID_ARITY_OPTION(value: any) {
+        let fmt = `Expected a positive integer or undefined value for options.arity, but found %j.`;
+        return error(format(fmt, value));
+    }
+
+    export function INVALID_ASYNC_OPTION(value: any) {
+        let fmt = `Expected a boolean or undefined value for options.async, but found %j.`;
+        return error(format(fmt, value));
+    }
+
+    export function INVALID_STRICT_OPTION(value: any) {
+        let fmt = `Expected a boolean or undefined value for options.strict, but found %j.`;
+        return error(format(fmt, value));
+    }
+
+    export function INVALID_TO_DISCRIMINANT_OPTION() {
+        let fmt = `Expected a function or undefined value for options.toDiscriminant.`;
+        return error(format(fmt));
     }
 
     export function MIXED_CHAIN(predicate: string) {
@@ -42,8 +57,8 @@ namespace fatalError {
         return error(format(fmt));
     }
 
-    export function VALIDATION(problems: string[]) {
-        let fmt = `Multimethod validation failed. The following problems were found: %s`;
+    export function STRICT_VALIDATION(problems: string[]) {
+        let fmt = `Strict validation failed. The following problems were found: %s`;
         return error(format(fmt, '\n' + problems.map((p, i) => `${i + 1}. ${p}`).join('\n')));
     }
 }

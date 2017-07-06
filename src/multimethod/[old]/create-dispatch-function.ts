@@ -2,8 +2,7 @@ import MultimethodOptions from './multimethod-options';
 import normaliseMethods from './normalise-methods';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 import {toNormalPredicate, NormalPredicate} from '../../set-theory/predicates';
-import {validateEulerDiagram} from './validate';
-import debug, {DISPATCH, EMIT, VALIDATE} from '../../util/debug';
+import debug, {DISPATCH, EMIT} from '../../util/debug';
 
 import getLongestCommonPrefix from '../../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../../util/get-longest-common-suffix';
@@ -29,12 +28,6 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the `methods` hash.
     let eulerDiagram = new EulerDiagram(Object.keys(normalisedMethods).map(toPredicate));
-
-    // TODO: explain...
-    if (debug.enabled) {
-        let problems = validateEulerDiagram(eulerDiagram, normalisedOptions);
-        problems.forEach(problem => debug(`${VALIDATE} %s`, problem));
-    }
 
 
 
