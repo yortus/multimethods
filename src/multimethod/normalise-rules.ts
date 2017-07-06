@@ -4,7 +4,7 @@ import fatalError from '../util/fatal-error';
 import isPromiseLike from '../util/is-promise-like';
 import isMetaHandler from './is-meta-handler';
 import MultimethodOptions from './multimethod-options';
-import Rule from './rule';
+import repeatString from '../util/repeat-string';
 import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
 
 
@@ -12,6 +12,12 @@ import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
 
 
 // TODO: move rule validation into here...? like with normaliseOptions...
+
+
+
+
+
+export type CheckedMethods = {[predicate: string]: Function[]};
 
 
 
@@ -36,23 +42,15 @@ export default function normaliseRules(rules: MultimethodOptions['rules']) {
     }
 
     // TODO: doc...
-    let result: Rule[] = [];
+    let result = {} as CheckedMethods;
     for (let predicate in rules) {
-        let handler = rules[predicate];
-        if (Array.isArray(handler)) {
-            let chain = handler;
-            for (handler of chain) {
-                let rule = new Rule(predicate, handler);
-                rule.chain = chain;
-                if (debug.enabled) instrument(rule);
-                result.push(rule);
-            }
+        let chain = rules[predicate];
+        if (!Array.isArray(chain)) chain = [chain];
+
+        if (debug.enabled) {
+            chain = chain.map((handler, i) => instrument(predicate, handler, i));
         }
-        else {
-            let rule = new Rule(predicate, handler);
-            if (debug.enabled) instrument(rule);
-            result.push(rule);
-        }
+        result[predicate] = chain;
     }
     return result;
 }
@@ -62,10 +60,8 @@ export default function normaliseRules(rules: MultimethodOptions['rules']) {
 
 
 // TODO: doc...
-function instrument(rule: Rule) {
-    let handler = rule.handler;
-    let chainIndex = rule.chain ? rule.chain.indexOf(handler) : -1;
-    let ruleInfo = `rule=${rule.predicate}${rule.chain ? ` [${chainIndex}]` : ''}   type=${isMetaHandler(handler) ? 'meta' : 'regular'}`;
+function instrument(predicate: string, handler: Function, chainIndex: number) {
+    let ruleInfo = `rule=${predicate}${repeatString('ᐟ', chainIndex)}   type=${isMetaHandler(handler) ? 'meta' : 'regular'}`;
     let wrapped = function(...args: any[]) {
         let next = isMetaHandler(handler) ? args.pop() : null;
         let captures = args.pop();
@@ -79,9 +75,8 @@ function instrument(rule: Rule) {
         });
     };
 
-    rule.handler = wrapped;
-    if (rule.chain) rule.chain[chainIndex] = wrapped;
     if (isMetaHandler(handler)) isMetaHandler(wrapped, true);
+    return wrapped;
 }
 
 

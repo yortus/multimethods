@@ -9,4 +9,4 @@
 // } from './multimethod';
 
 
-export {default} from './multimethod-2';
+export {default} from './multimethod';

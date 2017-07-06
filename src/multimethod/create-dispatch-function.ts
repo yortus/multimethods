@@ -27,7 +27,7 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
     let normalisedRules = normaliseRules(normalisedOptions.rules);
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the rule set.
-    let eulerDiagram = new EulerDiagram(normalisedRules.map(rule => rule.predicate));
+    let eulerDiagram = new EulerDiagram(Object.keys(normalisedRules).map(toPredicate));
 
     // TODO: explain...
     if (debug.enabled) {
