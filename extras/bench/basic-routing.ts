@@ -77,7 +77,8 @@ const mm = MM({
         'zz/z/./*': () => 'forty-two'
     },
     arity: 1,
-    async: false
+    async: false,
+    strict: false
 });
 
 

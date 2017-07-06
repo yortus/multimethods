@@ -40,7 +40,7 @@ function validateArity(arity: MultimethodOptions['arity'], staticArity?: Multime
 
     // If *both* static and runtime arities are given, they must match.
     if (staticArity !== undefined && arity !== undefined && staticArity !== arity) {
-        return fatalError('ARITY_MISMATCH');
+        return fatalError.ARITY_MISMATCH();
     }
 }
 
@@ -58,7 +58,7 @@ function validateMethods(methods: MultimethodOptions['methods']) {
 
             // ensure first regular method in chain (if any) comes after last meta-method in chain (if any)
             if (chain.some((fn, i) => i < chain.length - 1 && !isMetaMethod(fn) && isMetaMethod(chain[i + 1]))) {
-                return fatalError('MIXED_CHAIN', predicate);
+                return fatalError.MIXED_CHAIN(predicate);
             }
         }
     });

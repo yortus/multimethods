@@ -38,7 +38,7 @@ export default function normaliseMethods(methods: MultimethodOptions['methods'])
     });
     for (let np in deduped) {
         if (deduped[np].length <= 1) continue;
-        fatalError('DUPLICATE_PREDICATE', np, `'${deduped[np].join(`', '`)}'`);
+        fatalError.DUPLICATE_PREDICATE(np, `'${deduped[np].join(`', '`)}'`);
     }
 
     // TODO: doc...

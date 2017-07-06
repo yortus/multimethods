@@ -25,6 +25,7 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
 
     // TODO: ...
     let normalisedMethods = normaliseMethods(normalisedOptions.methods);
+    normalisedOptions.methods = normalisedMethods;
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the `methods` hash.
     let eulerDiagram = new EulerDiagram(Object.keys(normalisedMethods).map(toPredicate));
@@ -81,7 +82,7 @@ if (debug.enabled) {
 }
 
 
-let mm = emitAll(source, {mminfo, CONTINUE, fatalError, isPromiseLike});
+let mm = emitAll(source, {mminfo, CONTINUE, unhandledError: fatalError.UNHANDLED, isPromiseLike});
 
 // TODO: temp testing... neaten/improve emit of wrapper?
 if (debug.enabled) {
@@ -106,11 +107,10 @@ function emitAll(
     env: {
         mminfo: MMInfo,
         CONTINUE: any,
-        fatalError: Function,
+        unhandledError: typeof fatalError.UNHANDLED,
         isPromiseLike: Function,
     }
 ) {
-
     let $0: any;
     let $1: any;
     let abc = xyz
@@ -130,10 +130,10 @@ function emitAll(
 
 
     function xyz() {
-        let {mminfo, CONTINUE, fatalError, isPromiseLike} = env;
+        let {mminfo, CONTINUE, unhandledError, isPromiseLike} = env;
 
         // Suppress TS6133 decl never used for above locals, which *are* referenced in the source code eval'ed below.
-        [mminfo, CONTINUE, fatalError, isPromiseLike];
+        [mminfo, CONTINUE, unhandledError, isPromiseLike];
 
         $0
 
@@ -289,13 +289,13 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
             pathsFromRoot.forEach(path => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
                 let hasMetaMethods = divergentSets.some(set => set.methods.some(h => isMetaMethod(h)));
-                if (hasMetaMethods) return fatalError('MULTIPLE_PATHS_TO', node.predicate);
+                if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.predicate);
             });
 
             // TODO: explain all below more clearly...
             // Synthesize a 'crasher' method that throws an 'ambiguous' error, and add it to the existing methods.
             let candidates = pathsFromRoot.map(path => path[path.length - suffix.length - 1].predicate).join(', ');
-            let method = function _ambiguous() { fatalError('MULTIPLE_FALLBACKS_FROM', node.predicate, candidates); };
+            let method = function _ambiguous() { fatalError.MULTIPLE_FALLBACKS_FROM(node.predicate, candidates); };
             insertAsLeastSpecificRegularMethod(node.methods, method);
 
             // Set 'fallback' to the node at the end of the common prefix.
@@ -536,7 +536,7 @@ function emitDispatcher(mminfo: MMInfo) {
         TO_DISCRIMINANT: 'toDiscriminant',
         SELECT_THUNK: 'selectThunk', // TODO: temp testing... how to know this name?
         CONTINUE: 'CONTINUE',
-        FATAL_ERROR: 'fatalError'
+        UNHANDLED_ERROR: 'unhandledError'
     });
 
     // All done for this iteration.

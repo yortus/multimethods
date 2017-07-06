@@ -12,7 +12,7 @@ export default function validate(multimethod: { _options: MultimethodOptions }) 
     let eulerDiagram = new EulerDiagram(Object.keys(multimethod._options.methods).map(pattern => toPredicate(pattern)));
     let problems = validateEulerDiagram(eulerDiagram, multimethod._options);
     if (problems.length === 0) return;
-    fatalError('VALIDATION', '\n' + problems.map((p, i) => `${i + 1}. ${p}`).join('\n'));
+    fatalError.VALIDATION(problems);
 }
 
 

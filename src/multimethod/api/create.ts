@@ -1,6 +1,7 @@
 import createDispatchFunction from '../[old]/create-dispatch-function';
 import MultimethodOptions from '../[old]/multimethod-options';
 import normaliseOptions from '../[old]/normalise-options';
+import validate from '../[old]/validate';
 import Options from './options';
 export default create;
 
@@ -32,6 +33,11 @@ function create(options: Options) {
 
     // Create a new options object incorporating all defaults.
     let normalisedOptions = normaliseOptions(mmopts);
+
+// TODO: temp testing...
+if (options.strict) {
+    validate({_options: mmopts});
+}
 
     // TODO: ...
     let instance = createDispatchFunction(normalisedOptions);
