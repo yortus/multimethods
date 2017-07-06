@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Multimethod, meta, CONTINUE} from 'multimethods';
+import MM, {meta, CONTINUE} from 'multimethods';
 import isPromiseLike from 'multimethods/util/is-promise-like';
 // TODO: rename these tests in filename and describe() ? this is more about invoking the Multimethod, not constructing it...
 // TODO: more multimethod tests? for other files?
@@ -27,12 +27,12 @@ describe('Constructing a Multimethod instance', () => {
     const randomError = msg => (Math.random() >= 0.5 ? immediateError : promisedError)(msg);
 
     let variants = [
-        { vname: 'all synchronous', timing: 'sync' as 'sync', val: immediateValue, err: immediateError },
-        { vname: 'all asynchronous', timing: 'async' as 'async', val: promisedValue, err: promisedError },
-        { vname: 'randomized sync/async', timing: 'mixed' as 'mixed', val: randomValue, err: randomError }
+        { vname: 'all synchronous', async: 'never', val: immediateValue, err: immediateError },
+        { vname: 'all asynchronous', async: 'always', val: promisedValue, err: promisedError },
+        { vname: 'randomized sync/async', async: undefined, val: randomValue, err: randomError }
     ];
 
-    variants.forEach(({vname, timing, val, err}) => describe(`(${vname})`, () => {
+    variants.forEach(({vname, async, val, err}) => describe(`(${vname})`, () => {
         let rules = {
             '/...': () => err('nothing matches!'),
             '/foo': () => val('foo'),
@@ -134,10 +134,10 @@ describe('Constructing a Multimethod instance', () => {
         ];
 
         // TODO: doc...
-        let multimethod = new Multimethod({
-            toDiscriminant: (r: any) => r.address,
+        let multimethod = MM({
             arity: 1,
-            timing,
+            toDiscriminant: (r: any) => r.address,
+            async,
             rules
         });
 
@@ -148,8 +148,8 @@ describe('Constructing a Multimethod instance', () => {
             let actual: string;
             try {
                 let res = multimethod(request) as string | Promise<string>;
-                if (timing === 'sync') expect(res).to.not.satisfy(isPromiseLike);
-                if (timing === 'async') expect(res).to.satisfy(isPromiseLike);
+                if (async === 'never') expect(res).to.not.satisfy(isPromiseLike);
+                if (async === 'always') expect(res).to.satisfy(isPromiseLike);
                 actual = isPromiseLike(res) ? await (res) : res;
             }
             catch (ex) {

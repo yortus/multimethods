@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import {Multimethod, meta, CONTINUE, validate} from 'multimethods';
+import MM, {meta, CONTINUE, validate} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -113,11 +113,11 @@ const tests = [
 
     // Set up the tests.
     console.log(`Running perf test: basic routing...`);
-    let mm = new Multimethod({
+    let mm = MM({
         rules: ruleSet,
-        toDiscriminant: r => r.address,
+        toDiscriminant: (r: {address: string}) => r.address,
         arity: 1,
-        timing: 'sync'
+        async: 'never'
     });
     // validate(mm);
     let addresses = tests.map(test => test.split(' ==> ')[0]);
