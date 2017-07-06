@@ -1,11 +1,11 @@
 import {CONTINUE} from './sentinels';
-import debug, {DISPATCH} from '../util/debug';
-import fatalError from '../util/fatal-error';
-import isPromiseLike from '../util/is-promise-like';
+import debug, {DISPATCH} from '../../util/debug';
+import fatalError from '../../util/fatal-error';
+import isPromiseLike from '../../util/is-promise-like';
 import isMetaHandler from './is-meta-handler';
 import MultimethodOptions from './multimethod-options';
-import repeatString from '../util/repeat-string';
-import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
+import repeatString from '../../util/repeat-string';
+import {toPredicate, toNormalPredicate} from '../../set-theory/predicates';
 
 
 

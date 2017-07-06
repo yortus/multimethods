@@ -1,12 +1,1 @@
-// export {
-//     default,
-//     Multimethod,
-//     NullaryMultimethod,
-//     UnaryMultimethod,
-//     BinaryMultimethod,
-//     TernaryMultimethod,
-//     VariadicMultimethod
-// } from './multimethod';
-
-
-export {default} from './multimethod';
+export {default} from './[old]/multimethod';

@@ -1,4 +1,4 @@
-import fatalError from '../util/fatal-error';
+import fatalError from '../../util/fatal-error';
 import MultimethodOptions from './multimethod-options';
 import isMetaHandler from './is-meta-handler';
 

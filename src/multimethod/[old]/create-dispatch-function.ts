@@ -1,19 +1,19 @@
 import MultimethodOptions from './multimethod-options';
 import normaliseRules from './normalise-rules';
-import {EulerDiagram, EulerSet} from '../set-theory/sets';
-import {toNormalPredicate, NormalPredicate} from '../set-theory/predicates';
+import {EulerDiagram, EulerSet} from '../../set-theory/sets';
+import {toNormalPredicate, NormalPredicate} from '../../set-theory/predicates';
 import {validateEulerDiagram} from './validate';
-import debug, {DISPATCH, EMIT, VALIDATE} from '../util/debug';
+import debug, {DISPATCH, EMIT, VALIDATE} from '../../util/debug';
 
-import getLongestCommonPrefix from '../util/get-longest-common-prefix';
-import getLongestCommonSuffix from '../util/get-longest-common-suffix';
+import getLongestCommonPrefix from '../../util/get-longest-common-prefix';
+import getLongestCommonSuffix from '../../util/get-longest-common-suffix';
 import isMetaHandler from './is-meta-handler';
-import fatalError from '../util/fatal-error';
-import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate, Predicate} from '../set-theory/predicates';
+import fatalError from '../../util/fatal-error';
+import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate, Predicate} from '../../set-theory/predicates';
 import {CONTINUE} from './sentinels';
 import {emitThunkFunction, emitDispatchFunction} from './codegen/emit';
-import repeatString from '../util/repeat-string';
-import isPromiseLike from '../util/is-promise-like';
+import repeatString from '../../util/repeat-string';
+import isPromiseLike from '../../util/is-promise-like';
 
 
 

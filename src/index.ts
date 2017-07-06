@@ -14,15 +14,15 @@ export {EulerDiagram, EulerSet} from './set-theory/sets';
 
 // TODO: temp testing...
 export {default} from './multimethod';
-export {CONTINUE} from './multimethod/sentinels';
-export {default as validate} from './multimethod/validate';
+export {CONTINUE} from './multimethod/[old]/sentinels';
+export {default as validate} from './multimethod/[old]/validate';
 
 
 
 
 
 // TODO: temp testing...
-import isMetaHandler from './multimethod/is-meta-handler';
+import isMetaHandler from './multimethod/[old]/is-meta-handler';
 export function meta<T extends Function>(fn: T) {
     // TODO: ensure it is a function, etc
     isMetaHandler(fn, true);
