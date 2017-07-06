@@ -18,9 +18,9 @@ export default interface Options {
     // - undefined: may return either a Promise or a value, and methods may return promises or values
     async?: boolean;
 
-    // TODO: doc... If not undefined, fails on early detection of discriminants for which there is no best handler.
+    // TODO: doc... If not undefined, fails on early detection of discriminants for which there is no best method.
     // TODO: alt names: unambiguous explicit exact definite precise complete whole exhaustive strict
-    // TODO: code up additional strict mode checks in thunks for what handlers return when async='always|never'
+    // TODO: code up additional strict mode checks in thunks for what methods return when async='always|never'
     strict?: boolean;
 
     toDiscriminant?: Function;

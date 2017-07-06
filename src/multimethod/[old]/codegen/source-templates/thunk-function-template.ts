@@ -23,7 +23,7 @@ export const template = function __FUNCNAME__(discriminant: string, result: {}|P
 
     // TODO: call method in most efficient way...
     if (!$.IS_META_METHOD) {
-        result = $.CALL_HANDLER(__VARARGS__, captures);
+        result = $.CALL_METHOD(__VARARGS__, captures);
     }
     else {
         if ($.HAS_DOWNSTREAM) {
@@ -34,7 +34,7 @@ export const template = function __FUNCNAME__(discriminant: string, result: {}|P
         else {
             var forward: typeof forward = function () { return $.CONTINUE; };
         }
-        result = $.CALL_HANDLER(__VARARGS__, captures, forward);
+        result = $.CALL_METHOD(__VARARGS__, captures, forward);
     }
 
     // TODO: cascade result...
@@ -91,11 +91,11 @@ export interface VariablesInScope {
     */
     DELEGATE_DOWNSTREAM: Thunk;
 
-    /* used for cascading evaluation, i.e. when the thunk's immediate handler returns CONTINUE. */
+    /* used for cascading evaluation, i.e. when the thunk's corresponding method returns CONTINUE. */
     DELEGATE_FALLBACK: Thunk;
 
     GET_CAPTURES: (discriminant: string) => {};
-    CALL_HANDLER: (...args: any[]) => any; // Method signature, NB: context is passed last!
+    CALL_METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
 }
 
 // TODO: these are statically known conditions that facilitate dead code elimination

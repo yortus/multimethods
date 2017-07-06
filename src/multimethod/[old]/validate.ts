@@ -35,11 +35,11 @@ export function validateEulerDiagram(eulerDiagram: EulerDiagram, options: Multim
     let unhandledPredicates = eulerDiagram.sets.map(n => n.predicate.toString()).filter(p => normalizedPredicates.indexOf(<any> p) === -1);
     let hasUnhandledCatchall = unhandledPredicates.indexOf(ANY) !== -1;
     if (hasUnhandledCatchall) {
-        problems.push(`No catch-all handler. To resolve, add a handler for the predicate '...'.`);
+        problems.push(`No catch-all method. To resolve, add a method for the predicate '...'.`);
     }
     let unhandledIntersections = unhandledPredicates.filter(p => p !== ANY);
     unhandledIntersections.forEach(predicate => {
-        problems.push(`Ambiguous dispatch for discriminants matching '${predicate}'. To resolve, add a handler for this predicate.`);
+        problems.push(`Ambiguous dispatch for discriminants matching '${predicate}'. To resolve, add a method for this predicate.`);
     });
     return problems;
 }

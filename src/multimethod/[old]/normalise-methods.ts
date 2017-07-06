@@ -48,7 +48,7 @@ export default function normaliseMethods(methods: MultimethodOptions['methods'])
         if (!Array.isArray(chain)) chain = [chain];
 
         if (debug.enabled) {
-            chain = chain.map((handler, i) => instrument(predicate, handler, i));
+            chain = chain.map((method, i) => instrument(predicate, method, i));
         }
         result[predicate] = chain;
     }

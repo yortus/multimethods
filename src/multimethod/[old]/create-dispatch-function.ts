@@ -42,19 +42,18 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
     let dispatcher = emitDispatcher(mminfo);
     let thunkSelector = emitThunkSelector(mminfo);
     let thunks = mminfo.nodes.map(n => n.thunkSource).join('\n\n\n');
-    let isMatch = mminfo.nodes.map((n, i) => `var isMatchː${n.identifier} = mminfo.nodes[${i}].isMatch;`).join('\n');
-    let getCaptures = mminfo.nodes
+    let isMatchLines = mminfo.nodes.map((n, i) => `var isMatchː${n.identifier} = mminfo.nodes[${i}].isMatch;`);
+    let getCapturesLines = mminfo.nodes
         .map((n, i) => `var getCapturesː${n.identifier} = mminfo.nodes[${i}].getCaptures;`)
-        .filter((_, i) => mminfo.nodes[i].getCaptures != null)
-        .join('\n');
+        .filter((_, i) => mminfo.nodes[i].getCaptures != null);
 
-    let handler = mminfo.nodes.reduce(
-        (lines, n, i) => n.handlers.reduce(
-            (lines, _, j) => lines.concat(`var handlerː${n.identifier}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].handlers[${j}];`),
+    let methodLines = mminfo.nodes.reduce(
+        (lines, n, i) => n.methods.reduce(
+            (lines, _, j) => lines.concat(`var methodː${n.identifier}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].methods[${j}];`),
             lines
         ),
         [] as string[]
-    ).join('\n');
+    );
 
     // TODO: revise comment... terminology has changed
     // Generate the combined source code for the multimethod. This includes local variable declarations for
@@ -70,9 +69,9 @@ export default function createDispatchFunction(normalisedOptions: MultimethodOpt
         `// ========== ENVIRONMENT ==========`,
         `var toDiscriminant = mminfo.options.toDiscriminant;`,
         `var EMPTY_OBJECT = Object.freeze({});`,
-        isMatch,
-        getCaptures,
-        handler,
+        isMatchLines.join('\n'),
+        getCapturesLines.join('\n'),
+        methodLines.join('\n'),
     ].join('\n\n\n') + '\n';
 
 
@@ -121,11 +120,11 @@ function emitAll(
 
     // TODO: revise comment...
     // Evaluate the source code, and return its result, which is the multimethod dispatch function. The use of eval
-    // here is safe. There are no untrusted inputs substituted into the source. The client-provided handler
-    // functions can do anything (so may be considered untrusted), but that has nothing to do with the use of 'eval'
-    // here, since they would need to be called by the dispatcher whether or not eval was used. More importantly,
-    // the use of eval here allows for multimethod dispatch code that is both more readable and more efficient, since it is
-    // tailored specifically to the options of this multimethod, rather than having to be generalized for all possible cases.
+    // here is safe. There are no untrusted inputs substituted into the source. The client-provided methods can do
+    // anything (so may be considered untrusted), but that has nothing to do with the use of 'eval' here, since they
+    // would need to be called by the dispatcher whether or not eval was used. More importantly, the use of eval here
+    // allows for multimethod dispatch code that is both more readable and more efficient, since it is tailored
+    // specifically to the options of this multimethod, rather than having to be generalized for all possible cases.
     let mm: Function = eval(`(${abc})`)();
     return mm;
 
@@ -170,7 +169,7 @@ interface MMInfo {
 }
 interface MMNode {
     predicate: Predicate;
-    handlers: Function[];
+    methods: Function[];
     fallback: MMNode|null;
 
     identifier: string;
@@ -228,25 +227,25 @@ interface MMNode {
 
 function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: MultimethodOptions): MMInfo {
 
-    // Augment sets with exactly-matching handlers in most- to least-specific order.
+    // Augment sets with exactly-matching methods in most- to least-specific order.
     let euler2 = eulerDiagram.augment(set => {
         let predicateInHash = findMatchingPredicateInMethods(set.predicate, normalisedOptions.methods) || set.predicate;
 
-        // Find the index in the chain where meta-handlers end and regular handlers begin.
+        // Find the index in the chain where meta-methods end and regular methods begin.
         let chain = normalisedOptions.methods[predicateInHash] || [];
         if (!Array.isArray(chain)) chain = [chain];
         let i = 0;
         while (i < chain.length && isMetaMethod(chain[i])) ++i;
-        // TODO: explain ordering: regular handlers from left-to-right; then meta-handlers from right-to-left
-        let handlers = chain.slice(i).concat(chain.slice(0, i).reverse());
+        // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
+        let methods = chain.slice(i).concat(chain.slice(0, i).reverse());
 
-        return {predicateInHash, handlers};
+        return {predicateInHash, methods};
     });
 
     // TODO: create one node for each set. Leave everything from `fallback` onward null for now.
     let nodes: MMNode[] = euler2.sets.map(set => ({
         predicate: set.predicateInHash,
-        handlers: set.handlers,
+        methods: set.methods,
         fallback: null,
 
         identifier: toIdentifierParts(set.predicate),
@@ -264,10 +263,10 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
         let set = euler2.sets[i];
 
         // Case 0: the root node has no fallback.
-        // Leave fallback as null, but synthesize an additional regular handler that always returns CONTINUE.
+        // Leave fallback as null, but synthesize an additional regular method that always returns CONTINUE.
         if (set.supersets.length === 0) {
-            let handler = function _unhandled() { return CONTINUE; };
-            insertAsLeastSpecificRegularHandler(node.handlers, handler);
+            let method = function _unhandled() { return CONTINUE; };
+            insertAsLeastSpecificRegularMethod(node.methods, method);
         }       
 
         // Case 1: if there is only one way into the set, then the fallback is the node corresponding to the one-and-only superset.
@@ -286,18 +285,18 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
             let prefix = getLongestCommonPrefix(pathsFromRoot);
             let suffix = getLongestCommonSuffix(pathsFromRoot);
 
-            // Ensure the divergent sets contain NO meta-handlers.
+            // Ensure the divergent sets contain NO meta-methods.
             pathsFromRoot.forEach(path => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
-                let hasMetaHandlers = divergentSets.some(set => set.handlers.some(h => isMetaMethod(h)));
-                if (hasMetaHandlers) return fatalError('MULTIPLE_PATHS_TO', node.predicate);
+                let hasMetaMethods = divergentSets.some(set => set.methods.some(h => isMetaMethod(h)));
+                if (hasMetaMethods) return fatalError('MULTIPLE_PATHS_TO', node.predicate);
             });
 
             // TODO: explain all below more clearly...
-            // Synthesize a 'crasher' handler that throws an 'ambiguous' error, and add it to the existing handlers.
+            // Synthesize a 'crasher' method that throws an 'ambiguous' error, and add it to the existing methods.
             let candidates = pathsFromRoot.map(path => path[path.length - suffix.length - 1].predicate).join(', ');
-            let handler = function _ambiguous() { fatalError('MULTIPLE_FALLBACKS_FROM', node.predicate, candidates); };
-            insertAsLeastSpecificRegularHandler(node.handlers, handler);
+            let method = function _ambiguous() { fatalError('MULTIPLE_FALLBACKS_FROM', node.predicate, candidates); };
+            insertAsLeastSpecificRegularMethod(node.methods, method);
 
             // Set 'fallback' to the node at the end of the common prefix.
             node.fallback = nodes[euler2.sets.indexOf(prefix[prefix.length - 1])];
@@ -367,10 +366,10 @@ function getAllPathsFromRootToSet<T extends EulerSet>(set: T): T[][] {
 
 
 // TODO: doc...
-function insertAsLeastSpecificRegularHandler(orderedHandlers: Function[], handler: Function) {
+function insertAsLeastSpecificRegularMethod(orderedMethods: Function[], method: Function) {
     let i = 0;
-    while (i < orderedHandlers.length && !isMetaMethod(orderedHandlers[i])) ++i;
-    orderedHandlers.splice(i, 0, handler);
+    while (i < orderedMethods.length && !isMetaMethod(orderedMethods[i])) ++i;
+    orderedMethods.splice(i, 0, method);
 }
 
 
@@ -380,33 +379,33 @@ function insertAsLeastSpecificRegularHandler(orderedHandlers: Function[], handle
 // TODO: rewrite comments. Esp signature of route executor matches signature of multimethod (as per provided Options)
 /**
  * Generates the virtual method, called a 'thunk', for the given node.
- * In the absence of meta-handlers, the logic for the virtual method is straightforward: execute each matching handler
- * in turn, from the most- to the least-specific, until one produces a result. With meta-handlers, the logic becomes more
- * complex, because a meta-handler must run *before* more-specific handlers, with those more specific
- * handlers being wrapped into a callback function and passed to the meta-handler. To account for this, we perform
- * an order-preserving partitioning of all matching handlers for the node, with each meta-handler starting a new
- * partition. Within each partition, we use the simple cascading logic outlined above for the straightforward case.
+ * In the absence of meta-methods, the logic for the virtual method is straightforward: execute each matching method
+ * in turn, from the most- to the least-specific, until one produces a result. With meta-methods, the logic becomes more
+ * complex, because a meta-method must run *before* more-specific regular methods, with those more specific
+ * methods being wrapped into a callback function and passed to the meta-method. To account for this, we perform
+ * an order-preserving partitioning of all matching methods for the node, with each meta-method starting a new
+ * partition. Within each partition, we use the straightforward cascading logic outlined above.
  * However, each partition as a whole is executed in reverse-order (least to most specific), with the next (more-specific)
- * partition being passed as the `next` parameter to the meta-handler starting the previous (less-specific) partition.
- * @param {node} MMNode - contains the list of matching handlers for the node's predicate, ordered from most- to least-specific.
+ * partition being passed as the `next` parameter to the meta-method starting the previous (less-specific) partition.
+ * @param {node} MMNode - contains the list of matching methods for the node's predicate, ordered from most- to least-specific.
  * @returns {Thunk} the virtual method for the node.
  */
 function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
     const mostSpecificNode = node;
-    let allHandlers = [] as {handler: Function, node: MMNode, localIndex: number}[];
+    let allMethods = [] as {method: Function, node: MMNode, localIndex: number}[];
     while (node !== null) {
-        allHandlers = allHandlers.concat(node.handlers.map((handler, localIndex) => ({handler, node, localIndex})));
+        allMethods = allMethods.concat(node.methods.map((method, localIndex) => ({method, node, localIndex})));
         node = node.fallback!; // NB: may be null
     }
 
-    let sources = allHandlers.map(({handler, node, localIndex}, i) => {
+    let sources = allMethods.map(({method, node, localIndex}, i) => {
 
         // To avoid unnecessary duplication, skip emit for regular methods that are less specific that the set's predicate, since these will be handled in their own set.
-        if (!isMetaMethod(handler) && node !== mostSpecificNode) return '';
+        if (!isMetaMethod(method) && node !== mostSpecificNode) return '';
 
         // TODO: temp testing... explain!!
-        let isFinalHandler = i === allHandlers.length - 1;
-        let downstream = allHandlers.filter(({handler}, j) => (j === 0 || isMetaMethod(handler)) && j < i).pop();
+        let isLeastSpecificMethod = i === allMethods.length - 1;
+        let downstream = allMethods.filter(({method}, j) => (j === 0 || isMetaMethod(method)) && j < i).pop();
 
         // TODO: temp testing...
         return emitThunkFunction(getNameForThunk(i), options.arity as number|undefined, { // TODO: fix cast after Options type is fixed
@@ -414,14 +413,14 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
             CONTINUE: 'CONTINUE',
             EMPTY_OBJECT: 'EMPTY_OBJECT',
             GET_CAPTURES: `getCapturesː${node.identifier}`,
-            CALL_HANDLER: `handlerː${node.identifier}${repeatString('ᐟ', localIndex)}`,
-            DELEGATE_DOWNSTREAM: downstream ? getNameForThunk(allHandlers.indexOf(downstream)) : '',
-            DELEGATE_FALLBACK: isFinalHandler ? '' : getNameForThunk(i + 1),
+            CALL_METHOD: `methodː${node.identifier}${repeatString('ᐟ', localIndex)}`,
+            DELEGATE_DOWNSTREAM: downstream ? getNameForThunk(allMethods.indexOf(downstream)) : '',
+            DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : getNameForThunk(i + 1),
 
             // Statically known booleans --> 'true'/'false' literals (for dead code elimination)
-            ENDS_PARTITION: isFinalHandler || isMetaMethod(allHandlers[i + 1].handler),
+            ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(allMethods[i + 1].method),
             HAS_CAPTURES: node.getCaptures != null,
-            IS_META_METHOD: isMetaMethod(handler),
+            IS_META_METHOD: isMetaMethod(method),
             HAS_DOWNSTREAM: downstream != null,
             IS_NEVER_ASYNC: options.timing === 'sync',
             IS_ALWAYS_ASYNC: options.timing === 'async'
@@ -433,8 +432,8 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
     // TODO: temp testing...
     // The 'entry point' method is the one whose method we call to begin the cascading evaluation of the route. It is the
     // least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
-    let entryPoint = allHandlers.filter(el => isMetaMethod(el.handler)).pop() || allHandlers[0];
-    let thunkName = getNameForThunk(allHandlers.indexOf(entryPoint));
+    let entryPoint = allMethods.filter(el => isMetaMethod(el.method)).pop() || allMethods[0];
+    let thunkName = getNameForThunk(allMethods.indexOf(entryPoint));
     return {
         thunkName,
         thunkSource: sources.join('\n\n')
@@ -442,9 +441,9 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
 
     // TODO: closure... move out?
     function getNameForThunk(i: number): string {
-        let el = allHandlers[i];
+        let el = allMethods[i];
         let baseName = `${el.node.identifier}${repeatString('ᐟ', el.localIndex)}`;
-        if (isMetaMethod(el.handler) && (el.node !== mostSpecificNode || el.localIndex > 0)) {
+        if (isMetaMethod(el.method) && (el.node !== mostSpecificNode || el.localIndex > 0)) {
             return `thunkː${mostSpecificNode.identifier}ːviaː${baseName}`;
         }
         else {
@@ -475,9 +474,7 @@ function computeThunksForNode(node: MMNode, options: MultimethodOptions) {
  */
 function emitThunkSelector(mminfo: MMInfo) {
 
-    // Generate the combined source code for selecting the best thunk. This includes local variable declarations
-    // for all the match functions and all the candidate route handler functions, as well as the dispatcher function
-    // housing all the conditional logic for selecting the best route handler based on address matching.
+    // Generate the combined source code for selecting the best thunk based on predicate-matching of the discriminant.
     let lines = [
         'function selectThunk(discriminant) {',
         ...emitThunkSelectorBlock(mminfo.root, 1),

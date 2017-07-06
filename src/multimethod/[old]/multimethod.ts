@@ -20,7 +20,7 @@ export interface Options {
     arity?: undefined|1|2|3;
     // Check result if not undefined. For 'never', the result must NOT be a promise. For 'always', the result is wrapped using the global `Promise.resolve`
     async?: undefined|'never'|'always';
-    // If not undefined, fails on early detection of discriminants for which there is no best handler.
+    // If not undefined, fails on early detection of discriminants for which there is no best method.
     // TODO: alt names: unambiguous explicit exact definite precise complete whole exhaustive strict
     strict?: undefined|boolean;
     toDiscriminant: Function;

@@ -6,11 +6,11 @@ import isPromiseLike from 'multimethods/util/is-promise-like';
 
 
 // TODO: More coverage:
-// - [ ] multiple regular handlers for same predicate
-// - [ ] multiple metahandlers for same predicate
-// - [ ] one meta- and several regular handlers for same predicate
-// - [ ] metahandlers along ambiguous paths (same metahandlers on all paths)
-// - [x] metahandlers along ambiguous paths (not same metahandlers on all paths) - c/d
+// - [ ] multiple regular methods for same predicate
+// - [ ] multiple meta-methods for same predicate
+// - [ ] one meta- and several regular methods for same predicate
+// - [ ] meta-methods along ambiguous paths (same meta-methods on all paths)
+// - [x] meta-methods along ambiguous paths (not same meta-methods on all paths) - c/d
 
 
 
