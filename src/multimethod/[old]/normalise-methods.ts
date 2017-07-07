@@ -1,7 +1,7 @@
+import andThen from '../mmutil/and-then';
 import {CONTINUE} from './sentinels';
 import debug, {DISPATCH} from '../../util/debug';
 import fatalError from '../../util/fatal-error';
-import isPromiseLike from '../../util/is-promise-like';
 import isMetaMethod from '../mmutil/is-meta-method';
 import MultimethodOptions from './multimethod-options';
 import repeatString from '../../util/repeat-string';
@@ -65,25 +65,15 @@ function instrument(predicate: string, method: Function, chainIndex: number) {
     let wrapped = function(...args: any[]) {
         let next = isMetaMethod(method) ? args.pop() : null;
         let captures = args.pop();
-        debug(`${DISPATCH} Enter   %s${captures ? '   captures=%o' : ''}`, methodInfo, captures);
-        let result = isMetaMethod(method) ? method(...args, captures, next) : method(...args, captures);
-        let isAsync = isPromiseLike(result);
-        return andThen(result, result => {
-            let resultInfo = result === CONTINUE ? '   result=CONTINUE' : ''
-            debug(`${DISPATCH} Leave   %s%s%s`, methodInfo, isAsync ? '   ASYNC' : '', resultInfo);
-            return result;
+        debug(`${DISPATCH} |-->| %s${captures ? '   captures=%o' : ''}`, methodInfo, captures);
+        let getResult = () => isMetaMethod(method) ? method(...args, captures, next) : method(...args, captures);
+        return andThen(getResult, (result, error, isAsync) => {
+            let resultInfo = error ? 'result=ERROR' : result === CONTINUE ? 'result=CONTINUE' : '';
+            debug(`${DISPATCH} |<--| %s   %s   %s`, methodInfo, isAsync ? 'async' : 'sync', resultInfo);
+            if (error) throw error; else return result;
         });
     };
 
     if (isMetaMethod(method)) isMetaMethod(wrapped, true);
     return wrapped;
-}
-
-
-
-
-
-// TODO: copypasta - move to util
-function andThen(val: any, cb: (val: any) => any) {
-    return isPromiseLike(val) ? val.then(cb) : cb(val);
 }

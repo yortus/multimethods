@@ -15,6 +15,7 @@ import repeatString from '../../util/repeat-string';
 import isPromiseLike from '../../util/is-promise-like';
 import Options from '../api/options';
 import normaliseOptions from '../[old]/normalise-options';
+import andThen from '../mmutil/and-then';
 
 
 
@@ -92,15 +93,20 @@ let mm = emitAll(source, {mminfo, CONTINUE, unhandledError: fatalError.UNHANDLED
 
 // TODO: temp testing... neaten/improve emit of wrapper?
 if (debug.enabled) {
+    let mmname = mminfo.name;
     let oldmm = mm;
     mm = function _dispatch(...args: any[]) {
-        debug(`${DISPATCH} Call   discriminant='%s'   args=%o`, normalisedOptions.toDiscriminant(...args), args);
-        let result = oldmm(...args);
-        let isAsync = isPromiseLike(result);
-        return andThen(result, result => {
-            debug(`${DISPATCH} Return%s   result=%o`, isAsync ? '   ASYNC' : '', result);
+        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, normalisedOptions.toDiscriminant(...args), args);
+        let getResult = () => oldmm(...args);
+        return andThen(getResult, (result, error, isAsync) => {
+            if (error) {
+                debug(`${DISPATCH} |<--| ${mmname}   %s   result=ERROR`, isAsync ? 'async' : 'sync');
+            }
+            else {
+                debug(`${DISPATCH} |<--| ${mmname}   %s   result=%o`, isAsync ? 'async' : 'sync', result);
+            }
             debug('');
-            return result;
+            if (error) throw error; else return result;
         });
     }
 }
@@ -151,15 +157,6 @@ function emitAll(
 
 
 
-}
-
-
-
-
-
-// TODO: copypasta - move to util
-function andThen(val: any, cb: (val: any) => any) {
-    return isPromiseLike(val) ? val.then(cb) : cb(val);
 }
 
 
