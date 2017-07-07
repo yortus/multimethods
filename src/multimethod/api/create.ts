@@ -81,8 +81,6 @@ function createImpl(options: Options) {
     // TODO: temp testing...
     check(options); // NB: may throw
     let mminfo = distill(options);
-emit;
-return mminfo;
-    // let result = emit(mminfo);
-    // return result;
+    let result = emit(mminfo);
+    return result;
 }

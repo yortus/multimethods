@@ -1,11 +1,16 @@
+import emitStuff from './emit-stuff';
+
+// TODO: fix...
+import {MMInfo} from '../distill/distill-stuff';
 
 
 
 
 
-export default function emit(x: any) {
+export default function emit(mminfo: MMInfo) {
 
     // TODO: implement...
-    return x;
+    let result = emitStuff(mminfo);
+    return result;
 
 }

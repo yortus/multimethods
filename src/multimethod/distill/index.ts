@@ -1,11 +1,11 @@
-import createDispatchFunction from './create-dispatch-function';
+import distillStuff, {MMInfo} from './distill-stuff';
 import Options from '../api/options';
 
 
 
 
 
-export default function distill(options: Options) {
+export default function distill(options: Options): MMInfo {
 
     // TODO: implement...
     // 1. from options get:
@@ -17,6 +17,6 @@ export default function distill(options: Options) {
 
 
 
-    let result = createDispatchFunction(options);
+    let result = distillStuff(options);
     return result;
 }
