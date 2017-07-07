@@ -21,7 +21,7 @@ export default function emitStuff(mminfo: MMInfo) {
 
     // TODO: thunks...
     mminfo.nodes.forEach(node => {
-        let thunks = computeThunksForNode(node, mminfo.options.arity, mminfo.options.timing);
+        let thunks = computeThunksForNode(node, mminfo.arity, mminfo.async);
         node.thunkName = thunks.thunkName;
         node.thunkSource = thunks.thunkSource;
     });
@@ -54,7 +54,7 @@ export default function emitStuff(mminfo: MMInfo) {
         `// ========== THUNKS ==========`,
         thunks,
         `// ========== ENVIRONMENT ==========`,
-        `var toDiscriminant = mminfo.options.toDiscriminant;`,
+        `var toDiscriminant = mminfo.toDiscriminant;`,
         `var EMPTY_OBJECT = Object.freeze({});`,
         isMatchLines.join('\n'),
         getCapturesLines.join('\n'),
@@ -75,7 +75,7 @@ if (debug.enabled) {
     let mmname = mminfo.name;
     let oldmm = mm;
     mm = function _dispatch(...args: any[]) {
-        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, mminfo.options.toDiscriminant(...args), args);
+        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, mminfo.toDiscriminant(...args), args);
         let getResult = () => oldmm(...args);
         return andThen(getResult, (result, error, isAsync) => {
             if (error) {
@@ -161,7 +161,7 @@ function emitAll(
  * @param {node} MMNode - contains the list of matching methods for the node's predicate, ordered from most- to least-specific.
  * @returns {Thunk} the virtual method for the node.
  */
-function computeThunksForNode(node: MMNode, arity: number|'variadic', timing: 'sync'|'async'|'mixed') {
+function computeThunksForNode(node: MMNode, arity: number|undefined, async: boolean|undefined) {
     const mostSpecificNode = node;
     let allMethods = [] as {method: Function, node: MMNode, localIndex: number}[];
     while (node !== null) {
@@ -179,7 +179,7 @@ function computeThunksForNode(node: MMNode, arity: number|'variadic', timing: 's
         let downstream = allMethods.filter(({method}, j) => (j === 0 || isMetaMethod(method)) && j < i).pop();
 
         // TODO: temp testing...
-        return emitThunkFunction(getNameForThunk(i), arity as number|undefined, { // TODO: fix cast after Options type is fixed
+        return emitThunkFunction(getNameForThunk(i), arity, {
             IS_PROMISE: 'isPromiseLike',
             CONTINUE: 'CONTINUE',
             EMPTY_OBJECT: 'EMPTY_OBJECT',
@@ -193,8 +193,8 @@ function computeThunksForNode(node: MMNode, arity: number|'variadic', timing: 's
             HAS_CAPTURES: node.getCaptures != null,
             IS_META_METHOD: isMetaMethod(method),
             HAS_DOWNSTREAM: downstream != null,
-            IS_NEVER_ASYNC: timing === 'sync',
-            IS_ALWAYS_ASYNC: timing === 'async'
+            IS_NEVER_ASYNC: async === false,
+            IS_ALWAYS_ASYNC: async === true
         });
     });
 
@@ -303,7 +303,7 @@ function emitThunkSelectorBlock(node: MMNode, nestDepth: number) {
 // TODO: temp testing...
 function emitDispatcher(mminfo: MMInfo) {
 
-    let source = emitDispatchFunction(mminfo.name, mminfo.options.arity as number|undefined, {
+    let source = emitDispatchFunction(mminfo.name, mminfo.arity, {
         TO_DISCRIMINANT: 'toDiscriminant',
         SELECT_THUNK: 'selectThunk', // TODO: temp testing... how to know this name?
         CONTINUE: 'CONTINUE',

@@ -1,45 +1,23 @@
 import andThen from '../mmutil/and-then';
-import {CONTINUE} from './sentinels';
+import {CONTINUE} from '../[old]/sentinels';
 import debug, {DISPATCH} from '../../util/debug';
-import fatalError from '../../util/fatal-error';
 import isMetaMethod from '../mmutil/is-meta-method';
-import MultimethodOptions from './multimethod-options';
 import repeatString from '../../util/repeat-string';
-import {toPredicate, toNormalPredicate} from '../../set-theory/predicates';
+import Options from '../api/options';
 
 
 
 
 
-// TODO: move method validation into here...? like with normaliseOptions...
-
-
-
-
-
-export type CheckedMethods = {[predicate: string]: Function[]};
+type CheckedMethods = {[predicate: string]: Function[]};
 
 
 
 
 
 // TODO: ...
-export default function normaliseMethods(methods: MultimethodOptions['methods']) {
-
-    // TODO: doc these new invariants:
-    // - all predicates in `methods` are valid
-    // - no two predicates in `methods` have the same normalised predicate (use chains for this scenario)
-    let deduped = {} as {[s: string]: string[]};
-    Object.keys(methods).forEach(predicateSource => {
-        let p = toPredicate(predicateSource);
-        let np = toNormalPredicate(p);
-        deduped[np] = deduped[np] || [];
-        deduped[np].push(p);
-    });
-    for (let np in deduped) {
-        if (deduped[np].length <= 1) continue;
-        fatalError.DUPLICATE_PREDICATE(np, `'${deduped[np].join(`', '`)}'`);
-    }
+export default function normaliseMethods(methods: Options['methods']) {
+    methods = methods || {};
 
     // TODO: doc...
     let result = {} as CheckedMethods;

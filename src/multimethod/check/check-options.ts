@@ -46,8 +46,9 @@ export default function checkOptions(options: Options) {
     // - issue a fatal error if options.strict is true.
     // - otherwise issue debug messages if debug.enabled is true
     // TODO: other static checks...
-    // - Function.length of methods must match arity
-    // - method body must reference capture names
+    // - Function.length of methods+toDiscriminant must match arity
+    // - method body must reference capture names of its predicate (relax if in chain?)
+    // - no AsyncFunction methods if mm is declared sync
     let problems = listDiscontinuities(options.methods);
     if (options.strict) {
         if (problems.length > 0) return fatalError.STRICT_VALIDATION(problems);

@@ -1,5 +1,4 @@
-import MultimethodOptions from '../[old]/multimethod-options';
-import normaliseMethods from '../[old]/normalise-methods';
+import normaliseMethods from './normalise-methods';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 import {toNormalPredicate, NormalPredicate} from '../../set-theory/predicates';
 
@@ -10,7 +9,6 @@ import fatalError from '../../util/fatal-error';
 import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate, Predicate} from '../../set-theory/predicates';
 import {CONTINUE} from '../[old]/sentinels';
 import Options from '../api/options';
-import normaliseOptions from '../[old]/normalise-options';
 
 
 
@@ -20,28 +18,8 @@ import normaliseOptions from '../[old]/normalise-options';
 /** TODO: doc... */
 export default function distillStuff(options: Options) {
 
-    // TODO: temp convertion while transitioning options types
-    let mmopts: MultimethodOptions = {
-        arity: options.arity || 'variadic',
-        timing: options.async === undefined ? 'mixed' : (options.async === true ? 'async' : 'sync'),
-        toDiscriminant: options.toDiscriminant || (() => { throw new Error('Implement default discriminant!') }), // TODO: implement...
-        methods: options.methods || {}
-    };
-
-    // Create a new options object incorporating all defaults.
-    let normalisedOptions = normaliseOptions(mmopts);
-
-    // TODO: ...
-    let normalisedMethods = normaliseMethods(normalisedOptions.methods);
-    normalisedOptions.methods = normalisedMethods;
-
-    // Generate a taxonomic arrangement of all the predicate patterns that occur in the `methods` hash.
-    let eulerDiagram = new EulerDiagram(Object.keys(normalisedMethods).map(toPredicate));
-
-
-
     // TODO: temp testing...
-    let mminfo = createMMInfo(eulerDiagram, normalisedOptions);
+    let mminfo = createMMInfo(options);
     return mminfo;
 }
 
@@ -52,7 +30,13 @@ export default function distillStuff(options: Options) {
 // TODO: doc...
 export interface MMInfo {
     name: string;
-    options: MultimethodOptions;
+
+    arity: number | undefined;
+    async: boolean | undefined;
+    strict: boolean;
+    toDiscriminant: Function;
+    methods: {[predicate: string]: Function[]};
+
     nodes: MMNode[];
     root: MMNode;
 }
@@ -114,14 +98,25 @@ export interface MMNode {
     // (iii) For two meta-methods in the same chain, the leftmost method is less specific
     // (iv) Anything else is ambiguous and results in an error
 
-function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: MultimethodOptions): MMInfo {
+function createMMInfo(options: Options): MMInfo {
+
+    let arity = options.arity;
+    let async = options.async;
+    let strict = options.strict || false;
+    let toDiscriminant = options.toDiscriminant || (() => { throw new Error('Implement default discriminant!') }); // TODO: implement...
+    let normalisedMethods = normaliseMethods(options.methods || {});
+
+    // Generate a taxonomic arrangement of all the predicate patterns that occur in the `methods` hash.
+    let eulerDiagram = new EulerDiagram(Object.keys(normalisedMethods).map(toPredicate));
+
+
 
     // Augment sets with exactly-matching methods in most- to least-specific order.
     let euler2 = eulerDiagram.augment(set => {
-        let predicateInHash = findMatchingPredicateInMethods(set.predicate, normalisedOptions.methods) || set.predicate;
+        let predicateInHash = findMatchingPredicateInMethods(set.predicate, normalisedMethods) || set.predicate;
 
         // Find the index in the chain where meta-methods end and regular methods begin.
-        let chain = normalisedOptions.methods[predicateInHash] || [];
+        let chain = normalisedMethods[predicateInHash] || [];
         if (!Array.isArray(chain)) chain = [chain];
         let i = 0;
         while (i < chain.length && isMetaMethod(chain[i])) ++i;
@@ -201,7 +196,16 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
     // TODO: all together...
     let name = `MM${multimethodCounter++}`;
     let root = nodes[euler2.sets.indexOf(euler2.universe)];
-    return {name, options: normalisedOptions, nodes, root};
+    return {
+        name,
+        arity,
+        async,
+        strict,
+        toDiscriminant,
+        methods: normalisedMethods,
+        nodes,
+        root
+    };
 }
 
 
@@ -209,7 +213,8 @@ function createMMInfo(eulerDiagram: EulerDiagram, normalisedOptions: Multimethod
 
 
 // TODO: doc...
-function findMatchingPredicateInMethods(normalisedPredicate: NormalPredicate, methods: MultimethodOptions['methods']) {
+function findMatchingPredicateInMethods(normalisedPredicate: NormalPredicate, methods: Options['methods']) {
+    methods = methods || {};
     for (let key in methods) {
         let predicate = toPredicate(key);
 
