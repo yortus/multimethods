@@ -114,6 +114,28 @@
   - [ ] TODO: doc use of special chars in emitted MM code
     - [ ] `ᐟ` (U+141F) to differentiate otherwise-equivalent identifiers
     - [ ] `ː` (U+02D0) to visually separate parts of an identifier
+    - [ ] EXPERIMENTS - valid identifier chars:
+      - M `Ɱ` (U+04CE)
+      - M `ϻ` (U+03FB)
+      - < `ᐸ` (U+1438)
+      - > `ᐳ` (U+1433)
+      - ? `ॽ` (U+097D)
+      - = `ꘌ` (U+A60C)
+      - # `ⵌ` (U+2D4C)
+      - @ `ම` (U+0DB8)
+      - + `ᕀ` (U+1540)
+      - ! `ǃ` (U+01C3)
+      - | `ǀ` (U+01C0)
+      - ^ `ᣔ` (U+18D4)
+      - " `ʺ` (U+02BA)
+      - ' `ʹ` (U+0374)   similar to prime
+      - ~ `ᔓ` (U+1513)   any better one?
+      - % `ꕑ` (U+A551)   any better one?
+
+      - none found for: `( ) [ ] { } & ; ,`
+      -  `` (U+)
+ 
+
 
   - [ ] Examples:
 
