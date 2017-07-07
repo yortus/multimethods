@@ -6,9 +6,10 @@ import getLongestCommonPrefix from '../../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../../util/get-longest-common-suffix';
 import isMetaMethod from '../shared/is-meta-method';
 import fatalError from '../../util/fatal-error';
-import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate, Predicate} from '../../set-theory/predicates';
+import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate} from '../../set-theory/predicates';
 import CONTINUE from '../shared/continue';
 import Options from '../api/options';
+import MMInfo, {MMNode} from '../shared/mm-info';
 
 
 
@@ -27,33 +28,6 @@ export default function distillStuff(options: Options) {
 
 
 
-// TODO: doc...
-export interface MMInfo {
-    name: string;
-
-    arity: number | undefined;
-    async: boolean | undefined;
-    strict: boolean;
-    toDiscriminant: Function;
-    methods: {[predicate: string]: Function[]};
-
-    nodes: MMNode[];
-    root: MMNode;
-}
-export interface MMNode {
-    predicate: Predicate;
-    methods: Function[];
-    fallback: MMNode|null;
-
-    identifier: string;
-    isMatch(discriminant: string): object/*truthy*/|null/*falsy*/; // TODO: use like a boolean...
-    getCaptures(discriminant: string): {[captureName: string]: string};
-
-    thunkName: string;
-    thunkSource: string;
-
-    children: MMNode[];
-}
 
 
 

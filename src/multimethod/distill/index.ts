@@ -1,4 +1,5 @@
-import distillStuff, {MMInfo} from './distill-stuff';
+import distillStuff from './distill-stuff';
+import MMInfo from '../shared/mm-info';
 import Options from '../api/options';
 
 

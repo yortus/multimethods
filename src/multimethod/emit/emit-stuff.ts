@@ -7,9 +7,7 @@ import {emitThunkFunction, emitDispatchFunction} from './codegen/emit';
 import repeatString from '../../util/repeat-string';
 import isPromiseLike from '../../util/is-promise-like';
 import andThen from '../shared/and-then';
-
-// TODO: fix...
-import {MMInfo, MMNode} from '../distill/distill-stuff';
+import MMInfo, {MMNode} from '../shared/mm-info';
 
 
 

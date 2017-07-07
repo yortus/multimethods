@@ -1,7 +1,5 @@
 import emitStuff from './emit-stuff';
-
-// TODO: fix...
-import {MMInfo} from '../distill/distill-stuff';
+import MMInfo from '../shared/mm-info';
 
 
 
