@@ -1,5 +1,5 @@
 import fatalError from '../../util/fatal-error';
-import isMetaMethod from '../mmutil/is-meta-method';
+import isMetaMethod from '../shared/is-meta-method';
 import Options from '../api/options';
 import {toPredicate, toNormalPredicate} from '../../set-theory/predicates';
 

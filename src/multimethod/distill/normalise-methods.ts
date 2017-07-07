@@ -1,7 +1,7 @@
-import andThen from '../mmutil/and-then';
-import {CONTINUE} from '../[old]/sentinels';
+import andThen from '../shared/and-then';
+import CONTINUE from '../shared/continue';
 import debug, {DISPATCH} from '../../util/debug';
-import isMetaMethod from '../mmutil/is-meta-method';
+import isMetaMethod from '../shared/is-meta-method';
 import repeatString from '../../util/repeat-string';
 import Options from '../api/options';
 

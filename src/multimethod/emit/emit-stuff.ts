@@ -1,12 +1,12 @@
 import debug, {DISPATCH, EMIT} from '../../util/debug';
 
-import isMetaMethod from '../mmutil/is-meta-method';
+import isMetaMethod from '../shared/is-meta-method';
 import fatalError from '../../util/fatal-error';
-import {CONTINUE} from '../[old]/sentinels';
-import {emitThunkFunction, emitDispatchFunction} from '../[old]/codegen/emit';
+import CONTINUE from '../shared/continue';
+import {emitThunkFunction, emitDispatchFunction} from './codegen/emit';
 import repeatString from '../../util/repeat-string';
 import isPromiseLike from '../../util/is-promise-like';
-import andThen from '../mmutil/and-then';
+import andThen from '../shared/and-then';
 
 // TODO: fix...
 import {MMInfo, MMNode} from '../distill/distill-stuff';

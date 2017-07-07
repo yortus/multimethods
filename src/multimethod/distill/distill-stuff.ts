@@ -4,10 +4,10 @@ import {toNormalPredicate, NormalPredicate} from '../../set-theory/predicates';
 
 import getLongestCommonPrefix from '../../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../../util/get-longest-common-suffix';
-import isMetaMethod from '../mmutil/is-meta-method';
+import isMetaMethod from '../shared/is-meta-method';
 import fatalError from '../../util/fatal-error';
 import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate, Predicate} from '../../set-theory/predicates';
-import {CONTINUE} from '../[old]/sentinels';
+import CONTINUE from '../shared/continue';
 import Options from '../api/options';
 
 

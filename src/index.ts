@@ -14,14 +14,14 @@ export {EulerDiagram, EulerSet} from './set-theory/sets';
 
 // TODO: temp testing...
 export {default} from './multimethod';
-export {CONTINUE} from './multimethod/[old]/sentinels';
+export {default as CONTINUE} from './multimethod/shared/continue';
 
 
 
 
 
 // TODO: temp testing...
-import isMetaMethod from './multimethod/mmutil/is-meta-method';
+import isMetaMethod from './multimethod/shared/is-meta-method';
 export function meta<T extends Function>(fn: T) {
     // TODO: ensure it is a function, etc
     isMetaMethod(fn, true);
