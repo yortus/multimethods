@@ -1,8 +1,6 @@
 import check from '../check';
-
-import createDispatchFunction from '../[old]/create-dispatch-function';
-import MultimethodOptions from '../[old]/multimethod-options';
-import normaliseOptions from '../[old]/normalise-options';
+import distill from '../distill';
+import emit from '../emit';
 import Options from './options';
 export default create;
 
@@ -21,26 +19,9 @@ function create<T0, T1, T2, TR>(options: {arity: 3; async: true} & TernaryOption
 function create<T0, T1, T2, TR>(options: {arity: 3} & TernaryOptions<T0, T1, T2, TR | Promise<TR>>): (_0: T0, _1: T1, _2: T2) => TR | Promise<TR>;
 function create<T, TR>(options: {async: false} & VariadicOptions<T, TR>): (...args: T[]) => TR;
 function create<T, TR>(options: {async: true} & VariadicOptions<T, TR | Promise<TR>>): (...args: T[]) => Promise<TR>;
-function create<T, TR>(options: VariadicOptions<T, TR | Promise<TR>>): (...args: T[]) => TR | Promise<TR>;
-function create(options: Options) {
-
-    // TODO: temp testing...
-    check(options);
-
-    // TODO: temp convertion while transitioning options types
-    let mmopts: MultimethodOptions = {
-        arity: options.arity || 'variadic',
-        timing: options.async === undefined ? 'mixed' : (options.async === true ? 'async' : 'sync'),
-        toDiscriminant: options.toDiscriminant || (() => { throw new Error('Implement default discriminant!') }), // TODO: implement...
-        methods: options.methods || {}
-    };
-
-    // Create a new options object incorporating all defaults.
-    let normalisedOptions = normaliseOptions(mmopts);
-
-    // TODO: ...
-    let instance = createDispatchFunction(normalisedOptions);
-    return instance;
+function create<T, TR>(options?: VariadicOptions<T, TR | Promise<TR>>): (...args: T[]) => TR | Promise<TR>;
+function create(options?: Options) {
+    return createImpl(options || {});
 }
 
 
@@ -91,3 +72,17 @@ export type Methods<TMethod extends Function> = { [predicate: string]: TMethod|T
 
 
 export type Captures = {[captureName: string]: string};
+
+
+
+
+
+function createImpl(options: Options) {
+    // TODO: temp testing...
+    check(options); // NB: may throw
+    let mminfo = distill(options);
+emit;
+return mminfo;
+    // let result = emit(mminfo);
+    // return result;
+}

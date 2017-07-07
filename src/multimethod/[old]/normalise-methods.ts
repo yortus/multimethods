@@ -2,7 +2,7 @@ import {CONTINUE} from './sentinels';
 import debug, {DISPATCH} from '../../util/debug';
 import fatalError from '../../util/fatal-error';
 import isPromiseLike from '../../util/is-promise-like';
-import isMetaMethod from './is-meta-method';
+import isMetaMethod from '../mmutil/is-meta-method';
 import MultimethodOptions from './multimethod-options';
 import repeatString from '../../util/repeat-string';
 import {toPredicate, toNormalPredicate} from '../../set-theory/predicates';

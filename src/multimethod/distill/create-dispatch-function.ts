@@ -1,18 +1,20 @@
-import MultimethodOptions from './multimethod-options';
-import normaliseMethods from './normalise-methods';
+import MultimethodOptions from '../[old]/multimethod-options';
+import normaliseMethods from '../[old]/normalise-methods';
 import {EulerDiagram, EulerSet} from '../../set-theory/sets';
 import {toNormalPredicate, NormalPredicate} from '../../set-theory/predicates';
 import debug, {DISPATCH, EMIT} from '../../util/debug';
 
 import getLongestCommonPrefix from '../../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../../util/get-longest-common-suffix';
-import isMetaMethod from './is-meta-method';
+import isMetaMethod from '../mmutil/is-meta-method';
 import fatalError from '../../util/fatal-error';
 import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate, Predicate} from '../../set-theory/predicates';
-import {CONTINUE} from './sentinels';
-import {emitThunkFunction, emitDispatchFunction} from './codegen/emit';
+import {CONTINUE} from '../[old]/sentinels';
+import {emitThunkFunction, emitDispatchFunction} from '../[old]/codegen/emit';
 import repeatString from '../../util/repeat-string';
 import isPromiseLike from '../../util/is-promise-like';
+import Options from '../api/options';
+import normaliseOptions from '../[old]/normalise-options';
 
 
 
@@ -20,7 +22,18 @@ import isPromiseLike from '../../util/is-promise-like';
 
 // TODO: review all comments here
 /** TODO: doc... */
-export default function createDispatchFunction(normalisedOptions: MultimethodOptions) {
+export default function createDispatchFunction(options: Options) {
+
+    // TODO: temp convertion while transitioning options types
+    let mmopts: MultimethodOptions = {
+        arity: options.arity || 'variadic',
+        timing: options.async === undefined ? 'mixed' : (options.async === true ? 'async' : 'sync'),
+        toDiscriminant: options.toDiscriminant || (() => { throw new Error('Implement default discriminant!') }), // TODO: implement...
+        methods: options.methods || {}
+    };
+
+    // Create a new options object incorporating all defaults.
+    let normalisedOptions = normaliseOptions(mmopts);
 
     // TODO: ...
     let normalisedMethods = normaliseMethods(normalisedOptions.methods);

@@ -1,6 +1,6 @@
 import fatalError from '../../util/fatal-error';
 import MultimethodOptions from './multimethod-options';
-import isMetaMethod from './is-meta-method';
+import isMetaMethod from '../mmutil/is-meta-method';
 
 
 

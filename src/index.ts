@@ -21,7 +21,7 @@ export {CONTINUE} from './multimethod/[old]/sentinels';
 
 
 // TODO: temp testing...
-import isMetaMethod from './multimethod/[old]/is-meta-method';
+import isMetaMethod from './multimethod/mmutil/is-meta-method';
 export function meta<T extends Function>(fn: T) {
     // TODO: ensure it is a function, etc
     isMetaMethod(fn, true);
