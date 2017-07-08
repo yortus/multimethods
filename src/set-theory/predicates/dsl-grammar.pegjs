@@ -27,7 +27,7 @@ Wildcard 'wildcard'
 
 Literal 'literal'
 =   c:[a-zA-Z0-9_]                                                      { return [c, c, null]; }
-/   c:" "                                                               { return [c, 'ㆍ', null]; }  // (U+318D)
+/   c:" "                                                               { return [c, 'ˑ', null]; }  // (U+318D)
 /   c:"/"                                                               { return [c, 'Ⳇ', null]; }  // (U+FF89)
 /   c:"-"                                                               { return [c, 'ￚ', null]; }  // (U+FFDA)
 /   c:"."                                                               { return [c, 'ˌ', null]; }  // (U+02CC)
