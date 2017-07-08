@@ -22,13 +22,13 @@ Globstar 'globstar'
 /   ("{..." / "{…")   id:IDENTIFIER   "}"   !("*" / "..." / "…" / "{")  { return ['…', '﹍', id]; }
 
 Wildcard 'wildcard'
-=   "*"   !("*" / "..." / "…" / "{")                                    { return ['*', 'ӿ', '?']; } // (U+157D)
+=   "*"   !("*" / "..." / "…" / "{")                                    { return ['*', 'ӿ', '?']; } // (U+04FF)
 /   "{"   id:IDENTIFIER   "}"   !("*" / "..." / "…" / "{")              { return ['*', 'ӿ', id]; }
 
 Literal 'literal'
 =   c:[a-zA-Z0-9_]                                                      { return [c, c, null]; }
-/   c:" "                                                               { return [c, 'ˑ', null]; }  // (U+318D)
-/   c:"/"                                                               { return [c, 'Ⳇ', null]; }  // (U+FF89)
+/   c:" "                                                               { return [c, 'ˑ', null]; }  // (U+02D1)
+/   c:"/"                                                               { return [c, 'Ⳇ', null]; }  // (U+2CC6)
 /   c:"-"                                                               { return [c, 'ￚ', null]; }  // (U+FFDA)
 /   c:"."                                                               { return [c, 'ˌ', null]; }  // (U+02CC)
 
