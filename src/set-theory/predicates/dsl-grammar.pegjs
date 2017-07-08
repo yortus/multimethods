@@ -22,8 +22,8 @@ Globstar 'globstar'
 /   ("{..." / "{…")   id:IDENTIFIER   "}"   !("*" / "..." / "…" / "{")  { return ['…', '﹍', id]; }
 
 Wildcard 'wildcard'
-=   "*"   !("*" / "..." / "…" / "{")                                    { return ['*', 'ᕽ', '?']; } // (U+157D)
-/   "{"   id:IDENTIFIER   "}"   !("*" / "..." / "…" / "{")              { return ['*', 'ᕽ', id]; }
+=   "*"   !("*" / "..." / "…" / "{")                                    { return ['*', 'ӿ', '?']; } // (U+157D)
+/   "{"   id:IDENTIFIER   "}"   !("*" / "..." / "…" / "{")              { return ['*', 'ӿ', id]; }
 
 Literal 'literal'
 =   c:[a-zA-Z0-9_]                                                      { return [c, c, null]; }

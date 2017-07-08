@@ -37,12 +37,12 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
     // E.g., '/foo/*.js' becomes 'lit*lit', and '/pub/{...rest}' becomes 'lit{…cap}'
     let simplifiedPatternSignature = predicate
         .replace(/[ ]*\#.*$/g, '')      // strip trailing whitespace
-        .replace(/{[^.}]+}/g, 'ᕽ')      // replace '{name}' with 'ᕽ'
+        .replace(/{[^.}]+}/g, 'ӿ')      // replace '{name}' with 'ӿ'
         .replace(/{\.+[^}]+}/g, '﹍')    // replace '{...name}' with '﹍'
         .replace(/{…[^}]+}/g, '﹍')      // replace '{…name}' with '﹍'
         .replace(/\.\.\./g, '…')          // replace '...' with '…'
-        .replace(/[^*…ᕽ﹍]+/g, 'lit')    // replace contiguous sequences of literal characters with 'lit'
-        .replace(/ᕽ/g, '{cap}')         // replace named wildcard captures with '{cap}'
+        .replace(/[^*…ӿ﹍]+/g, 'lit')    // replace contiguous sequences of literal characters with 'lit'
+        .replace(/ӿ/g, '{cap}')         // replace named wildcard captures with '{cap}'
         .replace(/﹍/g, '{…cap}');     // replace named globstar captures with '{...cap}'
 
     // The switch block below picks out some simpler cases and provides specialized `match` methods for them.
