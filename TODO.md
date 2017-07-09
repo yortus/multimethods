@@ -111,31 +111,72 @@
 
   - [ ] TODO: special rules for spaces?
 
+  - [ ] TODO: check out unicode 'VAI' for many interesting symbol-like characters eg: `ꗬ ꗈ ꕹ ꕤ ꕢ ꖜ ꗷ ꗤ`
+
   - [ ] TODO: doc use of special chars in emitted MM code
     - [ ] `ᐟ` (U+141F) to differentiate otherwise-equivalent identifiers
     - [ ] `ː` (U+02D0) to visually separate parts of an identifier
     - [ ] EXPERIMENTS - valid identifier chars:
       - M `Ɱ` (U+04CE)
       - M `ϻ` (U+03FB)
+      - / `Ⳇ` (U+2CC6)
+      - \ `〵` (U+3035)
+      - * `ӿ` (U+04FF)
+      - ** `ᕯ` (U+156F)
+      - : `ː` (U+02D0)
+      - . `ˌ` (U+02CC)
       - < `ᐸ` (U+1438)
       - > `ᐳ` (U+1433)
       - ? `ॽ` (U+097D)
-      - = `ꘌ` (U+A60C)
-      - # `ⵌ` (U+2D4C)
-      - @ `ම` (U+0DB8)
+      - - `ￚ` (U+FFDA)
+      - # `ꐚ` (U+A41A)
       - + `ᕀ` (U+1540)
       - ! `ǃ` (U+01C3)
       - | `ǀ` (U+01C0)
       - ^ `ᣔ` (U+18D4)
-      - " `ʺ` (U+02BA)
-      - ' `ʹ` (U+0374)   similar to prime
-      - ~ `ᔓ` (U+1513)   any better one?
+      - ~ `ᱻ` (U+1C7B)
+      - @ `ဇ` (U+1007)
+      - ' `ʼ` (U+02BC)
+      - " `ˮ` (U+02EE)
+      - ` `ˋ` (U+02CB)
+      - \s `ˑ` *U+02D1) for space
       - % `ꕑ` (U+A551)   any better one?
+      - , `ˏ` (U+02CF)   any better one?
+      - ; `ꓼ` (U+A4FC)   any better one?
+      - = `ꘌ` (U+A60C)   any better one?
 
-      - none found for: `( ) [ ] { } & ; ,`
+      - none found for: `( ) [ ] { } &`
       -  `` (U+)
  
+      - `/foo/bᑕar|azᑐ/quux`
+      - `/foo/bᒥar|az/quux`
+      - `/foo/bᒪar|azᒧ/quux`
+      - `/foo/bᒻar|azᒽ/quux`
+      - `/foo/bᔪar|azᔨ/quux`
+      - `/foo/bᕮar|azᕭ/quux`
+      - `/foo/bᕳar|azᕲ/quux`
+      - `/foo/bᖱar|azᖲ/quux`
+      - `/foo/bᗕar|azᗒ/quux`
+      - `/foo/bᗧar|azᗤ/quux`
+      - `/foo/bᗭar|azᗪ/quux`
+      - `/foo/bᗴar|azᗱ/quux`
+      - `/foo/bᘳar|azᘰ/quux`
+      - `/foo/bᢰar|azᢱ/quux`
+      - `/foo/bᢱar|azᢰ/quux`
+      - `/foo/bᐊar|azᐅ/quux`
+      - `/foo/bᗏar|azᗌ/quux`
+      - `/foo/bᕙar|azᕗ/quux`
+      - `/foo/bᦷar|azᦡ/quux`
+      - `/foo/b𐡋ar|az𐡐/quux`
+      - `/foo/bꉔar|az𐰣/quux` but the right bracket is double-width PITA U+10C23
+      - `/foo/bꀯar|az /quux` no matching RB :(
 
+`ᑘ0FA4`
+`ᑘ0FA4`
+
+`ꡳ` (U+A873)
+`𐩧` (U+10A67) bad handling in VSCode - double width
+`𐰣` (U+10C23) "     "
 
   - [ ] Examples:
 
