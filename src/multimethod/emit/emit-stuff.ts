@@ -8,6 +8,16 @@ import repeatString from '../../util/repeat-string';
 import isPromiseLike from '../../util/is-promise-like';
 import andThen from '../shared/and-then';
 import MMInfo, {MMNode} from '../shared/mm-info';
+import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../../set-theory/predicates';
+
+
+
+
+
+interface ThunkInfo {
+    name: string;
+    source: string;
+}
 
 
 
@@ -16,25 +26,28 @@ import MMInfo, {MMNode} from '../shared/mm-info';
 // TODO: review all comments here
 /** TODO: doc... */
 export default function emitStuff(mminfo: MMInfo) {
-
-    // TODO: thunks...
-    mminfo.nodes.forEach(node => {
-        let thunks = computeThunksForNode(node, mminfo.arity, mminfo.async);
-        node.thunkName = thunks.thunkName;
-        node.thunkSource = thunks.thunkSource;
-    });
-
     let dispatcher = emitDispatcher(mminfo);
-    let thunkSelector = emitThunkSelector(mminfo);
-    let thunks = mminfo.nodes.map(n => n.thunkSource).join('\n\n\n');
-    let isMatchLines = mminfo.nodes.map((n, i) => `var isMatchː${n.identifier} = mminfo.nodes[${i}].isMatch;`);
-    let getCapturesLines = mminfo.nodes
-        .map((n, i) => `var getCapturesː${n.identifier} = mminfo.nodes[${i}].getCaptures;`)
-        .filter((_, i) => mminfo.nodes[i].getCaptures != null);
 
+    // TODO: compute additional info needed for emit
+    let thunkInfo = mminfo.nodes.reduce(
+        (map, node) => map.set(node, computeThunksForNode(node, mminfo.arity, mminfo.async)),
+        new Map<MMNode, ThunkInfo>()
+    );
+    let thunks = '';
+    thunkInfo.forEach(({source}) => thunks += source + '\n\n\n');
+    let thunkSelector = emitThunkSelector(mminfo, thunkInfo);
+
+    // TODO: buggy emit for isMatch and getCaptures below
+    // - assumes predicate string is valid inside the literal single quotes put around it in the emit.
+    // - SOLN: escape the predicate string properly!
+    let identifiers = mminfo.nodes.map(node => toIdentifierParts(node.predicate));
+    let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.nodes[i].predicate)}');`);
+    let getCapturesLines = identifiers
+        .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.nodes[i].predicate}');`)
+        .filter((_, i) => parsePredicateSource(mminfo.nodes[i].predicate).captureNames.length > 0);
     let methodLines = mminfo.nodes.reduce(
         (lines, n, i) => n.methods.reduce(
-            (lines, _, j) => lines.concat(`var methodː${n.identifier}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].methods[${j}];`),
+            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].methods[${j}];`),
             lines
         ),
         [] as string[]
@@ -66,7 +79,7 @@ if (debug.enabled) {
 }
 
 
-let mm = emitAll(source, {mminfo, CONTINUE, unhandledError: fatalError.UNHANDLED, isPromiseLike});
+let mm = emitAll(source, {mminfo, toMatchFunction, CONTINUE, unhandledError: fatalError.UNHANDLED, isPromiseLike});
 
 // TODO: temp testing... neaten/improve emit of wrapper?
 if (debug.enabled) {
@@ -95,6 +108,7 @@ function emitAll(
     source: string,
     env: {
         mminfo: MMInfo,
+        toMatchFunction: Function,
         CONTINUE: any,
         unhandledError: typeof fatalError.UNHANDLED,
         isPromiseLike: Function,
@@ -119,10 +133,10 @@ function emitAll(
 
 
     function xyz() {
-        let {mminfo, CONTINUE, unhandledError, isPromiseLike} = env;
+        let {mminfo, toMatchFunction, CONTINUE, unhandledError, isPromiseLike} = env;
 
         // Suppress TS6133 decl never used for above locals, which *are* referenced in the source code eval'ed below.
-        [mminfo, CONTINUE, unhandledError, isPromiseLike];
+        [mminfo, toMatchFunction, CONTINUE, unhandledError, isPromiseLike];
 
         $0
 
@@ -159,7 +173,8 @@ function emitAll(
  * @param {node} MMNode - contains the list of matching methods for the node's predicate, ordered from most- to least-specific.
  * @returns {Thunk} the virtual method for the node.
  */
-function computeThunksForNode(node: MMNode, arity: number|undefined, async: boolean|undefined) {
+function computeThunksForNode(node: MMNode, arity: number|undefined, async: boolean|undefined): ThunkInfo {
+
     const mostSpecificNode = node;
     let allMethods = [] as {method: Function, node: MMNode, localIndex: number}[];
     while (node !== null) {
@@ -168,6 +183,7 @@ function computeThunksForNode(node: MMNode, arity: number|undefined, async: bool
     }
 
     let sources = allMethods.map(({method, node, localIndex}, i) => {
+        const identifier = toIdentifierParts(node.predicate);
 
         // To avoid unnecessary duplication, skip emit for regular methods that are less specific that the set's predicate, since these will be handled in their own set.
         if (!isMetaMethod(method) && node !== mostSpecificNode) return '';
@@ -181,14 +197,14 @@ function computeThunksForNode(node: MMNode, arity: number|undefined, async: bool
             IS_PROMISE: 'isPromiseLike',
             CONTINUE: 'CONTINUE',
             EMPTY_OBJECT: 'EMPTY_OBJECT',
-            GET_CAPTURES: `getCapturesː${node.identifier}`,
-            CALL_METHOD: `methodː${node.identifier}${repeatString('ᐟ', localIndex)}`,
+            GET_CAPTURES: `getCapturesː${identifier}`,
+            CALL_METHOD: `methodː${identifier}${repeatString('ᐟ', localIndex)}`,
             DELEGATE_DOWNSTREAM: downstream ? getNameForThunk(allMethods.indexOf(downstream)) : '',
             DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : getNameForThunk(i + 1),
 
             // Statically known booleans --> 'true'/'false' literals (for dead code elimination)
             ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(allMethods[i + 1].method),
-            HAS_CAPTURES: node.getCaptures != null,
+            HAS_CAPTURES: parsePredicateSource(node.predicate).captureNames.length > 0,
             IS_META_METHOD: isMetaMethod(method),
             HAS_DOWNSTREAM: downstream != null,
             IS_NEVER_ASYNC: async === false,
@@ -202,18 +218,17 @@ function computeThunksForNode(node: MMNode, arity: number|undefined, async: bool
     // The 'entry point' method is the one whose method we call to begin the cascading evaluation of the route. It is the
     // least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
     let entryPoint = allMethods.filter(el => isMetaMethod(el.method)).pop() || allMethods[0];
-    let thunkName = getNameForThunk(allMethods.indexOf(entryPoint));
     return {
-        thunkName,
-        thunkSource: sources.join('\n\n')
+        name: getNameForThunk(allMethods.indexOf(entryPoint)),
+        source: sources.join('\n\n')
     };
 
     // TODO: closure... move out?
     function getNameForThunk(i: number): string {
         let el = allMethods[i];
-        let baseName = `${el.node.identifier}${repeatString('ᐟ', el.localIndex)}`;
+        let baseName = `${toIdentifierParts(el.node.predicate)}${repeatString('ᐟ', el.localIndex)}`;
         if (isMetaMethod(el.method) && (el.node !== mostSpecificNode || el.localIndex > 0)) {
-            return `thunkː${mostSpecificNode.identifier}ːviaː${baseName}`;
+            return `thunkː${toIdentifierParts(mostSpecificNode.predicate)}ːviaː${baseName}`;
         }
         else {
             return `thunkː${baseName}`;
@@ -241,12 +256,12 @@ function computeThunksForNode(node: MMNode, arity: number|undefined, async: bool
  * @param {EulerDiagram} eulerDiagram - The arrangement of patterns on which to base the returned selector function.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-function emitThunkSelector(mminfo: MMInfo) {
+function emitThunkSelector(mminfo: MMInfo, thunkInfo: Map<MMNode, ThunkInfo>) {
 
     // Generate the combined source code for selecting the best thunk based on predicate-matching of the discriminant.
     let lines = [
         'function selectThunk(discriminant) {',
-        ...emitThunkSelectorBlock(mminfo.root, 1),
+        ...emitThunkSelectorBlock(mminfo.root, thunkInfo, 1),
         '}',
     ];
     let source = lines.join('\n') + '\n';
@@ -258,7 +273,7 @@ function emitThunkSelector(mminfo: MMInfo) {
 
 
 /** Helper function to generate source code for the thunk selector function. */
-function emitThunkSelectorBlock(node: MMNode, nestDepth: number) {
+function emitThunkSelectorBlock(node: MMNode, thunkInfo: Map<MMNode, ThunkInfo>, nestDepth: number) {
 
     // Make the indenting string corresponding to the given `nestDepth`.
     let indent = repeatString('    ', nestDepth);
@@ -266,23 +281,23 @@ function emitThunkSelectorBlock(node: MMNode, nestDepth: number) {
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
     node.children.forEach(node => {
-        let condition = `${indent}if (isMatchː${node.identifier}(discriminant)) `;
+        let condition = `${indent}if (isMatchː${toIdentifierParts(node.predicate)}(discriminant)) `;
 
         if (node.children.length === 0) {
-            lines.push(`${condition}return ${node.thunkName};`);
+            lines.push(`${condition}return ${thunkInfo.get(node)!.name};`);
             return;
         }
 
         lines = [
             ...lines,
             `${condition}{`,
-            ...emitThunkSelectorBlock(node, nestDepth + 1),
+            ...emitThunkSelectorBlock(node, thunkInfo, nestDepth + 1),
             `${indent}}`
         ];
     });
 
     // Add a line to select the fallback predicate if none of the more specialised predicates matched the discriminant.
-    lines.push(`${indent}return ${node.thunkName};`);
+    lines.push(`${indent}return ${thunkInfo.get(node)!.name};`);
     return lines;
 }
 

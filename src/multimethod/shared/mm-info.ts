@@ -28,12 +28,13 @@ export interface MMNode {
     methods: Function[];
     fallback: MMNode|null;
 
-    identifier: string;
-    isMatch(discriminant: string): object/*truthy*/|null/*falsy*/; // TODO: use like a boolean...
-    getCaptures(discriminant: string): {[captureName: string]: string};
-
-    thunkName: string;
-    thunkSource: string;
-
     children: MMNode[];
+
+// TODO: all below is for emit only...
+    // identifier: string;
+    // isMatch(discriminant: string): object/*truthy*/|null/*falsy*/; // TODO: use like a boolean...
+    // getCaptures(discriminant: string): {[captureName: string]: string};
+
+    // thunkName: string;
+    // thunkSource: string;
 }

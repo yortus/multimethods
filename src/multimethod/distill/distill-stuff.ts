@@ -6,7 +6,7 @@ import getLongestCommonPrefix from '../../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../../util/get-longest-common-suffix';
 import isMetaMethod from '../shared/is-meta-method';
 import fatalError from '../../util/fatal-error';
-import {toIdentifierParts, toMatchFunction, parsePredicateSource as parse, toPredicate} from '../../set-theory/predicates';
+import {toPredicate} from '../../set-theory/predicates';
 import CONTINUE from '../shared/continue';
 import Options from '../api/options';
 import MMInfo, {MMNode} from '../shared/mm-info';
@@ -105,14 +105,6 @@ function createMMInfo(options: Options): MMInfo {
         predicate: set.predicateInHash,
         methods: set.methods,
         fallback: null,
-
-        identifier: toIdentifierParts(set.predicate),
-        isMatch: toMatchFunction(set.predicate),
-        getCaptures: parse(set.predicateInHash).captureNames.length ? toMatchFunction(set.predicateInHash) as any : null,
-
-        thunkName: '', // TODO: leave for now...
-        thunkSource: '', // TODO: leave for now...
-
         children: []
     }));
 
@@ -125,7 +117,7 @@ function createMMInfo(options: Options): MMInfo {
         if (set.supersets.length === 0) {
             let method = function _unhandled() { return CONTINUE; };
             insertAsLeastSpecificRegularMethod(node.methods, method);
-        }       
+        }
 
         // Case 1: if there is only one way into the set, then the fallback is the node corresponding to the one-and-only superset.
         else if (set.supersets.length === 1) {
