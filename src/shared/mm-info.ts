@@ -1,4 +1,4 @@
-import {Predicate} from '../set-theory/predicates';
+import {Predicate} from '../math/predicates';
 
 
 

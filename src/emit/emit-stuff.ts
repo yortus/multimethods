@@ -8,7 +8,7 @@ import repeatString from '../util/repeat-string';
 import isPromiseLike from '../util/is-promise-like';
 import andThen from '../shared/and-then';
 import MMInfo, {MMNode} from '../shared/mm-info';
-import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../set-theory/predicates';
+import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
 
 
 

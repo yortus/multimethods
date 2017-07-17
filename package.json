@@ -7,7 +7,7 @@
   "typings": "dist/release/index.d.ts",
   "scripts": {
     "build": "tsc -p src && tsc -p test && tsc -p extras && npm run build:peg",
-    "build:peg": "pegjs -o dist/release/set-theory/predicates/dsl-grammar.js src/set-theory/predicates/dsl-grammar.pegjs",
+    "build:peg": "pegjs -o dist/release/math/predicates/dsl-grammar.js src/math/predicates/dsl-grammar.pegjs",
     "clean": "rimraf dist/",
     "test": "node ./scripts/run-unit-tests",
     "test:debug": "cross-env DEBUG=multimethods node ./scripts/run-unit-tests",
