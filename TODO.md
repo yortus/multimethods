@@ -1,73 +1,39 @@
+## Todo - High Priority
+- [ ] support more special characters in predicates
+  - [ ] initially: ':<>'
+- [ ] add a good default implementation for `toDiscriminant`
+
+
+
+
+
+## Todo - Medium Priority
+- [ ] Address code quality in /src
+  - [ ] Rationalise file structure under /src
+  - [ ] Reasonable breakdown of functions
+  - [ ] JSDoc comments for all exports
+  - [ ] Descriptive inline comments so someone can understand the inner workings
+- [ ] Write better README
+  - [ ] TOC
+  - [ ] Rationale / motivating example - problem, solution
+  - [ ] Installing
+  - [ ] Usage example
+  - [ ] Further Details
+    - [ ] predicates
+    - [ ] options
+- [ ] Improve unit test coverage
+
+
+
+
+
+## Todo - Low Priority
+
+
+
+
+
 ## Decisions:
-- [x] add option `strictChecks: boolean`
-  - [x] add note for future addition: this option *may* be expanded to allow for specific strict checks
-  - [x] current uses of `util.warn` become errors *iff* strictChecks is true, else no error/warning issued.
-  - [x] remove all `warn`-related stuff from codebase
-- [x] add an `fatalError.ts` file listing all possible errors with a short code and a description with {0} holes
-  - [x] use these codes when throwing errors (via helper)
-  - [x] improve the 'MM contains conflicts' error message. i.e., what does it mean? How to fix it?
-    - [x] MM has no catch-all handler, so some calls may no be dispatchable. To resolve this problem, define a handler for the predicate '...'
-    - [x] MM has ambiguities, so some calls may not be dispatchable. To resolve this problem, define handlers for the predicates(s) ${...}
-- [x] split unit tests from perf work.
-  - [x] perf moves to `/extras/bench`, call with `npm run bench`
-  - [x] simplify under dirs `/test`
-- [x] emit to `/dist/release`, `/dist/test`, `/dist/extras`
-- [x] Ensure runtime support for ES5 envs without perf loss
-  - [x] remove `emitES5` option
-  - [x] Don't use ES6 libs in `/src` (but can use them in `/test` and `/extras`)
-  - [x] Downlevel ES6 language features `/src` (but not in `/test` and `/extras`)
-  - [x] Ensure 'templates' contain no ES6 to begin with, to avoid surprise behaviour with 'macro' subtitutions
-    - [x] carefully audit all generated code for possible ES6 usage:
-      - [x] arrow functions
-      - [x] rest/spread
-      - [x] ES6 runtime - Promise, Symbol, string functions, etc
-      - [x] other - check&whitelist every line to rule out anything missed above
-    - [x] EXCEPTIONS (supported even in IE11):
-      - [x] let/const
-      - [x] Map & Set basic usage
-      - [x] Object.setPrototypeOf
-  - [x] ensure benchmarks have not suffered
-- [x] UNHANDLED --> FALLBACK
-  - [x] export the default FALLBACK sentinel value
-  - [x] replace refs everywhere
-  - [x] fix 'unhandled' option
-  - [x] explain in README what FALLBACK sentinel means (imperative, not declarative)
-  - [x] what happens when last handler returns FALLBACK?
-    - [x] FALLBACK should not be observable to clients; it is an internal dispatch imperative
-    - [x] throw an unhandled dispatch error (new case in `fatalErrors.ts`)
-- [x] TODO: Helper(s) to compose handlers manually
-  - [x] permit listing regular handlers in an array ('chain')
-  - [x] permit listing metahandlers in an array ('chain')
-  - [x] permit mixing metahandlers and regular handlers in an array ('chain')
-    - [x] implement special ordering laws and validate them
-  - [x] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
-    - [x] remove all references to `tiebreak` and `moreSpecific` function in code/comments
-    - [x] simplify code that previously used tiebreak stuff, if/where possible
-  - [x] remove predicate comment support - they were not really 'comments' since they affected semantics
-  - [x] enforce 'meta-handlers before regular-handlers in chains' convention. Early error if not.
-    - [x] explain in docs that this simplifies reading of chains as having left-to-right execution order
-- [x] revise FALLBACK
-  - [x] change to CONTINUE
-  - [x] don't allow overriding; remove from MMOptions (check this will work with routist first)
-- [x] add `debug` logging using the `debug` module
-  - [x] replaces `trace` option. Remove that.
-  - [x] use npm `debug` module to sent all debug/trace messages
-    - [x] why not events? ANS: They are node.js-specific.
-  - [x] remove 'trace' code from executor function; replace with wrapper functions on all handlers when in debug mode
-  - [x] turn `strictChecks` checks into debug warnings and remove `strictChecks` option
-- [x] export a `validate(mm): void` function that does strict checking and throws a list of errors on failure
-  - [x] remove the `strictChecks` option
-  - [x] move what were the strict checks into the validate function
-- [x] SKIPPED: Use/support ES6 `class` syntax for defining multimethods
-  - [x] SKIPPED: MM = static class, you call the constructor, not an instance
-    - [x] SKIPPED: prevent instantiation
-    - [x] SKIPPED: allow calling the class ctor like a function (no `new`)
-      - [x] is this even permitted with ES6 classes? Ans: NO
-
-
-
-
-
 - [ ] Update predicate special character handling
   - [ ] use URI ref: https://tools.ietf.org/html/rfc3986
   - [ ] TODO: char pool yet to classify:
@@ -148,6 +114,8 @@
       - none found for: `( ) [ ] { } &`
       -  `` (U+)
  
+      - `/foo/b(ar|az)/quux`
+
       - `/foo/bᑕar|azᑐ/quux`
       - `/foo/bᒥar|az/quux`
       - `/foo/bᒪar|azᒧ/quux`
@@ -167,9 +135,14 @@
       - `/foo/bᗏar|azᗌ/quux`
       - `/foo/bᕙar|azᕗ/quux`
       - `/foo/bᦷar|azᦡ/quux`
-      - `/foo/b𐡋ar|az𐡐/quux`
+      - `/foo/b𐡋ar|az𐡐/quux` but the right bracket is double-width PITA U+10C23
       - `/foo/bꉔar|az𐰣/quux` but the right bracket is double-width PITA U+10C23
       - `/foo/bꀯar|az /quux` no matching RB :(
+
+
+      - `(1 * (2 + 3)) / 4`
+      - `ᐊ1 * ᐊ2 + 3ᐅᐅ / 4`
+
 
 `ᑘ0FA4`
 `ᑘ0FA4`
@@ -515,10 +488,9 @@ Contenders
   - [ ] provide a 'check handler signature' option (default=true) to multimethod constructor
 
 
-- [x] move TODO list(s) to separate github issues
-- [x] clean up README - just keep glossary, pattern info for now
+- [ ] move TODO list(s) to separate github issues
+- [ ] clean up README - just keep glossary, pattern info for now
 
-- [x] use @types, remove typings
 
 - [ ] PatternMatchingFunction --> Multimethod
   - [x] define as class
@@ -574,8 +546,6 @@ Contenders
 
 
 
-- [x] RuleSet: change to UNHANDLED sentinel value instead of null
-- [x] RuleSet: allow UNHANDLED value to be specified as an option
 - [ ] RuleSet: allow custom 'tiebreak' function to be specified as an option
 - [ ] Transport: for 'file' responses, harden againt rel paths in address eg '../../../sys/passwords.txt'
 - [ ] docs: some code comments are almost impossible to grasp (eg see comments in findAllRoutesThroughRuleSet). Need step-by-step explanations of concepts in separate .md file(s), code can refer reader to these docs for more explanation. Code comments should then be reduced to simpler statements.
@@ -584,6 +554,89 @@ Contenders
   - [ ] isolate transport deps: node (http/s), node-static
 - [ ] investigate N-way multiple dispatch
   - [ ] RuleSet becomes Dispatcher and ctor takes params for: ruleSet, arg->addr mapper(s), options
+
+
+
+
+
+
+
+
+
+
+## Done
+- [x] add option `strictChecks: boolean`
+  - [x] add note for future addition: this option *may* be expanded to allow for specific strict checks
+  - [x] current uses of `util.warn` become errors *iff* strictChecks is true, else no error/warning issued.
+  - [x] remove all `warn`-related stuff from codebase
+- [x] add an `fatalError.ts` file listing all possible errors with a short code and a description with {0} holes
+  - [x] use these codes when throwing errors (via helper)
+  - [x] improve the 'MM contains conflicts' error message. i.e., what does it mean? How to fix it?
+    - [x] MM has no catch-all handler, so some calls may no be dispatchable. To resolve this problem, define a handler for the predicate '...'
+    - [x] MM has ambiguities, so some calls may not be dispatchable. To resolve this problem, define handlers for the predicates(s) ${...}
+- [x] split unit tests from perf work.
+  - [x] perf moves to `/extras/bench`, call with `npm run bench`
+  - [x] simplify under dirs `/test`
+- [x] emit to `/dist/release`, `/dist/test`, `/dist/extras`
+- [x] Ensure runtime support for ES5 envs without perf loss
+  - [x] remove `emitES5` option
+  - [x] Don't use ES6 libs in `/src` (but can use them in `/test` and `/extras`)
+  - [x] Downlevel ES6 language features `/src` (but not in `/test` and `/extras`)
+  - [x] Ensure 'templates' contain no ES6 to begin with, to avoid surprise behaviour with 'macro' subtitutions
+    - [x] carefully audit all generated code for possible ES6 usage:
+      - [x] arrow functions
+      - [x] rest/spread
+      - [x] ES6 runtime - Promise, Symbol, string functions, etc
+      - [x] other - check&whitelist every line to rule out anything missed above
+    - [x] EXCEPTIONS (supported even in IE11):
+      - [x] let/const
+      - [x] Map & Set basic usage
+      - [x] Object.setPrototypeOf
+  - [x] ensure benchmarks have not suffered
+- [x] UNHANDLED --> FALLBACK
+  - [x] export the default FALLBACK sentinel value
+  - [x] replace refs everywhere
+  - [x] fix 'unhandled' option
+  - [x] explain in README what FALLBACK sentinel means (imperative, not declarative)
+  - [x] what happens when last handler returns FALLBACK?
+    - [x] FALLBACK should not be observable to clients; it is an internal dispatch imperative
+    - [x] throw an unhandled dispatch error (new case in `fatalErrors.ts`)
+- [x] TODO: Helper(s) to compose handlers manually
+  - [x] permit listing regular handlers in an array ('chain')
+  - [x] permit listing metahandlers in an array ('chain')
+  - [x] permit mixing metahandlers and regular handlers in an array ('chain')
+    - [x] implement special ordering laws and validate them
+  - [x] ambiguity is now an error - there is no tieBreak fn (apart from metarule vs rule)
+    - [x] remove all references to `tiebreak` and `moreSpecific` function in code/comments
+    - [x] simplify code that previously used tiebreak stuff, if/where possible
+  - [x] remove predicate comment support - they were not really 'comments' since they affected semantics
+  - [x] enforce 'meta-handlers before regular-handlers in chains' convention. Early error if not.
+    - [x] explain in docs that this simplifies reading of chains as having left-to-right execution order
+- [x] revise FALLBACK
+  - [x] change to CONTINUE
+  - [x] don't allow overriding; remove from MMOptions (check this will work with routist first)
+- [x] add `debug` logging using the `debug` module
+  - [x] replaces `trace` option. Remove that.
+  - [x] use npm `debug` module to sent all debug/trace messages
+    - [x] why not events? ANS: They are node.js-specific.
+  - [x] remove 'trace' code from executor function; replace with wrapper functions on all handlers when in debug mode
+  - [x] turn `strictChecks` checks into debug warnings and remove `strictChecks` option
+- [x] export a `validate(mm): void` function that does strict checking and throws a list of errors on failure
+  - [x] remove the `strictChecks` option
+  - [x] move what were the strict checks into the validate function
+- [x] SKIPPED: Use/support ES6 `class` syntax for defining multimethods
+  - [x] SKIPPED: MM = static class, you call the constructor, not an instance
+    - [x] SKIPPED: prevent instantiation
+    - [x] SKIPPED: allow calling the class ctor like a function (no `new`)
+      - [x] is this even permitted with ES6 classes? Ans: NO
+
+
+
+
+
+## Done (older)
+- [x] RuleSet: change to UNHANDLED sentinel value instead of null
+- [x] RuleSet: allow UNHANDLED value to be specified as an option
 - [x] transpile to /dist or /built directory and npmignore src/
 - [x] more pegjs to devDeps and make PEG compilation a build step
 - [x] change {...rest} to {**rest} / {…rest} for consistency?
@@ -596,3 +649,4 @@ Contenders
 - [x] asyncify Handler#execute
 - [x] still need `isPromise`? If not, remove it :( Otherwise find a use for it.
 - [x] add npmignore
+- [x] use @types, remove typings
