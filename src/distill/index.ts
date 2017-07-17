@@ -1,12 +1,12 @@
 import normaliseMethods from './normalise-methods';
-import {EulerDiagram, EulerSet} from '../../set-theory/sets';
-import {toNormalPredicate, NormalPredicate} from '../../set-theory/predicates';
+import {EulerDiagram, EulerSet} from '../set-theory/sets';
+import {toNormalPredicate, NormalPredicate} from '../set-theory/predicates';
 
-import getLongestCommonPrefix from '../../util/get-longest-common-prefix';
-import getLongestCommonSuffix from '../../util/get-longest-common-suffix';
+import getLongestCommonPrefix from '../util/get-longest-common-prefix';
+import getLongestCommonSuffix from '../util/get-longest-common-suffix';
 import isMetaMethod from '../shared/is-meta-method';
-import fatalError from '../../util/fatal-error';
-import {toPredicate} from '../../set-theory/predicates';
+import fatalError from '../util/fatal-error';
+import {toPredicate} from '../set-theory/predicates';
 import CONTINUE from '../shared/continue';
 import Options from '../api/options';
 import MMInfo, {MMNode} from '../shared/mm-info';

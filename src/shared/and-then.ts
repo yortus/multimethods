@@ -1,4 +1,4 @@
-import isPromiseLike from '../../util/is-promise-like';
+import isPromiseLike from '../util/is-promise-like';
 
 
 

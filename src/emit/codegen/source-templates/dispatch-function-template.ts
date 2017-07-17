@@ -1,4 +1,4 @@
-import fatalError from '../../../../util/fatal-error';
+import fatalError from '../../../util/fatal-error';
 import Thunk from '../thunk';
 
 

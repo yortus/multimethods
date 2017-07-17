@@ -1,8 +1,8 @@
 import andThen from '../shared/and-then';
 import CONTINUE from '../shared/continue';
-import debug, {DISPATCH} from '../../util/debug';
+import debug, {DISPATCH} from '../util/debug';
 import isMetaMethod from '../shared/is-meta-method';
-import repeatString from '../../util/repeat-string';
+import repeatString from '../util/repeat-string';
 import Options from '../api/options';
 
 

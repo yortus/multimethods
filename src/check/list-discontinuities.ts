@@ -1,6 +1,6 @@
-import EulerDiagram from '../../set-theory/sets/euler-diagram';
+import EulerDiagram from '../set-theory/sets/euler-diagram';
 import Options from '../api/options';
-import {toPredicate, toNormalPredicate, ANY} from '../../set-theory/predicates';
+import {toPredicate, toNormalPredicate, ANY} from '../set-theory/predicates';
 
 
 

@@ -1,6 +1,6 @@
 import checkMethods from './check-methods';
-import debug, {VALIDATE} from '../../util/debug';
-import fatalError from '../../util/fatal-error';
+import debug, {VALIDATE} from '../util/debug';
+import fatalError from '../util/fatal-error';
 import listDiscontinuities from './list-discontinuities';
 import Options from '../api/options';
 

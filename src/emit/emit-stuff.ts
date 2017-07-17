@@ -1,14 +1,14 @@
-import debug, {DISPATCH, EMIT} from '../../util/debug';
+import debug, {DISPATCH, EMIT} from '../util/debug';
 
 import isMetaMethod from '../shared/is-meta-method';
-import fatalError from '../../util/fatal-error';
+import fatalError from '../util/fatal-error';
 import CONTINUE from '../shared/continue';
 import {emitThunkFunction, emitDispatchFunction} from './codegen/emit';
-import repeatString from '../../util/repeat-string';
-import isPromiseLike from '../../util/is-promise-like';
+import repeatString from '../util/repeat-string';
+import isPromiseLike from '../util/is-promise-like';
 import andThen from '../shared/and-then';
 import MMInfo, {MMNode} from '../shared/mm-info';
-import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../../set-theory/predicates';
+import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../set-theory/predicates';
 
 
 

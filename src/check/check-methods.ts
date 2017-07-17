@@ -1,7 +1,7 @@
-import fatalError from '../../util/fatal-error';
+import fatalError from '../util/fatal-error';
 import isMetaMethod from '../shared/is-meta-method';
 import Options from '../api/options';
-import {toPredicate, toNormalPredicate} from '../../set-theory/predicates';
+import {toPredicate, toNormalPredicate} from '../set-theory/predicates';
 
 
 
