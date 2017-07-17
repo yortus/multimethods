@@ -1,7 +1,7 @@
-import andThen from '../shared/and-then';
-import CONTINUE from '../shared/continue';
+import andThen from '../util/and-then';
+import {CONTINUE} from '../sentinels';
 import debug, {DISPATCH} from '../util/debug';
-import isMetaMethod from '../shared/is-meta-method';
+import isMetaMethod from '../util/is-meta-method';
 import repeatString from '../util/repeat-string';
 import Options from '../options';
 

@@ -4,12 +4,12 @@ import {toNormalPredicate, NormalPredicate} from '../math/predicates';
 
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
-import isMetaMethod from '../shared/is-meta-method';
+import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
 import {toPredicate} from '../math/predicates';
-import CONTINUE from '../shared/continue';
+import {CONTINUE} from '../sentinels';
 import Options from '../options';
-import MMInfo, {MMNode} from '../shared/mm-info';
+import MMInfo, {MMNode} from './mm-info';
 
 
 

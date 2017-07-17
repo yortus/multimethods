@@ -1,13 +1,13 @@
 import debug, {DISPATCH, EMIT} from '../util/debug';
 
-import isMetaMethod from '../shared/is-meta-method';
+import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
-import CONTINUE from '../shared/continue';
+import {CONTINUE} from '../sentinels';
 import {emitThunkFunction, emitDispatchFunction} from './codegen/emit';
 import repeatString from '../util/repeat-string';
 import isPromiseLike from '../util/is-promise-like';
-import andThen from '../shared/and-then';
-import MMInfo, {MMNode} from '../shared/mm-info';
+import andThen from '../util/and-then';
+import MMInfo, {MMNode} from '../distill/mm-info';
 import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
 
 

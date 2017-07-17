@@ -1,5 +1,5 @@
 import emitStuff from './emit-stuff';
-import MMInfo from '../shared/mm-info';
+import MMInfo from '../distill/mm-info';
 
 
 
