@@ -1,4 +1,4 @@
-import check from './check';
+import {checkOptions} from './validation';
 import distill from './distill';
 import emit from './emit';
 import Options from './options';
@@ -79,7 +79,7 @@ export type Captures = {[captureName: string]: string};
 
 function createImpl(options: Options) {
     // TODO: temp testing...
-    check(options); // NB: may throw
+    checkOptions(options); // NB: may throw
     let mminfo = distill(options);
     let result = emit(mminfo);
     return result;
