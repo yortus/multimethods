@@ -3,21 +3,15 @@ import debug, {DISPATCH, EMIT} from '../util/debug';
 import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
 import {CONTINUE} from '../sentinels';
-import {emitThunkFunction, emitDispatchFunction} from './emit';
+import emitDispatchFunction from './emit-dispatch-function';
+import emitSelectorFunction from './emit-selector-function';
+import emitThunkFunction from './emit-thunk-function';
 import repeatString from '../util/repeat-string';
 import isPromiseLike from '../util/is-promise-like';
 import andThen from '../util/and-then';
 import MMInfo, {MMNode} from '../analysis/mm-info';
 import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
-
-
-
-
-
-interface ThunkInfo {
-    name: string;
-    source: string;
-}
+import ThunkInfo from './thunk-info';
 
 
 
@@ -35,7 +29,7 @@ export default function emitStuff(mminfo: MMInfo) {
     );
     let thunks = '';
     thunkInfo.forEach(({source}) => thunks += source + '\n\n\n');
-    let thunkSelector = emitThunkSelector(mminfo, thunkInfo);
+    let thunkSelector = emitSelectorFunction(mminfo, thunkInfo);
 
     // TODO: buggy emit for isMatch and getCaptures below
     // - assumes predicate string is valid inside the literal single quotes put around it in the emit.
@@ -234,71 +228,6 @@ function computeThunksForNode(node: MMNode, arity: number|undefined, async: bool
             return `thunkː${baseName}`;
         }
     }
-}
-
-
-
-
-
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// %%     SELECTOR
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-// TODO: rewrite doc...
-/**
- * Generates a function that, given a discriminant, returns the best-matching route executor from the given list of
- * candidates. The returned selector function is generated for maximum readability and efficiency, using conditional
- * constructs that follow the branches of the given `eulerDiagram`.
- * @param {EulerDiagram} eulerDiagram - The arrangement of patterns on which to base the returned selector function.
- * @returns {(address: string) => Function} The generated route selector function.
- */
-function emitThunkSelector(mminfo: MMInfo, thunkInfo: Map<MMNode, ThunkInfo>) {
-
-    // Generate the combined source code for selecting the best thunk based on predicate-matching of the discriminant.
-    let lines = [
-        'function selectThunk(discriminant) {',
-        ...emitThunkSelectorBlock(mminfo.root, thunkInfo, 1),
-        '}',
-    ];
-    let source = lines.join('\n') + '\n';
-    return source;
-}
-
-
-
-
-
-/** Helper function to generate source code for the thunk selector function. */
-function emitThunkSelectorBlock(node: MMNode, thunkInfo: Map<MMNode, ThunkInfo>, nestDepth: number) {
-
-    // Make the indenting string corresponding to the given `nestDepth`.
-    let indent = repeatString('    ', nestDepth);
-
-    // Recursively generate the conditional logic block to select among the given patterns.
-    let lines: string[] = [];
-    node.children.forEach(node => {
-        let condition = `${indent}if (isMatchː${toIdentifierParts(node.predicate)}(discriminant)) `;
-
-        if (node.children.length === 0) {
-            lines.push(`${condition}return ${thunkInfo.get(node)!.name};`);
-            return;
-        }
-
-        lines = [
-            ...lines,
-            `${condition}{`,
-            ...emitThunkSelectorBlock(node, thunkInfo, nestDepth + 1),
-            `${indent}}`
-        ];
-    });
-
-    // Add a line to select the fallback predicate if none of the more specialised predicates matched the discriminant.
-    lines.push(`${indent}return ${thunkInfo.get(node)!.name};`);
-    return lines;
 }
 
 
