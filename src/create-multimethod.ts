@@ -1,5 +1,5 @@
 import {checkOptions} from './validation';
-import distill from './distill';
+import distill from './analysis';
 import emit from './codegen';
 import Options from './options';
 export default create;
