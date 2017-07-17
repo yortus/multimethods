@@ -1,6 +1,6 @@
-import check from '../check';
-import distill from '../distill';
-import emit from '../emit';
+import check from './check';
+import distill from './distill';
+import emit from './emit';
 import Options from './options';
 export default create;
 

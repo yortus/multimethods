@@ -1,5 +1,5 @@
 import EulerDiagram from '../set-theory/sets/euler-diagram';
-import Options from '../api/options';
+import Options from '../options';
 import {toPredicate, toNormalPredicate, ANY} from '../set-theory/predicates';
 
 

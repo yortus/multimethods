@@ -8,7 +8,7 @@ import isMetaMethod from '../shared/is-meta-method';
 import fatalError from '../util/fatal-error';
 import {toPredicate} from '../set-theory/predicates';
 import CONTINUE from '../shared/continue';
-import Options from '../api/options';
+import Options from '../options';
 import MMInfo, {MMNode} from '../shared/mm-info';
 
 
