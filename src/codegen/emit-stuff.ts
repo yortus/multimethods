@@ -3,7 +3,7 @@ import debug, {DISPATCH, EMIT} from '../util/debug';
 import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
 import {CONTINUE} from '../sentinels';
-import {emitThunkFunction, emitDispatchFunction} from './codegen/emit';
+import {emitThunkFunction, emitDispatchFunction} from './emit';
 import repeatString from '../util/repeat-string';
 import isPromiseLike from '../util/is-promise-like';
 import andThen from '../util/and-then';
