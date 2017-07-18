@@ -25,5 +25,6 @@ export default interface Options {
 
     toDiscriminant?: Function;
 
+    // TODO: doc... this is the Method Table...
     methods?: { [predicate: string]: Function|Function[]; }
 }

@@ -32,11 +32,11 @@ export default function emitStuff(mminfo: MMInfo) {
     // TODO: buggy emit for isMatch and getCaptures below
     // - assumes predicate string is valid inside the literal single quotes put around it in the emit.
     // - SOLN: escape the predicate string properly!
-    let identifiers = mminfo.nodes.map(node => toIdentifierParts(node.predicate));
-    let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.nodes[i].predicate)}');`);
+    let identifiers = mminfo.nodes.map(node => toIdentifierParts(node.predicateInMethodTable));
+    let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.nodes[i].predicateInMethodTable)}');`);
     let getCapturesLines = identifiers
-        .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.nodes[i].predicate}');`)
-        .filter((_, i) => parsePredicateSource(mminfo.nodes[i].predicate).captureNames.length > 0);
+        .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.nodes[i].predicateInMethodTable}');`)
+        .filter((_, i) => parsePredicateSource(mminfo.nodes[i].predicateInMethodTable).captureNames.length > 0);
     let methodLines = mminfo.nodes.reduce(
         (lines, n, i) => n.methods.reduce(
             (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].methods[${j}];`),

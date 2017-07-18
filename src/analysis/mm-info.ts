@@ -24,8 +24,9 @@ export default interface MMInfo {
 
 // TODO: doc...
 export interface MMNode {
-    predicate: Predicate;
+    predicateInMethodTable: Predicate;
     methods: Function[];
+
     fallback: MMNode|null;
 
     children: MMNode[];

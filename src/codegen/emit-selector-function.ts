@@ -40,7 +40,7 @@ function emitThunkSelectorBlock(node: MMNode, thunkInfo: Map<MMNode, ThunkInfo>,
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
     node.children.forEach(node => {
-        let condition = `${indent}if (isMatchː${toIdentifierParts(node.predicate)}(discriminant)) `;
+        let condition = `${indent}if (isMatchː${toIdentifierParts(node.predicateInMethodTable)}(discriminant)) `;
 
         if (node.children.length === 0) {
             lines.push(`${condition}return ${thunkInfo.get(node)!.name};`);

@@ -6,7 +6,7 @@ import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
 import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
-import {toPredicate} from '../math/predicates';
+import {Predicate, toPredicate} from '../math/predicates';
 import {CONTINUE} from '../sentinels';
 import Options from '../options';
 import MMInfo, {MMNode} from './mm-info';
@@ -74,22 +74,22 @@ export default function createMMInfo(options: Options): MMInfo {
 
     // Augment sets with exactly-matching methods in most- to least-specific order.
     let euler2 = eulerDiagram.augment(set => {
-        let predicateInHash = findMatchingPredicateInMethods(set.predicate, normalisedMethods) || set.predicate;
+        let predicateInMethodTable = findMatchingPredicateInMethodTable(set.predicate, normalisedMethods) || set.predicate;
 
         // Find the index in the chain where meta-methods end and regular methods begin.
-        let chain = normalisedMethods[predicateInHash] || [];
+        let chain = normalisedMethods[predicateInMethodTable] || [];
         if (!Array.isArray(chain)) chain = [chain];
         let i = 0;
         while (i < chain.length && isMetaMethod(chain[i])) ++i;
         // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
         let methods = chain.slice(i).concat(chain.slice(0, i).reverse());
 
-        return {predicateInHash, methods};
+        return {predicateInMethodTable, methods};
     });
 
     // TODO: create one node for each set. Leave everything from `fallback` onward null for now.
     let nodes: MMNode[] = euler2.sets.map(set => ({
-        predicate: set.predicateInHash,
+        predicateInMethodTable: set.predicateInMethodTable,
         methods: set.methods,
         fallback: null,
         children: []
@@ -126,13 +126,13 @@ export default function createMMInfo(options: Options): MMInfo {
             pathsFromRoot.forEach(path => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
                 let hasMetaMethods = divergentSets.some(set => set.methods.some(h => isMetaMethod(h)));
-                if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.predicate);
+                if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.predicateInMethodTable);
             });
 
             // TODO: explain all below more clearly...
             // Synthesize a 'crasher' method that throws an 'ambiguous' error, and add it to the existing methods.
             let candidates = pathsFromRoot.map(path => path[path.length - suffix.length - 1].predicate).join(', ');
-            let method = function _ambiguous() { fatalError.MULTIPLE_FALLBACKS_FROM(node.predicate, candidates); };
+            let method = function _ambiguous() { fatalError.MULTIPLE_FALLBACKS_FROM(node.predicateInMethodTable, candidates); };
             insertAsLeastSpecificRegularMethod(node.methods, method);
 
             // Set 'fallback' to the node at the end of the common prefix.
@@ -166,7 +166,7 @@ export default function createMMInfo(options: Options): MMInfo {
 
 
 // TODO: doc...
-function findMatchingPredicateInMethods(normalisedPredicate: NormalPredicate, methods: Options['methods']) {
+function findMatchingPredicateInMethodTable(normalisedPredicate: NormalPredicate, methods: Options['methods']): Predicate|null {
     methods = methods || {};
     for (let key in methods) {
         let predicate = toPredicate(key);
