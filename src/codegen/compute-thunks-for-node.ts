@@ -26,34 +26,34 @@ import ThunkInfo from './thunk-info';
 export default function computeThunksForNode(node: MMNode, arity: number|undefined, async: boolean|undefined): ThunkInfo {
 
     const mostSpecificNode = node;
-    let allMethods = [] as MethodInfo[];
+    let allMatchingMethods = [] as MethodInfo[];
     while (node !== null) {
-        allMethods = allMethods.concat(node.exactlyMatchingMethods.map((method, localIndex) => ({method, node, localIndex})));
+        allMatchingMethods = allMatchingMethods.concat(node.exactlyMatchingMethods.map((method, localIndex) => ({method, node, localIndex})));
         node = node.fallback!; // NB: may be null
     }
 
-    let sources = allMethods.map(({method, node, localIndex}, i) => {
+    let sources = allMatchingMethods.map(({method, node, localIndex}, i) => {
         const identifier = toIdentifierParts(node.predicateInMethodTable);
 
         // To avoid unnecessary duplication, skip emit for regular methods that are less specific that the set's predicate, since these will be handled in their own set.
         if (!isMetaMethod(method) && node !== mostSpecificNode) return '';
 
         // TODO: temp testing... explain!!
-        let isLeastSpecificMethod = i === allMethods.length - 1;
-        let downstream = allMethods.filter(({method}, j) => (j === 0 || isMetaMethod(method)) && j < i).pop();
+        let isLeastSpecificMethod = i === allMatchingMethods.length - 1;
+        let downstream = allMatchingMethods.filter(({method}, j) => (j === 0 || isMetaMethod(method)) && j < i).pop();
 
         // TODO: temp testing...
-        return emitThunkFunction(getNameForThunk(i, allMethods, mostSpecificNode), arity, {
+        return emitThunkFunction(getNameForThunk(i, allMatchingMethods, mostSpecificNode), arity, {
             IS_PROMISE: 'isPromiseLike',
             CONTINUE: 'CONTINUE',
             EMPTY_OBJECT: 'EMPTY_OBJECT',
             GET_CAPTURES: `getCapturesː${identifier}`,
             CALL_METHOD: `methodː${identifier}${repeatString('ᐟ', localIndex)}`,
-            DELEGATE_DOWNSTREAM: downstream ? getNameForThunk(allMethods.indexOf(downstream), allMethods, mostSpecificNode) : '',
-            DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : getNameForThunk(i + 1, allMethods, mostSpecificNode),
+            DELEGATE_DOWNSTREAM: downstream ? getNameForThunk(allMatchingMethods.indexOf(downstream), allMatchingMethods, mostSpecificNode) : '',
+            DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : getNameForThunk(i + 1, allMatchingMethods, mostSpecificNode),
 
             // Statically known booleans --> 'true'/'false' literals (for dead code elimination)
-            ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(allMethods[i + 1].method),
+            ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(allMatchingMethods[i + 1].method),
             HAS_CAPTURES: parsePredicateSource(node.predicateInMethodTable).captureNames.length > 0,
             IS_META_METHOD: isMetaMethod(method),
             HAS_DOWNSTREAM: downstream != null,
@@ -67,9 +67,9 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
     // TODO: temp testing...
     // The 'entry point' method is the one whose method we call to begin the cascading evaluation of the route. It is the
     // least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
-    let entryPoint = allMethods.filter(el => isMetaMethod(el.method)).pop() || allMethods[0];
+    let entryPoint = allMatchingMethods.filter(el => isMetaMethod(el.method)).pop() || allMatchingMethods[0];
     return {
-        name: getNameForThunk(allMethods.indexOf(entryPoint), allMethods, mostSpecificNode),
+        name: getNameForThunk(allMatchingMethods.indexOf(entryPoint), allMatchingMethods, mostSpecificNode),
         source: sources.join('\n\n')
     };
 }
