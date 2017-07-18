@@ -28,7 +28,7 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
     const mostSpecificNode = node;
     let allMethods = [] as MethodInfo[];
     while (node !== null) {
-        allMethods = allMethods.concat(node.methods.map((method, localIndex) => ({method, node, localIndex})));
+        allMethods = allMethods.concat(node.exactlyMatchingMethods.map((method, localIndex) => ({method, node, localIndex})));
         node = node.fallback!; // NB: may be null
     }
 

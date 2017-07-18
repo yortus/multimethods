@@ -90,7 +90,7 @@ export default function createMMInfo(options: Options): MMInfo {
     // TODO: create one node for each set. Leave everything from `fallback` onward null for now.
     let nodes: MMNode[] = euler2.sets.map(set => ({
         predicateInMethodTable: set.predicateInMethodTable,
-        methods: set.methods,
+        exactlyMatchingMethods: set.methods,
         fallback: null,
         children: []
     }));
@@ -103,7 +103,7 @@ export default function createMMInfo(options: Options): MMInfo {
         // Leave fallback as null, but synthesize an additional regular method that always returns CONTINUE.
         if (set.supersets.length === 0) {
             let method = function _unhandled() { return CONTINUE; };
-            insertAsLeastSpecificRegularMethod(node.methods, method);
+            insertAsLeastSpecificRegularMethod(node.exactlyMatchingMethods, method);
         }
 
         // Case 1: if there is only one way into the set, then the fallback is the node corresponding to the one-and-only superset.
@@ -133,7 +133,7 @@ export default function createMMInfo(options: Options): MMInfo {
             // Synthesize a 'crasher' method that throws an 'ambiguous' error, and add it to the existing methods.
             let candidates = pathsFromRoot.map(path => path[path.length - suffix.length - 1].predicate).join(', ');
             let method = function _ambiguous() { fatalError.MULTIPLE_FALLBACKS_FROM(node.predicateInMethodTable, candidates); };
-            insertAsLeastSpecificRegularMethod(node.methods, method);
+            insertAsLeastSpecificRegularMethod(node.exactlyMatchingMethods, method);
 
             // Set 'fallback' to the node at the end of the common prefix.
             node.fallback = nodes[euler2.sets.indexOf(prefix[prefix.length - 1])];

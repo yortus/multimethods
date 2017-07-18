@@ -38,8 +38,8 @@ export default function emitStuff(mminfo: MMInfo) {
         .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.nodes[i].predicateInMethodTable}');`)
         .filter((_, i) => parsePredicateSource(mminfo.nodes[i].predicateInMethodTable).captureNames.length > 0);
     let methodLines = mminfo.nodes.reduce(
-        (lines, n, i) => n.methods.reduce(
-            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].methods[${j}];`),
+        (lines, n, i) => n.exactlyMatchingMethods.reduce(
+            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].exactlyMatchingMethods[${j}];`),
             lines
         ),
         [] as string[]

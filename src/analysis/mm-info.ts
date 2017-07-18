@@ -25,7 +25,7 @@ export default interface MMInfo {
 // TODO: doc...
 export interface MMNode {
     predicateInMethodTable: Predicate;
-    methods: Function[];
+    exactlyMatchingMethods: Function[];
 
     fallback: MMNode|null;
 
