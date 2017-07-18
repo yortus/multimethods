@@ -22,7 +22,7 @@ export default function emitStuff(mminfo: MMInfo) {
 
     // TODO: compute additional info needed for emit
     let thunkInfo = mminfo.nodes.reduce(
-        (map, node) => map.set(node, computeThunksForNode(node, mminfo.arity, mminfo.async)),
+        (map, node) => map.set(node, computeThunksForNode(node, mminfo.options.arity, mminfo.options.async)),
         new Map<MMNode, ThunkInfo>()
     );
     let thunks = '';
@@ -57,7 +57,7 @@ export default function emitStuff(mminfo: MMInfo) {
         `// ========== THUNKS ==========`,
         thunks,
         `// ========== ENVIRONMENT ==========`,
-        `var toDiscriminant = mminfo.toDiscriminant;`,
+        `var toDiscriminant = mminfo.options.toDiscriminant;`,
         `var EMPTY_OBJECT = Object.freeze({});`,
         isMatchLines.join('\n'),
         getCapturesLines.join('\n'),
@@ -78,7 +78,7 @@ if (debug.enabled) {
     let mmname = mminfo.name;
     let oldmm = mm;
     mm = function _dispatch(...args: any[]) {
-        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, mminfo.toDiscriminant(...args), args);
+        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, mminfo.options.toDiscriminant(...args), args);
         let getResult = () => oldmm(...args);
         return andThen(getResult, (result, error, isAsync) => {
             if (error) {
@@ -149,7 +149,7 @@ function emitAll(
 // TODO: temp testing...
 function emitDispatcher(mminfo: MMInfo) {
 
-    let source = emitDispatchFunction(mminfo.name, mminfo.arity, {
+    let source = emitDispatchFunction(mminfo.name, mminfo.options.arity, {
         TO_DISCRIMINANT: 'toDiscriminant',
         SELECT_THUNK: 'selectThunk', // TODO: temp testing... how to know this name?
         CONTINUE: 'CONTINUE',

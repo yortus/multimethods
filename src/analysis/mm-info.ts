@@ -1,3 +1,4 @@
+import {NormalOptions} from './normalise-options';
 import {Predicate} from '../math/predicates';
 
 
@@ -6,13 +7,9 @@ import {Predicate} from '../math/predicates';
 
 // TODO: doc...
 export default interface MMInfo {
-    name: string;
+    options: NormalOptions;
 
-    arity: number | undefined;
-    async: boolean | undefined;
-    strict: boolean;
-    toDiscriminant: Function;
-    methods: {[predicate: string]: Function[]};
+    name: string;
 
     nodes: MMNode[];
     root: MMNode;

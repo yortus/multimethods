@@ -9,24 +9,45 @@ import Options from '../options';
 
 
 
-type CheckedMethods = {[predicate: string]: Function[]};
+export interface NormalOptions {
+    arity: number | undefined;
+    async: boolean | undefined;
+    strict: boolean;
+    toDiscriminant: Function;
+    methods: {[predicate: string]: Function[]};
+}
 
 
 
 
 
 // TODO: ...
-export default function normaliseMethods(methods: Options['methods']) {
+export default function normaliseOptions(options: Options) {
+    let arity = options.arity;
+    let async = options.async;
+    let strict = options.strict || false;
+    let toDiscriminant = options.toDiscriminant || (() => { throw new Error('Implement default discriminant!') }); // TODO: implement...
+    let methods = normaliseMethods(options.methods);
+
+    return {arity, async, strict, toDiscriminant, methods} as NormalOptions;
+}
+
+
+
+
+
+// TODO: ...
+function normaliseMethods(methods: Options['methods']) {
     methods = methods || {};
 
     // TODO: doc...
-    let result = {} as CheckedMethods;
+    let result = {} as NormalOptions['methods'];
     for (let predicate in methods) {
         let chain = methods[predicate];
         if (!Array.isArray(chain)) chain = [chain];
 
         if (debug.enabled) {
-            chain = chain.map((method, i) => instrument(predicate, method, i));
+            chain = chain.map((method, i) => instrumentMethod(predicate, method, i));
         }
         result[predicate] = chain;
     }
@@ -38,7 +59,7 @@ export default function normaliseMethods(methods: Options['methods']) {
 
 
 // TODO: doc...
-function instrument(predicate: string, method: Function, chainIndex: number) {
+function instrumentMethod(predicate: string, method: Function, chainIndex: number) {
     let methodInfo = `method=${predicate}${repeatString('ᐟ', chainIndex)}   type=${isMetaMethod(method) ? 'meta' : 'regular'}`;
     let wrapped = function(...args: any[]) {
         let next = isMetaMethod(method) ? args.pop() : null;

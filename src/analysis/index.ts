@@ -1,4 +1,4 @@
-import normaliseMethods from './normalise-methods';
+import normaliseOptions from './normalise-options';
 import {EulerDiagram, EulerSet} from '../math/sets';
 import {toNormalPredicate, NormalPredicate} from '../math/predicates';
 
@@ -61,23 +61,19 @@ import MMInfo, {MMNode} from './mm-info';
 
 export default function createMMInfo(options: Options): MMInfo {
 
-    let arity = options.arity;
-    let async = options.async;
-    let strict = options.strict || false;
-    let toDiscriminant = options.toDiscriminant || (() => { throw new Error('Implement default discriminant!') }); // TODO: implement...
-    let normalisedMethods = normaliseMethods(options.methods || {});
+    let normalisedOptions = normaliseOptions(options);
 
     // Generate a taxonomic arrangement of all the predicate patterns that occur in the `methods` hash.
-    let eulerDiagram = new EulerDiagram(Object.keys(normalisedMethods).map(toPredicate));
+    let eulerDiagram = new EulerDiagram(Object.keys(normalisedOptions.methods).map(toPredicate));
 
 
 
     // Augment sets with exactly-matching methods in most- to least-specific order.
     let euler2 = eulerDiagram.augment(set => {
-        let predicateInMethodTable = findMatchingPredicateInMethodTable(set.predicate, normalisedMethods) || set.predicate;
+        let predicateInMethodTable = findMatchingPredicateInMethodTable(set.predicate, normalisedOptions.methods) || set.predicate;
 
         // Find the index in the chain where meta-methods end and regular methods begin.
-        let chain = normalisedMethods[predicateInMethodTable] || [];
+        let chain = normalisedOptions.methods[predicateInMethodTable] || [];
         if (!Array.isArray(chain)) chain = [chain];
         let i = 0;
         while (i < chain.length && isMetaMethod(chain[i])) ++i;
@@ -150,12 +146,8 @@ export default function createMMInfo(options: Options): MMInfo {
     let name = `MM${multimethodCounter++}`;
     let root = nodes[euler2.sets.indexOf(euler2.universe)];
     return {
-        name,
-        arity,
-        async,
-        strict,
-        toDiscriminant,
-        methods: normalisedMethods,
+        options: normalisedOptions,
+        name, // TODO: need this here? put in normalised options? allow user to override?
         nodes,
         root
     };
