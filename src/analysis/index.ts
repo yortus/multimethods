@@ -143,11 +143,9 @@ export default function createMMInfo(options: Options): MMInfo {
     });
 
     // TODO: all together...
-    let name = `MM${multimethodCounter++}`;
     let root = nodes[euler2.sets.indexOf(euler2.universe)];
     return {
         options: normalisedOptions,
-        name, // TODO: need this here? put in normalised options? allow user to override?
         nodes,
         root
     };
@@ -203,10 +201,3 @@ function insertAsLeastSpecificRegularMethod(orderedMethods: Function[], method: 
     while (i < orderedMethods.length && !isMetaMethod(orderedMethods[i])) ++i;
     orderedMethods.splice(i, 0, method);
 }
-
-
-
-
-
-// TODO: doc...
-let multimethodCounter = 0;

@@ -10,6 +10,7 @@ import Options from '../options';
 
 
 export interface NormalOptions {
+    name: string;
     arity: number | undefined;
     async: boolean | undefined;
     strict: boolean;
@@ -23,13 +24,14 @@ export interface NormalOptions {
 
 // TODO: ...
 export default function normaliseOptions(options: Options) {
+    let name = options.name || `MM${++multimethodCounter}`;
     let arity = options.arity;
     let async = options.async;
     let strict = options.strict || false;
     let toDiscriminant = options.toDiscriminant || (() => { throw new Error('Implement default discriminant!') }); // TODO: implement...
     let methods = normaliseMethods(options.methods);
 
-    return {arity, async, strict, toDiscriminant, methods} as NormalOptions;
+    return {name, arity, async, strict, toDiscriminant, methods} as NormalOptions;
 }
 
 
@@ -76,3 +78,10 @@ function instrumentMethod(predicate: string, method: Function, chainIndex: numbe
     if (isMetaMethod(method)) isMetaMethod(wrapped, true);
     return wrapped;
 }
+
+
+
+
+
+// TODO: doc...
+let multimethodCounter = 0;

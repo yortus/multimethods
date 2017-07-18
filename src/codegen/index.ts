@@ -75,7 +75,7 @@ let mm = emitAll(source, {mminfo, toMatchFunction, CONTINUE, unhandledError: fat
 
 // TODO: temp testing... neaten/improve emit of wrapper?
 if (debug.enabled) {
-    let mmname = mminfo.name;
+    let mmname = mminfo.options.name;
     let oldmm = mm;
     mm = function _dispatch(...args: any[]) {
         debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, mminfo.options.toDiscriminant(...args), args);
@@ -111,7 +111,7 @@ function emitAll(
     let abc = xyz
         .toString()
         .replace(/\$0/g, source)
-        .replace(/\$1/g, env.mminfo.name);
+        .replace(/\$1/g, env.mminfo.options.name);
 
     // TODO: revise comment...
     // Evaluate the source code, and return its result, which is the multimethod dispatch function. The use of eval
@@ -149,7 +149,7 @@ function emitAll(
 // TODO: temp testing...
 function emitDispatcher(mminfo: MMInfo) {
 
-    let source = emitDispatchFunction(mminfo.name, mminfo.options.arity, {
+    let source = emitDispatchFunction(mminfo.options.name, mminfo.options.arity, {
         TO_DISCRIMINANT: 'toDiscriminant',
         SELECT_THUNK: 'selectThunk', // TODO: temp testing... how to know this name?
         CONTINUE: 'CONTINUE',

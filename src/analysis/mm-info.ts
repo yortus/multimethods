@@ -9,8 +9,6 @@ import {Predicate} from '../math/predicates';
 export default interface MMInfo {
     options: NormalOptions;
 
-    name: string;
-
     nodes: MMNode[];
     root: MMNode;
 }

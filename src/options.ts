@@ -6,6 +6,9 @@
 // TODO: doc...
 export default interface Options {
 
+    // TODO: doc...
+    name?: string;
+
     // TODO: doc... check correct number of args passed on every call if not undefined.
     // TODO: validate integer >= 1 and less than something?
     // TODO: doc perf and signature differences of variadic vs fixed arity...
