@@ -3,7 +3,7 @@ import fatalError from '../util/fatal-error';
 import {CONTINUE} from '../sentinels';
 import emitDispatchFunction from './emit-dispatch-function';
 import emitSelectorFunction from './emit-selector-function';
-import repeatString from '../util/string-repeat';
+import repeat from '../util/string-repeat';
 import isPromiseLike from '../util/is-promise-like';
 import andThen from '../util/and-then';
 import MMInfo, {MMNode} from '../analysis/mm-info';
@@ -39,7 +39,7 @@ export default function emitStuff(mminfo: MMInfo<MMNode>) {
         .filter((_, i) => parsePredicateSource(mminfo.nodes[i].predicateInMethodTable).captureNames.length > 0);
     let methodLines = mminfo.nodes.reduce(
         (lines, n, i) => n.exactlyMatchingMethods.reduce(
-            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeatString('ᐟ', j)} = mminfo.nodes[${i}].exactlyMatchingMethods[${j}];`),
+            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeat('ᐟ', j)} = mminfo.nodes[${i}].exactlyMatchingMethods[${j}];`),
             lines
         ),
         [] as string[]

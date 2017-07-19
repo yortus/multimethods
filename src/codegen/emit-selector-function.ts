@@ -1,4 +1,4 @@
-import repeatString from '../util/string-repeat';
+import repeat from '../util/string-repeat';
 import MMInfo, {MMNode} from '../analysis/mm-info';
 import {toIdentifierParts} from '../math/predicates';
 import ThunkInfo from './thunk-info';
@@ -35,7 +35,7 @@ export default function emitSelectorFunction(mminfo: MMInfo<MMNode>, thunkInfo: 
 function emitThunkSelectorBlock(node: MMNode, thunkInfo: Map<MMNode, ThunkInfo>, nestDepth: number) {
 
     // Make the indenting string corresponding to the given `nestDepth`.
-    let indent = repeatString('    ', nestDepth);
+    let indent = repeat('    ', nestDepth);
 
     // Recursively generate the conditional logic block to select among the given patterns.
     let lines: string[] = [];
