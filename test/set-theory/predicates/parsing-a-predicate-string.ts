@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {parsePredicateSource, PredicateAST} from 'multimethods'; // TODO: these exports are lib internals - expose them differently? eg under util or something like that?
+import {parsePredicateSource, PredicateAST} from 'multimethods/math/predicates';
 
 
 describe('Parsing a predicate string', () => {

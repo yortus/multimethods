@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {toPredicate, toNormalPredicate} from 'multimethods';
+import {toPredicate, toNormalPredicate} from 'multimethods/math/predicates';
 
 
 describe('Comparing a predicate with its normal form', () => {

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {toPredicate, parsePredicateSource, toNormalPredicate} from 'multimethods';
+import {toPredicate, parsePredicateSource, toNormalPredicate} from 'multimethods/math/predicates';
 
 
 describe('Constructing a Predicate instance', () => {

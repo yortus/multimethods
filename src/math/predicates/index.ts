@@ -1,9 +1,3 @@
-
-
-
-
-
-// TODO: ...
 export {default as ANY} from './any';
 export {default as NormalPredicate} from './normal-predicate';
 export {default as toIdentifierParts} from './to-identifier-parts';

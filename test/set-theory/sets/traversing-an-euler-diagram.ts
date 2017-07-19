@@ -1,5 +1,6 @@
 import {expect} from 'chai';
-import {EulerDiagram, EulerSet, intersect, toNormalPredicate, ANY, toPredicate} from 'multimethods';
+import {toNormalPredicate, ANY, toPredicate} from 'multimethods/math/predicates';
+import {EulerDiagram, EulerSet, intersect} from 'multimethods/math/sets';
 
 
 describe('Traversing an euler diagram', () => {

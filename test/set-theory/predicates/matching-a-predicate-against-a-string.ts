@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {toPredicate, toMatchFunction} from 'multimethods';
+import {toPredicate, toMatchFunction} from 'multimethods/math/predicates';
 
 
 describe('Matching a predicate against a string', () => {
