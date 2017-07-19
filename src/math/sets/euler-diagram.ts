@@ -1,5 +1,5 @@
 import insertAsDescendent from './insert-as-descendent';
-import {Predicate, toPredicate, toNormalPredicate, NormalPredicate, ANY} from '../predicates';
+import {toPredicate, toNormalPredicate, NormalPredicate, ANY} from '../predicates';
 import EulerSet from './euler-set';
 
 
@@ -64,24 +64,24 @@ export default class EulerDiagram<T = {}> {
     /**
      * Constructs a new euler diagram comprising the sets defined by the given predicates.
      */
-    constructor(predicates: Predicate[]) {
+    constructor(predicates: string[]) {
         initEulerDiagram(this, predicates);
     }
 
 
     /** Holds the root set of the euler diagram. */
-    universe: AugmentedSet<T>;
+    universalSet: AugmentedSet<T>;
 
 
     /** Holds a snapshot of all the sets in the euler diagram at the time of construction. */
-    sets: AugmentedSet<T>[];
+    allSets: AugmentedSet<T>[];
 
 
     // TODO: temp testing... doc... looks up the set for the given predicate. returns undefined if not found.
     // algo: exact match using canonical form of given Predicate/string
-    get(predicate: string): AugmentedSet<T> {
+    findSet(predicate: string): AugmentedSet<T> {
         let p = toNormalPredicate(toPredicate(predicate));
-        let result = this.sets.filter(set => set.predicate === p)[0];
+        let result = this.allSets.filter(set => set.predicate === p)[0];
         return result;
     }
 
@@ -106,7 +106,7 @@ export type AugmentedSet<T> = EulerSet & T & {supersets: AugmentedSet<T>[]; subs
 
 
 /** Internal helper function used by the EulerDiagram constructor. */
-function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: Predicate[]) {
+function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: string[]) {
 
     // Create the setFor() function to return the set corresponding to a given pattern,
     // creating it on demand if it doesn't already exist. This function ensures that every
@@ -118,17 +118,17 @@ function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: Predicat
     }
 
     // Retrieve the universal set for this euler diagram, which always corresponds to the '…' predicate.
-    let universe = eulerDiagram.universe = setFor(ANY);
+    let universe = eulerDiagram.universalSet = setFor(ANY);
 
     // Insert each of the given predicates, except '…', into a DAG rooted at '…'.
     // The insertion logic assumes only normalized patterns, which we obtain first.
     predicates
-        .map(predicate => toNormalPredicate(predicate)) // TODO: what if normalized patterns contain duplicates?
+        .map(predicate => toNormalPredicate(toPredicate(predicate))) // TODO: what if normalized patterns contain duplicates?
         .filter(predicate => predicate !== ANY) // TODO: why need this??
         .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
 
     // Finally, compute the `sets` property.
-    let sets: Array<EulerSet & T> = eulerDiagram.sets = [];
+    let sets: Array<EulerSet & T> = eulerDiagram.allSets = [];
     setLookup.forEach(value => sets.push(value));
 }
 
@@ -140,7 +140,7 @@ function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: Predicat
 function augmentEulerDiagram<T, U>(eulerDiagram: EulerDiagram<T>, callback: (set: AugmentedSet<T>) => U): EulerDiagram<T & U> {
 
     // Clone the bare euler diagram.
-    let oldSets = eulerDiagram.sets;
+    let oldSets = eulerDiagram.allSets;
     let newSets = oldSets.map(old => new EulerSet(old.predicate)) as Array<AugmentedSet<T & U>>;
     let oldToNew = oldSets.reduce((map, old, i) => map.set(old, newSets[i]), new Map());
     newSets.forEach((set, i) => {
@@ -158,7 +158,7 @@ function augmentEulerDiagram<T, U>(eulerDiagram: EulerDiagram<T>, callback: (set
 
     // Return the new euler diagram.
     let newEulerDiagram = new EulerDiagram<T & U>([]);
-    newEulerDiagram.universe = oldToNew.get(eulerDiagram.universe);
-    newEulerDiagram.sets = newSets;
+    newEulerDiagram.universalSet = oldToNew.get(eulerDiagram.universalSet);
+    newEulerDiagram.allSets = newSets;
     return newEulerDiagram;
 }

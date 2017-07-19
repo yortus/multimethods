@@ -84,7 +84,7 @@ export default function createMMInfo(options: Options): MMInfo {
     });
 
     // TODO: create one node for each set. Leave everything from `fallback` onward null for now.
-    let nodes: MMNode[] = euler2.sets.map(set => ({
+    let nodes: MMNode[] = euler2.allSets.map(set => ({
         predicateInMethodTable: set.predicateInMethodTable,
         exactlyMatchingMethods: set.methods,
         fallback: null,
@@ -93,7 +93,7 @@ export default function createMMInfo(options: Options): MMInfo {
 
     // Go back over the nodes and work out the correct `fallback` node. There must be precisely one (except for the root).
     nodes.forEach((node, i) => {
-        let set = euler2.sets[i];
+        let set = euler2.allSets[i];
 
         // Case 0: the root node has no fallback.
         // Leave fallback as null, but synthesize an additional regular method that always returns CONTINUE.
@@ -104,7 +104,7 @@ export default function createMMInfo(options: Options): MMInfo {
 
         // Case 1: if there is only one way into the set, then the fallback is the node corresponding to the one-and-only superset.
         else if (set.supersets.length === 1) {
-            let j = euler2.sets.indexOf(set.supersets[0]);
+            let j = euler2.allSets.indexOf(set.supersets[0]);
             node.fallback = nodes[j];
         }
 
@@ -132,18 +132,18 @@ export default function createMMInfo(options: Options): MMInfo {
             insertAsLeastSpecificRegularMethod(node.exactlyMatchingMethods, method);
 
             // Set 'fallback' to the node at the end of the common prefix.
-            node.fallback = nodes[euler2.sets.indexOf(prefix[prefix.length - 1])];
+            node.fallback = nodes[euler2.allSets.indexOf(prefix[prefix.length - 1])];
         }
     });
 
     // TODO: children...
     nodes.forEach((node, i) => {
-        let set = euler2.sets[i];
-        node.children = set.subsets.map((subset: any) => nodes[euler2.sets.indexOf(subset)]); // TODO: why cast needed?
+        let set = euler2.allSets[i];
+        node.children = set.subsets.map((subset: any) => nodes[euler2.allSets.indexOf(subset)]); // TODO: why cast needed?
     });
 
     // TODO: all together...
-    let root = nodes[euler2.sets.indexOf(euler2.universe)];
+    let root = nodes[euler2.allSets.indexOf(euler2.universalSet)];
     return {
         options: normalisedOptions,
         nodes,

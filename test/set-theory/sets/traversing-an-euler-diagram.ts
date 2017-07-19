@@ -15,18 +15,18 @@ describe('Traversing an euler diagram', () => {
 
     tests.forEach(test => {
         it(test.join(', '), () => {
-            let predicates = test.map(p => toPredicate(p));
+            let predicates = test;
             let eulerDiagram = new EulerDiagram(predicates);
 
             // An euler diagram is always rooted at '…'.
-            expect(eulerDiagram.universe.predicate.toString()).equals(ANY);
+            expect(eulerDiagram.universalSet.predicate).equals(ANY);
 
             // All input predicates are in the euler diagram constructed from them.
-            let eulerDiagramPredicates = eulerDiagram.sets.map(set => set.predicate.toString());
-            expect(predicates.every(p => eulerDiagramPredicates.indexOf(toNormalPredicate(p)) !== -1)).to.be.true;
+            let eulerDiagramPredicates = eulerDiagram.allSets.map(set => set.predicate.toString());
+            expect(predicates.every(p => eulerDiagramPredicates.indexOf(toNormalPredicate(toPredicate(p))) !== -1)).to.be.true;
 
             // Every child set's predicate matches a subset of the addresses matched by its parent set's predicate.
-            let edges = getAllEdges(eulerDiagram.universe);
+            let edges = getAllEdges(eulerDiagram.universalSet);
             expect(edges.every(edge => {
                 let intersections = intersect(<any> edge.parent.predicate.toString(), <any> edge.child.predicate.toString()); // TODO: messy & casty... fix...
                 return intersections.length === 1 && intersections[0] === edge.child.predicate.toString();

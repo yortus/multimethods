@@ -140,11 +140,10 @@ describe('Constructing an euler diagram', () => {
 
     tests.forEach(test => {
         it(test.name, () => {
-            let predicates = test.predicates.map(ps => toPredicate(ps));
             let expected: any = test.eulerDiagram;
             let actual: any;
             try {
-                actual = setToObj(new EulerDiagram(predicates).universe);
+                actual = setToObj(new EulerDiagram(test.predicates).universalSet);
             }
             catch (ex) {
                 actual = 'ERROR: ' + ex.message;

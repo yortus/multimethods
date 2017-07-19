@@ -20,7 +20,7 @@ export default function listDiscontinuities(methods: Options['methods']) {
 
     let handledPredicates = Object.keys(methods).map(p => toNormalPredicate(toPredicate(p)));
     let euler = new EulerDiagram(handledPredicates);
-    let unhandledPredicates = euler.sets.map(n => n.predicate).filter(p => handledPredicates.indexOf(p) === -1);
+    let unhandledPredicates = euler.allSets.map(n => n.predicate).filter(p => handledPredicates.indexOf(p) === -1);
     let problems = [] as string[];
 
     let hasUnhandledCatchall = unhandledPredicates.indexOf(ANY) !== -1;
