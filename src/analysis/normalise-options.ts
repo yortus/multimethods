@@ -2,7 +2,7 @@ import andThen from '../util/and-then';
 import {CONTINUE} from '../sentinels';
 import debug, {DISPATCH} from '../util/debug';
 import isMetaMethod from '../util/is-meta-method';
-import repeatString from '../util/repeat-string';
+import repeatString from '../util/string-repeat';
 import Options from '../options';
 
 

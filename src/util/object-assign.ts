@@ -21,5 +21,6 @@ export default function assign<T extends {[x: string]: any}, S extends {[x: stri
 
 
 
-type Overwrite<T, U> = { [P in Diff<keyof T, keyof U>]: T[P] } & U;
-type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];
+// TODO: doc... See https://github.com/Microsoft/TypeScript/issues/12215
+export type Overwrite<T, U> = { [P in Diff<keyof T, keyof U>]: T[P] } & U;
+export type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];

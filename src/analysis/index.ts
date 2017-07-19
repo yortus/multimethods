@@ -1,15 +1,13 @@
 import normaliseOptions from './normalise-options';
-import {EulerDiagram, EulerSet} from '../math/sets';
-
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
 import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
 import {toNormalPredicate, NormalPredicate, Predicate, toPredicate} from '../math/predicates';
+import {EulerSet} from '../math/sets';
 import {CONTINUE} from '../sentinels';
 import Options from '../options';
 import MMInfo, {MMNode} from './mm-info';
-import augmentEulerDiagram from './augment-euler-diagram';
 
 
 
@@ -63,13 +61,14 @@ export default function createMMInfo(options: Options): MMInfo<MMNode> {
 
     let normalisedOptions = normaliseOptions(options);
 
-    // Generate a taxonomic arrangement of all the predicate patterns that occur in the `methods` hash.
-    let eulerDiagram = new EulerDiagram(Object.keys(normalisedOptions.methods).map(toPredicate));
+//     // Generate a taxonomic arrangement of all the predicate patterns that occur in the `methods` hash.
+//     let eulerDiagram = new EulerDiagram(Object.keys(normalisedOptions.methods));
 
+    let mminfo1 = MMInfo.fromOptions(normalisedOptions);
 
 
     // Augment sets with exactly-matching methods in most- to least-specific order.
-    let euler2 = augmentEulerDiagram(eulerDiagram, set => {
+    let mminfo2 = mminfo1.addProps((_, __, set) => {
         let predicateInMethodTable = findMatchingPredicateInMethodTable(set.predicate, normalisedOptions.methods) || set.predicate;
 
         // Find the index in the chain where meta-methods end and regular methods begin.
@@ -78,34 +77,26 @@ export default function createMMInfo(options: Options): MMInfo<MMNode> {
         let i = 0;
         while (i < chain.length && isMetaMethod(chain[i])) ++i;
         // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
-        let methods = chain.slice(i).concat(chain.slice(0, i).reverse());
+        let exactlyMatchingMethods = chain.slice(i).concat(chain.slice(0, i).reverse());
 
-        return {predicateInMethodTable, methods};
+        return {predicateInMethodTable, exactlyMatchingMethods};
     });
 
-    // TODO: create one node for each set. Leave everything from `fallback` onward null for now.
-    let nodes: MMNode[] = euler2.allSets.map(set => ({
-        predicateInMethodTable: set.predicateInMethodTable,
-        exactlyMatchingMethods: set.methods,
-        fallback: null,
-        children: []
-    }));
-
     // Go back over the nodes and work out the correct `fallback` node. There must be precisely one (except for the root).
-    nodes.forEach((node, i) => {
-        let set = euler2.allSets[i];
+    let mminfo3 = mminfo2.addProps((node, nodes, set, sets) => {
+        let fallback: typeof node | null;
 
         // Case 0: the root node has no fallback.
         // Leave fallback as null, but synthesize an additional regular method that always returns CONTINUE.
         if (set.supersets.length === 0) {
             let method = function _unhandled() { return CONTINUE; };
             insertAsLeastSpecificRegularMethod(node.exactlyMatchingMethods, method);
+            fallback = null;
         }
 
         // Case 1: if there is only one way into the set, then the fallback is the node corresponding to the one-and-only superset.
         else if (set.supersets.length === 1) {
-            let j = euler2.allSets.indexOf(set.supersets[0]);
-            node.fallback = nodes[j];
+            fallback = nodes[sets.indexOf(set.supersets[0])];
         }
 
         // Case 2: there are multiple ways into the set.
@@ -121,7 +112,8 @@ export default function createMMInfo(options: Options): MMInfo<MMNode> {
             // Ensure the divergent sets contain NO meta-methods.
             pathsFromRoot.forEach(path => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
-                let hasMetaMethods = divergentSets.some(set => set.methods.some(h => isMetaMethod(h)));
+                let divergentNodes = divergentSets.map(set => nodes[sets.indexOf(set)]);
+                let hasMetaMethods = divergentNodes.some(node => node.exactlyMatchingMethods.some(h => isMetaMethod(h)));
                 if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.predicateInMethodTable);
             });
 
@@ -132,23 +124,19 @@ export default function createMMInfo(options: Options): MMInfo<MMNode> {
             insertAsLeastSpecificRegularMethod(node.exactlyMatchingMethods, method);
 
             // Set 'fallback' to the node at the end of the common prefix.
-            node.fallback = nodes[euler2.allSets.indexOf(prefix[prefix.length - 1])];
+            fallback = nodes[sets.indexOf(prefix[prefix.length - 1])];
         }
+        return {fallback};
     });
 
     // TODO: children...
-    nodes.forEach((node, i) => {
-        let set = euler2.allSets[i];
-        node.children = set.subsets.map((subset: any) => nodes[euler2.allSets.indexOf(subset)]); // TODO: why cast needed?
+    let mminfo4 = mminfo3.addProps((_, nodes, set, sets) => {
+        let children = set.subsets.map(subset => nodes[sets.indexOf(subset)]);
+        return {children};
     });
 
     // TODO: all together...
-    let rootNode = nodes[euler2.allSets.indexOf(euler2.universalSet)];
-    return {
-        options: normalisedOptions,
-        nodes,
-        rootNode
-    };
+    return mminfo4 as any; // TODO: fix hacky cast...
 }
 
 

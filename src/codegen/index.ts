@@ -21,7 +21,7 @@ export default function emitStuff(mminfo: MMInfo<MMNode>) {
     let dispatcher = emitDispatcher(mminfo);
 
     // TODO: compute additional info needed for emit
-    let thunkInfo = mminfo.nodes.reduce(
+    let thunkInfo = mminfo.allNodes.reduce(
         (map, node) => map.set(node, computeThunksForNode(node, mminfo.options.arity, mminfo.options.async)),
         new Map<MMNode, ThunkInfo>()
     );
@@ -32,14 +32,14 @@ export default function emitStuff(mminfo: MMInfo<MMNode>) {
     // TODO: buggy emit for isMatch and getCaptures below
     // - assumes predicate string is valid inside the literal single quotes put around it in the emit.
     // - SOLN: escape the predicate string properly!
-    let identifiers = mminfo.nodes.map(node => toIdentifierParts(node.predicateInMethodTable));
-    let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.nodes[i].predicateInMethodTable)}');`);
+    let identifiers = mminfo.allNodes.map(node => toIdentifierParts(node.predicateInMethodTable));
+    let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.allNodes[i].predicateInMethodTable)}');`);
     let getCapturesLines = identifiers
-        .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.nodes[i].predicateInMethodTable}');`)
-        .filter((_, i) => parsePredicateSource(mminfo.nodes[i].predicateInMethodTable).captureNames.length > 0);
-    let methodLines = mminfo.nodes.reduce(
+        .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.allNodes[i].predicateInMethodTable}');`)
+        .filter((_, i) => parsePredicateSource(mminfo.allNodes[i].predicateInMethodTable).captureNames.length > 0);
+    let methodLines = mminfo.allNodes.reduce(
         (lines, n, i) => n.exactlyMatchingMethods.reduce(
-            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeat('ᐟ', j)} = mminfo.nodes[${i}].exactlyMatchingMethods[${j}];`),
+            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeat('ᐟ', j)} = mminfo.allNodes[${i}].exactlyMatchingMethods[${j}];`),
             lines
         ),
         [] as string[]
