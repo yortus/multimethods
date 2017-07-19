@@ -55,17 +55,16 @@ describe('Constructing a Predicate instance', () => {
 
     tests.forEach(test => {
         it(test, () => {
-            let patternSource = test.split(' ==> ')[0].replace(/^∅$/, '');
+            let predicateSource = test.split(' ==> ')[0].replace(/^∅$/, '');
             let rhs = test.split(' ==> ')[1];
             let expectedSignature = rhs.split(' WITH ')[0].replace(/^∅$/, '');
             let expectedCaptureNames = eval(rhs.split(' WITH ')[1] || '[]');
-            let expectedComment = patternSource.split('#')[1] || '';
+            let expectedComment = predicateSource.split('#')[1] || '';
             let actualSignature = 'ERROR';
             let actualCaptureNames = [];
             try {
-                let pattern = toPredicate(patternSource);
-                let ast = parsePredicateSource(patternSource);
-                actualSignature = toNormalPredicate(pattern);
+                let ast = parsePredicateSource(predicateSource);
+                actualSignature = toNormalPredicate(predicateSource);
                 actualCaptureNames = ast.captureNames;
             }
             catch (ex) { }

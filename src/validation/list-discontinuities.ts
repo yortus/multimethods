@@ -1,6 +1,6 @@
 import EulerDiagram from '../math/sets/euler-diagram';
 import Options from '../options';
-import {toPredicate, toNormalPredicate, ANY} from '../math/predicates';
+import {toNormalPredicate, ANY} from '../math/predicates';
 
 
 
@@ -18,7 +18,7 @@ import {toPredicate, toNormalPredicate, ANY} from '../math/predicates';
 export default function listDiscontinuities(methods: Options['methods']) {
     if (methods === undefined) return [];
 
-    let handledPredicates = Object.keys(methods).map(p => toNormalPredicate(toPredicate(p)));
+    let handledPredicates = Object.keys(methods).map(p => toNormalPredicate(p));
     let euler = new EulerDiagram(handledPredicates);
     let unhandledPredicates = euler.allSets.map(n => n.predicate).filter(p => handledPredicates.indexOf(p) === -1);
     let problems = [] as string[];

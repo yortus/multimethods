@@ -1,6 +1,5 @@
 import {expect} from 'chai';
-import {toPredicate} from 'multimethods/math/predicates';
-import {intersect} from 'multimethods/math/sets';
+import {toPredicate, intersect} from 'multimethods/math/predicates';
 
 
 describe('Intersecting two predicates', () => {

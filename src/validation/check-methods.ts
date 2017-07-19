@@ -1,7 +1,7 @@
 import fatalError from '../util/fatal-error';
 import isMetaMethod from '../util/is-meta-method';
 import Options from '../options';
-import {toPredicate, toNormalPredicate} from '../math/predicates';
+import {toNormalPredicate} from '../math/predicates';
 
 
 
@@ -27,11 +27,10 @@ export default function checkMethods(methods: Options['methods']) {
     // - all predicates in `methods` are valid
     // - no two predicates in `methods` have the same normalised predicate (use chains for this scenario)
     let deduped = {} as {[s: string]: string[]};
-    Object.keys(methods).forEach(predicateSource => {
-        let p = toPredicate(predicateSource);
-        let np = toNormalPredicate(p);
+    Object.keys(methods).forEach(predicate => {
+        let np = toNormalPredicate(predicate);
         deduped[np] = deduped[np] || [];
-        deduped[np].push(p);
+        deduped[np].push(predicate);
     });
     for (let np in deduped) {
         if (deduped[np].length <= 1) continue;

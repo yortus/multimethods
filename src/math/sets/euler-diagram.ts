@@ -1,6 +1,5 @@
-import intersect from './intersect';
-import {toPredicate, toNormalPredicate, NormalPredicate, ANY} from '../predicates';
 import EulerSet from './euler-set';
+import {toNormalPredicate, NormalPredicate, ANY, intersect} from '../predicates';
 
 
 
@@ -80,7 +79,7 @@ export default class EulerDiagram {
     // TODO: temp testing... doc... looks up the set for the given predicate. returns undefined if not found.
     // algo: exact match using canonical form of given Predicate/string
     findSet(predicate: string): EulerSet | undefined {
-        let p = toNormalPredicate(toPredicate(predicate));
+        let p = toNormalPredicate(predicate);
         let result = this.allSets.filter(set => set.predicate === p)[0];
         return result;
     }
@@ -111,7 +110,7 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
     // Insert each of the given predicates, except '…', into a DAG rooted at '…'.
     // The insertion logic assumes only normalized patterns, which we obtain first.
     predicates
-        .map(predicate => toNormalPredicate(toPredicate(predicate))) // TODO: what if normalized patterns contain duplicates?
+        .map(predicate => toNormalPredicate(predicate)) // TODO: what if normalized patterns contain duplicates?
         .filter(predicate => predicate !== ANY) // TODO: why need this??
         .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
 

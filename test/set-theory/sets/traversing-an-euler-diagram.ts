@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import {toNormalPredicate, ANY, toPredicate} from 'multimethods/math/predicates';
-import {EulerDiagram, EulerSet, intersect} from 'multimethods/math/sets';
+import {toNormalPredicate, ANY, toPredicate, intersect} from 'multimethods/math/predicates';
+import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 
 
 describe('Traversing an euler diagram', () => {
@@ -24,7 +24,7 @@ describe('Traversing an euler diagram', () => {
 
             // All input predicates are in the euler diagram constructed from them.
             let eulerDiagramPredicates = eulerDiagram.allSets.map(set => set.predicate.toString());
-            expect(predicates.every(p => eulerDiagramPredicates.indexOf(toNormalPredicate(toPredicate(p))) !== -1)).to.be.true;
+            expect(predicates.every(p => eulerDiagramPredicates.indexOf(toNormalPredicate(p)) !== -1)).to.be.true;
 
             // Every child set's predicate matches a subset of the addresses matched by its parent set's predicate.
             let edges = getAllEdges(eulerDiagram.universalSet);

@@ -5,7 +5,7 @@ import Predicate from './predicate';
 
 
 
-/** Asserts `source` is a valid predicate string and returns it. Throws otherwise. */
+/** Asserts `source` is a valid predicate string and returns it. NB: may throw. */
 export default function toPredicate(source: string): Predicate {
 
     // Parse the source string to assert its validity. NB: may throw.
