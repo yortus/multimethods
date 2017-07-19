@@ -1,4 +1,4 @@
-import repeatString from '../util/repeat-string';
+import repeatString from '../util/string-repeat';
 import MMInfo, {MMNode} from '../analysis/mm-info';
 import {toIdentifierParts} from '../math/predicates';
 import ThunkInfo from './thunk-info';

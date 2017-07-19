@@ -3,7 +3,7 @@ import fatalError from '../util/fatal-error';
 import {CONTINUE} from '../sentinels';
 import emitDispatchFunction from './emit-dispatch-function';
 import emitSelectorFunction from './emit-selector-function';
-import repeatString from '../util/repeat-string';
+import repeatString from '../util/string-repeat';
 import isPromiseLike from '../util/is-promise-like';
 import andThen from '../util/and-then';
 import MMInfo, {MMNode} from '../analysis/mm-info';
