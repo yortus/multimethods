@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {toNormalPredicate, ANY, toPredicate, intersect} from 'multimethods/math/predicates';
+import {toNormalPredicate, ANY, intersect} from 'multimethods/math/predicates';
 import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 
 

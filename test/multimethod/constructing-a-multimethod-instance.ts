@@ -62,7 +62,7 @@ describe('Constructing a Multimethod instance', () => {
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(CONTINUE),
 
-            'zz/z/{...rest}': meta((rq, {rest}, next) => {
+            'zz/z/{...rest}': meta((_, {rest}, next) => {
                 return calc(next({address: rest.split('').reverse().join('')}), rs => rs === CONTINUE ? val('NONE') : rs);
             }),
             'zz/z/b*z': (rq) => val(`${rq.address}`),
@@ -71,13 +71,13 @@ describe('Constructing a Multimethod instance', () => {
             'CHAIN-{x}': [
 
                 // Wrap subsequent results with ()
-                meta((rq, {x}, next) => calc(['(', next(rq), ')'], concat)),
+                meta((rq, {}, next) => calc(['(', next(rq), ')'], concat)),
 
                 // Block any result that starts with '[32'
-                meta((rq, {x}, next) => calc(next(rq), rs => rs.startsWith('[32') ? err('blocked') : rs)),
+                meta((rq, {}, next) => calc(next(rq), rs => rs.startsWith('[32') ? err('blocked') : rs)),
 
                 // Wrap subsequent results with []
-                meta((rq, {x}, next) => calc(['[', next(rq), ']'], concat)),
+                meta((rq, {}, next) => calc(['[', next(rq), ']'], concat)),
 
                 // Return x!x! only if x ends with 'b' , otherwise skip
                 (_, {x}) => val(x.endsWith('b') ? (x + '!').repeat(2) : CONTINUE),
@@ -148,8 +148,8 @@ describe('Constructing a Multimethod instance', () => {
             let actual: string;
             try {
                 let res = multimethod(request) as string | Promise<string>;
-                if (async === 'never') expect(res).to.not.satisfy(isPromiseLike);
-                if (async === 'always') expect(res).to.satisfy(isPromiseLike);
+                if (async === false) expect(res).to.not.satisfy(isPromiseLike);
+                if (async === true) expect(res).to.satisfy(isPromiseLike);
                 actual = isPromiseLike(res) ? await (res) : res;
             }
             catch (ex) {

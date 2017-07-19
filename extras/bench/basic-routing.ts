@@ -72,7 +72,7 @@ const mm = MM({
         'api/bar': () => CONTINUE,
 
         // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-        'zz/z/{...rest}': meta(($req, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+        'zz/z/{...rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
         'zz/z/b*z': ($req) => `${$req.address}`,
         'zz/z/./*': () => 'forty-two'
     },
