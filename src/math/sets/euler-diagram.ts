@@ -1,4 +1,4 @@
-import insertAsDescendent from './insert-as-descendent';
+import intersect from './intersect';
 import {toPredicate, toNormalPredicate, NormalPredicate, ANY} from '../predicates';
 import EulerSet from './euler-set';
 
@@ -58,7 +58,7 @@ import EulerSet from './euler-set';
  *      \
  *        bar
  */
-export default class EulerDiagram<T = {}> {
+export default class EulerDiagram {
 
 
     /**
@@ -70,27 +70,19 @@ export default class EulerDiagram<T = {}> {
 
 
     /** Holds the root set of the euler diagram. */
-    universalSet: AugmentedSet<T>;
+    universalSet: EulerSet;
 
 
     /** Holds a snapshot of all the sets in the euler diagram at the time of construction. */
-    allSets: AugmentedSet<T>[];
+    allSets: EulerSet[];
 
 
     // TODO: temp testing... doc... looks up the set for the given predicate. returns undefined if not found.
     // algo: exact match using canonical form of given Predicate/string
-    findSet(predicate: string): AugmentedSet<T> {
+    findSet(predicate: string): EulerSet | undefined {
         let p = toNormalPredicate(toPredicate(predicate));
         let result = this.allSets.filter(set => set.predicate === p)[0];
         return result;
-    }
-
-
-    // TODO: temp testing... doc... returns a NEW augmented euler set, leaving original one unchanged
-    // TODO: better name? It maps the props AND assigns props back to sets (like a mixin)
-    // - augment? addProps?
-    augment<U>(callback: (set: AugmentedSet<T>) => U): EulerDiagram<T & U> {
-        return augmentEulerDiagram(this, callback);
     }
 }
 
@@ -98,22 +90,18 @@ export default class EulerDiagram<T = {}> {
 
 
 
-// TODO: doc helper type
-export type AugmentedSet<T> = EulerSet & T & {supersets: AugmentedSet<T>[]; subsets: AugmentedSet<T>[];}
-
-
-
-
-
 /** Internal helper function used by the EulerDiagram constructor. */
-function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: string[]) {
+function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
 
     // Create the setFor() function to return the set corresponding to a given pattern,
     // creating it on demand if it doesn't already exist. This function ensures that every
     // request for the same pattern gets the same singleton set.
-    let setLookup = new Map<NormalPredicate, AugmentedSet<T>>();
+    let setLookup = new Map<NormalPredicate, EulerSet>();
     let setFor = (predicate: NormalPredicate) => {
-        if (!setLookup.has(predicate)) setLookup.set(predicate, new EulerSet(predicate) as AugmentedSet<T>);
+        if (!setLookup.has(predicate)) {
+            let newSet: EulerSet = {predicate, supersets: [], subsets: []};
+            setLookup.set(predicate, newSet);
+        }
         return setLookup.get(predicate)!;
     }
 
@@ -128,37 +116,112 @@ function initEulerDiagram<T>(eulerDiagram: EulerDiagram<T>, predicates: string[]
         .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
 
     // Finally, compute the `sets` property.
-    let sets: Array<EulerSet & T> = eulerDiagram.allSets = [];
-    setLookup.forEach(value => sets.push(value));
+    let allSets = eulerDiagram.allSets = [] as EulerSet[];
+    setLookup.forEach(value => allSets.push(value));
 }
 
 
 
 
 
-/** Internal helper function used to implement EulerDiagram#map. */
-function augmentEulerDiagram<T, U>(eulerDiagram: EulerDiagram<T>, callback: (set: AugmentedSet<T>) => U): EulerDiagram<T & U> {
+// TODO: revise all comments below...
+// TODO: remove jsdoc ref to pattern '∅' below... Safe to remove? Anything to replace it?
 
-    // Clone the bare euler diagram.
-    let oldSets = eulerDiagram.allSets;
-    let newSets = oldSets.map(old => new EulerSet(old.predicate)) as Array<AugmentedSet<T & U>>;
-    let oldToNew = oldSets.reduce((map, old, i) => map.set(old, newSets[i]), new Map());
-    newSets.forEach((set, i) => {
-        set.supersets = oldSets[i].supersets.map(gen => oldToNew.get(gen));
-        set.subsets = oldSets[i].subsets.map(spc => oldToNew.get(spc));
+/**
+ * Inserts `insertee` into the euler diagram subgraph rooted at `ancestor`, preserving all invariants
+ * relating to the arrangement of sets. `insertee`'s predicate is assumed to be a proper
+ * subset of `ancestor`'s predicate, and `insertee` must not hold the 'empty' predicate '∅'.
+ * @param {EulerSet} insertee - the new set to be inserted into the euler diagram below `ancestor`.
+ * @param {EulerSet} ancestor - the 'root' set of the euler diagram subgraph in which `insertee` belongs.
+ * @param {(predicate: Predicate) => EulerSet} setFor - a function that returns the set for
+ *        a given predicate. It is expected to return the same instance when passed the same predicate for
+ *        the same euler diagram. When `insertee` overlaps an existing set in the subgraph, this function
+ *        is used to synthesize the additional intersection set(s).
+ */
+function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (predicate: NormalPredicate) => EulerSet) {
+
+    // Determine the set relationship between `insertee` and each of the `ancestor` set's existing children.
+    // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
+    let nonDisjointComparands = ancestor.subsets.reduce(
+        (comparands, set) => {
+            let intersections = intersect(insertee.predicate, set.predicate); // TODO: messy... has casts... fix...
+
+            // TODO: temp testing...
+            intersections.forEach(i => comparands.push({set, intersection: setFor(i)}));
+
+            // TODO: was...
+            //if (intersection !== Predicate.EMPTY) comparands.push({set, intersection: setFor(intersection)});
+
+
+            return comparands;
+        },
+        <{set: EulerSet; intersection: EulerSet}[]> []
+    );
+
+    // If the `ancestor` pattern has no existing children that are non-disjoint
+    // with `insertee`, then we simply add `insertee` as a direct child of `ancestor`.
+    if (nonDisjointComparands.length === 0) {
+        insertChild(ancestor, insertee);
+    }
+
+    // If `insertee` already exists as a direct child of `ancestor` at this point
+    // (including if it was just added above), then the insertion is complete.
+    if (hasChild(ancestor, insertee)) return;
+
+    // `insertee` has subset/superset/overlapping relationships with one or more of
+    // `ancestor`'s existing children. Work out how and where to insert it.
+    nonDisjointComparands.forEach(comparand => {
+        let isSubsetOfComparand = comparand.intersection === insertee;
+        let isSupersetOfComparand = comparand.intersection === comparand.set;
+        let isOverlappingComparand = !isSubsetOfComparand && !isSupersetOfComparand;
+
+        if (isSupersetOfComparand) {
+            // Remove the comparand from `ancestor`. It will be re-inserted as a child of `insertee` in the next step.
+            removeChild(ancestor, comparand.set);
+        }
+
+        if (isSupersetOfComparand || isOverlappingComparand) {
+            // Add `insertee` as a direct child of `ancestor`.
+            insertChild(ancestor, insertee);
+
+            // Recursively re-insert the comparand (or insert the overlap) as a child of `insertee`.
+            insertAsDescendent(comparand.intersection, insertee, setFor);
+        }
+
+        if (isSubsetOfComparand || isOverlappingComparand) {
+            // Recursively insert `insertee` (or insert the overlap) as a child of the comparand.
+            insertAsDescendent(comparand.intersection, comparand.set, setFor);
+        }
     });
+}
 
-    // Map and assign the additional properties.
-    newSets.forEach((set: any, i) => {
-        let oldProps: any = oldSets[i];
-        let newProps: any = callback(oldProps) || {};
-        Object.keys(newProps).forEach(key => { if (!(key in set)) set[key] = newProps[key]; });
-        Object.keys(oldProps).forEach(key => { if (!(key in set)) set[key] = oldProps[key]; });
-    });
 
-    // Return the new euler diagram.
-    let newEulerDiagram = new EulerDiagram<T & U>([]);
-    newEulerDiagram.universalSet = oldToNew.get(eulerDiagram.universalSet);
-    newEulerDiagram.allSets = newSets;
-    return newEulerDiagram;
+
+
+
+/** Checks if parent/child links exist directly between `set` and `child`. */
+function hasChild(set: EulerSet, child: EulerSet): boolean {
+    return set.subsets.indexOf(child) !== -1;
+}
+
+
+
+
+
+/** Ensures parent/child links exist directly between `set` and `child`. */
+function insertChild(set: EulerSet, child: EulerSet) {
+    // NB: If the child is already there, make this a no-op.
+    if (hasChild(set, child)) return;
+    set.subsets.push(child);
+    child.supersets.push(set);
+}
+
+
+
+
+
+/** Removes the existing parent/child links between `set` and `child`. */
+function removeChild(set: EulerSet, child: EulerSet) {
+    set.subsets.splice(set.subsets.indexOf(child), 1);
+    child.supersets.splice(child.supersets.indexOf(set), 1);
 }

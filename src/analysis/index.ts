@@ -10,6 +10,7 @@ import {Predicate, toPredicate} from '../math/predicates';
 import {CONTINUE} from '../sentinels';
 import Options from '../options';
 import MMInfo, {MMNode} from './mm-info';
+import augmentEulerDiagram from './augment-euler-diagram';
 
 
 
@@ -69,7 +70,7 @@ export default function createMMInfo(options: Options): MMInfo {
 
 
     // Augment sets with exactly-matching methods in most- to least-specific order.
-    let euler2 = eulerDiagram.augment(set => {
+    let euler2 = augmentEulerDiagram(eulerDiagram, set => {
         let predicateInMethodTable = findMatchingPredicateInMethodTable(set.predicate, normalisedOptions.methods) || set.predicate;
 
         // Find the index in the chain where meta-methods end and regular methods begin.
