@@ -15,12 +15,12 @@ import ThunkInfo from './thunk-info';
  * @param {EulerDiagram} eulerDiagram - The arrangement of patterns on which to base the returned selector function.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function emitSelectorFunction(mminfo: MMInfo, thunkInfo: Map<MMNode, ThunkInfo>) {
+export default function emitSelectorFunction(mminfo: MMInfo<MMNode>, thunkInfo: Map<MMNode, ThunkInfo>) {
 
     // Generate the combined source code for selecting the best thunk based on predicate-matching of the discriminant.
     let lines = [
         'function selectThunk(discriminant) {',
-        ...emitThunkSelectorBlock(mminfo.root, thunkInfo, 1),
+        ...emitThunkSelectorBlock(mminfo.rootNode, thunkInfo, 1),
         '}',
     ];
     let source = lines.join('\n') + '\n';

@@ -17,7 +17,7 @@ import computeThunksForNode from './compute-thunks-for-node';
 
 // TODO: review all comments here
 /** TODO: doc... */
-export default function emitStuff(mminfo: MMInfo) {
+export default function emitStuff(mminfo: MMInfo<MMNode>) {
     let dispatcher = emitDispatcher(mminfo);
 
     // TODO: compute additional info needed for emit
@@ -99,7 +99,7 @@ return mm;
 function emitAll(
     source: string,
     env: {
-        mminfo: MMInfo,
+        mminfo: MMInfo<MMNode>,
         toMatchFunction: Function,
         CONTINUE: any,
         unhandledError: typeof fatalError.UNHANDLED,
@@ -147,7 +147,7 @@ function emitAll(
 
 
 // TODO: temp testing...
-function emitDispatcher(mminfo: MMInfo) {
+function emitDispatcher(mminfo: MMInfo<MMNode>) {
 
     let source = emitDispatchFunction(mminfo.options.name, mminfo.options.arity, {
         TO_DISCRIMINANT: 'toDiscriminant',

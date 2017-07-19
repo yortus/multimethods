@@ -59,7 +59,7 @@ import augmentEulerDiagram from './augment-euler-diagram';
     // (iii) For two meta-methods in the same chain, the leftmost method is less specific
     // (iv) Anything else is ambiguous and results in an error
 
-export default function createMMInfo(options: Options): MMInfo {
+export default function createMMInfo(options: Options): MMInfo<MMNode> {
 
     let normalisedOptions = normaliseOptions(options);
 
@@ -143,11 +143,11 @@ export default function createMMInfo(options: Options): MMInfo {
     });
 
     // TODO: all together...
-    let root = nodes[euler2.allSets.indexOf(euler2.universalSet)];
+    let rootNode = nodes[euler2.allSets.indexOf(euler2.universalSet)];
     return {
         options: normalisedOptions,
         nodes,
-        root
+        rootNode
     };
 }
 
