@@ -1,12 +1,11 @@
 import normaliseOptions from './normalise-options';
 import {EulerDiagram, EulerSet} from '../math/sets';
-import {toNormalPredicate, NormalPredicate} from '../math/predicates';
 
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
 import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
-import {Predicate, toPredicate} from '../math/predicates';
+import {toNormalPredicate, NormalPredicate, Predicate, toPredicate} from '../math/predicates';
 import {CONTINUE} from '../sentinels';
 import Options from '../options';
 import MMInfo, {MMNode} from './mm-info';

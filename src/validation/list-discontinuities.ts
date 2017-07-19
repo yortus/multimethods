@@ -1,4 +1,4 @@
-import EulerDiagram from '../math/sets/euler-diagram';
+import {EulerDiagram} from '../math/sets';
 import Options from '../options';
 import {toNormalPredicate, ANY} from '../math/predicates';
 
