@@ -8,6 +8,7 @@
 
 
 ## Todo - Medium Priority
+- [ ] tidy up the method/dispatcher instrumentation code
 - [ ] Address code quality in /src
   - [ ] Rationalise file structure under /src
   - [ ] Reasonable breakdown of functions

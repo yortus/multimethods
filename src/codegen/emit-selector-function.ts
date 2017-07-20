@@ -1,7 +1,8 @@
-import repeat from '../util/string-repeat';
+import Emitter from './emitter';
 import {MMInfo, MMNode} from '../analysis';
-import {toIdentifierParts} from '../math/predicates';
+import repeat from '../util/string-repeat';
 import ThunkInfo from './thunk-info';
+import {toIdentifierParts} from '../math/predicates';
 
 
 
@@ -15,7 +16,7 @@ import ThunkInfo from './thunk-info';
  * @param {EulerDiagram} eulerDiagram - The arrangement of patterns on which to base the returned selector function.
  * @returns {(address: string) => Function} The generated route selector function.
  */
-export default function emitSelectorFunction(mminfo: MMInfo<MMNode>, thunkInfo: Map<MMNode, ThunkInfo>) {
+export default function emitSelectorFunction(emit: Emitter, mminfo: MMInfo<MMNode>, thunkInfo: Map<MMNode, ThunkInfo>) {
 
     // Generate the combined source code for selecting the best thunk based on predicate-matching of the discriminant.
     let lines = [
@@ -23,8 +24,7 @@ export default function emitSelectorFunction(mminfo: MMInfo<MMNode>, thunkInfo: 
         ...emitThunkSelectorBlock(mminfo.rootNode, thunkInfo, 1),
         '}',
     ];
-    let source = lines.join('\n') + '\n';
-    return source;
+    emit(...lines);
 }
 
 
