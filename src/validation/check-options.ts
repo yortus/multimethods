@@ -11,6 +11,13 @@ import Options from '../options';
 // TODO: doc...
 export default function checkOptions(options: Options) {
 
+    // `name` must be either undefined, or conform to [A-Za-z$_][A-Za-z$_0-9]* (ie a simple JS indentifier).
+    if (options.name !== undefined) {
+        let isValid = typeof options.name === 'string';
+        isValid = isValid && /[A-Za-z$_][A-Za-z$_0-9]*/.test(options.name);
+        if (!isValid) return fatalError.INVALID_NAME_OPTION(options.name);
+    }
+
     // `arity` must be either undefined, or else a positive integer.
     if (options.arity !== undefined) {
         let isValid = typeof options.arity === 'number';

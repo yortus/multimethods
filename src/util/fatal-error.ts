@@ -22,6 +22,11 @@ namespace fatalError {
         return error(format(fmt, value));
     }
 
+    export function INVALID_NAME_OPTION(value: any) {
+        let fmt = `Expected a valid identifier or undefined value for options.name, but found %j.`;
+        return error(format(fmt, value));
+    }
+
     export function INVALID_STRICT_OPTION(value: any) {
         let fmt = `Expected a boolean or undefined value for options.strict, but found %j.`;
         return error(format(fmt, value));
