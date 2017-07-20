@@ -1,6 +1,5 @@
 import assign from '../util/object-assign';
 import {NormalOptions} from './normalise-options';
-import {Predicate} from '../math/predicates';
 import {EulerDiagram, EulerSet} from '../math/sets';
 
 
@@ -20,7 +19,9 @@ export default class MMInfo<TNode extends {[x: string]: any}> {
     }
 
     options: NormalOptions;
+
     allNodes: TNode[];
+
     rootNode: TNode;
 
     findNode(predicate: string): TNode | undefined {
@@ -36,6 +37,7 @@ export default class MMInfo<TNode extends {[x: string]: any}> {
     }
 
     private constructor() { }
+
     private eulerDiagram: EulerDiagram;
 }
 
@@ -43,19 +45,7 @@ export default class MMInfo<TNode extends {[x: string]: any}> {
 
 
 
-// TODO: doc...
-export interface MMNode {
-    predicateInMethodTable: Predicate;
-    exactlyMatchingMethods: Function[];
-    fallback: MMNode|null;
-    children: MMNode[];
-}
-
-
-
-
-
-/** Internal helper function used to implement MMInfo#augment. */
+/** Internal helper function used to implement MMInfo#addProps. */
 function addProps<T extends {[x: string]: any}, U extends {[x: string]: any}>(nodes: T[], sets: EulerSet[], callback: (node: T, nodes: T[], set: EulerSet, sets: EulerSet[]) => U) {
 
     // Map over the new nodes, obtaining the additional properties, and assigning them into their corresponding node.

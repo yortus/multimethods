@@ -1,7 +1,7 @@
 import isMetaMethod from '../util/is-meta-method';
 import emitThunkFunction from './emit-thunk-function';
 import repeatString from '../util/string-repeat';
-import {MMNode} from '../analysis/mm-info';
+import {MMNode} from '../analysis';
 import {toIdentifierParts, parsePredicateSource} from '../math/predicates';
 import ThunkInfo from './thunk-info';
 

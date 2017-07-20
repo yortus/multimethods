@@ -6,7 +6,7 @@ import emitSelectorFunction from './emit-selector-function';
 import repeat from '../util/string-repeat';
 import isPromiseLike from '../util/is-promise-like';
 import andThen from '../util/and-then';
-import MMInfo, {MMNode} from '../analysis/mm-info';
+import {MMInfo, MMNode} from '../analysis';
 import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
 import ThunkInfo from './thunk-info';
 import computeThunksForNode from './compute-thunks-for-node';

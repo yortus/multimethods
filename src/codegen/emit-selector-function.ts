@@ -1,5 +1,5 @@
 import repeat from '../util/string-repeat';
-import MMInfo, {MMNode} from '../analysis/mm-info';
+import {MMInfo, MMNode} from '../analysis';
 import {toIdentifierParts} from '../math/predicates';
 import ThunkInfo from './thunk-info';
 
