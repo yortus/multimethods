@@ -1,4 +1,4 @@
-import {ExactPredicate, ExactMethods, ParentNode, MethodSequence} from './mm-node';
+import {MethodTableEntry, ParentNode, MethodSequence} from './mm-node';
 import isMetaMethod from '../util/is-meta-method';
 import MMInfo from './mm-info';
 import repeatString from '../util/string-repeat';
@@ -9,7 +9,7 @@ import {toIdentifierParts} from "../math/predicates";
 
 
 // TODO: doc...
-export default function analyseMethodSequences<T extends ExactPredicate & ExactMethods & ParentNode<T>>(mminfo: MMInfo<T>) {
+export default function analyseMethodSequences<T extends MethodTableEntry & ParentNode<T>>(mminfo: MMInfo<T>) {
     return mminfo.addProps((analysisNode) => {
         let result: MethodSequence<T> = {methodSequence: []};
         

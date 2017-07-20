@@ -5,14 +5,14 @@ import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
 import {EulerDiagram} from '../math/sets';
 import {CONTINUE} from '../sentinels';
-import {ExactPredicate, ExactMethods} from './mm-node';
+import {MethodTableEntry} from './mm-node';
 
 
 
 
 
 // TODO: doc...
-export default function analyseAmbiguities<T extends ExactPredicate & ExactMethods>(mminfo: MMInfo<T>) {
+export default function analyseAmbiguities<T extends MethodTableEntry>(mminfo: MMInfo<T>) {
     return mminfo.addProps((node, nodes, set, sets) => {
 
         // If this is the root node, synthesize an additional regular method that always returns CONTINUE. Adding

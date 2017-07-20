@@ -2,7 +2,7 @@ import isMetaMethod from '../util/is-meta-method';
 import MMInfo from './mm-info';
 import {NormalOptions} from './normalise-options';
 import {toNormalPredicate, NormalPredicate, Predicate, toPredicate} from '../math/predicates';
-import {ExactPredicate, ExactMethods} from './mm-node';
+import {MethodTableEntry} from './mm-node';
 
 
 
@@ -21,7 +21,7 @@ export default function analyseMethodTable<T>(mminfo: MMInfo<T>) {
         // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
         let exactMethods = chain.slice(i).concat(chain.slice(0, i).reverse());
 
-        return {exactPredicate, exactMethods} as ExactPredicate & ExactMethods;
+        return {exactPredicate, exactMethods} as MethodTableEntry;
     });
 }
 

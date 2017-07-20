@@ -1,14 +1,14 @@
 import MMInfo from './mm-info';
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import {EulerDiagram} from '../math/sets';
-import {ExactPredicate, ExactMethods, ParentNode} from './mm-node';
+import {MethodTableEntry, ParentNode} from './mm-node';
 
 
 
 
 
 // TODO: doc...Go back over the nodes and work out the correct parent node. There must be precisely one (except for the root which has no parent).
-export default function analyseParentNodes<T extends ExactPredicate & ExactMethods>(mminfo: MMInfo<T>) {
+export default function analyseParentNodes<T extends MethodTableEntry>(mminfo: MMInfo<T>) {
     return mminfo.addProps((_, nodes, set, sets) => {
         let parentNode: (T & ParentNode<T>) | null;
 
