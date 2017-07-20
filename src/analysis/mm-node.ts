@@ -31,12 +31,13 @@ export interface ExactMethods { exactMethods: Function[] }
 
 
 
-// TODO: doc...
+// TODO: doc... always unambiguously ordered from most- to least- specific. Always at least one element.
 export interface MethodSequence<TNode> {
     methodSequence: Array<{
         method: Function;
         node: TNode & MethodSequence<TNode>;
         localIndex: number;
+        identifier: string;
     }>;
 }
 
