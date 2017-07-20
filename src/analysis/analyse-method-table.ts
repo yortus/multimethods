@@ -2,7 +2,7 @@ import isMetaMethod from '../util/is-meta-method';
 import MMInfo from './mm-info';
 import {NormalOptions} from './normalise-options';
 import {toNormalPredicate, NormalPredicate, Predicate, toPredicate} from '../math/predicates';
-import {PredicateInMethodTable, ExactlyMatchingMethods} from './mm-node';
+import {ExactPredicate, ExactMethods} from './mm-node';
 
 
 
@@ -11,17 +11,17 @@ import {PredicateInMethodTable, ExactlyMatchingMethods} from './mm-node';
 // TODO: doc... Get predicates and exactly-matching methods in most- to least-specific order.
 export default function analyseMethodTable<T>(mminfo: MMInfo<T>) {
     return mminfo.addProps((_, __, set) => {
-        let predicateInMethodTable = findMatchingPredicateInMethodTable(set.predicate, mminfo.options.methods) || set.predicate;
+        let exactPredicate = findExactPredicateInMethodTable(set.predicate, mminfo.options) || set.predicate;
 
         // Find the index in the chain where meta-methods end and regular methods begin.
-        let chain = mminfo.options.methods[predicateInMethodTable] || [];
+        let chain = mminfo.options.methods[exactPredicate] || [];
         if (!Array.isArray(chain)) chain = [chain];
         let i = 0;
         while (i < chain.length && isMetaMethod(chain[i])) ++i;
         // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
-        let exactlyMatchingMethods = chain.slice(i).concat(chain.slice(0, i).reverse());
+        let exactMethods = chain.slice(i).concat(chain.slice(0, i).reverse());
 
-        return {predicateInMethodTable, exactlyMatchingMethods} as PredicateInMethodTable & ExactlyMatchingMethods;
+        return {exactPredicate, exactMethods} as ExactPredicate & ExactMethods;
     });
 }
 
@@ -30,9 +30,8 @@ export default function analyseMethodTable<T>(mminfo: MMInfo<T>) {
 
 
 // TODO: doc...
-function findMatchingPredicateInMethodTable(normalisedPredicate: NormalPredicate, methods: NormalOptions['methods']): Predicate|null {
-    methods = methods || {};
-    for (let key in methods) {
+function findExactPredicateInMethodTable(normalisedPredicate: NormalPredicate, options: NormalOptions): Predicate|null {
+    for (let key in options.methods) {
         let predicate = toPredicate(key);
 
         // Skip until we find the right predicate.
@@ -42,6 +41,6 @@ function findMatchingPredicateInMethodTable(normalisedPredicate: NormalPredicate
         return predicate;
     }
 
-    // If we get here, there is no matching predicate in the given `methods`.
+    // If we get here, there is no matching predicate in the method table.
     return null;
 }

@@ -29,7 +29,7 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
     let allMatchingMethods = node.methodSequence;
 
     let sources = allMatchingMethods.map(({method, node, localIndex}, i) => {
-        const identifier = toIdentifierParts(node.predicateInMethodTable);
+        const identifier = toIdentifierParts(node.exactPredicate);
 
         // To avoid unnecessary duplication, skip emit for regular methods that are less specific that the set's predicate, since these will be handled in their own set.
         if (!isMetaMethod(method) && node !== mostSpecificNode) return '';
@@ -50,7 +50,7 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
 
             // Statically known booleans --> 'true'/'false' literals (for dead code elimination)
             ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(allMatchingMethods[i + 1].method),
-            HAS_CAPTURES: parsePredicateSource(node.predicateInMethodTable).captureNames.length > 0,
+            HAS_CAPTURES: parsePredicateSource(node.exactPredicate).captureNames.length > 0,
             IS_META_METHOD: isMetaMethod(method),
             HAS_DOWNSTREAM: downstream != null,
             IS_NEVER_ASYNC: async === false,
@@ -76,9 +76,9 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
 
 function getNameForThunk(i: number, mostSpecificNode: MMNode): string {
     let el = mostSpecificNode.methodSequence[i];
-    let baseName = `${toIdentifierParts(el.node.predicateInMethodTable)}${repeatString('ᐟ', el.localIndex)}`;
+    let baseName = `${toIdentifierParts(el.node.exactPredicate)}${repeatString('ᐟ', el.localIndex)}`;
     if (isMetaMethod(el.method) && (el.node !== mostSpecificNode || el.localIndex > 0)) {
-        return `thunkː${toIdentifierParts(mostSpecificNode.predicateInMethodTable)}ːviaː${baseName}`;
+        return `thunkː${toIdentifierParts(mostSpecificNode.exactPredicate)}ːviaː${baseName}`;
     }
     else {
         return `thunkː${baseName}`;

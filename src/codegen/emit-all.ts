@@ -48,14 +48,14 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     // TODO: buggy emit for isMatch and getCaptures below
     // - assumes predicate string is valid inside the literal single quotes put around it in the emit.
     // - SOLN: escape the predicate string properly!
-    let identifiers = mminfo.allNodes.map(node => toIdentifierParts(node.predicateInMethodTable));
-    let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.allNodes[i].predicateInMethodTable)}');`);
+    let identifiers = mminfo.allNodes.map(node => toIdentifierParts(node.exactPredicate));
+    let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.allNodes[i].exactPredicate)}');`);
     let getCapturesLines = identifiers
-        .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.allNodes[i].predicateInMethodTable}');`)
-        .filter((_, i) => parsePredicateSource(mminfo.allNodes[i].predicateInMethodTable).captureNames.length > 0);
+        .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.allNodes[i].exactPredicate}');`)
+        .filter((_, i) => parsePredicateSource(mminfo.allNodes[i].exactPredicate).captureNames.length > 0);
     let methodLines = mminfo.allNodes.reduce(
-        (lines, n, i) => n.exactlyMatchingMethods.reduce(
-            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeat('ᐟ', j)} = mminfo.allNodes[${i}].exactlyMatchingMethods[${j}];`),
+        (lines, n, i) => n.exactMethods.reduce(
+            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeat('ᐟ', j)} = mminfo.allNodes[${i}].exactMethods[${j}];`),
             lines
         ),
         [] as string[]

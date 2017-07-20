@@ -6,8 +6,8 @@ import {Predicate} from '../math/predicates';
 
 // TODO: doc...
 export default interface MMNode extends
-    PredicateInMethodTable,
-    ExactlyMatchingMethods,
+    ExactPredicate,
+    ExactMethods,
     ParentNode<MMNode>,
     ChildNodes<MMNode>,
     MethodSequence<MMNode>
@@ -17,15 +17,15 @@ export default interface MMNode extends
 
 
 
-// TODO: doc...
-export interface PredicateInMethodTable { predicateInMethodTable: Predicate }
+// TODO: doc... the predicate for this node exactly as it was given in the method table
+export interface ExactPredicate { exactPredicate: Predicate }
 
 
 
 
 
-// TODO: doc...
-export interface ExactlyMatchingMethods { exactlyMatchingMethods: Function[] }
+// TODO: doc... the method chain for this node exactly as it was given in the method table
+export interface ExactMethods { exactMethods: Function[] }
 
 
 

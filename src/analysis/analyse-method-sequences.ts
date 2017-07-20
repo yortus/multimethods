@@ -1,4 +1,4 @@
-import {ExactlyMatchingMethods, ParentNode, MethodSequence} from './mm-node';
+import {ExactMethods, ParentNode, MethodSequence} from './mm-node';
 import MMInfo from './mm-info';
 //import repeatString from '../util/string-repeat';
 //import {toIdentifierParts} from "../math/predicates";
@@ -8,12 +8,12 @@ import MMInfo from './mm-info';
 
 
 // TODO: doc...
-export default function analyseMethodSequences<T extends ExactlyMatchingMethods & ParentNode<T>>(mminfo: MMInfo<T>) {
+export default function analyseMethodSequences<T extends ExactMethods & ParentNode<T>>(mminfo: MMInfo<T>) {
     return mminfo.addProps((node) => {
         let result: MethodSequence<T> = {methodSequence: []};
         
         for (let inode: T | null = node; inode !== null; inode = inode.parentNode) {
-            inode.exactlyMatchingMethods.forEach((method, localIndex) => {
+            inode.exactMethods.forEach((method, localIndex) => {
                 let node = inode as T & MethodSequence<T>;
                 result.methodSequence.push({method, node, localIndex});
             });

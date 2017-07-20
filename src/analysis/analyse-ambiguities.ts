@@ -5,14 +5,14 @@ import isMetaMethod from '../util/is-meta-method';
 import fatalError from '../util/fatal-error';
 import {EulerDiagram} from '../math/sets';
 import {CONTINUE} from '../sentinels';
-import {PredicateInMethodTable, ExactlyMatchingMethods} from './mm-node';
+import {ExactPredicate, ExactMethods} from './mm-node';
 
 
 
 
 
 // TODO: doc...
-export default function analyseAmbiguities<T extends PredicateInMethodTable & ExactlyMatchingMethods>(mminfo: MMInfo<T>) {
+export default function analyseAmbiguities<T extends ExactPredicate & ExactMethods>(mminfo: MMInfo<T>) {
     return mminfo.addProps((node, nodes, set, sets) => {
 
         // If this is the root node, synthesize an additional regular method that always returns CONTINUE. Adding
@@ -20,7 +20,7 @@ export default function analyseAmbiguities<T extends PredicateInMethodTable & Ex
         // universal predicate. In particular, it guarantees every possible dispatch has a non-empty method sequence.
         if (set.supersets.length === 0) {
             let method = function _unhandled() { return CONTINUE; };
-            insertAsLeastSpecificRegularMethod(node.exactlyMatchingMethods, method);
+            insertAsLeastSpecificRegularMethod(node.exactMethods, method);
         }
 
         // If there are multiple ways into the set, analyse and mitigate all potential ambiguities...
@@ -38,8 +38,8 @@ export default function analyseAmbiguities<T extends PredicateInMethodTable & Ex
             pathsFromRoot.forEach(path => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
                 let divergentNodes = divergentSets.map(set => nodes[sets.indexOf(set)]);
-                let hasMetaMethods = divergentNodes.some(node => node.exactlyMatchingMethods.some(h => isMetaMethod(h)));
-                if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.predicateInMethodTable);
+                let hasMetaMethods = divergentNodes.some(node => node.exactMethods.some(h => isMetaMethod(h)));
+                if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.exactPredicate);
             });
 
             // TODO: explain all below more clearly...
@@ -47,8 +47,8 @@ export default function analyseAmbiguities<T extends PredicateInMethodTable & Ex
             // TODO: this allows 'lazy' error handling that won't prevent the best-matching methods from handling
             //       the dispatch as long as they don't fall back to the ambiguous part of the sequence.
             let candidates = pathsFromRoot.map(path => path[path.length - suffix.length - 1].predicate).join(', ');
-            let method = function _ambiguous() { fatalError.MULTIPLE_FALLBACKS_FROM(node.predicateInMethodTable, candidates); };
-            insertAsLeastSpecificRegularMethod(node.exactlyMatchingMethods, method);
+            let method = function _ambiguous() { fatalError.MULTIPLE_FALLBACKS_FROM(node.exactPredicate, candidates); };
+            insertAsLeastSpecificRegularMethod(node.exactMethods, method);
         }
 
         return {}; // NB: we aren't adding any members to the nodes.
