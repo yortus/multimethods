@@ -2,7 +2,7 @@ import isMetaMethod from '../util/is-meta-method';
 import emitThunkFunction from './emit-thunk-function';
 import repeatString from '../util/string-repeat';
 import {MMNode} from '../analysis';
-import {toIdentifierParts, parsePredicateSource} from '../math/predicates';
+import {parsePredicateSource} from '../math/predicates';
 import ThunkInfo from './thunk-info';
 
 
@@ -24,15 +24,12 @@ import ThunkInfo from './thunk-info';
  * @returns {Thunk} the virtual method for the node.
  */
 export default function computeThunksForNode(node: MMNode, arity: number|undefined, async: boolean|undefined): ThunkInfo {
-
-    const mostSpecificNode = node;
     let mseq = node.methodSequence;
-
-    let sources = mseq.map(({method, node, localIndex}, i) => {
-        const identifier = toIdentifierParts(node.exactPredicate);
+    let sources = mseq.map(({method, fromNode}, i) => {
+        const identifier = fromNode.methodSequence[0].identifier;
 
         // To avoid unnecessary duplication, skip emit for regular methods that are less specific that the set's predicate, since these will be handled in their own set.
-        if (!isMetaMethod(method) && node !== mostSpecificNode) return '';
+        if (!isMetaMethod(method) && fromNode !== node) return '';
 
         // TODO: temp testing... explain!!
         let isLeastSpecificMethod = i === mseq.length - 1;
@@ -44,13 +41,13 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
             CONTINUE: 'CONTINUE',
             EMPTY_OBJECT: 'EMPTY_OBJECT',
             GET_CAPTURES: `getCapturesː${identifier}`,
-            CALL_METHOD: `methodː${identifier}${repeatString('ᐟ', localIndex)}`,
+            CALL_METHOD: `methodː${identifier}${repeatString('ᐟ', fromNode.exactMethods.indexOf(method))}`,
             DELEGATE_DOWNSTREAM: downstream ? `thunkː${downstream.identifier}` : '',
             DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : `thunkː${mseq[i + 1].identifier}`,
 
             // Statically known booleans --> 'true'/'false' literals (for dead code elimination)
             ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(mseq[i + 1].method),
-            HAS_CAPTURES: parsePredicateSource(node.exactPredicate).captureNames.length > 0,
+            HAS_CAPTURES: parsePredicateSource(fromNode.exactPredicate).captureNames.length > 0,
             IS_META_METHOD: isMetaMethod(method),
             HAS_DOWNSTREAM: downstream != null,
             IS_NEVER_ASYNC: async === false,

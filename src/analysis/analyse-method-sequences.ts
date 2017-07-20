@@ -10,19 +10,19 @@ import {toIdentifierParts} from "../math/predicates";
 
 // TODO: doc...
 export default function analyseMethodSequences<T extends MethodTableEntry & ParentNode<T>>(mminfo: MMInfo<T>) {
-    return mminfo.addProps((analysisNode) => {
+    return mminfo.addProps(startNode => {
         let result: MethodSequence<T> = {methodSequence: []};
         
-        for (let ancestor: T | null = analysisNode; ancestor !== null; ancestor = ancestor.parentNode) {
-            ancestor.exactMethods.forEach((method, localIndex) => {
+        for (let ancestorNode: T | null = startNode; ancestorNode !== null; ancestorNode = ancestorNode.parentNode) {
+            ancestorNode.exactMethods.forEach((method, i) => {
 
                 // Make an IdentifierPart for each method that is descriptive and unique accross the multimethod.
-                let identifier = `${toIdentifierParts(ancestor!.exactPredicate)}${repeatString('ᐟ', localIndex)}`;
-                if (isMetaMethod(method) && (ancestor !== analysisNode || localIndex > 0)) {
-                    identifier = `${toIdentifierParts(analysisNode.exactPredicate)}ːviaː${identifier}`;
+                let identifier = `${toIdentifierParts(ancestorNode!.exactPredicate)}${repeatString('ᐟ', i)}`;
+                if (isMetaMethod(method) && (ancestorNode !== startNode || i > 0)) {
+                    identifier = `${toIdentifierParts(startNode.exactPredicate)}ːviaː${identifier}`;
                 }
 
-                result.methodSequence.push({method, node: ancestor as T & MethodSequence<T>, localIndex, identifier});
+                result.methodSequence.push({method, fromNode: ancestorNode as T & MethodSequence<T>, identifier});
             });
         }
 

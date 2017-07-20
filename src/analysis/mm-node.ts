@@ -30,8 +30,7 @@ export interface MethodTableEntry {
 export interface MethodSequence<TNode> {
     methodSequence: Array<{
         method: Function;
-        node: TNode & MethodSequence<TNode>;
-        localIndex: number;
+        fromNode: TNode & MethodSequence<TNode>;
         identifier: string;
     }>;
 }

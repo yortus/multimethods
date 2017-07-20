@@ -7,7 +7,7 @@ import repeat from '../util/string-repeat';
 import isPromiseLike from '../util/is-promise-like';
 import andThen from '../util/and-then';
 import {MMInfo, MMNode} from '../analysis';
-import {toIdentifierParts, toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
+import {toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
 import ThunkInfo from './thunk-info';
 import computeThunksForNode from './compute-thunks-for-node';
 import Emitter from './emitter';
@@ -48,7 +48,7 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     // TODO: buggy emit for isMatch and getCaptures below
     // - assumes predicate string is valid inside the literal single quotes put around it in the emit.
     // - SOLN: escape the predicate string properly!
-    let identifiers = mminfo.allNodes.map(node => toIdentifierParts(node.exactPredicate));
+    let identifiers = mminfo.allNodes.map(node => node.methodSequence[0].identifier);
     let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.allNodes[i].exactPredicate)}');`);
     let getCapturesLines = identifiers
         .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.allNodes[i].exactPredicate}');`)
