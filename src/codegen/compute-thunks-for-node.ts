@@ -26,11 +26,7 @@ import ThunkInfo from './thunk-info';
 export default function computeThunksForNode(node: MMNode, arity: number|undefined, async: boolean|undefined): ThunkInfo {
 
     const mostSpecificNode = node;
-    let allMatchingMethods = [] as MethodInfo[];
-    while (node !== null) {
-        allMatchingMethods = allMatchingMethods.concat(node.exactlyMatchingMethods.map((method, localIndex) => ({method, node, localIndex})));
-        node = node.fallback!; // NB: may be null
-    }
+    let allMatchingMethods = node.methodSequence;
 
     let sources = allMatchingMethods.map(({method, node, localIndex}, i) => {
         const identifier = toIdentifierParts(node.predicateInMethodTable);
@@ -43,14 +39,14 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
         let downstream = allMatchingMethods.filter(({method}, j) => (j === 0 || isMetaMethod(method)) && j < i).pop();
 
         // TODO: temp testing...
-        return emitThunkFunction(getNameForThunk(i, allMatchingMethods, mostSpecificNode), arity, {
+        return emitThunkFunction(getNameForThunk(i, mostSpecificNode), arity, {
             IS_PROMISE: 'isPromiseLike',
             CONTINUE: 'CONTINUE',
             EMPTY_OBJECT: 'EMPTY_OBJECT',
             GET_CAPTURES: `getCapturesː${identifier}`,
             CALL_METHOD: `methodː${identifier}${repeatString('ᐟ', localIndex)}`,
-            DELEGATE_DOWNSTREAM: downstream ? getNameForThunk(allMatchingMethods.indexOf(downstream), allMatchingMethods, mostSpecificNode) : '',
-            DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : getNameForThunk(i + 1, allMatchingMethods, mostSpecificNode),
+            DELEGATE_DOWNSTREAM: downstream ? getNameForThunk(allMatchingMethods.indexOf(downstream), mostSpecificNode) : '',
+            DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : getNameForThunk(i + 1, mostSpecificNode),
 
             // Statically known booleans --> 'true'/'false' literals (for dead code elimination)
             ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(allMatchingMethods[i + 1].method),
@@ -69,7 +65,7 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
     // least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
     let entryPoint = allMatchingMethods.filter(el => isMetaMethod(el.method)).pop() || allMatchingMethods[0];
     return {
-        name: getNameForThunk(allMatchingMethods.indexOf(entryPoint), allMatchingMethods, mostSpecificNode),
+        name: getNameForThunk(allMatchingMethods.indexOf(entryPoint), mostSpecificNode),
         source: sources.join('\n\n')
     };
 }
@@ -78,8 +74,8 @@ export default function computeThunksForNode(node: MMNode, arity: number|undefin
 
 
 
-function getNameForThunk(i: number, allMethods: MethodInfo[], mostSpecificNode: MMNode): string {
-    let el = allMethods[i];
+function getNameForThunk(i: number, mostSpecificNode: MMNode): string {
+    let el = mostSpecificNode.methodSequence[i];
     let baseName = `${toIdentifierParts(el.node.predicateInMethodTable)}${repeatString('ᐟ', el.localIndex)}`;
     if (isMetaMethod(el.method) && (el.node !== mostSpecificNode || el.localIndex > 0)) {
         return `thunkː${toIdentifierParts(mostSpecificNode.predicateInMethodTable)}ːviaː${baseName}`;
@@ -88,9 +84,3 @@ function getNameForThunk(i: number, allMethods: MethodInfo[], mostSpecificNode: 
         return `thunkː${baseName}`;
     }
 }
-
-
-
-
-
-type MethodInfo = {method: Function, node: MMNode, localIndex: number};

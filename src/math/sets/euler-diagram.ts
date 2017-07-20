@@ -83,6 +83,18 @@ export default class EulerDiagram {
         let result = this.allSets.filter(set => set.predicate === p)[0];
         return result;
     }
+
+
+    /**
+     * Enumerates every walk[1] in the euler diagram from the root to the given `set` following 'subset' edges.
+     * Each walk is represented as a list of sets arranged in walk-order (i.e., from the root to the given `set`).
+     * [1] See: https://en.wikipedia.org/wiki/Glossary_of_graph_theory#walk
+     */
+    static findAllPathsFromRootTo(set: EulerSet): EulerSet[][] {
+        if (set.supersets.length === 0) return [[set]]; // Base case: there is a single path to the root set.
+        let result = ([] as EulerSet[][]).concat(...set.supersets.map(EulerDiagram.findAllPathsFromRootTo));
+        return result.map(path => path.concat(set));
+    }
 }
 
 

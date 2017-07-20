@@ -1,9 +1,12 @@
 import normaliseOptions from './normalise-options';
 import Options from '../options';
 import MMInfo from './mm-info';
+import analyseAmbiguities from './analyse-ambiguities';
+import analyseChildNodes from './analyse-child-nodes';
+import analyseMethodSequences from './analyse-method-sequences';
 import analyseMethodTable from './analyse-method-table';
-import analyseFallbacks from './analyse-fallbacks';
-import {PredicateInMethodTable, ExactlyMatchingMethods, Fallback, Children} from './node-parts';
+import analyseParentNodes from './analyse-parent-nodes';
+import MMNode from './mm-node';
 
 
 
@@ -14,28 +17,11 @@ export default function analyseAll(options: Options) {
     let normalisedOptions = normaliseOptions(options);
     let mminfo1 = MMInfo.fromOptions(normalisedOptions);
     let mminfo2 = analyseMethodTable(mminfo1);
-    let mminfo3 = analyseFallbacks(mminfo2);
-    let mminfo4 = analyseChildren(mminfo3);
-    return mminfo4 as MMInfo<MMNode>;
-}
-
-
-
-
-
-// TODO: doc...
-export interface MMNode extends PredicateInMethodTable, ExactlyMatchingMethods, Fallback<MMNode>, Children<MMNode> { }
-
-
-
-
-
-// TODO: doc...
-function analyseChildren<T>(mminfo: MMInfo<T>) {
-    return mminfo.addProps((_, nodes, set, sets) => {
-        let children = set.subsets.map(subset => nodes[sets.indexOf(subset)]);
-        return {children} as Children<T>;
-    });
+    let mminfo3 = analyseAmbiguities(mminfo2);
+    let mminfo4 = analyseChildNodes(mminfo3);
+    let mminfo5 = analyseParentNodes(mminfo4);
+    let mminfo6 = analyseMethodSequences(mminfo5);
+    return mminfo6 as MMInfo<MMNode>;
 }
 
 

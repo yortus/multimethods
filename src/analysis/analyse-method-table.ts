@@ -2,13 +2,13 @@ import isMetaMethod from '../util/is-meta-method';
 import MMInfo from './mm-info';
 import {NormalOptions} from './normalise-options';
 import {toNormalPredicate, NormalPredicate, Predicate, toPredicate} from '../math/predicates';
-import {PredicateInMethodTable, ExactlyMatchingMethods} from './node-parts';
+import {PredicateInMethodTable, ExactlyMatchingMethods} from './mm-node';
 
 
 
 
 
-// TODO: doc... Augment sets with exactly-matching methods in most- to least-specific order.
+// TODO: doc... Get predicates and exactly-matching methods in most- to least-specific order.
 export default function analyseMethodTable<T>(mminfo: MMInfo<T>) {
     return mminfo.addProps((_, __, set) => {
         let predicateInMethodTable = findMatchingPredicateInMethodTable(set.predicate, mminfo.options.methods) || set.predicate;
