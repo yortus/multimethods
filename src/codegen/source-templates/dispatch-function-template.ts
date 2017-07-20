@@ -10,7 +10,7 @@ import Thunk from '../thunk';
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
 export const template = function __FUNCNAME__(__VARARGS__: any[]) {
     let discriminant = $.TO_DISCRIMINANT(__VARARGS__);
-    let thunk = $.SELECT_THUNK(discriminant);
+    let thunk = $.THUNK_SELECTOR_NAME(discriminant);
     let result = thunk(discriminant, $.CONTINUE, __VARARGS__);
     return result === $.CONTINUE ? $.UNHANDLED_ERROR() : result;
 };
@@ -31,7 +31,7 @@ declare const $: VariablesInScope;
 // TODO: explain each of these in turn...
 export interface VariablesInScope {
     TO_DISCRIMINANT: (...args: any[]) => string;
-    SELECT_THUNK: (discriminant: string) => Thunk;
+    THUNK_SELECTOR_NAME: (discriminant: string) => Thunk;
     CONTINUE: any;
     UNHANDLED_ERROR: typeof fatalError.UNHANDLED;
 }

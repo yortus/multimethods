@@ -28,11 +28,14 @@ export interface MethodTableEntry {
 
 // TODO: doc... always unambiguously ordered from most- to least- specific. Always at least one element.
 export interface MethodSequence<TNode> {
-    methodSequence: Array<{
-        method: Function;
-        fromNode: TNode & MethodSequence<TNode>;
-        identifier: string;
-    }>;
+    methodSequence: MethodSequenceEntry<TNode>[];
+    entryPoint: MethodSequenceEntry<TNode>;
+    identifier: string;
+}
+export interface MethodSequenceEntry<TNode> {
+    method: Function;
+    fromNode: TNode & MethodSequence<TNode>;
+    identifier: string;
 }
 
 

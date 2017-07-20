@@ -1,6 +1,6 @@
 import debug, {DISPATCH, EMIT} from '../util/debug';
 import fatalError from '../util/fatal-error';
-import {CONTINUE} from '../sentinels';
+import * as sentinels from '../sentinels';
 import emitDispatchFunction from './emit-dispatch-function';
 import emitSelectorFunction from './emit-selector-function';
 import repeat from '../util/string-repeat';
@@ -8,8 +8,7 @@ import isPromiseLike from '../util/is-promise-like';
 import andThen from '../util/and-then';
 import {MMInfo, MMNode} from '../analysis';
 import {toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
-import ThunkInfo from './thunk-info';
-import computeThunksForNode from './compute-thunks-for-node';
+import emitThunkFunction from './emit-thunk-function';
 import Emitter from './emitter';
 
 
@@ -20,6 +19,13 @@ import Emitter from './emitter';
 /** TODO: doc... */
 export default function emitAll(mminfo: MMInfo<MMNode>) {
 
+    // TODO: doc... shared env... these must be consistent across emit
+    const THUNK_SELECTOR_NAME = 'selectThunk';
+    const CONTINUE = 'CONTINUE';
+    const TO_DISCRIMINANT = 'toDiscriminant';
+    const EMPTY_OBJECT = 'EMPTY_OBJECT';
+    const UNHANDLED_ERROR = 'unhandledError';
+
     let allLines = [] as string[];
     let emit: Emitter = (...lines: string[]) => {
         lines.forEach(line => allLines.push(...line.split(/\n/)));
@@ -27,28 +33,35 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
 
 
     emit(`\n\n\n// ========== MULTIMETHOD DISPATCHER ==========`);
-    emitDispatcher(emit, mminfo);
-
-
-    // TODO: compute additional info needed for emit
-    let thunkInfo = mminfo.allNodes.reduce(
-        (map, node) => map.set(node, computeThunksForNode(node, mminfo.options.arity, mminfo.options.async)),
-        new Map<MMNode, ThunkInfo>()
-    );
+    emitDispatchFunction(emit, mminfo.options.name, mminfo.options.arity, {
+        THUNK_SELECTOR_NAME,
+        CONTINUE,
+        TO_DISCRIMINANT,
+        UNHANDLED_ERROR
+    });
 
 
     emit(`\n\n\n// ========== THUNK SELECTOR ==========`);
-    emitSelectorFunction(emit, mminfo, thunkInfo);
+    emitSelectorFunction(emit, mminfo, {
+        THUNK_SELECTOR_NAME
+    });
 
 
     emit(`\n\n\n// ========== THUNKS ==========`);
-    thunkInfo.forEach(({source}) => emit(source));
+    mminfo.allNodes.forEach(node => {
+        node.methodSequence.forEach((_, i, seq) => {
+            emitThunkFunction(emit, mminfo, seq, i, {
+                CONTINUE,
+                EMPTY_OBJECT
+            });
+        });
+    });
 
 
     // TODO: buggy emit for isMatch and getCaptures below
     // - assumes predicate string is valid inside the literal single quotes put around it in the emit.
     // - SOLN: escape the predicate string properly!
-    let identifiers = mminfo.allNodes.map(node => node.methodSequence[0].identifier);
+    let identifiers = mminfo.allNodes.map(node => node.identifier);
     let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.allNodes[i].exactPredicate)}');`);
     let getCapturesLines = identifiers
         .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.allNodes[i].exactPredicate}');`)
@@ -67,8 +80,8 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     // the cascading, and possibly asynchronous, evaluation of each multimethod call.
     emit(
         `// ========== ENVIRONMENT ==========`,
-        `var toDiscriminant = mminfo.options.toDiscriminant;`,
-        `var EMPTY_OBJECT = Object.freeze({});`,
+        `var ${TO_DISCRIMINANT} = mminfo.options.toDiscriminant;`,
+        `var ${EMPTY_OBJECT} = Object.freeze({});`,
         ...isMatchLines,
         ...getCapturesLines,
         ...methodLines,
@@ -85,7 +98,7 @@ if (debug.enabled) {
 }
 
 
-let mm = emitAll(source, {mminfo, toMatchFunction, CONTINUE, unhandledError: fatalError.UNHANDLED, isPromiseLike});
+let mm = emitAll(source, {mminfo, toMatchFunction, CONTINUE: sentinels.CONTINUE, unhandledError: fatalError.UNHANDLED, isPromiseLike});
 
 // TODO: temp testing... neaten/improve emit of wrapper?
 if (debug.enabled) {
@@ -154,19 +167,4 @@ function emitAll(
 
 
 
-}
-
-
-
-
-
-// TODO: temp testing...
-function emitDispatcher(emit: Emitter, mminfo: MMInfo<MMNode>) {
-
-    emitDispatchFunction(emit, mminfo.options.name, mminfo.options.arity, {
-        TO_DISCRIMINANT: 'toDiscriminant',
-        SELECT_THUNK: 'selectThunk', // TODO: temp testing... how to know this name?
-        CONTINUE: 'CONTINUE',
-        UNHANDLED_ERROR: 'unhandledError'
-    });
 }
