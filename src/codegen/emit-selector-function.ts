@@ -17,12 +17,9 @@ import repeat from '../util/string-repeat';
 export default function emitSelectorFunction(emit: Emitter, mminfo: MMInfo<MMNode>, env: Env) {
 
     // Generate the combined source code for selecting the best thunk based on predicate-matching of the discriminant.
-    let lines = [
-        `function ${env.THUNK_SELECTOR_NAME}(discriminant) {`,
-        ...emitThunkSelectorBlock(mminfo.rootNode, 1),
-        '}',
-    ];
-    emit(...lines);
+    emit(`function ${env.THUNK_SELECTOR_NAME}(discriminant) {`);
+    emitThunkSelectorBlock(emit, mminfo.rootNode, 1, env);
+    emit('}');
 }
 
 
@@ -32,6 +29,8 @@ export default function emitSelectorFunction(emit: Emitter, mminfo: MMInfo<MMNod
 // TODO: doc...
 export type Env = {
     THUNK_SELECTOR_NAME: string;
+    IS_MATCH_PREFIX: string;
+    THUNK_PREFIX: string;
 }
 
 
@@ -39,30 +38,26 @@ export type Env = {
 
 
 /** Helper function to generate source code for the thunk selector function. */
-function emitThunkSelectorBlock(node: MMNode, nestDepth: number) {
+function emitThunkSelectorBlock(emit: Emitter, node: MMNode, nestDepth: number, env: Env) {
 
     // Make the indenting string corresponding to the given `nestDepth`.
     let indent = repeat('    ', nestDepth);
 
-    // Recursively generate the conditional logic block to select among the given patterns.
-    let lines: string[] = [];
+    // Recursively generate the conditional logic block to select among the given predicates.
     node.childNodes.forEach(node => {
-        let condition = `${indent}if (isMatchː${node.identifier}(discriminant)) `;
-
+        let condition = `${indent}if (${env.IS_MATCH_PREFIX}${node.identifier}(discriminant)) `;
         if (node.childNodes.length === 0) {
-            lines.push(`${condition}return thunkː${node.entryPoint.identifier};`);
-            return;
+            // One-liner if-statement
+            emit(`${condition}return ${env.THUNK_PREFIX}${node.entryPoint.identifier};`);
         }
-
-        lines = [
-            ...lines,
-            `${condition}{`,
-            ...emitThunkSelectorBlock(node, nestDepth + 1),
-            `${indent}}`
-        ];
+        else {
+            // Compound if-statement with nested block of conditions
+            emit(`${condition}{`),
+            emitThunkSelectorBlock(emit, node, nestDepth + 1, env),
+            emit(`${indent}}`);
+        }
     });
 
-    // Add a line to select the fallback predicate if none of the more specialised predicates matched the discriminant.
-    lines.push(`${indent}return thunkː${node.entryPoint.identifier};`);
-    return lines;
+    // Add a line to select the base predicate if none of the more specialised predicates matched the discriminant.
+    emit(`${indent}return ${env.THUNK_PREFIX}${node.entryPoint.identifier};`);
 }

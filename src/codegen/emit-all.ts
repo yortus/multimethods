@@ -10,27 +10,36 @@ import {MMInfo, MMNode} from '../analysis';
 import {toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
 import emitThunkFunction from './emit-thunk-function';
 import Emitter from './emitter';
+import assign from '../util/object-assign';
 
 
 
 
 
-// TODO: review all comments here
+// TODO: doc... shared env... these must be consistent across emit
+const IS_PROMISE_LIKE = 'isPromiseLike';
+const CONTINUE = 'CONTINUE';
+const THUNK_SELECTOR_NAME = 'selectThunk';
+const TO_DISCRIMINANT = 'toDiscriminant';
+const EMPTY_OBJECT = 'EMPTY_OBJECT';
+const UNHANDLED_ERROR = 'unhandledError';
+const IS_MATCH_PREFIX = 'isMatchː';
+const GET_CAPTURES_PREFIX = 'getCapturesː';
+const METHOD_PREFIX = 'methodː';
+const THUNK_PREFIX = 'thunkː';
+
+
+
+
+
 /** TODO: doc... */
-export default function emitAll(mminfo: MMInfo<MMNode>) {
-
-    // TODO: doc... shared env... these must be consistent across emit
-    const THUNK_SELECTOR_NAME = 'selectThunk';
-    const CONTINUE = 'CONTINUE';
-    const TO_DISCRIMINANT = 'toDiscriminant';
-    const EMPTY_OBJECT = 'EMPTY_OBJECT';
-    const UNHANDLED_ERROR = 'unhandledError';
+export default function emitAll(mminfo0: MMInfo<MMNode>) {
+    let mminfo = augmentMMInfo(mminfo0);
 
     let allLines = [] as string[];
     let emit: Emitter = (...lines: string[]) => {
         lines.forEach(line => allLines.push(...line.split(/\n/)));
     };
-
 
     emit(`\n\n\n// ========== MULTIMETHOD DISPATCHER ==========`);
     emitDispatchFunction(emit, mminfo.options.name, mminfo.options.arity, {
@@ -43,7 +52,9 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
 
     emit(`\n\n\n// ========== THUNK SELECTOR ==========`);
     emitSelectorFunction(emit, mminfo, {
-        THUNK_SELECTOR_NAME
+        THUNK_SELECTOR_NAME,
+        IS_MATCH_PREFIX,
+        THUNK_PREFIX
     });
 
 
@@ -51,44 +62,42 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     mminfo.allNodes.forEach(node => {
         node.methodSequence.forEach((_, i, seq) => {
             emitThunkFunction(emit, mminfo, seq, i, {
+                IS_PROMISE_LIKE,
                 CONTINUE,
-                EMPTY_OBJECT
+                EMPTY_OBJECT,
+                THUNK_PREFIX,
+                GET_CAPTURES_PREFIX,
+                METHOD_PREFIX
             });
         });
     });
 
 
-    // TODO: buggy emit for isMatch and getCaptures below
-    // - assumes predicate string is valid inside the literal single quotes put around it in the emit.
-    // - SOLN: escape the predicate string properly!
-    let identifiers = mminfo.allNodes.map(node => node.identifier);
-    let isMatchLines = identifiers.map((identifier, i) => `var isMatchː${identifier} = toMatchFunction('${toNormalPredicate(mminfo.allNodes[i].exactPredicate)}');`);
-    let getCapturesLines = identifiers
-        .map((identifier, i) => `var getCapturesː${identifier} = toMatchFunction('${mminfo.allNodes[i].exactPredicate}');`)
-        .filter((_, i) => parsePredicateSource(mminfo.allNodes[i].exactPredicate).captureNames.length > 0);
-    let methodLines = mminfo.allNodes.reduce(
-        (lines, n, i) => n.exactMethods.reduce(
-            (lines, _, j) => lines.concat(`var methodː${identifiers[i]}${repeat('ᐟ', j)} = mminfo.allNodes[${i}].exactMethods[${j}];`),
-            lines
-        ),
-        [] as string[]
-    );
+    emit(`// ========== ENVIRONMENT ==========`);
+    emit(`var ${TO_DISCRIMINANT} = mminfo.options.toDiscriminant;`);
+    emit(`var ${IS_PROMISE_LIKE} = mminfo.isPromiseLike;`);
+    emit(`var ${CONTINUE} = mminfo.CONTINUE;`);
+    emit(`var ${EMPTY_OBJECT} = Object.freeze({});`);
+    emit(`var ${UNHANDLED_ERROR} = mminfo.unhandledError;`);
+    mminfo.allNodes.forEach((node, i) => {
+        emit(`var ${IS_MATCH_PREFIX}${node.identifier} = mminfo.allNodes[${i}].isMatch;`);
+    });
+    mminfo.allNodes.forEach((node, i) => {
+        if (!node.hasCaptures) return;
+        emit(`var ${GET_CAPTURES_PREFIX}${node.identifier} = mminfo.allNodes[${i}].getCaptures;`);
+    });
+    mminfo.allNodes.forEach((node, i) => {
+        node.exactMethods.forEach((_, j) => {
+            emit(`var ${METHOD_PREFIX}${node.identifier}${repeat('ᐟ', j)} = mminfo.allNodes[${i}].exactMethods[${j}];`);
+        });
+    });
+
+
 
     // TODO: revise comment... terminology has changed
     // Generate the combined source code for the multimethod. This includes local variable declarations for
     // all predicates and methods, as well as the interdependent function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of each multimethod call.
-    emit(
-        `// ========== ENVIRONMENT ==========`,
-        `var ${TO_DISCRIMINANT} = mminfo.options.toDiscriminant;`,
-        `var ${EMPTY_OBJECT} = Object.freeze({});`,
-        ...isMatchLines,
-        ...getCapturesLines,
-        ...methodLines,
-    );
-
-
-    // TODO: ...
     let source = allLines.join('\n');
 
 
@@ -98,7 +107,7 @@ if (debug.enabled) {
 }
 
 
-let mm = emitAll(source, {mminfo, toMatchFunction, CONTINUE: sentinels.CONTINUE, unhandledError: fatalError.UNHANDLED, isPromiseLike});
+let mm = emitAll(source, mminfo);
 
 // TODO: temp testing... neaten/improve emit of wrapper?
 if (debug.enabled) {
@@ -123,22 +132,13 @@ if (debug.enabled) {
 return mm;
 
 
-function emitAll(
-    source: string,
-    env: {
-        mminfo: MMInfo<MMNode>,
-        toMatchFunction: Function,
-        CONTINUE: any,
-        unhandledError: typeof fatalError.UNHANDLED,
-        isPromiseLike: Function,
-    }
-) {
+function emitAll(source: string, mminfo: MMInfo<MMNode>) {
     let $0: any;
     let $1: any;
     let abc = xyz
         .toString()
         .replace(/\$0/g, source)
-        .replace(/\$1/g, env.mminfo.options.name);
+        .replace(/\$1/g, mminfo.options.name);
 
     // TODO: revise comment...
     // Evaluate the source code, and return its result, which is the multimethod dispatch function. The use of eval
@@ -150,21 +150,30 @@ function emitAll(
     let mm: Function = eval(`(${abc})`)();
     return mm;
 
-
     function xyz() {
-        let {mminfo, toMatchFunction, CONTINUE, unhandledError, isPromiseLike} = env;
-
-        // Suppress TS6133 decl never used for above locals, which *are* referenced in the source code eval'ed below.
-        [mminfo, toMatchFunction, CONTINUE, unhandledError, isPromiseLike];
-
         $0
-
         return $1;
     }
+}
+
 
 
 }
 
 
 
+
+
+function augmentMMInfo<T extends MMNode>(mminfo: MMInfo<T>) {
+    let result = mminfo.addProps((node) => {
+        let isMatch = toMatchFunction(toNormalPredicate(node.exactPredicate));
+        let hasCaptures = parsePredicateSource(node.exactPredicate).captureNames.length > 0;
+        let getCaptures = toMatchFunction(node.exactPredicate);
+
+        return {isMatch, hasCaptures, getCaptures};
+    });
+
+    // TODO: NB!! keys here *must* match their refs in emit
+    let extras = {CONTINUE: sentinels.CONTINUE, unhandledError: fatalError.UNHANDLED, isPromiseLike: isPromiseLike};
+    return assign(result, extras) as typeof result & typeof extras;
 }
