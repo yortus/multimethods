@@ -81,12 +81,9 @@ export default function emitAll(mminfo0: MMInfo<MMNode>) {
     emit(`var ${UNHANDLED_ERROR} = mminfo.unhandledError;`);
     mminfo.allNodes.forEach((node, i) => {
         emit(`var ${IS_MATCH_PREFIX}${node.identifier} = mminfo.allNodes[${i}].isMatch;`);
-    });
-    mminfo.allNodes.forEach((node, i) => {
-        if (!node.hasCaptures) return;
-        emit(`var ${GET_CAPTURES_PREFIX}${node.identifier} = mminfo.allNodes[${i}].getCaptures;`);
-    });
-    mminfo.allNodes.forEach((node, i) => {
+        if (node.hasCaptures) {
+            emit(`var ${GET_CAPTURES_PREFIX}${node.identifier} = mminfo.allNodes[${i}].getCaptures;`);
+        }
         node.exactMethods.forEach((_, j) => {
             emit(`var ${METHOD_PREFIX}${node.identifier}${repeat('ᐟ', j)} = mminfo.allNodes[${i}].exactMethods[${j}];`);
         });
@@ -103,11 +100,18 @@ export default function emitAll(mminfo0: MMInfo<MMNode>) {
 
 // TODO: doc...
 if (debug.enabled) {
-    for (let line of source.split('\n')) debug(`${EMIT} %s`, line);
+    for (let line of allLines) debug(`${EMIT} %s`, line);
 }
 
 
-let mm = emitAll(source, mminfo);
+    // Evaluate the multimethod's entire source code to obtain the multimethod function. The use of eval here is safe.
+    // There are no untrusted inputs substituted into the source. The client-provided methods can do anything (so may
+    // be considered untrusted), but that has nothing to do with the use of 'eval' here, since they would need to be
+    // called by the dispatcher whether or not eval was used. More importantly, the use of eval here allows for
+    // multimethod dispatch code that is both more readable and more efficient, since it is tailored specifically
+    // to the options of this multimethod, rather than having to be generalized for all possible cases.
+    let mm = eval(`(function () { ${source}; return ${mminfo.options.name}; })`)() as Function;
+
 
 // TODO: temp testing... neaten/improve emit of wrapper?
 if (debug.enabled) {
@@ -130,35 +134,21 @@ if (debug.enabled) {
 }
 
 return mm;
-
-
-function emitAll(source: string, mminfo: MMInfo<MMNode>) {
-    let $0: any;
-    let $1: any;
-    let abc = xyz
-        .toString()
-        .replace(/\$0/g, source)
-        .replace(/\$1/g, mminfo.options.name);
-
-    // TODO: revise comment...
-    // Evaluate the source code, and return its result, which is the multimethod dispatch function. The use of eval
-    // here is safe. There are no untrusted inputs substituted into the source. The client-provided methods can do
-    // anything (so may be considered untrusted), but that has nothing to do with the use of 'eval' here, since they
-    // would need to be called by the dispatcher whether or not eval was used. More importantly, the use of eval here
-    // allows for multimethod dispatch code that is both more readable and more efficient, since it is tailored
-    // specifically to the options of this multimethod, rather than having to be generalized for all possible cases.
-    let mm: Function = eval(`(${abc})`)();
-    return mm;
-
-    function xyz() {
-        $0
-        return $1;
-    }
 }
 
 
 
-}
+
+
+// TODO: temp testing...
+// function emitAll(source: string, mminfo: MMInfo<MMNode>) {
+
+//     // TODO: experimental 'type canary' that causes build errors if things get renamed but emit relies on them having a certain name.
+//     // do this for all/most identifiers relied on in emit?
+//     const MMINFO = 'mminfo';
+//     let x = {mminfo};
+//     [MMINFO] as (keyof typeof x)[];
+// }
 
 
 
