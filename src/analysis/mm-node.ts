@@ -33,9 +33,10 @@ export interface MethodSequence<TNode> {
     identifier: string;
 }
 export interface MethodSequenceEntry<TNode> {
-    method: Function;
     fromNode: TNode & MethodSequence<TNode>;
+    methodIndex: number;
     identifier: string;
+    isMeta: boolean;
 }
 
 

@@ -7,14 +7,12 @@ import {MMInfo, MMNode} from '../analysis';
 
 
 // TODO: doc...
+// TODO: improve code...
 export default function instrumentDispatchFunction(mminfo: MMInfo<MMNode>, mm: Function) {
-
     let mmname = mminfo.options.name;
-    let oldmm = mm;
-
-    mm = function _dispatch(...args: any[]) {
+    function instrumentedDispatch(...args: any[]) {
         debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, mminfo.options.toDiscriminant(...args), args);
-        let getResult = () => oldmm(...args);
+        let getResult = () => mm(...args);
         return andThen(getResult, (result, error, isAsync) => {
             if (error) {
                 debug(`${DISPATCH} |<--| ${mmname}   %s   result=ERROR`, isAsync ? 'async' : 'sync');
@@ -26,6 +24,5 @@ export default function instrumentDispatchFunction(mminfo: MMInfo<MMNode>, mm: F
             if (error) throw error; else return result;
         });
     }
-
-    return mm;
+    return instrumentedDispatch;
 }

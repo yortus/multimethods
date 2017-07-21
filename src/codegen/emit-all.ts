@@ -1,15 +1,13 @@
-import debug, {DISPATCH} from '../util/debug';
-import fatalError from '../util/fatal-error';
-import * as sentinels from '../sentinels';
+import {CONTINUE} from '../sentinels';
+import Emitter, {EmitEnvironment, EmitNode, createEmitter, EnvNames as names} from './emitter';
 import emitDispatchFunction from './emit-dispatch-function';
 import emitSelectorFunction from './emit-selector-function';
-import repeat from '../util/string-repeat';
-import isPromiseLike from '../util/is-promise-like';
-import andThen from '../util/and-then';
-import {MMInfo, MMNode} from '../analysis';
-import {toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
 import emitThunkFunction from './emit-thunk-function';
-import Emitter, {EmitEnvironment, EmitNode, createEmitter, EnvNames as names} from './emitter';
+import fatalError from '../util/fatal-error';
+import isPromiseLike from '../util/is-promise-like';
+import {MMInfo, MMNode} from '../analysis';
+import repeat from '../util/string-repeat';
+import {toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
 
 
 
@@ -44,49 +42,25 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     emit(`var ${names.TO_DISCRIMINANT} = ${names.ENV}.${names.OPTIONS}.${names.TO_DISCRIMINANT};`);
     emit(`var ${names.EMPTY_OBJECT} = Object.freeze({});`);
     env.allNodes.forEach((node, i) => {
+        const NODE_REF = `${names.ENV}.${names.ALL_NODES}[${i}]`;
         emit(`\n// -------------------- ${node.exactPredicate} --------------------`);
-        emit(`var ${names.IS_MATCH}ː${node.identifier} = ${names.ENV}.${names.ALL_NODES}[${i}].${names.IS_MATCH};`);
+        emit(`var ${names.IS_MATCH}ː${node.identifier} = ${NODE_REF}.${names.IS_MATCH};`);
         if (node.hasCaptures) {
-            emit(`var ${names.GET_CAPTURES}ː${node.identifier} = ${names.ENV}.${names.ALL_NODES}[${i}].${names.GET_CAPTURES};`);
+            emit(`var ${names.GET_CAPTURES}ː${node.identifier} = ${NODE_REF}.${names.GET_CAPTURES};`);
         }
         node.exactMethods.forEach((_, j) => {
-            emit(`var ${names.METHOD}ː${node.identifier}${repeat('ᐟ', j)} = ${names.ENV}.${names.ALL_NODES}[${i}].${names.EXACT_METHODS}[${j}];`);
+            emit(`var ${names.METHOD}ː${node.identifier}${repeat('ᐟ', j)} = ${NODE_REF}.${names.EXACT_METHODS}[${j}];`);
         });
     });
 
-
-    let mm = emit.build();
-
-
-
-
-// TODO: temp testing... neaten/improve emit of wrapper?
-if (debug.enabled) {
-    let mmname = env.options.name;
-    let oldmm = mm;
-    mm = function _dispatch(...args: any[]) {
-        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, env.options.toDiscriminant(...args), args);
-        let getResult = () => oldmm(...args);
-        return andThen(getResult, (result, error, isAsync) => {
-            if (error) {
-                debug(`${DISPATCH} |<--| ${mmname}   %s   result=ERROR`, isAsync ? 'async' : 'sync');
-            }
-            else {
-                debug(`${DISPATCH} |<--| ${mmname}   %s   result=%o`, isAsync ? 'async' : 'sync', result);
-            }
-            debug('');
-            if (error) throw error; else return result;
-        });
-    }
-}
-
-return mm;
+    return emit;
 }
 
 
 
 
 
+// TODO: doc...
 function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
     let result = mminfo.addProps((node) => {
         let isMatch = toMatchFunction(toNormalPredicate(node.exactPredicate));
@@ -95,7 +69,7 @@ function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
         return {isMatch, hasCaptures, getCaptures};
     }) as EmitEnvironment;
     result.isPromiseLike = isPromiseLike;
-    result.CONTINUE = sentinels.CONTINUE;
+    result.CONTINUE = CONTINUE;
     result.unhandledError = fatalError.UNHANDLED;
     return result;
 }
@@ -104,6 +78,7 @@ function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
 
 
 
+// TODO: doc...
 function emitBanner(emit: Emitter, text: string) {
     let filler = text.replace(/./g, '=');
     emit(`\n\n/*====================${filler}====================*`);

@@ -15,21 +15,23 @@ export default function analyseMethodSequences<T extends MethodTableEntry & Pare
 
         // TODO: explain method sequence... *All* applicable methods for the node's predicate in most- to least- specific order...
         for (let ancestorNode: T | null = startNode; ancestorNode !== null; ancestorNode = ancestorNode.parentNode) {
-            ancestorNode.exactMethods.forEach((method, i) => {
+            ancestorNode.exactMethods.forEach((method, methodIndex) => {
+                let fromNode = ancestorNode as T & MethodSequence<T>;
+                let isMeta = isMetaMethod(method);
 
                 // Make an IdentifierPart for each method that is descriptive and unique accross the multimethod.
-                let identifier = `${toIdentifierParts(ancestorNode!.exactPredicate)}${repeatString('ᐟ', i)}`;
-                if (isMetaMethod(method) && (ancestorNode !== startNode || i > 0)) {
+                let identifier = `${toIdentifierParts(ancestorNode!.exactPredicate)}${repeatString('ᐟ', methodIndex)}`;
+                if (isMeta && (ancestorNode !== startNode || methodIndex > 0)) {
                     identifier = `${toIdentifierParts(startNode.exactPredicate)}ːviaː${identifier}`;
                 }
 
-                methodSequence.push({method, fromNode: ancestorNode as T & MethodSequence<T>, identifier});
+                methodSequence.push({fromNode, methodIndex, identifier, isMeta});
             });
         }
 
         // The 'entry point' method is the one whose method we call to begin the cascading evaluation for a dispatch. It
         // is the least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
-        let entryPoint = methodSequence.filter(entry => isMetaMethod(entry.method)).pop() || methodSequence[0];
+        let entryPoint = methodSequence.filter(entry => entry.isMeta).pop() || methodSequence[0];
 
         // This one is for convenience.
         let identifier = methodSequence[0].identifier;

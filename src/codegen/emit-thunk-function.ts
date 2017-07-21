@@ -1,8 +1,7 @@
 import Emitter, {EnvNames} from './emitter';
-import isMetaMethod from '../util/is-meta-method';
-import repeatString from '../util/string-repeat';
 import {MMInfo, MMNode, MethodSequence} from '../analysis';
 import {parsePredicateSource} from '../math/predicates';
+import repeatString from '../util/string-repeat';
 import {thunkFunctionTemplate, ThunkFunctionSubstitutions} from './source-templates';
 import {transformFunctionSource} from './source-transforms';
 
@@ -26,32 +25,31 @@ import {transformFunctionSource} from './source-transforms';
  */
 export default function emitThunkFunction(emit: Emitter, mminfo: MMInfo<MMNode>, seq: MethodSequence<MMNode>['methodSequence'], index: number, names: typeof EnvNames) {
 
-    let {method, fromNode} = seq[index];
-    let i = index;
+    let {fromNode, methodIndex, isMeta} = seq[index];
 
     // To avoid unnecessary duplication, skip emit for regular methods that are less specific that the set's predicate, since these will be handled in their own set.
-    if (!isMetaMethod(method) && fromNode !== seq[0].fromNode) return;
+    if (!isMeta && fromNode !== seq[0].fromNode) return;
 
-    // TODO: temp testing... explain!!
-    let isLeastSpecificMethod = i === seq.length - 1;
-    let downstream = seq.filter(({method}, j) => (j === 0 || isMetaMethod(method)) && j < i).pop();
+    // TODO: temp testing... explain these calcs!!
+    let isLeastSpecificMethod = index === seq.length - 1;
+    let downstream = seq.filter(({isMeta}, j) => (j === 0 || isMeta) && j < index).pop();
 
     // TODO: temp testing...
-    emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[i].identifier}`, mminfo.options.arity, {
+    emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.options.arity, {
 
         // Statically known strings for substitution into the template
         IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
         CONTINUE: names.CONTINUE,
         EMPTY_OBJECT: names.EMPTY_OBJECT,
         GET_CAPTURES: `${names.GET_CAPTURES}ː${fromNode.identifier}`,
-        CALL_METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', fromNode.exactMethods.indexOf(method))}`,
+        CALL_METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', methodIndex)}`,
         DELEGATE_DOWNSTREAM: downstream ? `${names.THUNK}ː${downstream.identifier}` : '',
-        DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[i + 1].identifier}`,
+        DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[index + 1].identifier}`,
 
         // Statically known booleans for dead code elimination
-        ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(seq[i + 1].method),
+        ENDS_PARTITION: isLeastSpecificMethod || seq[index + 1].isMeta,
         HAS_CAPTURES: parsePredicateSource(fromNode.exactPredicate).captureNames.length > 0,
-        IS_META_METHOD: isMetaMethod(method),
+        IS_META_METHOD: isMeta,
         HAS_DOWNSTREAM: downstream != null,
         IS_NEVER_ASYNC: mminfo.options.async === false,
         IS_ALWAYS_ASYNC: mminfo.options.async === true

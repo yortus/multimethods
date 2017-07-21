@@ -1,5 +1,5 @@
 import debug, {EMIT} from '../util/debug';
-import {MMInfo, MMNode} from "../analysis/index";
+import {MMInfo, MMNode} from "../analysis";
 
 
 

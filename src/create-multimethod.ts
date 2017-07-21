@@ -1,7 +1,9 @@
-import {checkOptions} from './validation';
-import distill from './analysis';
-import emit from './codegen';
+import analyse from './analysis';
+import codegen from './codegen';
+import debug from './util/debug';
+import instrument from './instrumentation';
 import Options from './options';
+import validate from './validation';
 export default create;
 
 
@@ -79,8 +81,10 @@ export type Captures = {[captureName: string]: string};
 
 function createImpl(options: Options) {
     // TODO: temp testing...
-    checkOptions(options); // NB: may throw
-    let mminfo = distill(options);
-    let result = emit(mminfo);
-    return result;
+    validate(options); // NB: may throw
+    let mminfo = analyse(options);
+    let emit = codegen(mminfo);
+    if (debug.enabled) instrument(emit);
+    let mm = emit.build();
+    return mm;
 }
