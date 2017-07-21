@@ -7,32 +7,9 @@ import {MMInfo, MMNode} from "../analysis/index";
 
 // TODO: doc...
 export default interface Emitter {
-    mminfo: EmitEnvironment;
+    env: EmitEnvironment;
     (...lines: string[]): void;
     build(): Function;
-}
-
-
-
-
-
-// TODO: doc...
-export function createEmitter(mminfo: EmitEnvironment) {
-    let allLines = [] as string[];
-
-    function emit(...args: string[]) {
-        args.forEach(lines => {
-            lines.split('\n').forEach(line => {
-                debug(`${EMIT} %s`, line);
-                allLines.push(line);
-            });
-        });
-    };
-
-    let result = emit as Emitter;
-    result.mminfo = mminfo;
-    result.build = () => buildMultimethodFromSource(mminfo, allLines.join('\n'));
-    return result;
 }
 
 
@@ -45,10 +22,39 @@ export interface EmitEnvironment extends MMInfo<EmitNode> {
     CONTINUE: any;
     unhandledError: () => never;
 }
+
+
+
+
+
+// TODO: doc...
 export interface EmitNode extends MMNode {
     isMatch: (discriminant: string) => {} | null;
     hasCaptures: boolean;
     getCaptures: (discriminant: string) => {[captureName: string]: string};
+}
+
+
+
+
+
+// TODO: doc...
+export function createEmitter(env: EmitEnvironment) {
+    let allLines = [] as string[];
+
+    function emit(...args: string[]) {
+        args.forEach(lines => {
+            lines.split('\n').forEach(line => {
+                debug(`${EMIT} %s`, line);
+                allLines.push(line);
+            });
+        });
+    };
+
+    let result = emit as Emitter;
+    result.env = env;
+    result.build = () => buildMultimethodFromSource(env, allLines.join('\n'));
+    return result;
 }
 
 
@@ -68,16 +74,16 @@ function buildMultimethodFromSource(env: EmitEnvironment, source: string) {
     const {...envProps} = env;
     const {...optProps} = env.options;
     const {...nodeProps} = env.allNodes[0];
-    ['env'] as (keyof typeof globProps)[];
-    ['isPromiseLike'] as (keyof typeof envProps)[];
-    ['CONTINUE'] as (keyof typeof envProps)[];
-    ['unhandledError'] as (keyof typeof envProps)[];
-    ['options'] as (keyof typeof envProps)[];
-    ['allNodes'] as (keyof typeof envProps)[];
-    ['toDiscriminant'] as (keyof typeof optProps)[];
-    ['isMatch'] as (keyof typeof nodeProps)[];
-    ['getCaptures'] as (keyof typeof nodeProps)[];
-    ['exactMethods'] as (keyof typeof nodeProps)[];
+    [EnvNames.ENV] as (keyof typeof globProps)[];
+    [EnvNames.IS_PROMISE_LIKE] as (keyof typeof envProps)[];
+    [EnvNames.CONTINUE] as (keyof typeof envProps)[];
+    [EnvNames.UNHANDLED_ERROR] as (keyof typeof envProps)[];
+    [EnvNames.OPTIONS] as (keyof typeof envProps)[];
+    [EnvNames.ALL_NODES] as (keyof typeof envProps)[];
+    [EnvNames.TO_DISCRIMINANT] as (keyof typeof optProps)[];
+    [EnvNames.IS_MATCH] as (keyof typeof nodeProps)[];
+    [EnvNames.GET_CAPTURES] as (keyof typeof nodeProps)[];
+    [EnvNames.EXACT_METHODS] as (keyof typeof nodeProps)[];
     
     // Evaluate the multimethod's entire source code to obtain the multimethod function. The use of eval here is safe.
     // There are no untrusted inputs substituted into the source. The client-provided methods can do anything (so may
@@ -93,3 +99,20 @@ function buildMultimethodFromSource(env: EmitEnvironment, source: string) {
 
 
 
+// TODO: doc... assumed names... define each once and ref multiple times. These must be consistently named throughout emitted code
+export enum EnvNames {
+    ENV = 'env',
+    IS_PROMISE_LIKE = 'isPromiseLike',
+    CONTINUE = 'CONTINUE',
+    UNHANDLED_ERROR = 'unhandledError',
+    OPTIONS = 'options',
+    ALL_NODES = 'allNodes',
+    TO_DISCRIMINANT = 'toDiscriminant',
+    IS_MATCH = 'isMatch',
+    GET_CAPTURES = 'getCaptures',
+    EXACT_METHODS = 'exactMethods',
+    EMPTY_OBJECT = 'EMPTY_OBJECT',
+    SELECT_THUNK = 'selectThunk',
+    THUNK = 'thunk',
+    METHOD = 'method',
+}

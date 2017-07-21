@@ -1,4 +1,4 @@
-import Emitter from './emitter';
+import Emitter, {EnvNames} from './emitter';
 import isMetaMethod from '../util/is-meta-method';
 import repeatString from '../util/string-repeat';
 import {MMInfo, MMNode, MethodSequence} from '../analysis';
@@ -25,7 +25,8 @@ import {transformFunctionSource} from './source-transforms';
  * @param {node} MMNode - contains the list of matching methods for the node's predicate, ordered from most- to least-specific.
  * @returns {Thunk} the virtual method for the node.
  */
-export default function emitThunkFunction(emit: Emitter, mminfo: MMInfo<MMNode>, seq: MethodSequence<MMNode>['methodSequence'], index: number, env: Env) {
+export default function emitThunkFunction(emit: Emitter, mminfo: MMInfo<MMNode>, seq: MethodSequence<MMNode>['methodSequence'], index: number, names: typeof EnvNames) {
+
     let {method, fromNode} = seq[index];
     let i = index;
 
@@ -37,16 +38,16 @@ export default function emitThunkFunction(emit: Emitter, mminfo: MMInfo<MMNode>,
     let downstream = seq.filter(({method}, j) => (j === 0 || isMetaMethod(method)) && j < i).pop();
 
     // TODO: temp testing...
-    emitThunkFromTemplate(emit, `${env.THUNK_PREFIX}${seq[i].identifier}`, mminfo.options.arity, {
+    emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[i].identifier}`, mminfo.options.arity, {
 
         // Statically known strings for substitution into the template
-        IS_PROMISE_LIKE: env.IS_PROMISE_LIKE,
-        CONTINUE: env.CONTINUE,
-        EMPTY_OBJECT: env.EMPTY_OBJECT,
-        GET_CAPTURES: `${env.GET_CAPTURES_PREFIX}${fromNode.identifier}`,
-        CALL_METHOD: `${env.METHOD_PREFIX}${fromNode.identifier}${repeatString('ᐟ', fromNode.exactMethods.indexOf(method))}`,
-        DELEGATE_DOWNSTREAM: downstream ? `${env.THUNK_PREFIX}${downstream.identifier}` : '',
-        DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : `${env.THUNK_PREFIX}${seq[i + 1].identifier}`,
+        IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
+        CONTINUE: names.CONTINUE,
+        EMPTY_OBJECT: names.EMPTY_OBJECT,
+        GET_CAPTURES: `${names.GET_CAPTURES}ː${fromNode.identifier}`,
+        CALL_METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', fromNode.exactMethods.indexOf(method))}`,
+        DELEGATE_DOWNSTREAM: downstream ? `${names.THUNK}ː${downstream.identifier}` : '',
+        DELEGATE_FALLBACK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[i + 1].identifier}`,
 
         // Statically known booleans for dead code elimination
         ENDS_PARTITION: isLeastSpecificMethod || isMetaMethod(seq[i + 1].method),
@@ -56,20 +57,6 @@ export default function emitThunkFunction(emit: Emitter, mminfo: MMInfo<MMNode>,
         IS_NEVER_ASYNC: mminfo.options.async === false,
         IS_ALWAYS_ASYNC: mminfo.options.async === true
     });
-}
-
-
-
-
-
-// TODO: doc...
-export type Env = {
-    IS_PROMISE_LIKE: string;
-    CONTINUE: string;
-    EMPTY_OBJECT: string;
-    THUNK_PREFIX: string;
-    GET_CAPTURES_PREFIX: string;
-    METHOD_PREFIX: string;
 }
 
 

@@ -9,76 +9,48 @@ import andThen from '../util/and-then';
 import {MMInfo, MMNode} from '../analysis';
 import {toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
 import emitThunkFunction from './emit-thunk-function';
-import {EmitEnvironment, EmitNode, createEmitter} from './emitter';
-
-
-
-
-
-// TODO: doc... shared env... these must be consistent across emit
-const IS_PROMISE_LIKE = 'isPromiseLike';
-const CONTINUE = 'CONTINUE';
-const THUNK_SELECTOR_NAME = 'selectThunk';
-const TO_DISCRIMINANT = 'toDiscriminant';
-const EMPTY_OBJECT = 'EMPTY_OBJECT';
-const UNHANDLED_ERROR = 'unhandledError';
-const IS_MATCH_PREFIX = 'isMatchː';
-const GET_CAPTURES_PREFIX = 'getCapturesː';
-const METHOD_PREFIX = 'methodː';
-const THUNK_PREFIX = 'thunkː';
+import Emitter, {EmitEnvironment, EmitNode, createEmitter, EnvNames as names} from './emitter';
 
 
 
 
 
 /** TODO: doc... */
-export default function emitAll(mminfo0: MMInfo<MMNode>) {
-    let mminfo = createEmitEnvironment(mminfo0);
-    let emit = createEmitter(mminfo);
-
-    // TODO: revise comment... terminology has changed
+export default function emitAll(mminfo: MMInfo<MMNode>) {
+    let env = createEmitEnvironment(mminfo);
+    let emit = createEmitter(env);
+    
     // Generate the combined source code for the multimethod. This includes local variable declarations for
-    // all predicates and methods, as well as the interdependent function declarations that perform
+    // all predicates and methods, as well as the interdependent thunk function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of each multimethod call.
-    emit(`\n\n\n// ========== MULTIMETHOD DISPATCHER ==========`);
-    emitDispatchFunction(emit, mminfo.options.name, mminfo.options.arity, {
-        THUNK_SELECTOR_NAME,
-        CONTINUE,
-        TO_DISCRIMINANT,
-        UNHANDLED_ERROR
-    });
-    emit(`\n\n\n// ========== THUNK SELECTOR ==========`);
-    emitSelectorFunction(emit, mminfo, {
-        THUNK_SELECTOR_NAME,
-        IS_MATCH_PREFIX,
-        THUNK_PREFIX
-    });
-    emit(`\n\n\n// ========== THUNKS ==========`);
-    mminfo.allNodes.forEach(node => {
+    emitBanner(emit, 'MULTIMETHOD DISPATCHER');
+    emitDispatchFunction(emit, env.options.name, env.options.arity, names);
+
+    emitBanner(emit, 'THUNK SELECTOR');
+    emitSelectorFunction(emit, env, names);
+
+    emitBanner(emit, 'THUNKS');
+    env.allNodes.forEach(node => {
+        emit(`\n// -------------------- ${node.exactPredicate} --------------------`);
         node.methodSequence.forEach((_, i, seq) => {
-            emitThunkFunction(emit, mminfo, seq, i, {
-                IS_PROMISE_LIKE,
-                CONTINUE,
-                EMPTY_OBJECT,
-                THUNK_PREFIX,
-                GET_CAPTURES_PREFIX,
-                METHOD_PREFIX
-            });
+            emitThunkFunction(emit, env, seq, i, names);
         });
     });
-    emit(`// ========== ENVIRONMENT ==========`);
-    emit(`var ${IS_PROMISE_LIKE} = env.isPromiseLike;`);
-    emit(`var ${CONTINUE} = env.CONTINUE;`);
-    emit(`var ${UNHANDLED_ERROR} = env.unhandledError;`);
-    emit(`var ${TO_DISCRIMINANT} = env.options.toDiscriminant;`);
-    emit(`var ${EMPTY_OBJECT} = Object.freeze({});`);
-    mminfo.allNodes.forEach((node, i) => {
-        emit(`var ${IS_MATCH_PREFIX}${node.identifier} = env.allNodes[${i}].isMatch;`);
+
+    emitBanner(emit, 'ENVIRONMENT');
+    emit(`var ${names.IS_PROMISE_LIKE} = ${names.ENV}.${names.IS_PROMISE_LIKE};`);
+    emit(`var ${names.CONTINUE} = ${names.ENV}.${names.CONTINUE};`);
+    emit(`var ${names.UNHANDLED_ERROR} = ${names.ENV}.${names.UNHANDLED_ERROR};`);
+    emit(`var ${names.TO_DISCRIMINANT} = ${names.ENV}.${names.OPTIONS}.${names.TO_DISCRIMINANT};`);
+    emit(`var ${names.EMPTY_OBJECT} = Object.freeze({});`);
+    env.allNodes.forEach((node, i) => {
+        emit(`\n// -------------------- ${node.exactPredicate} --------------------`);
+        emit(`var ${names.IS_MATCH}ː${node.identifier} = ${names.ENV}.${names.ALL_NODES}[${i}].${names.IS_MATCH};`);
         if (node.hasCaptures) {
-            emit(`var ${GET_CAPTURES_PREFIX}${node.identifier} = env.allNodes[${i}].getCaptures;`);
+            emit(`var ${names.GET_CAPTURES}ː${node.identifier} = ${names.ENV}.${names.ALL_NODES}[${i}].${names.GET_CAPTURES};`);
         }
         node.exactMethods.forEach((_, j) => {
-            emit(`var ${METHOD_PREFIX}${node.identifier}${repeat('ᐟ', j)} = env.allNodes[${i}].exactMethods[${j}];`);
+            emit(`var ${names.METHOD}ː${node.identifier}${repeat('ᐟ', j)} = ${names.ENV}.${names.ALL_NODES}[${i}].${names.EXACT_METHODS}[${j}];`);
         });
     });
 
@@ -90,10 +62,10 @@ export default function emitAll(mminfo0: MMInfo<MMNode>) {
 
 // TODO: temp testing... neaten/improve emit of wrapper?
 if (debug.enabled) {
-    let mmname = mminfo.options.name;
+    let mmname = env.options.name;
     let oldmm = mm;
     mm = function _dispatch(...args: any[]) {
-        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, mminfo.options.toDiscriminant(...args), args);
+        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, env.options.toDiscriminant(...args), args);
         let getResult = () => oldmm(...args);
         return andThen(getResult, (result, error, isAsync) => {
             if (error) {
@@ -126,4 +98,15 @@ function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
     result.CONTINUE = sentinels.CONTINUE;
     result.unhandledError = fatalError.UNHANDLED;
     return result;
+}
+
+
+
+
+
+function emitBanner(emit: Emitter, text: string) {
+    let filler = text.replace(/./g, '=');
+    emit(`\n\n/*====================${filler}====================*`);
+    emit(` *                    ${text}                    *`);
+    emit(` *====================${filler}====================*/`);
 }
