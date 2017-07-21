@@ -7,7 +7,6 @@ import {MMInfo, MMNode} from '../analysis';
 
 
 // TODO: doc...
-// TODO: improve code...
 export default function instrumentDispatchFunction(mminfo: MMInfo<MMNode>, mm: Function) {
     let mmname = mminfo.options.name;
     function instrumentedDispatch(...args: any[]) {

@@ -9,7 +9,7 @@ import {MMInfo, MMNode} from "../analysis";
 export default interface Emitter {
     env: EmitEnvironment;
     (...lines: string[]): void;
-    build(): Function;
+    generate(): Function;
 }
 
 
@@ -53,7 +53,7 @@ export function createEmitter(env: EmitEnvironment) {
 
     let result = emit as Emitter;
     result.env = env;
-    result.build = () => buildMultimethodFromSource(env, allLines.join('\n'));
+    result.generate = () => evalMultimethodFromSource(env, allLines.join('\n'));
     return result;
 }
 
@@ -62,7 +62,7 @@ export function createEmitter(env: EmitEnvironment) {
 
 
 // TODO: doc...
-function buildMultimethodFromSource(env: EmitEnvironment, source: string) {
+function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
 
     // Static sanity check that the names and structures assumed in emitted code match those statically declared in the
     // EmitEnvironment var. A mismatch could arise for instance if IDE-based rename/refactor tools are used to change

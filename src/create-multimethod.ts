@@ -4,7 +4,6 @@ import debug from './util/debug';
 import instrument from './instrumentation';
 import Options from './options';
 import validate from './validation';
-export default create;
 
 
 
@@ -23,8 +22,15 @@ function create<T, TR>(options: {async: false} & VariadicOptions<T, TR>): (...ar
 function create<T, TR>(options: {async: true} & VariadicOptions<T, TR | Promise<TR>>): (...args: T[]) => Promise<TR>;
 function create<T, TR>(options?: VariadicOptions<T, TR | Promise<TR>>): (...args: T[]) => TR | Promise<TR>;
 function create(options?: Options) {
-    return createImpl(options || {});
+    options = options || {};
+    validate(options); // NB: may throw
+    let mminfo = analyse(options);
+    let emit = codegen(mminfo);
+    if (debug.enabled) instrument(emit);
+    let multimethod = emit.generate();
+    return multimethod;
 }
+export default create;
 
 
 
@@ -74,17 +80,3 @@ export type Methods<TMethod extends Function> = { [predicate: string]: TMethod|T
 
 
 export type Captures = {[captureName: string]: string};
-
-
-
-
-
-function createImpl(options: Options) {
-    // TODO: temp testing...
-    validate(options); // NB: may throw
-    let mminfo = analyse(options);
-    let emit = codegen(mminfo);
-    if (debug.enabled) instrument(emit);
-    let mm = emit.build();
-    return mm;
-}
