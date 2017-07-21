@@ -1,5 +1,6 @@
 ## Todo - High Priority
 - [ ] support more special characters in predicates
+  - [ ] switch globstar from `...`/`…` to `**`/`ᕯ`
   - [ ] initially: ':<>'
 - [x] add a good default implementation for `toDiscriminant`
 - [x] fix buggy emit for isMatch and getCaptures lines (see comment there in code)
@@ -29,11 +30,10 @@
 
 
 
-
-
-
-## Todo - Low Priority
-
+## Todo - Unassigned Priority
+- [ ] new option `toType: Function` - if provided and no `toDiscriminant` given, the default `toDiscriminant` uses it
+- [ ] new option `allowNulls` - mms should reject `null` args unless this is explicitly set to `true`
+- [ ] support simplified MM creation: accept method table directly instead of inside `methods` prop.
 
 
 
