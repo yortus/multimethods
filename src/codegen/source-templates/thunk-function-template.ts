@@ -7,7 +7,7 @@ import Thunk from '../thunk';
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __VARARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
-export const template = function __FUNCNAME__(discriminant: string, result: {}|Promise<{}>, __VARARGS__: any[]) {
+export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}>, __VARARGS__: any[]) {
 
     // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
     if (result !== $.CONTINUE) {

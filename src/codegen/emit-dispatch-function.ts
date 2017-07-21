@@ -1,6 +1,5 @@
 import Emitter, {EnvNames} from './emitter';
-import getNormalisedFunctionSource from './get-normalised-function-source';
-import {template, VariablesInScope} from './source-templates/dispatch-function-template';
+import {dispatchFunctionTemplate, DispatchFunctionSubstitutions} from './source-templates';
 import {transformFunctionSource} from './source-transforms';
 
 
@@ -9,8 +8,7 @@ import {transformFunctionSource} from './source-transforms';
 
 // TODO: doc...
 export default function emitDispatchFunction(emit: Emitter, name: string, arity: number|undefined, names: typeof EnvNames) {
-    let env: {[K in keyof VariablesInScope]: string} = names;
-    let source = getNormalisedFunctionSource(template);
-    source = transformFunctionSource(source, name, arity, env);
+    let env: DispatchFunctionSubstitutions = names;
+    let source = transformFunctionSource(dispatchFunctionTemplate, name, arity, env);
     emit(source);
 }

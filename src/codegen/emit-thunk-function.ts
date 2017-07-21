@@ -3,8 +3,7 @@ import isMetaMethod from '../util/is-meta-method';
 import repeatString from '../util/string-repeat';
 import {MMInfo, MMNode, MethodSequence} from '../analysis';
 import {parsePredicateSource} from '../math/predicates';
-import getNormalisedFunctionSource from './get-normalised-function-source';
-import {template, VariablesInScope, BooleanConstants} from './source-templates/thunk-function-template';
+import {thunkFunctionTemplate, ThunkFunctionSubstitutions} from './source-templates';
 import {transformFunctionSource} from './source-transforms';
 
 
@@ -64,15 +63,7 @@ export default function emitThunkFunction(emit: Emitter, mminfo: MMInfo<MMNode>,
 
 
 // TODO: doc...
-function emitThunkFromTemplate(emit: Emitter, name: string, arity: number|undefined, env: TemplateEnv) {
-    let source = getNormalisedFunctionSource(template);
-    source = transformFunctionSource(source, name, arity, env);
+function emitThunkFromTemplate(emit: Emitter, name: string, arity: number|undefined, env: ThunkFunctionSubstitutions) {
+    let source = transformFunctionSource(thunkFunctionTemplate, name, arity, env);
     emit(source);
 }
-
-
-
-
-
-// TODO: doc...
-type TemplateEnv = {[K in keyof VariablesInScope]: string} & {[K in keyof BooleanConstants]: boolean};
