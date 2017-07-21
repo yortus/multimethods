@@ -1,4 +1,4 @@
-//import {expect} from 'chai';
+import {expect} from 'chai';
 import multimethod, {meta} from 'multimethods';
 
 
@@ -8,219 +8,40 @@ import multimethod, {meta} from 'multimethods';
 // TODO: ...
 describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
 
+    // TODO: temp testing...
+    it('TEMP1', () => {
 
-
-
-
-// TODO: temp testing...
-it('???????????????????????????????????????????????', () => {
-
-    let mm = multimethod({
-        arity: 1,
-        toDiscriminant: (x: string) => x,
-        methods: {
-            '/{thing}': (x, {_thing}, _) => x,
-            '/foo':     (x) => 'foo' + x,
-            '/bar':     (x) => 'bar' + x,
-            '...':      meta((x, _caps, next) => `---${next(x)}---`)
-        }
+        let mm = multimethod({
+            arity: 1,
+            toDiscriminant: (x: string) => x,
+            methods: {
+                '/{thing}': (x, {_thing}, _) => x,
+                '/foo':     (x) => 'foo' + x,
+                '/bar':     (x) => 'bar' + x,
+                '...':      meta((x, _caps, next) => `---${next(x)}---`)
+            }
+        });
+        let result = mm('/foo');
+        result;
     });
-    let result = mm('/foo');
-    result;
-});
 
+    // TODO: temp testing...
+    it('TEMP2', () => {
 
+        let mm = multimethod({
+            arity: 2,
+            methods: {
+                '...':              (a: any, b: any) => `${a}:${b}`,
+                '/String...':       (_a: string, _b: any) => `first is string`,
+                '/Number...':       (_a: number, _b: any) => `first is number`,
+                '/Number/Boolean':  (_a: number, _b: any) => `num:bool`,
+            }
+        });
 
-//     let arities = [undefined, 0, 1, 2, 3, 4, 5];
-//     let timings: Array<'mixed'|'async'|'sync'|undefined> = [undefined, 'mixed', 'async', 'sync'];
+        expect(mm('foo', 42)).to.equal('first is string');
+        expect(mm(42, 'foo')).to.equal('first is number');
+        expect(mm(true, 42)).to.equal('true:42');
+        expect(mm(42, true)).to.equal('num:bool');
+    });
 
-
-//     arities.forEach(arity => {
-//         timings.forEach(timing => {
-
-//             it(`{arity: ${JSON.stringify(arity)}, timing: ${JSON.stringify(timing)}}`, () => {
-
-
-//                 // let mm = new Multimethod({
-//                 //     arity,
-//                 //     timing
-//                 // });
-
-//                 // // instanceof checks
-//                 // expect(mm).instanceof(Function);
-//                 // expect(mm).instanceof(Multimethod);
-
-
-//                 // TODO: restore these... not working yet...
-//                 // switch (arity) {
-//                 //     case 1:
-//                 //         expect(mm).instanceof(UnaryMultimethod);
-//                 //         expect(mm instanceof UnaryMultimethod).to.be.true;
-//                 //         break;
-//                 //     case 2: expect(mm).instanceof(BinaryMultimethod); break;
-//                 //     case 3: expect(mm).instanceof(TernaryMultimethod); break;
-//                 //     case 'variadic': expect(mm).instanceof(VariadicMultimethod); break;
-//                 // }
-
-//                 // Function checks
-// // TODO: ...
-// //                expect(mm.length).equals(typeof arity === 'number' ? arity : 0);
-
-//             });
-//         });
-//     });
-
-
-
-    // TODO: ...
-//    let tests = [
-//        () => multimethod({})
-//    ];
-
-
-
-    // // TODO: ...
-    // it('...', () => {
-
-
-
-
-    //     // EXAMPLES / TESTS
-    //     // TODO: temp testing...
-    //     function test() {
-
-
-    //         let mmx = new Multimethod({ // mixed variadic
-    //             //arity: undefined, // uncomment and it becomes UnaryMultimethod (except if using --strictNullChecks)
-    //         });
-    //         let resultx = mmx('foo');
-    //         resultx = mmx('foo', 42, 'bar'); // OK, variadic
-
-
-    //         let mm0 = new Multimethod({ // mixed variadic
-    //             arity: undefined, // or don't give this key at all
-    //             timing: 'mixed',
-    //             toDiscriminant: ([$0]) => '',
-    //             methods: {
-    //                 '/foo': async (_, x) => 42,
-    //                 '/bar': async (_, x) => 42,
-    //                 '/baz': async (_, x, y, z, w) => 42,
-    //             }
-    //         });
-    //         let result0 = mm0('foo');
-    //         result0 = mm0('foo', 42, 'bar'); // OK, variadic
-
-
-    //         let mm1 = new Multimethod<string, string>({ // async unary
-    //             arity: 1,
-    //             timing: 'async',
-    //             methods: {
-    //                 '/foo': async ({n, next}, x) => '42',
-    //                 '/bar': async (_, x) => '42',
-    //             }
-    //         });
-    //         mm1.add('/foo', async ({n, next}, x) => '42');
-    //         let result1 = mm1('foo');
-    //         //result1 = mm1();                                                    // ERROR arity
-    //         //result1 = mm1('foo', 'bar');                                        // ERROR arity
-
-
-    //         let mm2 = new UnaryMultimethod({ // sync unary
-    //             //arity: 1,
-    //             timing: 'sync',
-    //             methods: {
-    //                 '/foo': (_, x: string) => '42',
-    //                 '/bar': (_, x: string) => '42',
-    //                 // '/baz': (_, x: string, y: number) => '42' ERROR if uncommented
-    //             }
-    //         });
-    //         mm2.add({'/baz': (_, a) => '42'});
-    //         let result2 = mm2('foo');
-    //         //result2 = mm2();                                                    // ERROR arity
-    //         //result2 = mm2('foo', 'bar');                                        // ERROR arity
-
-
-    //         let mm3 = new Multimethod({ // async unary
-    //             arity: 1,
-    //             timing: 'async',
-    //             methods: {
-    //                 '/foo': async (_, x: string) => '42',
-    //                 '/bar': async (_, x: string) => '42',
-    //             }
-    //         });
-    //         let result3 = mm3('foo');
-    //         //result3 = mm3(); // ERROR arity
-    //         //result3 = mm3('foo', 'bar');                                        // ERROR arity
-
-
-    //         let mm4 = new BinaryMultimethod({ // mixed binary
-    //             //arity: 2,
-    //             //timing: 'async',
-    //             methods: {
-    //                 '/foo': async ({}, x: string, y: number) => '42',
-    //                 '/bar': async ({next}, x: string, y: number) => '42',
-    //             }
-    //         });
-    //         let result4 = mm4('foo', 720);
-    //         //result4 = mm4();                                                    // ERROR arity
-    //         //result4 = mm4('foo', 'bar');                                        // ERROR type
-    //         //result4 = mm4('foo', 11, 'bar');                                    // ERROR arity
-
-
-    //         let mm5 = new Multimethod({ // mixed ternary
-    //             arity: 3,
-    //             //timing: 'async',
-    //             methods: {
-    //                 '/foo': ({n}, x, y, z) => '42',
-    //                 '/bar': async ({n}, x, y, z) => '42',
-    //             }
-    //         });
-    //         let result5 = mm5('foo', 'bar', 'baz');
-    //         //result5 = mm5('foo', 'bar');                                        // ERROR arity
-    //         //result5 = mm5('foo', 'bar', 'baz', 'quux');                         // ERROR arity
-
-
-    //         let mm = new Multimethod({}); // untyped
-    //         mm(42, 24);
-    //         mm(1, 2, 3);
-
-
-    //         let mm6 = new Multimethod({ // mixed nullary
-    //             arity: 0,
-    //             methods: {
-    //                 foo: (ctx) => 'foo'
-    //             }
-    //         });
-    //         let result6 = mm6();
-    //         //result6 = mm6('foo');                                               // ERROR arity
-
-    //     }
-
-
-    //     function test2() {
-
-    //         let m1 = new Multimethod(); // untyped
-    //         let r1 = m1(42, 24);
-            
-    //         let m2 = new UnaryMultimethod();
-    //         let r2 = m2(43);
-    //         //r2 = m2(43, true);                                                  // ERROR arity
-
-    //         let m3 = new BinaryMultimethod();
-    //         let r3 = m3(42, 24);
-
-    //         let m4 = new TernaryMultimethod();
-    //         let r4 = m4(42, 24, 2);
-
-    //         let m5 = new VariadicMultimethod();
-    //         let r5 = m5(42, 24);
-    //         r5 = m5(); // OK
-
-    //     }
-
-
-
-
-
-    // });
 });

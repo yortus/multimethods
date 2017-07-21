@@ -37,8 +37,8 @@ export default create;
 
 
 export interface UnaryOptions<T0, TR> extends Options {
-    toDiscriminant: (_0: T0) => string;
-    methods: Methods<(_0: T0, captures: Captures, forward: (_0: T0) => TR) => TR>;
+    toDiscriminant?: (_0: T0) => string;
+    methods?: Methods<(_0: T0, captures: Captures, forward: (_0: T0) => TR) => TR>;
 }
 
 
@@ -46,8 +46,8 @@ export interface UnaryOptions<T0, TR> extends Options {
 
 
 export interface BinaryOptions<T0, T1, TR> extends Options {
-    toDiscriminant: (_0: T0, _1: T1) => string;
-    methods: Methods<(_0: T0, _1: T1, captures: Captures, forward: (_0: T0, _1: T1) => TR) => TR>;
+    toDiscriminant?: (_0: T0, _1: T1) => string;
+    methods?: Methods<(_0: T0, _1: T1, captures: Captures, forward: (_0: T0, _1: T1) => TR) => TR>;
 }
 
 
@@ -55,8 +55,8 @@ export interface BinaryOptions<T0, T1, TR> extends Options {
 
 
 export interface TernaryOptions<T0, T1, T2, TR> extends Options {
-    toDiscriminant: (_0: T0, _1: T1, _2: T2) => string;
-    methods: Methods<(_0: T0, _1: T1, _2: T2, captures: Captures, forward: (_0: T0, _1: T1, _2: T2) => TR) => TR>;
+    toDiscriminant?: (_0: T0, _1: T1, _2: T2) => string;
+    methods?: Methods<(_0: T0, _1: T1, _2: T2, captures: Captures, forward: (_0: T0, _1: T1, _2: T2) => TR) => TR>;
 }
 
 
@@ -64,8 +64,8 @@ export interface TernaryOptions<T0, T1, T2, TR> extends Options {
 
 
 export interface VariadicOptions<T, TR> extends Options {
-    toDiscriminant: (...args: T[]) => string;
-    methods: Methods<(...args: Array<T|Captures|((...args: T[]) => TR)>) => TR>;
+    toDiscriminant?: (...args: T[]) => string;
+    methods?: Methods<(...args: Array<T|Captures|((...args: T[]) => TR)>) => TR>;
     // TODO: ^--- the `...args` type is best effort, but really needs to be (...args: T[], captures: {[name: string]: string}, next: Next)
 }
 

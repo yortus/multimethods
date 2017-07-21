@@ -1,7 +1,7 @@
 ## Todo - High Priority
 - [ ] support more special characters in predicates
   - [ ] initially: ':<>'
-- [ ] add a good default implementation for `toDiscriminant`
+- [x] add a good default implementation for `toDiscriminant`
 - [x] fix buggy emit for isMatch and getCaptures lines (see comment there in code)
 
 
