@@ -1,12 +1,12 @@
-import normaliseOptions from './normalise-options';
-import Options from '../options';
-import MMInfo from './mm-info';
 import analyseAmbiguities from './analyse-ambiguities';
 import analyseChildNodes from './analyse-child-nodes';
 import analyseMethodSequences from './analyse-method-sequences';
 import analyseMethodTable from './analyse-method-table';
 import analyseParentNodes from './analyse-parent-nodes';
+import MMInfo from './mm-info';
 import MMNode from './mm-node';
+import {normaliseOptions} from './normalisation';
+import Options from '../options';
 
 
 

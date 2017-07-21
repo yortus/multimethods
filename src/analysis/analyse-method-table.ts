@@ -1,8 +1,8 @@
 import isMetaMethod from '../util/is-meta-method';
-import MMInfo from './mm-info';
-import {NormalOptions} from './normalise-options';
-import {toNormalPredicate, NormalPredicate, Predicate, toPredicate} from '../math/predicates';
 import {MethodTableEntry} from './mm-node';
+import MMInfo from './mm-info';
+import {NormalOptions} from './normalisation';
+import {toNormalPredicate, NormalPredicate, Predicate, toPredicate} from '../math/predicates';
 
 
 

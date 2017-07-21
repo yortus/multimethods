@@ -1,5 +1,5 @@
-import {MethodTableEntry, ParentNode, MethodSequence, MethodSequenceEntry} from './mm-node';
 import isMetaMethod from '../util/is-meta-method';
+import {MethodTableEntry, ParentNode, MethodSequence, MethodSequenceEntry} from './mm-node';
 import MMInfo from './mm-info';
 import repeatString from '../util/string-repeat';
 import {toIdentifierParts} from "../math/predicates";

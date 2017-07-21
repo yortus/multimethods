@@ -1,6 +1,6 @@
 import assign from '../util/object-assign';
-import {NormalOptions} from './normalise-options';
 import {EulerDiagram, EulerSet} from '../math/sets';
+import {NormalOptions} from './normalisation';
 
 
 

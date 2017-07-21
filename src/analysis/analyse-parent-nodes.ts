@@ -1,7 +1,7 @@
-import MMInfo from './mm-info';
-import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import {EulerDiagram} from '../math/sets';
+import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import {MethodTableEntry, ParentNode} from './mm-node';
+import MMInfo from './mm-info';
 
 
 

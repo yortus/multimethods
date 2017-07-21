@@ -1,11 +1,11 @@
-import MMInfo from './mm-info';
+import {CONTINUE} from '../sentinels';
+import {EulerDiagram} from '../math/sets';
+import fatalError from '../util/fatal-error';
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
 import isMetaMethod from '../util/is-meta-method';
-import fatalError from '../util/fatal-error';
-import {EulerDiagram} from '../math/sets';
-import {CONTINUE} from '../sentinels';
 import {MethodTableEntry} from './mm-node';
+import MMInfo from './mm-info';
 
 
 
