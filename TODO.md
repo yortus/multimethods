@@ -10,6 +10,7 @@
 
 ## Todo - Medium Priority
 - [ ] tidy up the method/dispatcher instrumentation code
+- [ ] support numeric discriminant matching for very fast dispatch scenarios (like my C++/C# MMs did)
 - [ ] Address code quality in /src
   - [ ] Rationalise file structure under /src
   - [ ] Reasonable breakdown of functions
@@ -45,6 +46,7 @@
                           - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
                           - [ ] Others: `% ^ ~ < > " |`
 
+  - [ ] support predicate 'type' indicators - eg binary predicates like `*100*10`, and maybe more future ones
   - [ ] treat the following as literal match characters:
     - [ ] `a-z A-Z 0-9 _ . - /`  (already supported)
     - [ ] `~` (unreserved in URIs - so may commonly appear in URLs)
