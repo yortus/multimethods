@@ -9,11 +9,11 @@
 
 
 ## Todo - Medium Priority
-- [ ] tidy up the method/dispatcher instrumentation code
+- [x] tidy up the method/dispatcher instrumentation code
 - [ ] support numeric discriminant matching for very fast dispatch scenarios (like my C++/C# MMs did)
 - [ ] Address code quality in /src
-  - [ ] Rationalise file structure under /src
-  - [ ] Reasonable breakdown of functions
+  - [x] Rationalise file structure under /src
+  - [x] Reasonable breakdown of functions
   - [ ] JSDoc comments for all exports
   - [ ] Descriptive inline comments so someone can understand the inner workings
 - [ ] Write better README
@@ -25,6 +25,8 @@
     - [ ] predicates
     - [ ] options
 - [ ] Improve unit test coverage
+  - [ ] add basic tests for correct arg passing for variadic, nullary, unary, binary and ternary MMs
+
 
 
 
@@ -185,10 +187,6 @@ http://app.co/things?item=t[[100]]
 
 
 
-- [ ] do proper emit for the dispatch function - currently it is hardcoded to unary arity.
-  - [ ] put it through same emit steps as executor template function
-  - [ ] make a templates dir and put templates in there?
-  - [ ] add basic tests for correct arg passing for variadic, nullary, unary, binary and ternary MMs
 
 - [ ] remove add() method. Multimethods are immutable.
   - [x] remove add method
@@ -233,24 +231,11 @@ http://app.co/things?item=t[[100]]
     - [ ] misc rules
     - [ ] TODO: more cases...
 
-
-
-
-- [ ] TODO: revise codegen
-  - [ ] move all `isMatch`, `getCaptures`, and `callHandler` vars to one place at the end of emit
-  - [ ] fix dispatchFunction (see TODOs on lines 56-57 of `generate-dispatch-function.ts`)
-  - [ ] always output codegen in debug mode
-  - [ ] investigate: can it be made more understandable/idiomatic?
-    - [ ] TODO: findings & actions...
-    - [ ] remove unnecessary .toStrings on predicates (which are simply strings at runtime, but tagged at compile-time)
-  - [ ] inventigate: can the source 'stitching together' be made more template-like?
-    - [ ] TODO: findings & actions...
-
 - [ ] TODO: fix meta() function
   - [ ] should detect whether used as a wrapper function around a handler, or as a property decorator
 
 - [ ] TODO: improve `fatalError.ts`
-  - [ ] TODO: investigate alternatives... current form:   +ve = type-consistency   -ve = intellisense
+  - [x] investigate alternatives... current form:   +ve = type-consistency   -ve = intellisense
   - [ ] remove dep on `util.format`
 
 - [ ] max strictness in `tsconfig.json` for src, tests and extras
@@ -260,36 +245,6 @@ http://app.co/things?item=t[[100]]
 
 
 ## Notes
-
-
-ES6 features in use
-- in source code
-  - arrow functions
-  - spread
-  - computed properties
-  - classes
-  - Promise
-  - Map
-  - String#repeat()
-  - Symbol.hasInstance()
-  - Array.from
-
-- in generated code
-  - arrow functions
-  - rest
-  - spread
-
-
-JS Environments that support ES6 as used:
-- Node.js:  >= 6.5
-- Chrome:   Last 9+ versions
-- Firefox:  Last 9+ versions
-- Edge:     Last 3+ versions
-- Safari:   Last 2 versions
-- iOS:      Last 2 versions
-- IE:       Not supported
-
-
 
 Predicate Special Chars:
 - Literal Match:
@@ -319,66 +274,7 @@ Predicate Special Chars:
 
 
 
-## Renaming and Reorganising
-### To Dos
-- Predicate: replace class with one or more branded strings and free functions
-  - parsePredicate(s: string): Predicate
-  - normalisePredicate(p: Predicate): NormalisedPredicate
-  - ...
-- Taxonomy...? - an Euler Diagram represented as a DAG whose nodes are Set instances, where a Set contains a predicate, links to supersets and subsets, and extra annotations
 
-- Multimethod...?
-
-
-
-
-
-
-### Set Theory, Logic & Math
-- Predicate
-- predicate notation (pattern / DSL)
-- predicate normalisation
-- predicate evaluation
-- Set
-- Euler Diagram
-- intersection
-- union
-- subset
-- superset
-- universe of strings
-- partition
-
-
-
-type Predicate = string & { __predicateBrand: any }
-type NormalisedPredicate = Predicate & { __normalisedPredicateBrand: any }
-
-Predicate functions:
-- parse(pred: Predicate): PredicateAST
-- normalise(pred: Predicate): NormalisedPredicate
-- toIdentifier(pred: Predicate): string
-- getMembershipFunction(pred: Predicate): (s: string) => boolean
-- getUnificationFunction(pred: Predicate): (s: string) => Captures
-- equals(p: Predicate, q: Predicate): boolean
-- intersect(p: Predicate, q: Predicate): Predicate[]; // or introduce 'or' operator in predicate DSL
-
-Set functions:
-- generate taxonomy from predicates
-- annotate taxonomy
-
-
-
-
-
-
-
-
-# Source Audit for terminology & naming
-- [ ] /src/multimethod/impl/create-multimethod.ts
-- [x] /src/multimethod/impl/disambiguate-routes.ts
-- [x] /src/multimethod/impl/disambiguate-rules.ts
-- [ ] /src/multimethod/impl/make-composite-method.ts
-- [x] /src/multimethod/impl/rule.ts
 
 
 # Other audits:
@@ -569,6 +465,16 @@ Contenders
 
 
 ## Done
+- [x] TODO: revise codegen
+  - [x] move all `isMatch`, `getCaptures`, and `callHandler` vars to one place at the end of emit
+  - [x] fix dispatchFunction (see TODOs on lines 56-57 of `generate-dispatch-function.ts`)
+  - [x] always output codegen in debug mode
+  - [x] investigate: can it be made more understandable/idiomatic?
+    - [x] remove unnecessary .toStrings on predicates (which are simply strings at runtime, but tagged at compile-time)
+  - [x] investigate: can the source 'stitching together' be made more template-like?
+- [x] do proper emit for the dispatch function - currently it is hardcoded to unary arity.
+  - [x] put it through same emit steps as executor template function
+  - [x] make a templates dir and put templates in there?
 - [x] add option `strictChecks: boolean`
   - [x] add note for future addition: this option *may* be expanded to allow for specific strict checks
   - [x] current uses of `util.warn` become errors *iff* strictChecks is true, else no error/warning issued.
