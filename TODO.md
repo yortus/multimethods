@@ -34,8 +34,9 @@
 - [ ] new option `toType: Function` - if provided and no `toDiscriminant` given, the default `toDiscriminant` uses it
 - [ ] new option `allowNulls` - mms should reject `null` args unless this is explicitly set to `true`
 - [ ] support simplified MM creation: accept method table directly instead of inside `methods` prop.
-
-
+- [ ] build system: use webpack to create a single-file bundle (eg so can use in browser)
+- [ ] build system: integrate tslint
+- [ ] validation: check for unrecognised options
 
 
 ## Decisions:
