@@ -1,6 +1,6 @@
-import Emitter, {EnvNames} from './emitter';
 import {MMInfo, MMNode} from '../analysis';
 import repeat from '../util/string-repeat';
+import Emitter, {EnvNames} from './emitter';
 
 
 
@@ -31,16 +31,16 @@ function emitThunkSelectorBlock(emit: Emitter, node: MMNode, nestDepth: number, 
     let indent = repeat('    ', nestDepth);
 
     // Recursively generate the conditional logic block to select among the given predicates.
-    node.childNodes.forEach(node => {
-        let condition = `${indent}if (${names.IS_MATCH}ː${node.identifier}(discriminant)) `;
-        if (node.childNodes.length === 0) {
+    node.childNodes.forEach(childNode => {
+        let condition = `${indent}if (${names.IS_MATCH}ː${childNode.identifier}(discriminant)) `;
+        if (childNode.childNodes.length === 0) {
             // One-liner if-statement
-            emit(`${condition}return ${names.THUNK}ː${node.entryPoint.identifier};`);
+            emit(`${condition}return ${names.THUNK}ː${childNode.entryPoint.identifier};`);
         }
         else {
             // Compound if-statement with nested block of conditions
             emit(`${condition}{`),
-            emitThunkSelectorBlock(emit, node, nestDepth + 1, names),
+            emitThunkSelectorBlock(emit, childNode, nestDepth + 1, names),
             emit(`${indent}}`);
         }
     });

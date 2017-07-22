@@ -1,13 +1,15 @@
+import {ANY, toNormalPredicate} from '../math/predicates';
 import {EulerDiagram} from '../math/sets';
 import Options from '../options';
-import {toNormalPredicate, ANY} from '../math/predicates';
 
 
 
 
 
-// TODO: doc... returns a list of human-readable problem descriptions where the methods statically don't cover some predicates
-// Detect synthesized patterns in the euler diagram (i.e., ones with no exactly-matching predicates in the methods hash).
+// TODO: doc...
+//      - returns a list of human-readable problem descriptions where the methods statically don't cover some predicates
+
+// Detect synthesized patterns in the euler diagram, i.e., ones with no exactly-matching predicates in the method table.
 // They get there in two ways:
 // (i)  the root Predicate.ANY where the raw methods hash doesn't explicitly handle it, and
 // (ii) intersections of non-disjoint predicates that aren't explicitly handled in the methods hash

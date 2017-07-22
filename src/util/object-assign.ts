@@ -8,7 +8,7 @@
  * See: https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
  */
 export default function assign<T extends {[x: string]: any}, S extends {[x: string]: any}>(target: T, source: S) {
-    for (var key in source) {
+    for (let key in source) {
         // Avoid bugs when hasOwnProperty is shadowed
         if (Object.prototype.hasOwnProperty.call(source, key)) {
             target[key] = source[key];

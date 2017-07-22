@@ -1,13 +1,14 @@
 import {EulerDiagram} from '../math/sets';
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
-import {MethodTableEntry, ParentNode} from './mm-node';
 import MMInfo from './mm-info';
+import {MethodTableEntry, ParentNode} from './mm-node';
 
 
 
 
 
-// TODO: doc...Go back over the nodes and work out the correct parent node. There must be precisely one (except for the root which has no parent).
+// TODO: doc... Go back over the nodes and work out the correct parent node.
+//              There must be precisely one (except for the root which has no parent).
 export default function analyseParentNodes<T extends MethodTableEntry>(mminfo: MMInfo<T>) {
     return mminfo.addProps((_, nodes, set, sets) => {
         let parentNode: (T & ParentNode<T>) | null;
@@ -17,7 +18,8 @@ export default function analyseParentNodes<T extends MethodTableEntry>(mminfo: M
             parentNode = null;
         }
 
-        // If there is only one way into the set, then the parent is the node corresponding to the one-and-only superset.
+        // If there is only one way into the set, then the parent
+        // is the node corresponding to the one-and-only superset.
         else if (set.supersets.length === 1) {
             parentNode = nodes[sets.indexOf(set.supersets[0])] as T & ParentNode<T>;
         }

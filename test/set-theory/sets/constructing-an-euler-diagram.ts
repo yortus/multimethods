@@ -12,16 +12,16 @@ describe('Constructing an euler diagram', () => {
                 '/...',
                 '/foo/*',
                 '/bar/*',
-                '/foo/bar'
+                '/foo/bar',
             ],
             eulerDiagram: {
-                "/…": {
-                    "/foo/*": {
-                        "/foo/bar": {}
+                '/…': {
+                    '/foo/*': {
+                        '/foo/bar': {},
                     },
-                    "/bar/*": {}
-                }
-            }
+                    '/bar/*': {},
+                },
+            },
         },
         {
             // ======================================== 2. ========================================
@@ -36,13 +36,13 @@ describe('Constructing an euler diagram', () => {
             eulerDiagram: {
                 'a*': {
                     'a': {},
-                    'a*a': {}
+                    'a*a': {},
                 },
                 '*a': {
                     'a': {},
-                    'a*a': {}
-                }
-            }
+                    'a*a': {},
+                },
+            },
 
             // TODO: was...
             // eulerDiagram: 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
@@ -68,74 +68,74 @@ describe('Constructing an euler diagram', () => {
                 '/*z/b',
             ],
             eulerDiagram: {
-                "a*": {
-                    "a*m*": {
-                        "a*m*z": {}
+                'a*': {
+                    'a*m*': {
+                        'a*m*z': {},
                     },
-                    "a*z": {
-                        "a*m*z": {}
-                    }
+                    'a*z': {
+                        'a*m*z': {},
+                    },
                 },
-                "*m*": {
-                    "a*m*": {
-                        "a*m*z": {}
+                '*m*': {
+                    'a*m*': {
+                        'a*m*z': {},
                     },
-                    "*m*z": {
-                        "a*m*z": {}
-                    }
+                    '*m*z': {
+                        'a*m*z': {},
+                    },
                 },
-                "*z": {
-                    "a*z": {
-                        "a*m*z": {}
+                '*z': {
+                    'a*z': {
+                        'a*m*z': {},
                     },
-                    "*m*z": {
-                        "a*m*z": {}
-                    }
+                    '*m*z': {
+                        'a*m*z': {},
+                    },
                 },
-                "/*": {
-                    "/bar": {},
-                    "/*o*o*": {
-                        "/foo": {},
-                        "/*o*o*.html": {}
-                    }
+                '/*': {
+                    '/bar': {},
+                    '/*o*o*': {
+                        '/foo': {},
+                        '/*o*o*.html': {},
+                    },
                 },
-                "/…o…o…": {
-                    "/*o*o*": {
-                        "/foo": {},
-                        "/*o*o*.html": {}
+                '/…o…o…': {
+                    '/*o*o*': {
+                        '/foo': {},
+                        '/*o*o*.html': {},
                     },
-                    "/…o…o….html": {
-                        "/*o*o*.html": {},
-                        "/foo/*.html": {},
-                        "/a/*o*o*.html": {}
+                    '/…o…o….html': {
+                        '/*o*o*.html': {},
+                        '/foo/*.html': {},
+                        '/a/*o*o*.html': {},
                     },
-                    "/a/*o*o*": {
-                        "/a/*o*o*.html": {}
+                    '/a/*o*o*': {
+                        '/a/*o*o*.html': {},
                     },
-                    "/*o*o*/b": {
-                        "/*o*o*z/b": {}
-                    }
+                    '/*o*o*/b': {
+                        '/*o*o*z/b': {},
+                    },
                 },
-                "/a/*": {
-                    "/a/*o*o*": {
-                        "/a/*o*o*.html": {}
+                '/a/*': {
+                    '/a/*o*o*': {
+                        '/a/*o*o*.html': {},
                     },
-                    "/a/b": {}
+                    '/a/b': {},
                 },
-                "/*/b": {
-                    "/*o*o*/b": {
-                        "/*o*o*z/b": {}
+                '/*/b': {
+                    '/*o*o*/b': {
+                        '/*o*o*z/b': {},
                     },
-                    "/a/b": {},
-                    "/*z/b": {
-                        "/*o*o*z/b": {}
-                    }
+                    '/a/b': {},
+                    '/*z/b': {
+                        '/*o*o*z/b': {},
+                    },
                 },
-                "/*z/b": {
-                    "/*o*o*z/b": {}
-                }
-            }
-        }
+                '/*z/b': {
+                    '/*o*o*z/b': {},
+                },
+            },
+        },
     ];
 
     tests.forEach(test => {
@@ -159,5 +159,5 @@ describe('Constructing an euler diagram', () => {
 
 /** Helper function that converts an EulerDiagram to a simple nested object with predicate sources for keys */
 function setToObj(set: EulerSet): {} {
-    return set.subsets.reduce((obj, set) => (obj[set.predicate.toString()] = setToObj(set), obj), {});
+    return set.subsets.reduce((obj, subset) => (obj[subset.predicate.toString()] = setToObj(subset), obj), {});
 }

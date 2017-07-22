@@ -1,8 +1,8 @@
-import checkMethods from './check-methods';
-import debug, {VALIDATE} from '../util/debug';
-import fatalError from '../util/fatal-error';
-import listDiscontinuities from './list-discontinuities';
 import Options from '../options';
+import debug, {VALIDATE} from '../util/debug';
+import * as fatalError from '../util/fatal-error';
+import checkMethods from './check-methods';
+import listDiscontinuities from './list-discontinuities';
 
 
 

@@ -1,3 +1,4 @@
+// tslint:disable:no-eval
 import {expect} from 'chai';
 import getLongestCommonSuffix from 'multimethods/util/get-longest-common-suffix';
 
@@ -24,7 +25,7 @@ describe('Getting the longest common suffix', () => {
         `[1], [1], [true], [], [1] ==> []`,
         `[true, false, 'blah', [], {}, 5] ==> [true, false, 'blah', [], {}, 5]`,
         `[] ==> []`,
-        ` ==> []`
+        ` ==> []`,
     ];
 
     tests.forEach(test => {

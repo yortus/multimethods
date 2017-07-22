@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {toPredicate, intersect} from 'multimethods/math/predicates';
+import {intersect, toPredicate} from 'multimethods/math/predicates';
 
 
 describe('Intersecting two predicates', () => {
@@ -70,7 +70,7 @@ describe('Intersecting two predicates', () => {
         '/o… ∩ /*z = /o*z',
         '/o…o… ∩ /*z = /o*o*z',
         '/o…o… ∩ /*z/b = /o*o*z/b',
-        '/…o…o… ∩ /*z/b = /*o*o*z/b'
+        '/…o…o… ∩ /*z/b = /*o*o*z/b',
     ];
 
     tests.forEach(test => {
@@ -78,13 +78,14 @@ describe('Intersecting two predicates', () => {
             let lhsA = test.split(' = ')[0].split(' ∩ ')[0].replace(/^∅$/, '');
             let lhsB = test.split(' = ')[0].split(' ∩ ')[1].replace(/^∅$/, '');
             let rhs = test.split(' = ')[1].replace(/^∅$/, '');
-            let actual: string, expected = rhs;
+            let actual: string;
+            let expected = rhs;
             try {
                 let intersections = intersect(toPredicate(lhsA), toPredicate(lhsB)); // TODO: fix casts
                 actual = `[${intersections}]`;
                 if (intersections.length === 1) actual = actual.slice(1, -1);
             }
-            catch(ex) {
+            catch (ex) {
                 actual = 'ERROR';
             }
             expect(actual).equals(expected);

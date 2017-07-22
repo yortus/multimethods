@@ -1,3 +1,4 @@
+import {Template} from '../source-templates';
 
 
 
@@ -10,10 +11,10 @@
 // - if (!true) {\n[...]} [else {\n[...]}]
 // - if (!false) {\n[...]} [else {\n[...]}]
 // TODO: assumes consistent 4-space block indents, simple conditions... relax any of these?
-export default function eliminateDeadCode(source: string): string {
+export default function eliminateDeadCode(template: Template) {
     const MATCH_IF = /^(\s*)if \((\!?)((?:true)|(?:false))\) {$/;
     const MATCH_ELSE = /^(\s*)else {$/;
-    let inLines = source.split('\n');
+    let inLines = template.split('\n');
     let outLines: string[] = [];
     while (inLines.length > 0) {
         let inLine = inLines.shift()!;
@@ -31,12 +32,14 @@ export default function eliminateDeadCode(source: string): string {
         let blockLines: string[] = [];
         let blockClose = indent + '}';
 
-        while ((inLine = inLines.shift()!) !== blockClose) {
+        while (true) {
+            inLine = inLines.shift()!;
+            if (inLine === blockClose) break;
             blockLines.push(inLine.slice(4));
         }
 
         if (isTrueCond) {
-            outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n')));
+            outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n') as Template));
         }
 
         // TODO: handle 'else' blocks...
@@ -45,5 +48,5 @@ export default function eliminateDeadCode(source: string): string {
         }
     }
 
-    return outLines.join('\n');
+    return outLines.join('\n') as Template;
 }

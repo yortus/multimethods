@@ -1,8 +1,8 @@
+import {toIdentifierParts} from '../math/predicates';
 import isMetaMethod from '../util/is-meta-method';
-import {MethodTableEntry, ParentNode, MethodSequence, MethodSequenceEntry} from './mm-node';
-import MMInfo from './mm-info';
 import repeatString from '../util/string-repeat';
-import {toIdentifierParts} from "../math/predicates";
+import MMInfo from './mm-info';
+import {MethodSequence, MethodSequenceEntry, MethodTableEntry, ParentNode} from './mm-node';
 
 
 
@@ -11,9 +11,10 @@ import {toIdentifierParts} from "../math/predicates";
 // TODO: doc...
 export default function analyseMethodSequences<T extends MethodTableEntry & ParentNode<T>>(mminfo: MMInfo<T>) {
     return mminfo.addProps(startNode => {
-        let methodSequence = [] as MethodSequenceEntry<T>[];
+        let methodSequence = [] as Array<MethodSequenceEntry<T>>;
 
-        // TODO: explain method sequence... *All* applicable methods for the node's predicate in most- to least- specific order...
+        // TODO: explain method sequence...
+        //       *All* applicable methods for the node's predicate in most- to least- specific order...
         for (let ancestorNode: T | null = startNode; ancestorNode !== null; ancestorNode = ancestorNode.parentNode) {
             ancestorNode.exactMethods.forEach((method, methodIndex) => {
                 let fromNode = ancestorNode as T & MethodSequence<T>;
@@ -33,9 +34,6 @@ export default function analyseMethodSequences<T extends MethodTableEntry & Pare
         // is the least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
         let entryPoint = methodSequence.filter(entry => entry.isMeta).pop() || methodSequence[0];
 
-        // This one is for convenience.
-        let identifier = methodSequence[0].identifier;
-
-        return {methodSequence, entryPoint, identifier} as MethodSequence<T>;
+        return {methodSequence, entryPoint, identifier: methodSequence[0].identifier} as MethodSequence<T>;
     });
 }

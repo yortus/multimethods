@@ -1,5 +1,5 @@
+import {MMInfo, MMNode} from '../analysis';
 import debug, {EMIT} from '../util/debug';
-import {MMInfo, MMNode} from "../analysis";
 
 
 
@@ -49,7 +49,7 @@ export function createEmitter(env: EmitEnvironment) {
                 allLines.push(line);
             });
         });
-    };
+    }
 
     let result = emit as Emitter;
     result.env = env;
@@ -74,23 +74,26 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     const {...envProps} = env;
     const {...optProps} = env.options;
     const {...nodeProps} = env.allNodes[0];
-    [EnvNames.ENV] as (keyof typeof globProps)[];
-    [EnvNames.IS_PROMISE_LIKE] as (keyof typeof envProps)[];
-    [EnvNames.CONTINUE] as (keyof typeof envProps)[];
-    [EnvNames.UNHANDLED_ERROR] as (keyof typeof envProps)[];
-    [EnvNames.OPTIONS] as (keyof typeof envProps)[];
-    [EnvNames.ALL_NODES] as (keyof typeof envProps)[];
-    [EnvNames.TO_DISCRIMINANT] as (keyof typeof optProps)[];
-    [EnvNames.IS_MATCH] as (keyof typeof nodeProps)[];
-    [EnvNames.GET_CAPTURES] as (keyof typeof nodeProps)[];
-    [EnvNames.EXACT_METHODS] as (keyof typeof nodeProps)[];
-    
+    // tslint:disable:no-unused-expression
+    [EnvNames.ENV] as Array<keyof typeof globProps>;
+    [EnvNames.IS_PROMISE_LIKE] as Array<keyof typeof envProps>;
+    [EnvNames.CONTINUE] as Array<keyof typeof envProps>;
+    [EnvNames.UNHANDLED_ERROR] as Array<keyof typeof envProps>;
+    [EnvNames.OPTIONS] as Array<keyof typeof envProps>;
+    [EnvNames.ALL_NODES] as Array<keyof typeof envProps>;
+    [EnvNames.TO_DISCRIMINANT] as Array<keyof typeof optProps>;
+    [EnvNames.IS_MATCH] as Array<keyof typeof nodeProps>;
+    [EnvNames.GET_CAPTURES] as Array<keyof typeof nodeProps>;
+    [EnvNames.EXACT_METHODS] as Array<keyof typeof nodeProps>;
+    // tslint:enable:no-unused-expression
+
     // Evaluate the multimethod's entire source code to obtain the multimethod function. The use of eval here is safe.
     // There are no untrusted inputs substituted into the source. The client-provided methods can do anything (so may
     // be considered untrusted), but that has nothing to do with the use of 'eval' here, since they would need to be
     // called by the dispatcher whether or not eval was used. More importantly, the use of eval here allows for
     // multimethod dispatch code that is both more readable and more efficient, since it is tailored specifically
     // to the options of this multimethod, rather than having to be generalized for all possible cases.
+    // tslint:disable-next-line:no-eval
     let mm = eval(`(function () { ${source}; return ${env.options.name}; })`)() as Function;
     return mm;
 }
@@ -99,7 +102,8 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
 
 
 
-// TODO: doc... assumed names... define each once and ref multiple times. These must be consistently named throughout emitted code
+// TODO: doc... assumed names...
+//              define each once and ref multiple times. These must be consistently named throughout emitted code
 export enum EnvNames {
     ENV = 'env',
     IS_PROMISE_LIKE = 'isPromiseLike',

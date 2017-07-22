@@ -1,5 +1,5 @@
-import NormalPredicate from './normal-predicate';
 import parse from './dsl-parser';
+import NormalPredicate from './normal-predicate';
 
 
 

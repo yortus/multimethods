@@ -1,8 +1,8 @@
+import {NormalPredicate, Predicate, toNormalPredicate, toPredicate} from '../math/predicates';
 import isMetaMethod from '../util/is-meta-method';
-import {MethodTableEntry} from './mm-node';
 import MMInfo from './mm-info';
+import {MethodTableEntry} from './mm-node';
 import {NormalOptions} from './normalisation';
-import {toNormalPredicate, NormalPredicate, Predicate, toPredicate} from '../math/predicates';
 
 
 
@@ -32,6 +32,7 @@ export default function analyseMethodTable<T>(mminfo: MMInfo<T>) {
 // TODO: doc...
 function findExactPredicateInMethodTable(normalisedPredicate: NormalPredicate, options: NormalOptions): Predicate|null {
     for (let key in options.methods) {
+        if (!options.methods.hasOwnProperty(key)) continue;
         let predicate = toPredicate(key);
 
         // Skip until we find the right predicate.

@@ -1,26 +1,24 @@
+import {ANY, intersect, NormalPredicate, toNormalPredicate} from '../predicates';
 import EulerSet from './euler-set';
-import {toNormalPredicate, NormalPredicate, ANY, intersect} from '../predicates';
 
 
 
 
 
 /**
- * A euler diagram is a directed acyclic graph (DAG) where each set holds a predicate. The sets are arranged according to
- * the relationships between their respecive predicates. More specifically, given any two sets A and B within the same
- * euler diagram, set B is a descendent of set A if and only if the set of strings matched by set B's predicate is a
- * proper subset of the set of strings matched by set A's predicate.
- * 
+ * A euler diagram is a directed acyclic graph (DAG) where each set holds a predicate. The sets are arranged according
+ * to the relationships between their respecive predicates. More specifically, given any two sets A and B within the
+ * same euler diagram, set B is a descendent of set A if and only if the set of strings matched by set B's predicate is
+ * a proper subset of the set of strings matched by set A's predicate.
+ *
  *  and where the sets are arranged
  * according to the set relationships between the predicate's sets of matching strings.
-
-
-
-
-
-
-
- * 
+ *
+ *
+ *
+ *
+ *
+ *
  *  The predicates in a
  * euler diagram are arranged according to the relationships between the sets of strings they match.
  *
@@ -29,7 +27,7 @@ import {toNormalPredicate, NormalPredicate, ANY, intersect} from '../predicates'
  *
  * Each set in a euler diagram holds a single predicate, as well as links to all parent and child sets.
  * Every euler diagram has a single root set that holds the universal predicate '…' that matches all strings.
- * 
+ *
  * In any given euler diagram,
  * for any two sets holding predicates P and Q, if Q is a proper subset of P, then Q will be a
  * descendent of P in the euler diagram. Overlapping predicates (i.e., predicates whose intersection is
@@ -39,12 +37,12 @@ import {toNormalPredicate, NormalPredicate, ANY, intersect} from '../predicates'
  * (such as intersection sets) may be reached via more than one path from the root, but no two
  * sets in a euler diagram hold the same pattern. A euler diagram may thus contain 'diamonds', making it a
  * DAG rather than a tree.
- * 
+ *
  * NB: The patterns in a euler diagram may not correspond identically to its input patterns, due to (i)
  * pattern normalization, (ii) the addition of the '…' pattern if it was not among the input
  * patterns, and (iii) the addition of intersection patterns for each pair of overlapping input
  * patterns.
- * 
+ *
  * For example, the input patterns ['foo', 'bar', 'f{chars}', '*o'] result in this 6-set euler diagram:
  *
  *        f*
@@ -114,7 +112,7 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
             setLookup.set(predicate, newSet);
         }
         return setLookup.get(predicate)!;
-    }
+    };
 
     // Retrieve the universal set for this euler diagram, which always corresponds to the '…' predicate.
     let universe = eulerDiagram.universalSet = setFor(ANY);
@@ -161,12 +159,12 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
             intersections.forEach(i => comparands.push({set, intersection: setFor(i)}));
 
             // TODO: was...
-            //if (intersection !== Predicate.EMPTY) comparands.push({set, intersection: setFor(intersection)});
+            // if (intersection !== Predicate.EMPTY) comparands.push({set, intersection: setFor(intersection)});
 
 
             return comparands;
         },
-        <{set: EulerSet; intersection: EulerSet}[]> []
+        [] as Array<{set: EulerSet; intersection: EulerSet}>
     );
 
     // If the `ancestor` pattern has no existing children that are non-disjoint

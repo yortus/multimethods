@@ -8,7 +8,7 @@ describe('Comparing a predicate with its normal form', () => {
         '/*/bar/{...baz}',
         '/*/bar/…',
         '/{n}/bar/...',
-        '/{__}/bar/{…baz}'
+        '/{__}/bar/{…baz}',
     ];
 
     predicatePatterns.forEach(p1 => {

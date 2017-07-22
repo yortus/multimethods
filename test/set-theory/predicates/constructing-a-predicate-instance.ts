@@ -1,3 +1,4 @@
+// tslint:disable:no-eval
 import {expect} from 'chai';
 import {parsePredicateSource, toNormalPredicate} from 'multimethods/math/predicates';
 
@@ -59,14 +60,17 @@ describe('Constructing a Predicate instance', () => {
             let rhs = test.split(' ==> ')[1];
             let expectedSignature = rhs.split(' WITH ')[0].replace(/^∅$/, '');
             let expectedCaptureNames = eval(rhs.split(' WITH ')[1] || '[]');
-            let actualSignature = 'ERROR';
-            let actualCaptureNames = [] as string[];
+            let actualSignature: string;
+            let actualCaptureNames: string[];
             try {
                 let ast = parsePredicateSource(predicateSource);
                 actualSignature = toNormalPredicate(predicateSource);
                 actualCaptureNames = ast.captureNames;
             }
-            catch (ex) { }
+            catch (ex) {
+                actualSignature = 'ERROR';
+                actualCaptureNames = [];
+            }
             expect(actualSignature).equals(expectedSignature);
             expect(actualCaptureNames).to.deep.equal(expectedCaptureNames);
         });

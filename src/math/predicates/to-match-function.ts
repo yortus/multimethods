@@ -7,14 +7,14 @@ import Predicate from './predicate';
 
 
 // TODO: revise comments (merge, remove 'internal', ...)
-//     // /**
-//     //  * Attempts to recognize the given string by matching it against this predicate. If the match is successful, an object
-//     //  * is returned containing the name/value pairs for each named capture that unifies the string with this predicate. If
-//     //  * the match fails, the return value is null.
-//     //  * @param {string} string - the string to recognize.
-//     //  * @returns {Object} null if the string is not recognized by the predicate. Otherwise, a hash of captured name/value
-//     //  *          pairs that unify the string with this predicate.
-//     //  */
+// /**
+//  * Attempts to recognize the given string by matching it against this predicate. If the match is successful,
+//  * an object is returned containing the name/value pairs for each named capture that unifies the string with this
+//  * predicate. If the match fails, the return value is null.
+//  * @param {string} string - the string to recognize.
+//  * @returns {Object} null if the string is not recognized by the predicate. Otherwise, a hash of captured name/value
+//  *          pairs that unify the string with this predicate.
+//  */
 /**
  * Internal function used to generate the Predicate#match method. Although RegExps may be used to implement the `match`
  * method for any predicate, we avoid using RegExps for a number of simpler kinds of predicate pattern. This is because
@@ -59,7 +59,7 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
             return s => containsSlash(s) ? null : {[firstCaptureName]: s};
 
         case '…':
-            return _s => SUCCESSFUL_MATCH_NO_CAPTURES;
+            return _ => SUCCESSFUL_MATCH_NO_CAPTURES;
 
         case '{…cap}':
             return s => ({[firstCaptureName]: s});
@@ -115,7 +115,11 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
         case 'lit{…cap}lit':
 
         default:
-            debug(`${DEOPT} Cannot optimise match function for predicate '%s' (%s)`, predicate, simplifiedPatternSignature);
+            debug(
+                `${DEOPT} Cannot optimise match function for predicate '%s' (%s)`,
+                predicate,
+                simplifiedPatternSignature
+            );
             let regexp = makeRegExpForPattern(predicateAST);
             return s => {
                 let matches = s.match(regexp);
@@ -130,7 +134,7 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
 
 
 /** The signature of the Predicate#match method. */
-export type MatchFunction = (string: string) => {[captureName: string]: string} | null;
+export type MatchFunction = (_: string) => {[captureName: string]: string} | null;
 
 
 
@@ -165,7 +169,7 @@ function makeRegExpForPattern(patternAST: PredicateAST) {
 
 // A singleton match result that may be returned in all cases of a successful match with no named
 // captures. This reduces the number of cases where calls to match() functions create new heap objects.
-const SUCCESSFUL_MATCH_NO_CAPTURES = <{[captureName: string]: string}> Object.freeze({});
+const SUCCESSFUL_MATCH_NO_CAPTURES = Object.freeze({}) as {[captureName: string]: string};
 
 
 

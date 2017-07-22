@@ -1,5 +1,6 @@
+// tslint:disable:no-unused-expression
 import {expect} from 'chai';
-import {toNormalPredicate, ANY, intersect} from 'multimethods/math/predicates';
+import {ANY, intersect, toNormalPredicate} from 'multimethods/math/predicates';
 import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 
 
@@ -11,7 +12,7 @@ describe('Traversing an euler diagram', () => {
         ['a', 'b', 'c', 'd', 'e', 'f'],
         ['a', 'a', 'a', 'a', 'a', 'a'],
         ['...', '*', '*/*', '.../*', '*/*', '*/*/*'],
-        ['...', '*', '*/*', '.../*', '*/*', '*/*/*', 'a/b', 'a/*', '*/b/b']
+        ['...', '*', '*/*', '.../*', '*/*', '*/*/*', 'a/b', 'a/*', '*/b/b'],
     ];
 
     tests.forEach(test => {
@@ -29,7 +30,7 @@ describe('Traversing an euler diagram', () => {
             // Every child set's predicate matches a subset of the addresses matched by its parent set's predicate.
             let edges = getAllEdges(eulerDiagram.universalSet);
             expect(edges.every(edge => {
-                let intersections = intersect(<any> edge.parent.predicate.toString(), <any> edge.child.predicate.toString()); // TODO: messy & casty... fix...
+                let intersections = intersect(edge.parent.predicate, edge.child.predicate);
                 return intersections.length === 1 && intersections[0] === edge.child.predicate.toString();
             })).to.be.true;
         });
@@ -38,8 +39,8 @@ describe('Traversing an euler diagram', () => {
 
 
 /** Helper function that enumerates all edges in an euler diagram. */
-function getAllEdges(set: EulerSet): {parent: EulerSet; child: EulerSet}[] {
+function getAllEdges(set: EulerSet): Array<{parent: EulerSet; child: EulerSet}> {
     let direct = set.subsets.map(spec => ({parent: set, child: spec}));
-    let all = direct.concat(...set.subsets.map(getAllEdges)); 
+    let all = direct.concat(...set.subsets.map(getAllEdges));
     return all;
 }

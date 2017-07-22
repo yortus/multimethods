@@ -12,12 +12,12 @@ export default debug;
 
 
 
-const BG_BLUE = "\x1b[44m";
-const BG_CYAN = "\x1b[46m";
-const BG_RED = "\x1b[41m";
-const BG_YELLOW = "\x1b[43m";
-const FG_WHITE = "\x1b[37m";
-const RESET = "\x1b[0m";
+const BG_BLUE = '\x1b[44m';
+const BG_CYAN = '\x1b[46m';
+const BG_RED = '\x1b[41m';
+const BG_YELLOW = '\x1b[43m';
+const FG_WHITE = '\x1b[37m';
+const RESET = '\x1b[0m';
 
 
 

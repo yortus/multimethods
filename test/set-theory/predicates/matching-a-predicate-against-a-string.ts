@@ -1,5 +1,6 @@
+// tslint:disable:no-eval
 import {expect} from 'chai';
-import {toPredicate, toMatchFunction} from 'multimethods/math/predicates';
+import {toMatchFunction, toPredicate} from 'multimethods/math/predicates';
 
 
 describe('Matching a predicate against a string', () => {
@@ -38,7 +39,7 @@ describe('Matching a predicate against a string', () => {
         '*bbb* DOES NOT MATCH bb/baaabb',
         '/{lhs}/bbb/{...rhs} MATCHES /aaa/bbb/ccc/ddd WITH {lhs: "aaa", rhs: "ccc/ddd"}',
         '{lhs}/bbb/{...rhs} DOES NOT MATCH /aaa/bbb/ccc/ddd',
-        '/f*o/bar/{baz}z/{...rest}.html MATCHES /foo/bar/baz/some/more/stuff.html WITH { baz: "ba", rest: "some/more/stuff" }',
+        '/f*o/bar/{baz}z/{...rest}.html MATCHES /foo/bar/baz/1/more/part.html WITH { baz: "ba", rest: "1/more/part" }',
         '{first} {...rest} MATCHES a b c d WITH { first: "a b c", rest: "d" }',
         '{first} {...rest} DOES NOT MATCH abcd',
         '{first} {rest} DOES NOT MATCH abcd',
@@ -51,7 +52,7 @@ describe('Matching a predicate against a string', () => {
         '  {first}    {...rest}   MATCHES   a      b   WITH { first: "a  ", rest: "b" }',
         '  {first}    {...rest}   DOES NOT MATCH   a      b',
         '  {first}  /  {...rest} MATCHES     a  /      b   WITH { first: "  a", rest: "    b  " }',
-        '  {first}  /  {...rest} MATCHES     a  /      b WITH { first: "  a", rest: "    b" }'
+        '  {first}  /  {...rest} MATCHES     a  /      b WITH { first: "  a", rest: "    b" }',
     ];
 
     tests.forEach(test => {

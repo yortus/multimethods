@@ -1,7 +1,7 @@
-import fatalError from '../util/fatal-error';
-import isMetaMethod from '../util/is-meta-method';
-import Options from '../options';
 import {toNormalPredicate} from '../math/predicates';
+import Options from '../options';
+import * as fatalError from '../util/fatal-error';
+import isMetaMethod from '../util/is-meta-method';
 
 
 
@@ -11,7 +11,7 @@ import {toNormalPredicate} from '../math/predicates';
 export default function checkMethods(methods: Options['methods']) {
     if (methods === undefined) return;
 
-    // TODO: cleanup... For method chains, ensure first regular method in chain (if any) comes after last meta-method in chain (if any)
+    // For method chains, ensure first regular method in chain (if any) comes after last meta-method in chain (if any).
     Object.keys(methods).forEach(predicate => {
         let method = methods[predicate];
         if (!Array.isArray(method)) return;

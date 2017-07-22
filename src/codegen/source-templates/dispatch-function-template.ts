@@ -1,4 +1,4 @@
-import fatalError from '../../util/fatal-error';
+import * as fatalError from '../../util/fatal-error';
 import Thunk from '../thunk';
 
 
@@ -8,12 +8,13 @@ import Thunk from '../thunk';
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __VARARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
+// TODO: implement non-promise-like result assertion for when options.async === false
 export default function __FUNCNAME__(__VARARGS__: any[]) {
     let discriminant = $.TO_DISCRIMINANT(__VARARGS__);
     let thunk = $.SELECT_THUNK(discriminant);
     let result = thunk(discriminant, $.CONTINUE, __VARARGS__);
     return result === $.CONTINUE ? $.UNHANDLED_ERROR() : result;
-};
+}
 
 
 

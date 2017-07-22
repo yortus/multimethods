@@ -1,3 +1,4 @@
+// tslint:disable:no-eval
 import {expect} from 'chai';
 import getLongestCommonPrefix from 'multimethods/util/get-longest-common-prefix';
 
@@ -23,7 +24,7 @@ describe('Getting the longest common prefix', () => {
         `[1], [1], [true], [], [1] ==> []`,
         `[true, false, 'blah', [], {}, 5] ==> [true, false, 'blah', [], {}, 5]`,
         `[] ==> []`,
-        ` ==> []`
+        ` ==> []`,
     ];
 
     tests.forEach(test => {

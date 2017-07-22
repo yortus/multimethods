@@ -9,7 +9,8 @@ Predicate
         let signature = elems.map(elem => elem[0]).join('');
         let identifier = elems.map(elem => elem[1]).join('');
         let captures = elems.map(elem => elem[2]).filter(elem => !!elem);
-        return { signature, identifier, captures };
+        let captureNames = captures.filter(c => c !== '?');
+        return {signature, identifier, captures, captureNames};
     }
 
 Element

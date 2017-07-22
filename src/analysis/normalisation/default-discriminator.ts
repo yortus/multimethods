@@ -7,7 +7,7 @@
 // TODO: revise suitability of this default behaviour in actual usage
 // TODO: better to specialise for MM arity for perf/strict checks?
 export default function toDiscriminant(...args: any[]) {
-	return args.map(arg => '/' + textify(arg)).join('');
+    return args.map(arg => '/' + textify(arg)).join('');
 }
 
 

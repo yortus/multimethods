@@ -6,9 +6,10 @@
   "main": "dist/release/index.js",
   "typings": "dist/release/index.d.ts",
   "scripts": {
+    "clean": "rimraf dist/",
     "build": "tsc -p src && tsc -p test && tsc -p extras && npm run build:peg",
     "build:peg": "pegjs -o dist/release/math/predicates/dsl-grammar.js src/math/predicates/dsl-grammar.pegjs",
-    "clean": "rimraf dist/",
+    "lint": "tslint src/**/*.ts extras/**/*.ts test/**/*.ts",
     "test": "node ./scripts/run-unit-tests",
     "test:debug": "cross-env DEBUG=multimethods node ./scripts/run-unit-tests",
     "bench": "node ./dist/extras/bench/basic-routing.js",
@@ -55,6 +56,7 @@
     "mocha": "^3.4.2",
     "pegjs": "^0.10.0",
     "rimraf": "^2.6.1",
+    "tslint": "^5.5.0",
     "typescript": "^2.4.1"
   }
 }

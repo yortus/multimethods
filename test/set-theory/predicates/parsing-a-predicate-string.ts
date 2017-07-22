@@ -1,3 +1,4 @@
+// tslint:disable:no-eval
 import {expect} from 'chai';
 import {parsePredicateSource, PredicateAST} from 'multimethods/math/predicates';
 
@@ -53,23 +54,18 @@ describe('Parsing a predicate string', () => {
 
     tests.forEach(test => {
         it(test, () => {
-            let pattern = test.split(' ==> ')[0].replace(/^∅$/, '');
+            let source = test.split(' ==> ')[0].replace(/^∅$/, '');
             let rhs = test.split(' ==> ')[1];
-            let expected: PredicateAST|string = rhs === "ERROR" ? rhs : eval(`(${rhs})`);
-            if (typeof expected !== 'string') expected.captureNames = expected.captures.filter(c => c !== '?'); // TODO: temp testing for PredicateClass compat. Add above or otherwise clean up.
-            //let expectedError = '';// TODO: implement this...
-            let actual: PredicateAST|string = 'ERROR';
+            let expected: PredicateAST|string = rhs === 'ERROR' ? rhs : eval(`(${rhs})`);
+            if (typeof expected !== 'string') expected.captureNames = expected.captures.filter(c => c !== '?');
+            let actual: PredicateAST|string;
             try {
-                actual = parsePredicateSource(pattern);
+                actual = parsePredicateSource(source);
             }
-            catch (ex) { }
+            catch (ex) {
+                actual = 'ERROR';
+            }
             expect(actual).to.deep.equal(expected);
-
-            // TODO: temp testing...
-            if (typeof actual !== 'string') {
-                eval(`(function () { var ℙ${actual.identifier}; })`);
-            }
-
         });
     });
 });

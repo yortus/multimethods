@@ -1,7 +1,7 @@
-import defaultDiscriminator from './default-discriminator';
-import normaliseMethods from './normalise-methods';
-import NormalOptions from './normal-options';
 import Options from '../../options';
+import defaultDiscriminator from './default-discriminator';
+import NormalOptions from './normal-options';
+import normaliseMethods from './normalise-methods';
 
 
 

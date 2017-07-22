@@ -1,4 +1,4 @@
-import {toNormalPredicate, NormalPredicate, Predicate} from '../predicates';
+import {NormalPredicate, Predicate, toNormalPredicate} from '../predicates';
 
 
 
@@ -92,8 +92,8 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
  * wildcard character have the wildcard on both sides of the split (i.e. as the last character of the prefix and the
  * first character of the suffix). E.g., 'ab…c' splits into: ['','ab…c'], ['a','b…c'], ['ab…','…c'], and ['ab…c',''].
  */
-function getAllPredicateSplits(predicate: NormalPredicate): [NormalPredicate, NormalPredicate][] {
-    let result = [] as [NormalPredicate, NormalPredicate][];
+function getAllPredicateSplits(predicate: NormalPredicate): Array<[NormalPredicate, NormalPredicate]> {
+    let result = [] as Array<[NormalPredicate, NormalPredicate]>;
     for (let i = 0; i <= predicate.length; ++i) {
         let pair = [predicate.substring(0, i), predicate.substring(i)];
         if (predicate[i] === '…' || predicate[i] === '*') {

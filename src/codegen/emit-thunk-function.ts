@@ -1,8 +1,8 @@
-import Emitter, {EnvNames} from './emitter';
-import {MMInfo, MMNode, MethodSequence} from '../analysis';
+import {MethodSequenceEntry, MMInfo, MMNode} from '../analysis';
 import {parsePredicateSource} from '../math/predicates';
 import repeatString from '../util/string-repeat';
-import {thunkFunctionTemplate, ThunkFunctionSubstitutions} from './source-templates';
+import Emitter, {EnvNames} from './emitter';
+import {ThunkFunctionSubstitutions, thunkFunctionTemplate} from './source-templates';
 import {transformFunctionSource} from './source-transforms';
 
 
@@ -18,21 +18,27 @@ import {transformFunctionSource} from './source-transforms';
  * methods being wrapped into a callback function and passed to the meta-method. To account for this, we perform
  * an order-preserving partitioning of all matching methods for the node, with each meta-method starting a new
  * partition. Within each partition, we use the straightforward cascading logic outlined above.
- * However, each partition as a whole is executed in reverse-order (least to most specific), with the next (more-specific)
- * partition being passed as the `next` parameter to the meta-method starting the previous (less-specific) partition.
- * @param {node} MMNode - contains the list of matching methods for the node's predicate, ordered from most- to least-specific.
- * @returns {Thunk} the virtual method for the node.
+ * However, each partition as a whole is executed in reverse-order (least to most specific), with the next
+ * (more-specific) partition being passed as the `next` parameter to the meta-method starting the previous
+ * (less-specific) partition.
+ * @param {node} MMNode - TODO: fix these...
+ * @returns {Thunk} TODO:...
  */
-export default function emitThunkFunction(emit: Emitter, mminfo: MMInfo<MMNode>, seq: MethodSequence<MMNode>['methodSequence'], index: number, names: typeof EnvNames) {
+export default function emitThunkFunction(emit: Emitter,
+                                          mminfo: MMInfo<MMNode>,
+                                          seq: Array<MethodSequenceEntry<MMNode>>,
+                                          index: number,
+                                          names: typeof EnvNames) {
 
     let {fromNode, methodIndex, isMeta} = seq[index];
 
-    // To avoid unnecessary duplication, skip emit for regular methods that are less specific that the set's predicate, since these will be handled in their own set.
+    // To avoid unnecessary duplication, skip emit for regular methods that are less
+    // specific that the set's predicate, since these will be handled in their own set.
     if (!isMeta && fromNode !== seq[0].fromNode) return;
 
     // TODO: temp testing... explain these calcs!!
     let isLeastSpecificMethod = index === seq.length - 1;
-    let downstream = seq.filter(({isMeta}, j) => (j === 0 || isMeta) && j < index).pop();
+    let downstream = seq.filter((entry, j) => (j === 0 || entry.isMeta) && j < index).pop();
 
     // TODO: temp testing...
     emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.options.arity, {
@@ -52,7 +58,7 @@ export default function emitThunkFunction(emit: Emitter, mminfo: MMInfo<MMNode>,
         IS_META_METHOD: isMeta,
         HAS_DOWNSTREAM: downstream != null,
         IS_NEVER_ASYNC: mminfo.options.async === false,
-        IS_ALWAYS_ASYNC: mminfo.options.async === true
+        IS_ALWAYS_ASYNC: mminfo.options.async === true,
     });
 }
 

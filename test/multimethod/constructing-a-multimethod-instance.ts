@@ -1,7 +1,8 @@
 import {expect} from 'chai';
-import MM, {meta, CONTINUE} from 'multimethods';
+import MM, {CONTINUE, meta} from 'multimethods';
 import isPromiseLike from 'multimethods/util/is-promise-like';
-// TODO: rename these tests in filename and describe() ? this is more about invoking the Multimethod, not constructing it...
+// TODO: rename these tests in filename and describe()?
+// - this is more about invoking the Multimethod, not constructing it...
 // TODO: more multimethod tests? for other files?
 
 
@@ -29,7 +30,7 @@ describe('Constructing a Multimethod instance', () => {
     let variants = [
         { vname: 'all synchronous', async: false, val: immediateValue, err: immediateError },
         { vname: 'all asynchronous', async: true, val: promisedValue, err: promisedError },
-        { vname: 'randomized sync/async', async: undefined, val: randomValue, err: randomError }
+        { vname: 'randomized sync/async', async: undefined, val: randomValue, err: randomError },
     ];
 
     variants.forEach(({vname, async, val, err}) => describe(`(${vname})`, () => {
@@ -38,7 +39,13 @@ describe('Constructing a Multimethod instance', () => {
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
             '/baz': () => val('baz'),
-            '/*a*': meta((rq, _, next) => calc(['---', calc(next(rq), rs => rs === CONTINUE ? err('no downstream!') : rs), '---'], concat)),
+            '/*a*': meta((rq, _, next) => {
+                    return calc([
+                        '---',
+                        calc(next(rq), rs => rs === CONTINUE ? err('no downstream!') : rs),
+                        '---',
+                    ], concat);
+            }),
 
             'a/*': () => val(`starts with 'a'`),
             '*/b': () => val(`ends with 'b'`),
@@ -51,19 +58,24 @@ describe('Constructing a Multimethod instance', () => {
             'api/...': () => val(`fallback`),
             'api/fo*o': () => val(CONTINUE),
             'api/fo*': [
-                meta((rq, _, next) => calc(['fo2-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat)),
-                meta((rq, _, next) => calc(['fo1-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat))
+                meta((rq, _, next) => {
+                    return calc(['fo2-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat);
+                }),
+                meta((rq, _, next) => {
+                    return calc(['fo1-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat);
+                }),
             ],
             'api/foo': [
                 meta((rq, _, next) => calc([calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), '!'], concat)),
-                () => val('FOO')
+                () => val('FOO'),
             ],
             'api/foot': rq => val(`FOOt${rq.address.length}`),
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(CONTINUE),
 
             'zz/z/{...rest}': meta((_, {rest}, next) => {
-                return calc(next({address: rest.split('').reverse().join('')}), rs => rs === CONTINUE ? val('NONE') : rs);
+                let moddedReq = {address: rest.split('').reverse().join('')};
+                return calc(next(moddedReq), rs => rs === CONTINUE ? val('NONE') : rs);
             }),
             'zz/z/b*z': (rq) => val(`${rq.address}`),
             'zz/z/./*': () => val('forty-two'),
@@ -86,8 +98,8 @@ describe('Constructing a Multimethod instance', () => {
                 (_, {x}) => val(x.length === 2 ? x.repeat(3) : CONTINUE),
 
                 // Return the string reversed
-                (_, {x}) => val(x.split('').reverse().join(''))
-            ]
+                (_, {x}) => val(x.split('').reverse().join('')),
+            ],
         };
 
         let tests = [
@@ -138,7 +150,7 @@ describe('Constructing a Multimethod instance', () => {
             arity: 1,
             toDiscriminant: (r: any) => r.address,
             async,
-            methods
+            methods,
         });
 
         tests.forEach(test => it(test, async () => {

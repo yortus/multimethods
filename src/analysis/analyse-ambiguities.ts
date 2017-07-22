@@ -1,11 +1,11 @@
-import {CONTINUE} from '../sentinels';
 import {EulerDiagram} from '../math/sets';
-import fatalError from '../util/fatal-error';
+import {CONTINUE} from '../sentinels';
+import * as fatalError from '../util/fatal-error';
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
 import isMetaMethod from '../util/is-meta-method';
-import {MethodTableEntry} from './mm-node';
 import MMInfo from './mm-info';
+import {MethodTableEntry} from './mm-node';
 
 
 
@@ -37,8 +37,8 @@ export default function analyseAmbiguities<T extends MethodTableEntry>(mminfo: M
             // This guarantees the dispatch result is the same regardless of which path is taken through the methods.
             pathsFromRoot.forEach(path => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
-                let divergentNodes = divergentSets.map(set => nodes[sets.indexOf(set)]);
-                let hasMetaMethods = divergentNodes.some(node => node.exactMethods.some(h => isMetaMethod(h)));
+                let divergentNodes = divergentSets.map(s => nodes[sets.indexOf(s)]);
+                let hasMetaMethods = divergentNodes.some(n => n.exactMethods.some(m => isMetaMethod(m)));
                 if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.exactPredicate);
             });
 
@@ -54,7 +54,6 @@ export default function analyseAmbiguities<T extends MethodTableEntry>(mminfo: M
         return {}; // NB: we aren't adding any members to the nodes.
     });
 }
-
 
 
 

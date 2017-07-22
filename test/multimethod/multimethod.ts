@@ -18,11 +18,11 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
                 '/{thing}': (x, {_thing}, _) => x,
                 '/foo':     (x) => 'foo' + x,
                 '/bar':     (x) => 'bar' + x,
-                '...':      meta((x, _caps, next) => `---${next(x)}---`)
-            }
+                '...':      meta((x, _, next) => `---${next(x)}---`),
+            },
         });
         let result = mm('/foo');
-        result;
+        result = result;
     });
 
     // TODO: temp testing...
@@ -32,10 +32,10 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
             arity: 2,
             methods: {
                 '...':              (a: any, b: any) => `${a}:${b}`,
-                '/String...':       (_a: string, _b: any) => `first is string`,
-                '/Number...':       (_a: number, _b: any) => `first is number`,
-                '/Number/Boolean':  (_a: number, _b: any) => `num:bool`,
-            }
+                '/String...':       (_: string, __: any) => `first is string`,
+                '/Number...':       (_: number, __: any) => `first is number`,
+                '/Number/Boolean':  (_: number, __: any) => `num:bool`,
+            },
         });
 
         expect(mm('foo', 42)).to.equal('first is string');

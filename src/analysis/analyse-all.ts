@@ -1,3 +1,4 @@
+import Options from '../options';
 import analyseAmbiguities from './analyse-ambiguities';
 import analyseChildNodes from './analyse-child-nodes';
 import analyseMethodSequences from './analyse-method-sequences';
@@ -6,7 +7,6 @@ import analyseParentNodes from './analyse-parent-nodes';
 import MMInfo from './mm-info';
 import MMNode from './mm-node';
 import {normaliseOptions} from './normalisation';
-import Options from '../options';
 
 
 
@@ -29,6 +29,7 @@ export default function analyseAll(options: Options) {
 
 
 // TODO: reuse/revise old comments below, all from computePredicateLineages()...
+    // tslint:disable:max-line-length
 // (1):
     // Every route begins with the universal predicate. It matches all discriminants,
     // and its method simply returns the `CONTINUE` sentinel value.

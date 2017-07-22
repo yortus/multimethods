@@ -4,6 +4,5 @@
 
 
 // TODO: explain calling convention...
-export default interface Thunk {
-    (discriminant: string, resultSoFar: any, ...mmargs: any[]): any;
-}
+type Thunk = (discriminant: string, resultSoFar: any, ...mmargs: any[]) => any;
+export default Thunk;

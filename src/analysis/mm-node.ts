@@ -5,12 +5,9 @@ import {Predicate} from '../math/predicates';
 
 
 // TODO: doc...
-export default interface MMNode extends
-    MethodTableEntry,
-    ParentNode<MMNode>,
-    ChildNodes<MMNode>,
-    MethodSequence<MMNode>
-    { }
+export default interface MMNode
+    extends MethodTableEntry, ParentNode<MMNode>, ChildNodes<MMNode>, MethodSequence<MMNode> {
+}
 
 
 
@@ -28,7 +25,7 @@ export interface MethodTableEntry {
 
 // TODO: doc... always unambiguously ordered from most- to least- specific. Always at least one element.
 export interface MethodSequence<TNode> {
-    methodSequence: MethodSequenceEntry<TNode>[];
+    methodSequence: Array<MethodSequenceEntry<TNode>>;
     entryPoint: MethodSequenceEntry<TNode>;
     identifier: string;
 }
@@ -44,11 +41,15 @@ export interface MethodSequenceEntry<TNode> {
 
 
 // TODO: doc...
-export interface ParentNode<TNode> { parentNode: (TNode & ParentNode<TNode>) | null }
+export interface ParentNode<TNode> {
+    parentNode: (TNode & ParentNode<TNode>) | null;
+}
 
 
 
 
 
 // TODO: doc...
-export interface ChildNodes<TNode> { childNodes: Array<TNode & ChildNodes<TNode>> }
+export interface ChildNodes<TNode> {
+    childNodes: Array<TNode & ChildNodes<TNode>>;
+}

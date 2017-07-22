@@ -1,6 +1,6 @@
+import {Emitter} from '../codegen';
 import instrumentDispatchFunction from './instrument-dispatch-function';
 import instrumentMethods from './instrument-methods';
-import {Emitter} from "../codegen";
 
 
 

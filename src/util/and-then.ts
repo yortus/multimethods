@@ -5,21 +5,21 @@ import isPromiseLike from './is-promise-like';
 
 
 // TODO: doc...
-export default function andThen(getValue: () => any, cb: (val: any, err: any, isAsync: boolean) => any) {
-    let val: any;
+export default function andThen(getValue: () => any, cb: (value: any, error: any, isAsync: boolean) => any) {
+    let value: any;
     try {
-        val = getValue();
+        value = getValue();
     }
-    catch (err) {
+    catch (error) {
         // sync error
-        return cb(undefined, err, false);
+        return cb(undefined, error, false);
     }
-    if (isPromiseLike(val)) {
+    if (isPromiseLike(value)) {
         // async result or error
-        return val.then(val => cb(val, undefined, true), err => cb(undefined, err, true));
+        return value.then(val => cb(val, undefined, true), err => cb(undefined, err, true));
     }
     else {
         // sync result
-        return cb(val, undefined, false);
+        return cb(value, undefined, false);
     }
 }

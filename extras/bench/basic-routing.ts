@@ -1,5 +1,6 @@
+// tslint:disable:max-line-length
 import * as assert from 'assert';
-import MM, {meta, CONTINUE} from 'multimethods';
+import MM, {CONTINUE, meta} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -61,11 +62,11 @@ const mm = MM({
         'api/fo*o': () => CONTINUE,
         'api/fo*': [
             meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
-            meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`)
+            meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
         ],
         'api/foo': [
             meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
-            () => 'FOO'
+            () => 'FOO',
         ],
         'api/foot': () => 'FOOt',
         'api/fooo': () => 'fooo',
@@ -74,11 +75,11 @@ const mm = MM({
         // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
         'zz/z/{...rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
         'zz/z/b*z': ($req) => `${$req.address}`,
-        'zz/z/./*': () => 'forty-two'
+        'zz/z/./*': () => 'forty-two',
     },
     arity: 1,
     async: false,
-    strict: false
+    strict: false,
 });
 
 
@@ -110,37 +111,39 @@ const tests = [
     `zz/z/baz ==> zab`,
     `zz/z/booz ==> zoob`,
     `zz/z/looz ==> NONE`,
-    `zz/z/./{whatever} ==> forty-two`
+    `zz/z/./{whatever} ==> forty-two`,
 ];
 
 
 // TODO: ...
 // TODO: was... (async () => {
 
-    // Set up the tests.
-    console.log(`Running perf test: basic routing...`);
-    let addresses = tests.map(test => test.split(' ==> ')[0]);
-    let requests = addresses.map(address => ({address}));
-    let responses = tests.map(test => test.split(' ==> ')[1]);
+// Set up the tests.
+// tslint:disable:no-console
+console.log(`Running perf test: basic routing...`);
+let addresses = tests.map(test => test.split(' ==> ')[0]);
+let requests = addresses.map(address => ({address}));
+let responses = tests.map(test => test.split(' ==> ')[1]);
 
-    // Start timer.
-    let start = new Date().getTime();
+// Start timer.
+let start = new Date().getTime();
 
-    // Loop over the tests.
-    for (let i = 0; i < COUNT; ++i) {
-        let index = Math.floor(Math.random() * tests.length);
-        let res = mm(requests[index]);
-        let actualResponse = res;
-        assert.equal(actualResponse, responses[index]);
-    }
+// Loop over the tests.
+for (let i = 0; i < COUNT; ++i) {
+    let index = Math.floor(Math.random() * tests.length);
+    let res = mm(requests[index]);
+    let actualResponse = res;
+    assert.equal(actualResponse, responses[index]);
+}
 
-    // Stop timer.
-    let stop = new Date().getTime();
+// Stop timer.
+let stop = new Date().getTime();
 
-    // Output performance results.
-    let sec = (stop - start) / 1000;
-    let rate = Math.round(0.001 * COUNT / sec) * 1000;
-    console.log(`Dispatched ${COUNT} requests in ${sec} seconds   (~${rate} req/sec)`);
+// Output performance results.
+let sec = (stop - start) / 1000;
+let rate = Math.round(0.001 * COUNT / sec) * 1000;
+console.log(`Dispatched ${COUNT} requests in ${sec} seconds   (~${rate} req/sec)`);
+
 // TODO: was... })().catch(console.log);
 
 

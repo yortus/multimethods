@@ -7,6 +7,7 @@ import Thunk from '../thunk';
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __VARARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
+// tslint:disable:no-var-keyword
 export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}>, __VARARGS__: any[]) {
 
     // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
@@ -27,12 +28,13 @@ export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}
     }
     else {
         if ($.HAS_DOWNSTREAM) {
-            var forward = function (__VARARGS__: any[]) {
+            // tslint:disable-next-line:no-shadowed-variable
+            var forward = (__VARARGS__: any[]) => {
                 return $.DELEGATE_DOWNSTREAM(discriminant, $.CONTINUE, __VARARGS__);
             };
         }
         else {
-            var forward: typeof forward = function () { return $.CONTINUE; };
+            var forward: typeof forward = () => $.CONTINUE;
         }
         result = $.CALL_METHOD(__VARARGS__, captures, forward);
     }

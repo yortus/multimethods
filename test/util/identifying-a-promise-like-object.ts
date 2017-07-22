@@ -1,3 +1,4 @@
+// tslint:disable:no-eval
 import {expect} from 'chai';
 import isPromiseLike from 'multimethods/util/is-promise-like';
 
@@ -20,7 +21,7 @@ describe('Identifying a Promise-like object', () => {
         `T: {then: () => {}}`,
         `F: {then: {}}`,
         `F: {Then: () => {}}`,
-        `T: {Then: () => {}, then: () => {}}`
+        `T: {Then: () => {}, then: () => {}}`,
     ];
 
     tests.forEach(test => {

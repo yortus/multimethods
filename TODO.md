@@ -4,6 +4,7 @@
   - [ ] initially: ':<>'
 - [x] add a good default implementation for `toDiscriminant`
 - [x] fix buggy emit for isMatch and getCaptures lines (see comment there in code)
+- [ ] implement `async: false` option properly
 
 
 
@@ -37,6 +38,7 @@
 - [ ] build system: use webpack to create a single-file bundle (eg so can use in browser)
 - [ ] build system: integrate tslint
 - [ ] validation: check for unrecognised options
+- [ ] review fatalError module again: 1. don't use ALL_CAPS, how best to export? c.f. TypeScript internals...
 
 
 ## Decisions:

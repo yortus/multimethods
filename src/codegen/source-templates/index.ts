@@ -1,6 +1,6 @@
 import dispatchFunction, {VariablesInScope as DispatchVars} from './dispatch-function-template';
-import thunkFunction, {VariablesInScope as ThunkVars, BooleanConstants as ThunkBools} from './thunk-function-template';
-
+import Template from './template';
+import thunkFunction, {BooleanConstants as ThunkBools, VariablesInScope as ThunkVars} from './thunk-function-template';
 
 
 
@@ -12,19 +12,25 @@ import thunkFunction, {VariablesInScope as ThunkVars, BooleanConstants as ThunkB
 
 
 
-// TODO: doc...
-const dispatchFunctionTemplate = getNormalisedFunctionSource(dispatchFunction);
-type DispatchFunctionSubstitutions = {[K in keyof DispatchVars]: string}
-export {dispatchFunctionTemplate, DispatchFunctionSubstitutions}
+export {Template};
 
 
 
 
 
 // TODO: doc...
-const thunkFunctionTemplate = getNormalisedFunctionSource(thunkFunction);
+const dispatchFunctionTemplate = getNormalisedFunctionSource(dispatchFunction) as Template;
+type DispatchFunctionSubstitutions = {[K in keyof DispatchVars]: string};
+export {dispatchFunctionTemplate, DispatchFunctionSubstitutions};
+
+
+
+
+
+// TODO: doc...
+const thunkFunctionTemplate = getNormalisedFunctionSource(thunkFunction) as Template;
 type ThunkFunctionSubstitutions = {[K in keyof ThunkVars]: string} & {[K in keyof ThunkBools]: boolean};
-export {thunkFunctionTemplate, ThunkFunctionSubstitutions}
+export {thunkFunctionTemplate, ThunkFunctionSubstitutions};
 
 
 

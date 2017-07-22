@@ -1,13 +1,13 @@
+import {MMInfo, MMNode} from '../analysis';
+import {parsePredicateSource, toMatchFunction, toNormalPredicate} from '../math/predicates';
 import {CONTINUE} from '../sentinels';
-import Emitter, {EmitEnvironment, EmitNode, createEmitter, EnvNames as names} from './emitter';
+import * as fatalError from '../util/fatal-error';
+import isPromiseLike from '../util/is-promise-like';
+import repeat from '../util/string-repeat';
 import emitDispatchFunction from './emit-dispatch-function';
 import emitSelectorFunction from './emit-selector-function';
 import emitThunkFunction from './emit-thunk-function';
-import fatalError from '../util/fatal-error';
-import isPromiseLike from '../util/is-promise-like';
-import {MMInfo, MMNode} from '../analysis';
-import repeat from '../util/string-repeat';
-import {toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/predicates';
+import Emitter, {createEmitter, EmitEnvironment, EmitNode, EnvNames as names} from './emitter';
 
 
 
@@ -17,7 +17,7 @@ import {toMatchFunction, toNormalPredicate, parsePredicateSource} from '../math/
 export default function emitAll(mminfo: MMInfo<MMNode>) {
     let env = createEmitEnvironment(mminfo);
     let emit = createEmitter(env);
-    
+
     // Generate the combined source code for the multimethod. This includes local variable declarations for
     // all predicates and methods, as well as the interdependent thunk function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of each multimethod call.

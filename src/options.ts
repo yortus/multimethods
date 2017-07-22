@@ -14,11 +14,12 @@ export default interface Options {
     // TODO: doc perf and signature differences of variadic vs fixed arity...
     arity?: number;
 
-    // TODO: doc... Check result if not undefined. For 'never', the result must NOT be a promise. For 'always', the result is wrapped using the global `Promise.resolve`
-    // TODO: doc tristate:
-    // - true: always returns a promise. Doc use of global Promise.resolve
-    // - false: always returns a value synchronously. Additional strict mode checks.
-    // - undefined: may return either a Promise or a value, and methods may return promises or values
+    // TODO: doc... determines special treatment of multimethod's returned values. Tristate:
+    // - true: ensures mm always returns a promise, wrapping the result if necessary.
+    //         - TODO: doc reliance on availability of global Promise.resolve if this option is `true`
+    // - false: ensures mm always returns a value synchronously (ie never a promise). Throws if necessary
+    //         - TODO: is this actually implemented? Additional strict mode checks - eg check it in every thunk?
+    // - undefined: mm may return either a Promise or a value, and methods may return promises or values.
     async?: boolean;
 
     // TODO: doc... If not undefined, fails on early detection of discriminants for which there is no best method.
@@ -29,5 +30,7 @@ export default interface Options {
     toDiscriminant?: Function;
 
     // TODO: doc... this is the Method Table...
-    methods?: { [predicate: string]: Function|Function[]; }
+    methods?: {
+        [predicate: string]: Function|Function[];
+    };
 }

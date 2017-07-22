@@ -1,4 +1,11 @@
-import fatalError from '../../util/fatal-error';
+import * as fatalError from '../../util/fatal-error';
+
+
+
+
+
+// NB: dsl-grammar is a .js file that is built from a pegjs grammar. TSC can't see it, so `import` can't be used here.
+// tslint:disable-next-line:no-var-requires
 const grammar: { parse(text: string): PredicateAST; } = require('./dsl-grammar');
 
 
@@ -16,7 +23,6 @@ const grammar: { parse(text: string): PredicateAST; } = require('./dsl-grammar')
 export default function parse(source: string): PredicateAST {
     try {
         let ast = grammar.parse(source);
-        ast.captureNames = ast.captures.filter(c => c !== '?'); // TODO: temp testing for PredicateClass compat - remove or integrate better
         return ast;
     }
     catch (ex) {

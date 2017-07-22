@@ -1,6 +1,6 @@
+import {MMInfo, MMNode} from '../analysis';
 import andThen from '../util/and-then';
 import debug, {DISPATCH} from '../util/debug';
-import {MMInfo, MMNode} from '../analysis';
 
 
 
@@ -10,7 +10,11 @@ import {MMInfo, MMNode} from '../analysis';
 export default function instrumentDispatchFunction(mminfo: MMInfo<MMNode>, mm: Function) {
     let mmname = mminfo.options.name;
     function instrumentedDispatch(...args: any[]) {
-        debug(`${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`, mminfo.options.toDiscriminant(...args), args);
+        debug(
+            `${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`,
+            mminfo.options.toDiscriminant(...args),
+            args
+        );
         let getResult = () => mm(...args);
         return andThen(getResult, (result, error, isAsync) => {
             if (error) {

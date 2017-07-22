@@ -1,8 +1,8 @@
-import andThen from '../util/and-then';
+import {MMInfo, MMNode} from '../analysis';
 import {CONTINUE} from '../sentinels';
+import andThen from '../util/and-then';
 import debug, {DISPATCH} from '../util/debug';
 import isMetaMethod from '../util/is-meta-method';
-import {MMInfo, MMNode} from "../analysis";
 import repeatString from '../util/string-repeat';
 
 
@@ -39,7 +39,7 @@ function instrumentMethod(method: Function, name: string) {
             debug(`${DISPATCH} |<--| %s   %s   %s`, methodInfo, isAsync ? 'async' : 'sync', resultInfo);
             if (error) throw error; else return result;
         });
-    };
+    }
     if (isMeta) isMetaMethod(instrumentedMethod, true);
     return instrumentedMethod;
 }
