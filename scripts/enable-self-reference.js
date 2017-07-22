@@ -5,10 +5,10 @@ var path = require('path');
 
 
 
-// Create a symlink at `node_modules/multimethods` pointing to `dist/release`
+// Create a symlink at `node_modules/multimethods` pointing to `dist/commonjs`
 try {
     var linkFrom = path.join(__dirname, '../node_modules/multimethods');
-    var linkTo = path.join(__dirname, '../dist/release');
+    var linkTo = path.join(__dirname, '../dist/commonjs');
     fs.symlinkSync(linkTo, linkFrom, 'junction');
 }
 catch (err) {

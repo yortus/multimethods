@@ -6,11 +6,14 @@
 Predicate
 =   elems:Element*   !.
     {
-        let signature = elems.map(elem => elem[0]).join('');
-        let identifier = elems.map(elem => elem[1]).join('');
-        let captures = elems.map(elem => elem[2]).filter(elem => !!elem);
-        let captureNames = captures.filter(c => c !== '?');
-        return {signature, identifier, captures, captureNames};
+        // NB: This isn't downleveled, so only use ES5 in here...
+        var captures = elems.map(function (elem) { return elem[2]; }).filter(function (c) { return !!c; });
+        return {
+            signature: elems.map(function (elem) { return elem[0]; }).join(''),
+            identifier: elems.map(function (elem) { return elem[1]; }).join(''),
+            captures: captures,
+            captureNames: captures.filter(function (c) { return c !== '?'; })
+        };
     }
 
 Element

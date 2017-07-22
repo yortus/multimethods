@@ -11,6 +11,7 @@ import MM, {CONTINUE, meta} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
+// 2017-07-22   LAJESTIC    Dispatched 1000000 requests in 0.741 seconds   (~1350000 req/sec)   general perf checkback after many commits.
 // 2017-06-26   LAJESTIC    Dispatched 1000000 requests in 0.763 seconds   (~1311000 req/sec)   now emits proper dispatch function (with arity adjustments, etc).
 // 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.782 seconds   (~1279000 req/sec)   adjustments after making MMs throw if final result is CONTINUE.
 // 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.76 seconds    (~1316000 req/sec)   Target is now ES5 (was ES6). Codegen changed accordingly.

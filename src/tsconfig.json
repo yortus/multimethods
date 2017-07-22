@@ -6,7 +6,7 @@
         "removeComments": false,
         "sourceMap": true,
         "declaration": true,
-        "outDir": "../dist/release",
+        "outDir": "../dist/commonjs",
 
         // Static checks
         "allowUnreachableCode": false,
