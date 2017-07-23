@@ -17,7 +17,7 @@ import {Template} from '../template-code';
 export default function downlevelES6RestSpread(template: Template, arity?: number) {
     if (typeof arity === 'number') {
         // NB: factor out magic string '__VARARGS__' to one place project-wide
-        template = strengthReduceES6RestSpread(template, '__VARARGS__', '_', arity);
+        template = strengthReduceES6RestSpread(template, '__VARARGS__', '$', arity);
     }
     else {
         template = convertES6RestToES5(template);
@@ -73,7 +73,7 @@ function convertES6SpreadToES5(template: Template) {
 
 
 // Matches (non-arrow) function headers with a rest argument
-const REGEX_REST = /function([^(]*)\((.*?)(?:,\s*)?\.\.\.([A-Z]+)\s*\)\s*{\n(\s*)/g;
+const REGEX_REST = /function([^(]*)\((.*?)(?:,\s*)?\.\.\.([A-Za-z$_][A-Za-z0-9$_]*)\s*\)\s*{\n(\s*)/g;
 
 
 
@@ -81,4 +81,4 @@ const REGEX_REST = /function([^(]*)\((.*?)(?:,\s*)?\.\.\.([A-Z]+)\s*\)\s*{\n(\s*
 
 // Recognises the argument list of a function call containing an ...XXX arg. Captures three groups:
 // (1) args before ...XXX if any, (2) the XXX part, and (3) args after ...XXX if any
-const REGEX_SPREAD = /\(([^)]*?)(?:,\s*)?\.\.\.([A-Z]+)(?:,\s*)?([^)]*?)\)(?!\s*{)/g;
+const REGEX_SPREAD = /\(([^)]*?)(?:,\s*)?\.\.\.([A-Za-z$_][A-Za-z0-9$_]*)(?:,\s*)?([^)]*?)\)(?!\s*{)/g;
