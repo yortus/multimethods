@@ -12,7 +12,6 @@
     "build:pegjs": "pegjs -o dist/commonjs/math/predicates/dsl-grammar.js src/math/predicates/dsl-grammar.pegjs",
     "build:umd": "webpack",
     "lint": "tslint src/**/*.ts extras/**/*.ts test/**/*.ts",
-    "bundle": "webpack --progress",
     "test": "node ./scripts/run-unit-tests",
     "test:debug": "cross-env DEBUG=multimethods node ./scripts/run-unit-tests",
     "bench": "node ./dist/extras/bench/basic-routing.js",
