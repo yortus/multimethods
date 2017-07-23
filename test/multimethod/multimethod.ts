@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import multimethod, {meta} from 'multimethods';
+import {create as MM, meta} from 'multimethods';
 
 
 
@@ -11,7 +11,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
     // TODO: temp testing...
     it('TEMP1', () => {
 
-        let mm = multimethod({
+        let mm = MM({
             arity: 1,
             toDiscriminant: (x: string) => x,
             methods: {
@@ -28,7 +28,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
     // TODO: temp testing...
     it('TEMP2', () => {
 
-        let mm = multimethod({
+        let mm = MM({
             arity: 2,
             methods: {
                 '...':              (a: any, b: any) => `${a}:${b}`,

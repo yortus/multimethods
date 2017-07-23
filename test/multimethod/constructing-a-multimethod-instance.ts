@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import MM, {CONTINUE, meta} from 'multimethods';
+import {CONTINUE, create as MM, meta} from 'multimethods';
 import isPromiseLike from 'multimethods/util/is-promise-like';
 // TODO: rename these tests in filename and describe()?
 // - this is more about invoking the Multimethod, not constructing it...

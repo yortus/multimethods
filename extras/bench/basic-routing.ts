@@ -1,6 +1,6 @@
 // tslint:disable:max-line-length
 import * as assert from 'assert';
-import MM, {CONTINUE, meta} from 'multimethods';
+import {CONTINUE, create as MM, meta} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
