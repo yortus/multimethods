@@ -27,5 +27,6 @@ export default function instrumentDispatchFunction(mminfo: MMInfo<MMNode>, mm: F
             if (error) throw error; else return result;
         });
     }
+    instrumentedDispatch.toString = mm.toString;
     return instrumentedDispatch;
 }

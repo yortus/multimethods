@@ -1,5 +1,4 @@
 import {MMInfo, MMNode} from '../analysis';
-import debug, {EMIT} from '../util/debug';
 
 
 
@@ -45,7 +44,6 @@ export function createEmitter(env: EmitEnvironment) {
     function emit(...args: string[]) {
         args.forEach(lines => {
             lines.split('\n').forEach(line => {
-                debug(`${EMIT} %s`, line);
                 allLines.push(line);
             });
         });
@@ -95,6 +93,7 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     // to the options of this multimethod, rather than having to be generalized for all possible cases.
     // tslint:disable-next-line:no-eval
     let mm = eval(`(function () { ${source}; return ${env.options.name}; })`)() as Function;
+    mm.toString = () => source;
     return mm;
 }
 

@@ -28,7 +28,7 @@
     - [ ] options
 - [ ] Improve unit test coverage
   - [ ] add basic tests for correct arg passing for variadic, nullary, unary, binary and ternary MMs
-- [ ] invenstigate and fix UMD errors when compression is enabled in uglifyjs.
+- [ ] investigate and fix UMD errors when compression is enabled in uglifyjs.
 
 
 
@@ -36,13 +36,13 @@
 - [ ] new option `toType: Function` - if provided and no `toDiscriminant` given, the default `toDiscriminant` uses it
 - [ ] new option `allowNulls` - mms should reject `null` args unless this is explicitly set to `true`
 - [ ] support simplified MM creation: accept method table directly instead of inside `methods` prop.
-- [ ] `multimethods.min.js`: test that the bundle actually works the same in a browser (pref IE11)
+- [x] `multimethods.min.js`: test that the bundle actually works the same in a browser
 - [ ] validation: check for unrecognised options
 - [ ] review fatalError module again: 1. don't use ALL_CAPS, how best to export? c.f. TypeScript internals...
-- [ ] add sticky comment at top of multimethods.min.js
+- [ ] add sticky copyright comment at top of multimethods.min.js
 - [x] ensure UMD file is working in Chrome, Firefox and Edge
 - [ ] test in real IE11 browser
-- [ ] override mm's `toString()` to give mm source code, and remove EMIT debug logging
+- [x] override mm's `toString()` to give mm source code, and remove EMIT debug logging
 
 
 ## Decisions:
