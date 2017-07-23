@@ -2,8 +2,8 @@ import {MethodSequenceEntry, MMInfo, MMNode} from '../analysis';
 import {parsePredicateSource} from '../math/predicates';
 import repeatString from '../util/string-repeat';
 import Emitter, {EnvNames} from './emitter';
-import {ThunkFunctionSubstitutions, thunkFunctionTemplate} from './templates';
-import {transformFunctionSource} from './template-transforms';
+import {ThunkFunctionSubstitutions, thunkFunctionTemplate} from './template-code';
+import {transformTemplate} from './template-transforms';
 
 
 
@@ -68,6 +68,6 @@ export default function emitThunkFunction(emit: Emitter,
 
 // TODO: doc...
 function emitThunkFromTemplate(emit: Emitter, name: string, arity: number|undefined, env: ThunkFunctionSubstitutions) {
-    let source = transformFunctionSource(thunkFunctionTemplate, name, arity, env);
+    let source = transformTemplate(thunkFunctionTemplate, name, arity, env);
     emit(source);
 }
