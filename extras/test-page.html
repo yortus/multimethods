@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html" charset="utf-8">
+        <script type="text/javascript" src="../dist/umd/multimethods.min.js" charset="utf-8"></script>
+        <script type="text/javascript">
+
+            let mm = multimethods.create({
+                arity: 2,
+                methods: {
+                    '...':              (a, b) => `${a}:${b}`,
+                    '/String...':       (_, __) => `first is string`,
+                    '/Number...':       (_, __) => `first is number`,
+                    '/Number/Boolean':  (_, __) => `num:bool`,
+                },
+            });
+
+            let a = mm('foo', 42);    //).to.equal('first is string');
+            let b = mm(42, 'foo');    //).to.equal('first is number');
+            let c = mm(true, 42);    //).to.equal('true:42');
+            let d = mm(42, true);    //).to.equal('num:bool');
+
+            console.log('a: ' + a);
+            console.log('b: ' + b);
+            console.log('c: ' + c);
+            console.log('d: ' + d);
+
+        </script>
+    </head>
+    <body>
+        <h1>Hello, World!</h1>
+    </body>
+</html>
+
