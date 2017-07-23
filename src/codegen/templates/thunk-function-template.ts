@@ -34,7 +34,9 @@ export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}
             };
         }
         else {
-            var forward: typeof forward = () => $.CONTINUE;
+            var forward: typeof forward = () => {
+                return $.CONTINUE;
+            };
         }
         result = $.CALL_METHOD(__VARARGS__, captures, forward);
     }

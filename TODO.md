@@ -39,6 +39,9 @@
 - [ ] validation: check for unrecognised options
 - [ ] review fatalError module again: 1. don't use ALL_CAPS, how best to export? c.f. TypeScript internals...
 - [ ] add sticky comment at top of multimethods.min.js
+- [x] ensure UMD file is working in Chrome, Firefox and Edge
+- [ ] test in real IE11 browser
+- [ ] override mm's `toString()` to give mm source code, and remove EMIT debug logging
 
 
 ## Decisions:
@@ -468,10 +471,10 @@ Contenders
 
 
 ## Done
-- [x] build system: use webpack to create a single-file bundle (eg so can use in browser)
+- [x] build system: use webpack to create a UMD file of the library (eg so can use in browser)
   - [x] get it working
   - [x] minify the bundle
-  - [x] rename dist dirs: `release` --> `commonjs`, `bundle` --> `single-file`
+  - [x] rename dist dirs: `release` --> `commonjs`, `bundle` --> `umd`
   - [x] do all in single build step (fix npm scripts)
 - [x] build system: integrate tslint
 - [x] TODO: revise codegen

@@ -1,4 +1,4 @@
-import {Template} from '../source-templates';
+import {Template} from '../templates';
 
 
 

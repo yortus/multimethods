@@ -1,19 +1,27 @@
-import {Template} from '../source-templates';
+import {Template} from '../templates';
 
 
 
 
 
-// TODO: explain... basically removes if/then branches that are statically dead code.
+// TODO: explain... removes dead code by simplistic transforms of if/else blocks
 // TODO: explain limited circumstances where this works:
 // - if (true) {\n[...]} [else {\n[...]}]
 // - if (false) {\n[...]} [else {\n[...]}]
 // - if (!true) {\n[...]} [else {\n[...]}]
 // - if (!false) {\n[...]} [else {\n[...]}]
-// TODO: assumes consistent 4-space block indents, simple conditions... relax any of these?
+// TODO: doc (or relax) assumptions ie normalisation of code:
+// - consistent 4-space block indents
+// - simple static conditions with compound consequent/alternative:
+//   - `if (true) {\n`
+//   - `if (!true) {\n`
+//   - `if (false) {\n`
+//   - `if (!false) {\n`
+//   - `else {\n`
+// - if/else keyword must be first thing on its line
 export default function eliminateDeadCode(template: Template) {
-    const MATCH_IF = /^(\s*)if \((\!?)((?:true)|(?:false))\) {$/;
-    const MATCH_ELSE = /^(\s*)else {$/;
+    const MATCH_IF = /^(\s*)if\s*\((\!?)((?:true)|(?:false))\)\s*{$/;
+    const MATCH_ELSE = /^(\s*)else\s*{$/;
     let inLines = template.split('\n');
     let outLines: string[] = [];
     while (inLines.length > 0) {

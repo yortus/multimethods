@@ -2,8 +2,8 @@ import {MethodSequenceEntry, MMInfo, MMNode} from '../analysis';
 import {parsePredicateSource} from '../math/predicates';
 import repeatString from '../util/string-repeat';
 import Emitter, {EnvNames} from './emitter';
-import {ThunkFunctionSubstitutions, thunkFunctionTemplate} from './source-templates';
-import {transformFunctionSource} from './source-transforms';
+import {ThunkFunctionSubstitutions, thunkFunctionTemplate} from './templates';
+import {transformFunctionSource} from './template-transforms';
 
 
 

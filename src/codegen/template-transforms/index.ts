@@ -1,4 +1,4 @@
-import {Template} from '../source-templates';
+import {Template} from '../templates';
 import downlevelES6RestSpread from './downlevel-es6-rest-spread';
 import eliminateDeadCode from './eliminate-dead-code';
 import replaceAll from './replace-all';

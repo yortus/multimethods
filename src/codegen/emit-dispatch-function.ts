@@ -1,6 +1,6 @@
 import Emitter, {EnvNames} from './emitter';
-import {DispatchFunctionSubstitutions, dispatchFunctionTemplate} from './source-templates';
-import {transformFunctionSource} from './source-transforms';
+import {DispatchFunctionSubstitutions, dispatchFunctionTemplate} from './templates';
+import {transformFunctionSource} from './template-transforms';
 
 
 

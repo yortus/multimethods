@@ -7,10 +7,10 @@
   "typings": "dist/commonjs/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "npm run build:tsc && npm run build:pegjs && npm run build:bundle",
+    "build": "npm run build:tsc && npm run build:pegjs && npm run build:umd",
     "build:tsc": "tsc -p src && tsc -p test && tsc -p extras",
     "build:pegjs": "pegjs -o dist/commonjs/math/predicates/dsl-grammar.js src/math/predicates/dsl-grammar.pegjs",
-    "build:bundle": "webpack",
+    "build:umd": "webpack",
     "lint": "tslint src/**/*.ts extras/**/*.ts test/**/*.ts",
     "bundle": "webpack --progress",
     "test": "node ./scripts/run-unit-tests",
@@ -60,6 +60,8 @@
     "pegjs": "^0.10.0",
     "rimraf": "^2.6.1",
     "tslint": "^5.5.0",
-    "typescript": "^2.4.1"
+    "typescript": "^2.4.1",
+    "uglifyjs-webpack-plugin": "^1.0.0-beta.2",
+    "webpack": "^3.3.0"
   }
 }
