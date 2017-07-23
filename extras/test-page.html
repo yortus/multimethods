@@ -5,26 +5,118 @@
         <script type="text/javascript" src="../dist/umd/multimethods.min.js" charset="utf-8"></script>
         <script type="text/javascript">
 
-            let mm = multimethods.create({
-                arity: 2,
+            // ==========   Adapted from ./bench/basic-routing.ts   ==========
+
+            let assert = { equal: (a, b) => { if (a !== b) throw new Error(`Assertion failed: ${a} === ${b}`); }};
+            let MM = multimethods.create;
+            let CONTINUE = multimethods.CONTINUE;
+            let meta = multimethods.meta;
+
+            // Declare test configuration.
+            const COUNT = 1000000;
+
+            // Declare the test multimethod
+            const mm = MM({
+                toDiscriminant: (r) => r.address,
                 methods: {
-                    '...':              (a, b) => `${a}:${b}`,
-                    '/String...':       (_, __) => `first is string`,
-                    '/Number...':       (_, __) => `first is number`,
-                    '/Number/Boolean':  (_, __) => `num:bool`,
+                    '...': () => 'UNHANDLED',
+                    '/foo': () => 'foo',
+                    '/bar': () => 'bar',
+                    '/baz': () => 'baz',
+                    '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
+
+                    'a/*': () => `starts with 'a'`,
+                    '*/b': () => `ends with 'b'`,
+                    'a/b': () => `starts with 'a' AND ends with 'b'`,
+
+                    'c/*': () => `starts with 'c'`,
+                    '*/d': () => `ends with 'd'`,
+                    'c/d': () => CONTINUE,
+
+                    'api/...': [() => `fallback`, () => `fallback`],
+                    'api/fo*o': () => CONTINUE,
+                    'api/fo*': [
+                        meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
+                        meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
+                    ],
+                    'api/foo': [
+                        meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
+                        () => 'FOO',
+                    ],
+                    'api/foot': () => 'FOOt',
+                    'api/fooo': () => 'fooo',
+                    'api/bar': () => CONTINUE,
+
+                    // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
+                    'zz/z/{...rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+                    'zz/z/b*z': ($req) => `${$req.address}`,
+                    'zz/z/./*': () => 'forty-two',
                 },
+                arity: 1,
+                async: false,
+                strict: false,
             });
 
-            let a = mm('foo', 42);    //).to.equal('first is string');
-            let b = mm(42, 'foo');    //).to.equal('first is number');
-            let c = mm(true, 42);    //).to.equal('true:42');
-            let d = mm(42, true);    //).to.equal('num:bool');
+            // Encode a battery of requests with their expected responses.
+            const tests = [
+                `/foo ==> foo`,
+                `/bar ==> ---bar---`,
+                `/baz ==> ---baz---`,
+                `/quux ==> UNHANDLED`,
+                `/qaax ==> ---NONE---`,
+                `/a ==> ---NONE---`,
+                `/ ==> UNHANDLED`,
 
-            console.log('a: ' + a);
-            console.log('b: ' + b);
-            console.log('c: ' + c);
-            console.log('d: ' + d);
+                `a/foo ==> starts with 'a'`,
+                `foo/b ==> ends with 'b'`,
+                `a/b ==> starts with 'a' AND ends with 'b'`,
 
+                `c/foo ==> starts with 'c'`,
+                `foo/d ==> ends with 'd'`,
+
+                `api/ ==> fallback`,
+                `api/foo ==> fo2-(fo1-(FOO!))`,
+                `api/fooo ==> fo2-(fo1-(fooo))`,
+                `api/foooo ==> fo2-(fo1-(NONE))`,
+                `api/foooot ==> fo2-(fo1-(NONE))`,
+                `api/foot ==> fo2-(fo1-(FOOt))`,
+                `api/bar ==> fallback`,
+
+                `zz/z/baz ==> zab`,
+                `zz/z/booz ==> zoob`,
+                `zz/z/looz ==> NONE`,
+                `zz/z/./{whatever} ==> forty-two`,
+            ];
+
+            // Set up the tests.
+            console.log(`Running perf test: basic routing...`);
+            let addresses = tests.map(test => test.split(' ==> ')[0]);
+            let requests = addresses.map(address => ({address}));
+            let responses = tests.map(test => test.split(' ==> ')[1]);
+
+            // Start timer.
+            let start = new Date().getTime();
+
+            // Loop over the tests.
+            for (let i = 0; i < COUNT; ++i) {
+                let index = Math.floor(Math.random() * tests.length);
+                let res = mm(requests[index]);
+                let actualResponse = res;
+                assert.equal(actualResponse, responses[index]);
+            }
+
+            // Stop timer.
+            let stop = new Date().getTime();
+
+            // Output performance results.
+            let sec = (stop - start) / 1000;
+            let rate = Math.round(0.001 * COUNT / sec) * 1000;
+            console.log(`Dispatched ${COUNT} requests in ${sec} seconds   (~${rate} req/sec)`);
+
+            // TODO: doc helper...
+            function ifUnhandled(lhs, rhs) {
+                return lhs === CONTINUE ? rhs : lhs;
+            }
         </script>
     </head>
     <body>

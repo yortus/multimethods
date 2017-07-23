@@ -16,12 +16,14 @@ module.exports = {
                 mangle: {
                     reserved: ['__FUNCNAME__', '__VARARGS__']
                 },
-                compress: {
-                    keep_fnames: true,
-                    sequences: false,
-                    conditionals: false,
-                    join_vars: false
-                }
+                compress: false,
+                // TODO: compression still causes errors in UMD build. `test-page.html` fails if compression is enabled.
+                // compress: {
+                //     keep_fnames: true,
+                //     sequences: false,
+                //     conditionals: false,
+                //     join_vars: false
+                // }
             }
         })
     ],

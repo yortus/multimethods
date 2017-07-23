@@ -28,6 +28,7 @@
     - [ ] options
 - [ ] Improve unit test coverage
   - [ ] add basic tests for correct arg passing for variadic, nullary, unary, binary and ternary MMs
+- [ ] invenstigate and fix UMD errors when compression is enabled in uglifyjs.
 
 
 
