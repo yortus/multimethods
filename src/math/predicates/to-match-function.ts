@@ -30,20 +30,15 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
     // These are used as precomputed values in the closures created below.
     const captureNames = predicateAST.captures.filter(capture => capture !== '?');
     const firstCaptureName = captureNames[0];
-    const literalChars = predicateAST.signature.replace(/[*…]/g, '');
+    const literalChars = predicateAST.signature.replace(/[*]/g, '');
     const literalCharCount = literalChars.length;
 
     // Characterise the given predicate pattern using a simplified 'signature'.
-    // E.g., '/foo/*.js' becomes 'lit*lit', and '/pub/{...rest}' becomes 'lit{…cap}'
+    // E.g., '/foo/*.js' becomes 'lit*lit', and '/a{b}/{**rest}' becomes 'lit{*}lit{**}'
     let simplifiedPatternSignature = predicate
-        .replace(/[ ]*\#.*$/g, '')      // strip trailing whitespace
-        .replace(/{[^.}]+}/g, 'ӿ')      // replace '{name}' with 'ӿ'
-        .replace(/{\.+[^}]+}/g, '﹍')    // replace '{...name}' with '﹍'
-        .replace(/{…[^}]+}/g, '﹍')      // replace '{…name}' with '﹍'
-        .replace(/\.\.\./g, '…')          // replace '...' with '…'
-        .replace(/[^*…ӿ﹍]+/g, 'lit')    // replace contiguous sequences of literal characters with 'lit'
-        .replace(/ӿ/g, '{cap}')         // replace named wildcard captures with '{cap}'
-        .replace(/﹍/g, '{…cap}');     // replace named globstar captures with '{...cap}'
+        .replace(/{[^*}]+}/g, '{*}')        // replace '{name}' with '{*}'
+        .replace(/{\*\*[^}]+}/g, '{**}')    // replace '{**name}' with '{**}'
+        .replace(/[^*{}]+/g, 'lit');        // replace contiguous sequences of literal characters with 'lit'
 
     // The switch block below picks out some simpler cases and provides specialized `match` methods for them.
     // The default case falls back to using a RegExp. Note that all but the default case below could be
@@ -55,13 +50,13 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
         case '*':
             return s => containsSlash(s) ? null : SUCCESSFUL_MATCH_NO_CAPTURES;
 
-        case '{cap}':
+        case '{*}':
             return s => containsSlash(s) ? null : {[firstCaptureName]: s};
 
-        case '…':
+        case '**':
             return _ => SUCCESSFUL_MATCH_NO_CAPTURES;
 
-        case '{…cap}':
+        case '{**}':
             return s => ({[firstCaptureName]: s});
 
         case 'lit*':
@@ -70,16 +65,16 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
                 return containsSlash(s, literalCharCount) ? null : SUCCESSFUL_MATCH_NO_CAPTURES;
             };
 
-        case 'lit{cap}':
+        case 'lit{*}':
             return s => {
                 if (!startsWith(s, literalChars)) return null;
                 return containsSlash(s, literalCharCount) ? null : {[firstCaptureName]: s.slice(literalCharCount)};
             };
 
-        case 'lit…':
+        case 'lit**':
             return s => startsWith(s, literalChars) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
-        case 'lit{…cap}':
+        case 'lit{**}':
             return s => startsWith(s, literalChars) ? {[firstCaptureName]: s.slice(literalCharCount)} : null;
 
         case '*lit':
@@ -89,17 +84,17 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
                 return containsSlash(s, 0, litStart) ? null : SUCCESSFUL_MATCH_NO_CAPTURES;
             };
 
-        case '{cap}lit':
+        case '{*}lit':
             return s => {
                 let litStart = s.length - literalCharCount;
                 if (!endsWith(s, literalChars)) return null;
                 return containsSlash(s, 0, litStart) ? null : {[firstCaptureName]: s.slice(0, litStart)};
             };
 
-        case '…lit':
+        case '**lit':
             return s => endsWith(s, literalChars) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
-        case '{…cap}lit':
+        case '{**}lit':
             return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
 
         case 'lit*lit':
@@ -111,8 +106,8 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
         // TODO: consider implementing the following cases for a *marginal* performance boost
         //       (but there are diminishing returns over default RegExp soln as pattern complexity increases).
         case 'lit{cap}lit':
-        case 'lit…lit':
-        case 'lit{…cap}lit':
+        case 'lit**lit':
+        case 'lit{**}lit':
 
         default:
             debug(
@@ -146,16 +141,16 @@ export type MatchFunction = (_: string) => {[captureName: string]: string} | nul
  */
 function makeRegExpForPattern(patternAST: PredicateAST) {
     let captureIndex = 0;
-    let re = patternAST.signature.split('').map(c => {
+    let re = patternAST.signature.replace(/\*\*/g, 'ᕯ').split('').map(c => {
         if (c === '*') {
             let isAnonymous = patternAST.captures[captureIndex++] === '?';
             return isAnonymous ? '[^\\/]*' : '([^\\/]*)';
         }
-        if (c === '…') {
+        if (c === 'ᕯ') {
             let isAnonymous = patternAST.captures[captureIndex++] === '?';
-            return isAnonymous ? '.*' : '(.*)';
+            return isAnonymous ? '[\\s\\S]*' : '([\\s\\S]*)';
         }
-        if (' /._-'.indexOf(c) !== -1) {
+        if (' /._-'.indexOf(c) !== -1) { // NB: these ones must be escaped in the regex.
             return `\\${c}`;
         }
         return c;

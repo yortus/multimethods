@@ -18,7 +18,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
                 '/{thing}': (x, {_thing}, _) => x,
                 '/foo':     (x) => 'foo' + x,
                 '/bar':     (x) => 'bar' + x,
-                '...':      meta((x, _, next) => `---${next(x)}---`),
+                '**':      meta((x, _, next) => `---${next(x)}---`),
             },
         });
         let result = mm('/foo');
@@ -31,9 +31,9 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
         let mm = MM({
             arity: 2,
             methods: {
-                '...':              (a: any, b: any) => `${a}:${b}`,
-                '/String...':       (_: string, __: any) => `first is string`,
-                '/Number...':       (_: number, __: any) => `first is number`,
+                '**':              (a: any, b: any) => `${a}:${b}`,
+                '/String**':       (_: string, __: any) => `first is string`,
+                '/Number**':       (_: number, __: any) => `first is number`,
                 '/Number/Boolean':  (_: number, __: any) => `num:bool`,
             },
         });

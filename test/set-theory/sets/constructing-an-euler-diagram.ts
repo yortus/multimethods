@@ -9,13 +9,13 @@ describe('Constructing an euler diagram', () => {
             // ======================================== 1. ========================================
             name: 'simple tree',
             predicates: [
-                '/...',
+                '/**',
                 '/foo/*',
                 '/bar/*',
                 '/foo/bar',
             ],
             eulerDiagram: {
-                '/…': {
+                '/**': {
                     '/foo/*': {
                         '/foo/bar': {},
                     },
@@ -27,7 +27,7 @@ describe('Constructing an euler diagram', () => {
             // ======================================== 2. ========================================
             name: 'impossible intersections',
             predicates: [
-                '...',
+                '**',
                 'a*',
                 '*a',
             ],
@@ -54,13 +54,13 @@ describe('Constructing an euler diagram', () => {
                 'a*',
                 '*m*',
                 '*z',
-                '...',
+                '**',
                 '/bar',
                 '/*',
                 '/foo',
                 '/foo/*.html',
-                '/…o…o….html',
-                '/...o...o...',
+                '/**o**o**.html',
+                '/**o**o**',
                 '/bar',
                 'a*',
                 '/a/*',
@@ -99,12 +99,12 @@ describe('Constructing an euler diagram', () => {
                         '/*o*o*.html': {},
                     },
                 },
-                '/…o…o…': {
+                '/**o**o**': {
                     '/*o*o*': {
                         '/foo': {},
                         '/*o*o*.html': {},
                     },
-                    '/…o…o….html': {
+                    '/**o**o**.html': {
                         '/*o*o*.html': {},
                         '/foo/*.html': {},
                         '/a/*o*o*.html': {},

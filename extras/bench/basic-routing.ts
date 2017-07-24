@@ -45,7 +45,7 @@ const COUNT = 1000000;
 const mm = MM({
     toDiscriminant: (r: {address: string}) => r.address,
     methods: {
-        '...': () => 'UNHANDLED',
+        '**': () => 'UNHANDLED',
         '/foo': () => 'foo',
         '/bar': () => 'bar',
         '/baz': () => 'baz',
@@ -59,7 +59,7 @@ const mm = MM({
         '*/d': () => `ends with 'd'`,
         'c/d': () => CONTINUE,
 
-        'api/...': [() => `fallback`, () => `fallback`],
+        'api/**': [() => `fallback`, () => `fallback`],
         'api/fo*o': () => CONTINUE,
         'api/fo*': [
             meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
@@ -74,7 +74,7 @@ const mm = MM({
         'api/bar': () => CONTINUE,
 
         // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-        'zz/z/{...rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+        'zz/z/{**rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
         'zz/z/b*z': ($req) => `${$req.address}`,
         'zz/z/./*': () => 'forty-two',
     },

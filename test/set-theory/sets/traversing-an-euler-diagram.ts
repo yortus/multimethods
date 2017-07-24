@@ -8,11 +8,11 @@ describe('Traversing an euler diagram', () => {
 
     let tests = [
         ['foo', 'bar', 'f{chars}', '*o'],
-        ['...', '/f...', '/foo/*', '/foo', '/*o', '/foo'],
+        ['**', '/f**', '/foo/*', '/foo', '/*o', '/foo'],
         ['a', 'b', 'c', 'd', 'e', 'f'],
         ['a', 'a', 'a', 'a', 'a', 'a'],
-        ['...', '*', '*/*', '.../*', '*/*', '*/*/*'],
-        ['...', '*', '*/*', '.../*', '*/*', '*/*/*', 'a/b', 'a/*', '*/b/b'],
+        ['**', '*', '*/*', '**/*', '*/*', '*/*/*'],
+        ['**', '*', '*/*', '**/*', '*/*', '*/*/*', 'a/b', 'a/*', '*/b/b'],
     ];
 
     tests.forEach(test => {
@@ -20,7 +20,7 @@ describe('Traversing an euler diagram', () => {
             let predicates = test;
             let eulerDiagram = new EulerDiagram(predicates);
 
-            // An euler diagram is always rooted at '…'.
+            // An euler diagram is always rooted at '**'.
             expect(eulerDiagram.universalSet.predicate).equals(ANY);
 
             // All input predicates are in the euler diagram constructed from them.

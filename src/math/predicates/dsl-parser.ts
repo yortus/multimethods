@@ -43,7 +43,7 @@ export interface PredicateAST {
 
 
     /**
-     * The predicate string in its normalized form (i.e. all named captures replaced with '*' and '…').
+     * The predicate string in its normalized form (i.e. all named captures replaced with '*' and '**').
      * Any two predicates with the same signature are guaranteed to match the same set of strings.
      */
     signature: string; // TODO: rename this and referring comments to Normal or NormalForm
@@ -57,8 +57,8 @@ export interface PredicateAST {
 
     /**
      * An array of strings whose elements correspond, in order, to the captures in the predicate. Each element holds
-     * the name of its corresponding capture, or '?' if the corresponding capture is anonymous (i.e. '*' or '…').
-     * For example, the predicate '{...path}/*.{ext}' has a `captures` value of ['path', '?', 'ext'].
+     * the name of its corresponding capture, or '?' if the corresponding capture is anonymous (i.e. '*' or '**').
+     * For example, the predicate '{**path}/*.{ext}' has a `captures` value of ['path', '?', 'ext'].
      */
     captures: string[];
 

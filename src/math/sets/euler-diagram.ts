@@ -26,7 +26,7 @@ import EulerSet from './euler-set';
  * a subset, superset, disjoint, or other relationship, according to the respective sets of string they match.
  *
  * Each set in a euler diagram holds a single predicate, as well as links to all parent and child sets.
- * Every euler diagram has a single root set that holds the universal predicate '…' that matches all strings.
+ * Every euler diagram has a single root set that holds the universal predicate '**' that matches all strings.
  *
  * In any given euler diagram,
  * for any two sets holding predicates P and Q, if Q is a proper subset of P, then Q will be a
@@ -39,7 +39,7 @@ import EulerSet from './euler-set';
  * DAG rather than a tree.
  *
  * NB: The patterns in a euler diagram may not correspond identically to its input patterns, due to (i)
- * pattern normalization, (ii) the addition of the '…' pattern if it was not among the input
+ * pattern normalization, (ii) the addition of the '**' pattern if it was not among the input
  * patterns, and (iii) the addition of intersection patterns for each pair of overlapping input
  * patterns.
  *
@@ -49,7 +49,7 @@ import EulerSet from './euler-set';
  *      /    \
  *     /      \
  *    /        \
- * … --- *o --- f*o --- foo
+ * ** --- *o --- f*o --- foo
  *    \
  *     \
  *      \
@@ -114,10 +114,10 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
         return setLookup.get(predicate)!;
     };
 
-    // Retrieve the universal set for this euler diagram, which always corresponds to the '…' predicate.
+    // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
     let universe = eulerDiagram.universalSet = setFor(ANY);
 
-    // Insert each of the given predicates, except '…', into a DAG rooted at '…'.
+    // Insert each of the given predicates, except '**', into a DAG rooted at '**'.
     // The insertion logic assumes only normalized patterns, which we obtain first.
     predicates
         .map(predicate => toNormalPredicate(predicate)) // TODO: what if normalized patterns contain duplicates?

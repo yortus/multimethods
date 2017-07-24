@@ -56,7 +56,7 @@ export default function analyseAll(options: Options) {
     // Get all the methods in the methods hash whose normalized predicate exactly matches that of the given set's predicate.
     // Some sets may have no matching methods, because the euler diagram may include predicates that are not in the
     // original methods hash for the following cases:
-    // (i) the always-present root predicate '…', which may be in the methods hash.
+    // (i) the always-present root predicate '**', which may be in the methods hash.
     // (ii) predicates synthesized at the intersection of overlapping (i.e. non-disjoint) predicates in the methods hash.
 
 // (5):

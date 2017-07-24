@@ -1,8 +1,10 @@
 ## Todo - High Priority
 - [ ] support more special characters in predicates
-  - [ ] switch globstar from `...`/`…` to `**`/`ᕯ`
+  - [x] switch globstar from `...`/`…` to `**`/`ᕯ`
+  - [x] don't allow `ᕯ` in Predicate or NormalPredicate (use `**`). It should only appear in `identifier`
   - [ ] initially: ':<>'
-- [ ] implement `async: false` option properly
+  - [ ] ensure predicate chars are whitelisted, not blacklisted, to avoid potential regex exploits
+- [ ] implement `async: false` option properly, with tests
 
 
 

@@ -88,8 +88,8 @@ A valid pattern string conforms to the following rules:
 - A globstar greedily matches zero or more adjacent characters in an address.
 - A wildcard greedily matches zero or more adjacent characters in an address, but cannot match `/`.
 - Captures may be named or anonymous. Named captures return their correspoding capture values in the result of a call to `Pattern#match`.
-- An anonymous globstar is designated with `...` or `…`.
-- A named globstar is designated with `{...id}` or `{…id}` where id is a valid JS identifier.
+- An anonymous globstar is designated with `**`.
+- A named globstar is designated with `{**id}` where id is a valid JS identifier.
 - An anonymous wildcard is designated with `*`.
 - A named wildcard is designated with `{id}` where id is a valid JS identifier.
 - Two captures may not occupy adjacent positions in a pattern.
@@ -104,10 +104,10 @@ A valid pattern string conforms to the following rules:
 
 - `/foo` matches only the literal address `/foo` and nothing else
 - `/foo/*` matches `/foo/bar` and `/foo/` but not `/foo` or `/foo/bar/baz`
-- `/foo...` (or `/foo…`) matches `/foo`, `/foo/bar` and `/foo/bar/baz`
-- `{...path}/{name}.{ext}` matches `/api/foo/bar.html` with `{path: '/api/foo', name: 'bar', ext: 'baz' }`
-- `*{...path}` is invalid (two adjacent captures)
-- `...` (or `…`) matches all addresses
+- `/foo**` matches `/foo`, `/foo/bar` and `/foo/bar/baz`
+- `{**path}/{name}.{ext}` matches `/api/foo/bar.html` with `{path: '/api/foo', name: 'bar', ext: 'baz' }`
+- `*{**path}` is invalid (two adjacent captures)
+- `**` matches all addresses
 - `*` matches all addresses that do not contain `/`
 - `∅` matches no addresses
 

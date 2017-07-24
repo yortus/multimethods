@@ -35,7 +35,7 @@ describe('Constructing a Multimethod instance', () => {
 
     variants.forEach(({vname, async, val, err}) => describe(`(${vname})`, () => {
         let methods = {
-            '/...': () => err('nothing matches!'),
+            '/**': () => err('nothing matches!'),
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
             '/baz': () => val('baz'),
@@ -55,7 +55,7 @@ describe('Constructing a Multimethod instance', () => {
             '*/d': () => err(`don't end with 'd'!`),
             'c/d': () => val(CONTINUE),
 
-            'api/...': () => val(`fallback`),
+            'api/**': () => val(`fallback`),
             'api/fo*o': () => val(CONTINUE),
             'api/fo*': [
                 meta((rq, _, next) => {
@@ -73,7 +73,7 @@ describe('Constructing a Multimethod instance', () => {
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(CONTINUE),
 
-            'zz/z/{...rest}': meta((_, {rest}, next) => {
+            'zz/z/{**rest}': meta((_, {rest}, next) => {
                 let moddedReq = {address: rest.split('').reverse().join('')};
                 return calc(next(moddedReq), rs => rs === CONTINUE ? val('NONE') : rs);
             }),
