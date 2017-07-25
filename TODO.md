@@ -1,4 +1,5 @@
 ## Todo - High Priority
+- [ ] export a `Multimethod` type (or family thereof)
 
 
 ## Todo - Medium Priority
