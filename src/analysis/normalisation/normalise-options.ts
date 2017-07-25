@@ -7,9 +7,9 @@ import normaliseMethods from './normalise-methods';
 
 
 
-// TODO: ...
+// TODO: doc...
 export default function normaliseOptions(options: Options) {
-    let name = options.name || `MM${++multimethodCounter}`;
+    let name = options.name || `Ɱ${++multimethodCounter}`;
     let arity = options.arity;
     let async = options.async;
     let strict = options.strict || false;
