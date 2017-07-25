@@ -1,14 +1,16 @@
 ## Todo - High Priority
-- [ ] use `Ɱ0`, `Ɱ1`, etc for mm funcion names
-- [ ] implement `async: false` option properly, with tests
-
-
-
 
 
 ## Todo - Medium Priority
+- [ ] export an `extend` function that takes a MM and a method table and returns a new multimethod
+  - [ ] use `super` in chains to control overriding behaviour w.r.t. original MM
+  - [ ] makes a new method table from the two given ones and returns a new multimethod with the extended method table
+  - [ ] original multimethod is unchanged
+  - [ ] new multimethod gets same options as given one
+  - [ ] method chains support explicit relative specificity with `'super'`
+  - [ ] explicit method specificity is *required*, otherwise throws an 'ambiguous' error
+  - [ ] add tests for all of above
 - [ ] support even more special characters in predicates
-- [ ] support numeric discriminant matching for very fast dispatch scenarios (like my C++/C# MMs did)
 - [ ] Address code quality in /src
   - [x] Rationalise file structure under /src
   - [x] Reasonable breakdown of functions
@@ -22,199 +24,9 @@
   - [ ] Further Details
     - [ ] predicates
     - [ ] options
+    - [ ] method table: specificity, chains, CONTINUE, meta-methods, etc
 - [ ] Improve unit test coverage
   - [ ] add basic tests for correct arg passing for variadic, nullary, unary, binary and ternary MMs
-- [ ] investigate and fix UMD errors when compression is enabled in uglifyjs.
-
-
-
-## Todo - Unassigned Priority
-- [ ] new option `toType: Function` - if provided and no `toDiscriminant` given, the default `toDiscriminant` uses it
-- [ ] new option `allowNulls` - mms should reject `null` args unless this is explicitly set to `true`
-- [ ] support simplified MM creation: accept method table directly instead of inside `methods` prop.
-- [ ] validation: check for unrecognised options
-- [ ] review fatalError module again: 1. don't use ALL_CAPS, how best to export? c.f. TypeScript internals...
-- [ ] add sticky copyright comment at top of multimethods.min.js
-- [ ] test in real IE11 browser
-
-
-## Decisions:
-- [ ] Update predicate special character handling
-  - [ ] use URI ref: https://tools.ietf.org/html/rfc3986
-  - [ ] TODO: char pool yet to classify:
-
-    - [ ] unallocated: `% ^ < > | ! $ ' " ( ) + , ;`
-                          was:
-                          - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
-                          - [ ] Others: `% ^ ~ < > " |`
-
-  - [ ] support predicate 'type' indicators - eg binary predicates like `*100*10`, and maybe more future ones
-  - [ ] treat the following as literal match characters:
-    - [ ] `a-z A-Z 0-9 _ . - /`  (already supported)
-    - [ ] `~` (unreserved in URIs - so may commonly appear in URLs)
-    - [ ] `: ? = & #` (commonly appear in URIs as delimiters)
-    - [ ] `[ ] @` (also used in some URI schemes according to RFC3986#1.1.2)
-    - [ ] `+` is this always unescaped to space? The RFC lists it as a reserved demiliter
-  - [ ] TODO: revise whether to treat the following as literal match characters. List pros/cons
-    - [ ] <space> (already supported)
-  - [ ] TODO: Implement the following operators:
-    - [ ] `*` wildcard
-    - [ ] `...` globstar
-      - [x] TODO: change back to `**`? Pros: One less special char. Cons: Ambiguous?
-      - [x] Use single unicode 'letter' char for `**` : U+156F `ᕯ`
-    - [ ] `{...}` wildcard/globstar named capture
-  - [x] TODO: Reserve the following characters for future use:
-    - [x] `( ) |`
-    - [ ] TODO: union/or: `|`?
-    - [ ] TODO: alternatives `(abc|def|123)`
-    - [ ] TODO: zero or one `(abc?)`
-    - [ ] TODO: escape sequence `('$30?!')` or `("it's")` or `(u0213)` or `my( )site` (literal space)
-
-    - [ ] general reserve: ``    
-    
-  - [ ] TODO: Reserve the following characters to be always illegal in predicates (unless escaped):
-    - [ ] doc why to have this:
-      - [ ] so client have a few special characters for augmenting predicates for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the predicate
-      - [ ] for safely putting other props in same hash as rules, eg `$toDiscriminant` or similar
-    - [ ] TODO: `$ ; < >`
-
-  - [ ] TODO: Support escape sequences for any character as follows:
-    - [ ] TODO: ...
-
-  - [ ] TODO: special rules for spaces?
-
-  - [ ] TODO: check out unicode 'VAI' for many interesting symbol-like characters eg: `ꗬ ꗈ ꕹ ꕤ ꕢ ꖜ ꗷ ꗤ`
-
-  - [ ] TODO: doc use of special chars in emitted MM code
-    - [ ] `ᐟ` (U+141F) to differentiate otherwise-equivalent identifiers
-    - [ ] `ː` (U+02D0) to visually separate parts of an identifier
-    - [ ] SUPPORT ADDED ALREADY - valid identifier chars:
-      - \s `ˑ` U+02D1 (for space)
-      - * `ӿ` U+04FF
-      - ** `ᕯ` U+156F
-      - / `Ⳇ` U+2CC6
-      - - `ￚ` U+FFDA
-      - . `ˌ` U+02CC
-      - : `ː` U+02D0
-      - < `ᐸ` U+1438
-      - > `ᐳ` U+1433
-    - [ ] CONSIDER FUTURE SUPPORT - valid identifier chars:
-      - M `Ɱ` U+04CE
-      - \ `〵` U+3035
-      - ? `ॽ` U+097D
-      - # `ꐚ` U+A41A
-      - + `ᕀ` U+1540
-      - ! `ǃ` U+01C3
-      - | `ǀ` U+01C0
-      - ^ `ᣔ` U+18D4
-      - ~ `ᱻ` U+1C7B
-      - @ `ဇ` U+1007
-      - ' `ʼ` U+02BC
-      - " `ˮ` U+02EE
-      - ` `ˋ` U+02CB
-      - % `ꕑ` U+A551   any better one?
-      - , `ˏ` U+02CF   any better one?
-      - ; `ꓼ` U+A4FC   any better one?
-      - = `ꘌ` U+A60C   any better one?
-
-      - none found for: `( ) [ ] { } &`
-      -  `` (U+)
- 
-      - `/foo/b(ar|az)/quux`
-
-      - `/foo/bᑕar|azᑐ/quux`
-      - `/foo/bᒥar|az/quux`
-      - `/foo/bᒪar|azᒧ/quux`
-      - `/foo/bᒻar|azᒽ/quux`
-      - `/foo/bᔪar|azᔨ/quux`
-      - `/foo/bᕮar|azᕭ/quux`
-      - `/foo/bᕳar|azᕲ/quux`
-      - `/foo/bᖱar|azᖲ/quux`
-      - `/foo/bᗕar|azᗒ/quux`
-      - `/foo/bᗧar|azᗤ/quux`
-      - `/foo/bᗭar|azᗪ/quux`
-      - `/foo/bᗴar|azᗱ/quux`
-      - `/foo/bᘳar|azᘰ/quux`
-      - `/foo/bᢰar|azᢱ/quux`
-      - `/foo/bᢱar|azᢰ/quux`
-      - `/foo/bᐊar|azᐅ/quux`
-      - `/foo/bᗏar|azᗌ/quux`
-      - `/foo/bᕙar|azᕗ/quux`
-      - `/foo/bᦷar|azᦡ/quux`
-      - `/foo/b𐡋ar|az𐡐/quux` but the right bracket is double-width PITA U+10C23
-      - `/foo/bꉔar|az𐰣/quux` but the right bracket is double-width PITA U+10C23
-      - `/foo/bꀯar|az /quux` no matching RB :(
-
-
-      - `(1 * (2 + 3)) / 4`
-      - `ᐊ1 * ᐊ2 + 3ᐅᐅ / 4`
-
-
-`ᑘ0FA4`
-`ᑘ0FA4`
-
-`ꡳ` (U+A873)
-`𐩧` (U+10A67) bad handling in VSCode - double width
-`𐰣` (U+10C23) "     "
-
-  - [ ] Examples:
-
-  ```
-i have spaces
-i( )have( )spaces
-i[ ]have[ ]spaces
-i+have+spaces
-
-literal [+] sign
-it(')s about time
-it[']s about time
-GET http://blah.com
-GET [ ] http://blah.com
-GET+http://blah.com
-http://app.co[#]some-id
-http://app.co/things?item=t[[100]]
-(ab*c|a*bc)def
-  ```
-
-
-
-- [ ] export an `extend` function that takes a MM and a rules hash and returns a new multimethod
-  - [ ] use `super` in chains to control overriding behaviour w.r.t. original MM
-
-
-
-
-
-
-
-
-- [ ] remove add() method. Multimethods are immutable.
-  - [x] remove add method
-  - [ ] document that multimethods are immutable and why. e.g. can emit fast code for them.
-  - [ ] add note for future addition: export helper functions to 'add' multimethods to create a new multimethod
-
-- [ ] rename UNHANDLED
-  - [x] rename to CONTINUE
-  - [ ] doc/explain naming - this is an imperative return value of what MM should do next, not a declaration of what just happened in current handler.
-  - [ ] add note for future addition: more sentinel return values for other builtin behaviours. Such as?
-- [ ] improve error API & strong typing
-- [ ] strictest TSC options in `/test` and `/extras`
-
-- [ ] Fix terminology in code and comments
-  - [ ] executor --> implementation, behaviour, case, effective handler, override, overload, subfunction, method, form, shape, mode
-  - [ ] no such thing as a metarule, only a meta-handler
-  - [x] UNHANDLED --> CONTINUE
-  - [ ] dispatch
-  - [ ] selector
-  - [ ] executor
-  - [ ] next --> forward/fwd
-  - [ ] rule
-  - [ ] predicate (rename from `pattern` in code/codegen/comments)
-  - [ ] regular handler (rename from `method` in code/codegen/comments)
-  - [ ] meta handler (rename from `method` in code/codegen/comments)
-  - [ ] ruleset
-
-- [ ] Add/revise tests
   - [ ] Early MM validation errors:
     - [ ] illegal chain (regular handlers before meta handlers)
     - [ ] ambiguous rules
@@ -230,21 +42,198 @@ http://app.co/things?item=t[[100]]
     - [ ] limited metarule
     - [ ] misc rules
     - [ ] TODO: more cases...
+- [ ] investigate and fix UMD errors when compression is enabled in uglifyjs.
+- [ ] support numeric discriminant matching for very fast dispatch scenarios (like my C++/C# MMs did)
 
+
+## Todo - Unassigned Priority
+- [ ] new option `toType: Function` - if provided and no `toDiscriminant` given, the default `toDiscriminant` uses it
+- [ ] new option `allowNulls` - mms should reject `null` args unless this is explicitly set to `true`
+- [ ] support simplified MM creation: accept method table directly instead of inside `methods` prop.
+- [ ] validation: check for unrecognised options
+- [ ] strict mode: if fixed arity, check number of arguments passed to discriminant is correct
+- [ ] review fatalError module again: 1. don't use ALL_CAPS, how best to export? c.f. TypeScript internals...
+- [ ] add sticky copyright comment at top of multimethods.min.js
+- [ ] test in real IE11 browser
+- [ ] get rid of nasty TypeScript '!' non-null assertions in code
+- [ ] Use consistent British English spelling (-ise vs -ize)
+- [ ] docs/comments/tests: get rid of refs to address, request, response (now discriminant, parameters/arguments, return value/result)
+- [ ] Multimethod - fix up all terminology
+  - [ ] src code props, vars, fns, exports, filenames, etc
+  - [ ] src code comments
+  - [ ] README - glossary, descriptions, etc
+- [ ] revise/revamp method function validation
+  - [ ] MAIN AIM: to ensure predicate captures stay synced with their methods, and error early if not, with opt-outs
+  - [ ] validate method function.length.
+  - [ ] the `captures` param:
+    - [ ] if object destructuring is used, require 1:1 correspondence to captured names
+    - [ ] if object destructuring is used, either account for or don't support prop renaming (which??? depends how easy/hard)
+    - [ ] if object destructuring is NOT used:
+      - [ ] disallow under some 'strict checking' option?
+      - [ ] if the pattern has named captures, then method length must include the `captures` param
+      - [ ] if the pattern has NO named captures, then method length must exclude the `captures` param
+- [ ] move TODO list(s) to separate github issues
+- [ ] Multimethods are immutable.
+  - [ ] document that multimethods are immutable and why. e.g. can emit fast code for them.
+  - [ ] check code - ensure no mutating operations on multimethods
+- [ ] doc/explain CONTINUE - this is an imperative return value of what MM should do next, not a declaration of what just happened in current handler.
+- [ ] Fix terminology in code and comments
+  - [ ] executor --> implementation, behaviour, case, effective handler, override, overload, subfunction, method, form, shape, mode
+  - [ ] no such thing as a metarule, only a meta-handler
+  - [x] UNHANDLED --> CONTINUE
+  - [ ] dispatch
+  - [ ] selector
+  - [ ] executor
+  - [ ] next --> forward/fwd
+  - [ ] rule
+  - [ ] predicate (rename from `pattern` in code/codegen/comments)
+  - [ ] regular handler (rename from `method` in code/codegen/comments)
+  - [ ] meta handler (rename from `method` in code/codegen/comments)
+  - [ ] ruleset
 - [ ] TODO: fix meta() function
   - [ ] should detect whether used as a wrapper function around a handler, or as a property decorator
-
-- [ ] TODO: improve `fatalError.ts`
-  - [x] investigate alternatives... current form:   +ve = type-consistency   -ve = intellisense
-  - [ ] remove dep on `util.format`
-
-- [ ] max strictness in `tsconfig.json` for src, tests and extras
-  - [ ] are there any new strictness flags to add?
-
-- [ ] TODO: investigate `Multimethod instanceof Function` workaround for IE11
+- [ ] remove dep on `util.format` in `fatal-error.ts`
 
 
-## Notes
+# Audits to do:
+- [ ] consistent British English spelling
+- [ ] consistent code style & quality
+- [ ] functionality & test converage
+- [ ] perforance & benchmarks
+- [ ] all errors and warnings (eg validation, codegen, etc)
+
+
+## Notes on future support for predicate symbols/operators/literals
+- [ ] use URI ref: https://tools.ietf.org/html/rfc3986
+- [ ] TODO: char pool yet to classify:
+
+  - [ ] unallocated: `% ^ < > | ! $ ' " ( ) + , ;`
+                        was:
+                        - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
+                        - [ ] Others: `% ^ ~ < > " |`
+
+- [ ] support predicate 'type' indicators - eg binary predicates like `*100*10`, and maybe more future ones
+- [ ] treat the following as literal match characters:
+  - [ ] `a-z A-Z 0-9 _ . - /`  (already supported)
+  - [ ] `~` (unreserved in URIs - so may commonly appear in URLs)
+  - [ ] `: ? = & #` (commonly appear in URIs as delimiters)
+  - [ ] `[ ] @` (also used in some URI schemes according to RFC3986#1.1.2)
+  - [ ] `+` is this always unescaped to space? The RFC lists it as a reserved demiliter
+- [ ] TODO: revise whether to treat the following as literal match characters. List pros/cons
+  - [ ] <space> (already supported)
+- [ ] TODO: Implement the following operators:
+  - [ ] `*` wildcard
+  - [ ] `...` globstar
+    - [x] TODO: change back to `**`? Pros: One less special char. Cons: Ambiguous?
+    - [x] Use single unicode 'letter' char for `**` : U+156F `ᕯ`
+  - [ ] `{...}` wildcard/globstar named capture
+- [x] TODO: Reserve the following characters for future use:
+  - [x] `( ) |`
+  - [ ] TODO: union/or: `|`?
+  - [ ] TODO: alternatives `(abc|def|123)`
+  - [ ] TODO: zero or one `(abc?)`
+  - [ ] TODO: escape sequence `('$30?!')` or `("it's")` or `(u0213)` or `my( )site` (literal space)
+
+  - [ ] general reserve: ``    
+  
+- [ ] TODO: Reserve the following characters to be always illegal in predicates (unless escaped):
+  - [ ] doc why to have this:
+    - [ ] so client have a few special characters for augmenting predicates for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the predicate
+    - [ ] for safely putting other props in same hash as rules, eg `$toDiscriminant` or similar
+  - [ ] TODO: `$ ; < >`
+
+- [ ] TODO: Support escape sequences for any character as follows:
+  - [ ] TODO: ...
+
+- [ ] TODO: special rules for spaces?
+
+- [ ] TODO: check out unicode 'VAI' for many interesting symbol-like characters eg: `ꗬ ꗈ ꕹ ꕤ ꕢ ꖜ ꗷ ꗤ`
+
+- [ ] TODO: doc use of special chars in emitted MM code
+  - [ ] `ᐟ` (U+141F) to differentiate otherwise-equivalent identifiers
+  - [ ] `ː` (U+02D0) to visually separate parts of an identifier
+  - [ ] SUPPORT ADDED ALREADY - valid identifier chars:
+    - M `Ɱ` U+04CE
+    - \s `ˑ` U+02D1 (for space)
+    - * `ӿ` U+04FF
+    - ** `ᕯ` U+156F
+    - / `Ⳇ` U+2CC6
+    - - `ￚ` U+FFDA
+    - . `ˌ` U+02CC
+    - : `ː` U+02D0
+    - < `ᐸ` U+1438
+    - > `ᐳ` U+1433
+  - [ ] CONSIDER FUTURE SUPPORT - valid identifier chars:
+    - \ `〵` U+3035
+    - ? `ॽ` U+097D
+    - # `ꐚ` U+A41A
+    - + `ᕀ` U+1540
+    - ! `ǃ` U+01C3
+    - | `ǀ` U+01C0
+    - ^ `ᣔ` U+18D4
+    - ~ `ᱻ` U+1C7B
+    - @ `ဇ` U+1007
+    - ' `ʼ` U+02BC
+    - " `ˮ` U+02EE
+    - ` `ˋ` U+02CB
+    - % `ꕑ` U+A551   any better one?
+    - , `ˏ` U+02CF   any better one?
+    - ; `ꓼ` U+A4FC   any better one?
+    - = `ꘌ` U+A60C   any better one?
+
+    - none found for: `( ) [ ] { } &`
+ 
+`/foo/b(ar|az)/quux` <-- real parentheses
+`/foo/bᑕar|azᑐ/quux`
+`/foo/bᒥar|az/quux`
+`/foo/bᒪar|azᒧ/quux`
+`/foo/bᒻar|azᒽ/quux`
+`/foo/bᔪar|azᔨ/quux`
+`/foo/bᕮar|azᕭ/quux`
+`/foo/bᕳar|azᕲ/quux`
+`/foo/bᖱar|azᖲ/quux`
+`/foo/bᗕar|azᗒ/quux`
+`/foo/bᗧar|azᗤ/quux`
+`/foo/bᗭar|azᗪ/quux`
+`/foo/bᗴar|azᗱ/quux`
+`/foo/bᘳar|azᘰ/quux`
+`/foo/bᢰar|azᢱ/quux`
+`/foo/bᢱar|azᢰ/quux`
+`/foo/bᐊar|azᐅ/quux`
+`/foo/bᗏar|azᗌ/quux`
+`/foo/bᕙar|azᕗ/quux`
+`/foo/bᦷar|azᦡ/quux`
+`/foo/bꀯar|azꡳ /quux` <-- not too bad?
+`/foo/b𐡋ar|az𐡐/quux` but the right bracket is double-width PITA U+10C23
+`/foo/bꉔar|az𐰣/quux` but the right bracket is double-width PITA U+10C23
+
+`(1 * (2 + 3)) / 4`
+`ᐊ1 * ᐊ2 + 3ᐅᐅ / 4`
+`ꀯ1 * ꀯ2 + 3ꡳꡳ / 4`
+
+`ᑘ0FA4`
+`ᑘ0FA4`
+
+`𐩧` (U+10A67) bad handling in VSCode - double width
+`𐰣` (U+10C23) "     "
+
+```
+i have spaces
+i( )have( )spaces
+i[ ]have[ ]spaces
+i+have+spaces
+
+literal [+] sign
+it(')s about time
+it[']s about time
+GET http://blah.com
+GET [ ] http://blah.com
+GET+http://blah.com
+http://app.co[#]some-id
+http://app.co/things?item=t[[100]]
+(ab*c|a*bc)def
+```
+
 
 Predicate Special Chars:
 - Literal Match:
@@ -268,203 +257,23 @@ Predicate Special Chars:
   mega-glob
   list of alternatives
   not
-  
-
-
-
-
-
-
-
-
-# Other audits:
-- [ ] consistent British English spelling
-- [ ] consistent code style & quality
-- [ ] functionality & test converage
-- [ ] perforance & benchmarks
-- [ ] all errors and warnings (eg validation, codegen, etc)
-
-
-# To Do List
-- [x] switch stricter tsconfig flags back on (eg strictNullChecks, noImplicitAny)
-- [ ] Do some V8 profiling/analysis. list possible optimisations.
-  - [x] indexOf (in make-match-method.js) takes ~30% of time - try rewriting
-  - [x] the (unoptimizable) generator function housing the perf test loop takes ~20% of time (remove it)
-  - [ ] do try this --> splitting selector function into multiple small functions (one per non-leaf node in taxonomy)
-  - [ ] others?
-- [ ] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
-- [ ] enfore max line length <= 120 chars
-- [ ] get rid of nasty TypeScript '!' non-null assertions in code
-- [ ] get whole lib working in ES5 mode (currently there are runtime errors due to reliance on ES6 runtime features in source)
-----------
-- [ ] rename Pattern (class/type) to Predicate, and patternSource (arg/var) to pattern
-  - [x] update all affected file/folder names
-  - [ ] update all affected names of exports/imports/vars/functions
-  - [ ] update all references in comments
-  - [x] update all tests including test names
-----------
-- [ ] clarify terminology around executor/route/method/rule/tryRule/tryMetaRule
-  - [x] *method* is a client-provided function that implements the behaviour associated with a rule
-  - [x] *rule* is a client-provided predicate/method pair, a bunch of which comprise the behaviour of a multimethod
-  - [ ] *lineage*???
-
-- [ ] clarify terminology around pattern vs predicate
-  - [x] *predicate* is a class/object for recognising specific strings, similar to a RexExp object but supports set analysis
-  - [x] *predicate pattern* is the string/textual representation of a predicate, using a special DSL syntax
-  - [ ] *predicate matching* - testing whether a predicate is true for a given string (and computing captures as well)
-  - [ ] *predicate intersection* - TODO
-
-- [ ] predicates: divide evaluation into two methods ('evaluate' and 'capture')?
-- [ ] use arrow functions in executor template then downlevel them.
-- [ ] arrange all src/multimethod files & exports more nicely
-- [ ] rename 'route' in WithRoute to 'matchedRules'
-- [ ] ensure codegen uses no ES6 features when emitES5 option is set
-  - [ ] arrow functions
-  - [ ] let/const
-  - [x] rest/spread
-  - [ ] builtins
-  - [ ] other?
-- [ ] provide a default UNHANDLED value in the library. Users can optionally override it in MM options
-- [ ] replace all void 0 with undefined
-- [ ] Use consistent British English spelling (-ise vs -ize)
-- [x] README - remove TODO lists into separate files (or into github issue(s)?)
-
-- [ ] Multimethod: get rid of refs to address, request, response (now discriminant, parameters/arguments, return value/result)
-- [ ] Multimethod: conflicts... (tiebreak / disambiguate / ambiguity)
-- [x] Multimethod: getDiscriminant --> toDiscriminant
-- [x] Multimethod: address --> discriminant
-- [x] ~~Multimethod: Rule --> Method~~
-- [x] Multimethod: Rule#test --> Method#predicate
-- [ ] Multimethod: decorator -> meta-rule
-- [ ] Multimethod: Route --> MatchingMethods                    Path
-- [ ] Multimethod: RouteHandler --> ShortlistHandler???         PathHandler
-- [ ] Multimethod: RouteSelector --> ShortlistSelector          PathSelector
-- [ ] Multimethod: makeRouteHandler --> makeShortlistHandler???
-- [ ] Multimethod: makeRouteSelector --> makeShortlistSelector
-- [ ] Multimethod: makeMultimethodHandler --> ???
-- [ ] Multimethod: disambiguateRoutes --> ???                   disambiguatePaths
-- [ ] Multimethod: disambiguateRules --> disambiguateMethods
-precomputeCandidateListHandlers
-precomputeCandidateListSelector
-
-
-MethodChain
-Cascade
-MatchingMethods (precompute as optimisation)
-Matches
-DispatchList
-CandidateList
-Shortlist
-MethodStack
-MatchList (no good)
-Contenders
-
-
-
-
-
-
-- [ ] Multimethod: support any/all arities
-- [ ] remove global 'warnings' option - should be a per-multimethod option (or have both? local override + fallback to global)
-- [x] mockable log methods (warn, error) - unit tests can mock these
-- [ ] Multimethod - fix up all terminology
-  - [ ] src code props, vars, fns, exports, filenames, etc
-  - [ ] src code comments
-  - [ ] README - glossary, descriptions, etc
-
-- [ ] revise/revamp action/decorator function validation
-  - [x] MAIN AIM: to ensure patterns stay synced with their handlers, and error early if not, with opt-outs
-  - [x] new file 'validate-handler-function.ts' replaces/based on  'util/get-function-parameter-names.ts' and tests
-  - [x] >3 params is an error. 0-3 params is fine.
-  - [x] names of first and third param are unchecked. Anything is fine for those.
-  - [ ] second param, the `captures` param:
-    - [x] if object destructuring is used, require 1:1 correspondence to captured names
-    - [x] if object destructuring is used, either account for or don't support prop renaming (which??? depends how easy/hard)
-    - [ ] if object destructuring is NOT used:
-      - [ ] disallow under some 'strict checking' option?
-      - [x] the name of the second param is unchecked. Anything is fine.
-      - [x] if the pattern has named captures, then handler arity MUST be >= 2
-      - [x] if the pattern has NO named captures, then arity < 2 is fine
-  - [ ] provide a 'check handler signature' option (default=true) to multimethod constructor
-
-
-- [ ] move TODO list(s) to separate github issues
-- [ ] clean up README - just keep glossary, pattern info for now
-
-
-- [ ] PatternMatchingFunction --> Multimethod
-  - [x] define as class
-    - [x] constructor returns a function
-    - [x] overrides Symbol.hasInstance
-    - [x] private tag to ensure instanceof TS narrowing works
-    - [ ] unit tests detect hasInstance runtime support and mocha skip() tests if not supported
-    - [ ] unit tests check TS narrowing works too thanks to _tag
-
-- [ ] Multimethod dispatch
-  - [ ] a rule is either (1) a test/action pair or (2) a test/decorator pair
-  - [ ] action signature: `type action = (input, captures): Output | NO_MATCH | Promise<Output | NO_MATCH>`
-  - [ ] decorator signature: `type decorator = (input, captures, next): Output | NO_MATCH | Promise<Output | NO_MATCH>`
-  - [ ] `next` signature - allow for future expansion - complete control of downstream 'decoratee' execution
-
-- [ ] Multimethod options
-  - [ ] specify fixed arity (0=variadic) - this is used to generate efficient calls via eval
-  - [ ] getDiscriminant is passed all args that are passed to Multimethod
-  - [ ] allow for future expansion - two multimethod dispatch styles:
-    1. [ ] discriminant is a string, and rule list is an objected keys by discriminant tests
-    2. [ ] discriminant is a number, and rule list is an array. THINK: holey? how filled? how does test work?
-
-
-
-- [ ] HTTP transport
-  - change action signature: pass in an object containing both rawReq and rawRes, and return either nothing or a Promise<void> (or NO_MATCH)
-
-
-- [ ] revise terminology for pattern-matching/dispatch (basically the RuleSet)
-  - [x] Pattern.UNIVERSAL --> Pattern.ANY
-  - RuleSet --> Dispatcher, PatternMatchingFunction
-  - address --> string
-  - request --> input or argument
-  - respose --> output or result
-  - UNHANDLED -> NO_MATCH ???
-  - ??? -> discriminant
-  - request --> ??? input $input in $in
-  - response --> ??? result? output $output out $out
-- [x] still need `∅` pattern anywhere in /src?
-- [ ] update pattern comments/docs
-- [ ] update pattern (intersection) unit tests
-- [ ] in RuleSet, what's involved in dropping the `address` parameter from handlers? check perf diff too...
-- [ ] finalize taxonomy changes w.r.t. Pattern#intersect changes
-- [ ] properly introduce RuleSet options, first option is strict/loose checking for all routes handled
-
-- [ ] can bundling be implemented as a decorator? any advantage in doing that?
-- [ ] List HTTP handler use cases
-      - content (inline/mime and attachment/download)
-      - json/data
-      - bundles
-      - redirect
-      - POST/DELETE/PUT etc
-
-
-
-- [ ] RuleSet: allow custom 'tiebreak' function to be specified as an option
-- [ ] Transport: for 'file' responses, harden againt rel paths in address eg '../../../sys/passwords.txt'
-- [ ] docs: some code comments are almost impossible to grasp (eg see comments in findAllRoutesThroughRuleSet). Need step-by-step explanations of concepts in separate .md file(s), code can refer reader to these docs for more explanation. Code comments should then be reduced to simpler statements.
-- [ ] make runnable client-side
-  - [ ] isolate/replace rule-set deps: node (assert, util)
-  - [ ] isolate transport deps: node (http/s), node-static
-- [ ] investigate N-way multiple dispatch
-  - [ ] RuleSet becomes Dispatcher and ctor takes params for: ruleSet, arg->addr mapper(s), options
-
-
-
-
-
 
 
 
 
 
 ## Done
+- [x] implement `async: false` option properly, with tests
+  - [x] assert method result is not promise-like in thunks (strict mode)
+  - [x] document strict vs non-strict behaviour (extra checks vs trusts you to conform to options you specified)
+  - [x] add tests
+- [x] implement `async: true` option properly, with tests
+  - [x] assert method result is promise-like in thunks (strict mode)
+  - [x] assert that method does not synchronously throw
+  - [x] document strict vs non-strict behaviour (extra checks vs trusts you to conform to options you specified)
+  - [x] document reliance on global `Promise.resolve(...)` when `{strict: true, async: true}` and a method throws
+  - [x] add tests
+- [x] use `Ɱ0`, `Ɱ1`, etc for mm funcion names
 - [x] support more special characters in predicates
   - [x] switch globstar from `...`/`…` to `**`/`ᕯ`
   - [x] don't allow `ᕯ` in Predicate or NormalPredicate (use `**`). It should only appear in `identifier`
@@ -563,6 +372,45 @@ Contenders
 
 
 ## Done (older)
+- [x] switch stricter tsconfig flags back on (eg strictNullChecks, noImplicitAny)
+- [x] Do some V8 profiling/analysis. list possible optimisations.
+  - [x] indexOf (in make-match-method.js) takes ~30% of time - try rewriting
+  - [x] the (unoptimizable) generator function housing the perf test loop takes ~20% of time (remove it)
+  - [-] do try this --> splitting selector function into multiple small functions (one per non-leaf node in taxonomy)
+  - [x] others?
+- [x] official logo - cactus in yellow box. c.f. 'JS' and 'then' logos
+- [x] enfore max line length <= 120 chars
+- [x] get whole lib working in ES5 mode (currently there are runtime errors due to reliance on ES6 runtime features in source)
+- [x] rename Pattern (class/type) to Predicate, and patternSource (arg/var) to pattern
+  - [x] update all affected file/folder names
+  - [x] update all affected names of exports/imports/vars/functions
+  - [x] update all references in comments
+  - [x] update all tests including test names
+- [x] predicates: divide evaluation into two methods ('evaluate' and 'capture')?
+- [x] use arrow functions in executor template then downlevel them.
+- [x] arrange all src/multimethod files & exports more nicely
+- [-] rename 'route' in WithRoute to 'matchedRules'
+- [x] ensure codegen uses no ES6 features when emitES5 option is set
+  - [x] arrow functions
+  - [x] let/const
+  - [x] rest/spread
+  - [x] builtins
+  - [x] other?
+- [x] provide a default UNHANDLED value in the library.
+  - [-] Users can optionally override it in MM options
+- [x] replace all void 0 with undefined
+- [x] README - remove TODO lists into separate files (or into github issue(s)?)
+- [x] Multimethod: conflicts... (tiebreak / disambiguate / ambiguity)
+- [x] Multimethod: getDiscriminant --> toDiscriminant
+- [x] Multimethod: address --> discriminant
+- [x] ~~Multimethod: Rule --> Method~~
+- [x] Multimethod: Rule#test --> Method#predicate
+- [x] Multimethod: support any/all arities
+- [x] remove global 'warnings' option - should be a per-multimethod option (or have both? local override + fallback to global)
+- [x] mockable log methods (warn, error) - unit tests can mock these
+- [x] Multimethod options
+  - [x] specify fixed arity (0=variadic) - this is used to generate efficient calls via eval
+  - [x] getDiscriminant is passed all args that are passed to Multimethod
 - [x] RuleSet: change to UNHANDLED sentinel value instead of null
 - [x] RuleSet: allow UNHANDLED value to be specified as an option
 - [x] transpile to /dist or /built directory and npmignore src/
