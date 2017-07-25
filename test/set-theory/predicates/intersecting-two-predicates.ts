@@ -2,6 +2,9 @@ import {expect} from 'chai';
 import {intersect, toPredicate} from 'multimethods/math/predicates';
 
 
+
+
+
 describe('Intersecting two predicates', () => {
 
     let tests = [

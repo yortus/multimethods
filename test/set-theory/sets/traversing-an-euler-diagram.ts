@@ -4,6 +4,9 @@ import {ANY, intersect, toNormalPredicate} from 'multimethods/math/predicates';
 import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 
 
+
+
+
 describe('Traversing an euler diagram', () => {
 
     let tests = [
@@ -36,6 +39,9 @@ describe('Traversing an euler diagram', () => {
         });
     });
 });
+
+
+
 
 
 /** Helper function that enumerates all edges in an euler diagram. */

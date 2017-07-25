@@ -3,6 +3,9 @@ import {expect} from 'chai';
 import isPromiseLike from 'multimethods/util/is-promise-like';
 
 
+
+
+
 describe('Identifying a Promise-like object', () => {
 
     let tests = [

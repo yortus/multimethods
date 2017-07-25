@@ -3,6 +3,9 @@ import {expect} from 'chai';
 import {toMatchFunction, toPredicate} from 'multimethods/math/predicates';
 
 
+
+
+
 describe('Matching a predicate against a string', () => {
 
     let tests = [

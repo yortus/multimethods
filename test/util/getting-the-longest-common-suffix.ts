@@ -3,6 +3,9 @@ import {expect} from 'chai';
 import getLongestCommonSuffix from 'multimethods/util/get-longest-common-suffix';
 
 
+
+
+
 describe('Getting the longest common suffix', () => {
 
     let tests = [

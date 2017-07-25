@@ -2,6 +2,9 @@ import {expect} from 'chai';
 import {toNormalPredicate} from 'multimethods/math/predicates';
 
 
+
+
+
 describe('Comparing a predicate with its normal form', () => {
 
     let predicatePatterns = [

@@ -176,6 +176,9 @@ describe('Constructing a Multimethod instance', () => {
 });
 
 
+
+
+
 // TODO: doc helpers...
 function calc(arg: any, cb: (arg: any) => any) {
     if (Array.isArray(arg)) {

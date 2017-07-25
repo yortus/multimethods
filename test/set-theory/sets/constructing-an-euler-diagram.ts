@@ -2,6 +2,9 @@ import {expect} from 'chai';
 import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 
 
+
+
+
 describe('Constructing an euler diagram', () => {
 
     let tests = [

@@ -3,6 +3,9 @@ import {expect} from 'chai';
 import {parsePredicateSource, toNormalPredicate} from 'multimethods/math/predicates';
 
 
+
+
+
 describe('Constructing a Predicate instance', () => {
 
     let tests = [

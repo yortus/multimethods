@@ -3,6 +3,9 @@ import {expect} from 'chai';
 import {parsePredicateSource, PredicateAST} from 'multimethods/math/predicates';
 
 
+
+
+
 describe('Parsing a predicate string', () => {
 
     let tests = [
