@@ -8,7 +8,7 @@ import Thunk from '../thunk';
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __VARARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
-// TODO: implement non-promise-like result assertion for when options.async === false
+// tslint:disable:no-var-keyword
 export default function __FUNCNAME__(__VARARGS__: any[]) {
     let discriminant = $.TO_DISCRIMINANT(__VARARGS__);
     let thunk = $.SELECT_THUNK(discriminant);
@@ -17,7 +17,7 @@ export default function __FUNCNAME__(__VARARGS__: any[]) {
         try {
             var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
         }
-        catch(error) {
+        catch (error) {
             result = Promise.resolve().then(() => {
                 $.ERROR_INVALID_RESULT('$.METHOD', 'a promise', 'an exception');
             });

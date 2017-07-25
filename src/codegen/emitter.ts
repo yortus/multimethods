@@ -1,5 +1,5 @@
 import {MMInfo, MMNode} from '../analysis';
-import {UNHANDLED, INVALID_METHOD_RESULT} from '../util/fatal-error';
+import {INVALID_METHOD_RESULT, UNHANDLED} from '../util/fatal-error';
 
 
 

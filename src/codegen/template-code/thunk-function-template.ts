@@ -1,5 +1,5 @@
-import Thunk from '../thunk';
 import {INVALID_METHOD_RESULT} from '../../util/fatal-error';
+import Thunk from '../thunk';
 
 
 
@@ -57,7 +57,7 @@ export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}
             }
         }
     }
-    
+
     // TODO: cascade result...
     if (!$.ENDS_PARTITION) {
         if ($.IS_NEVER_ASYNC) {

@@ -91,5 +91,4 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
         expect(mm(true, 42)).to.eventually.equal('true:42');
         expect(mm(42, true)).to.eventually.throw();
     });
-    
 });
