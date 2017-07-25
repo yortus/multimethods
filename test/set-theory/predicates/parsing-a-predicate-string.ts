@@ -55,7 +55,7 @@ describe('Parsing a predicate string', () => {
         '© ==> ERROR',
 
         // More complex valid predicates:
-        '∅ ==> {signature: "", identifier: "", captures: []}',
+        ' ==> {signature: "", identifier: "", captures: []}', // NB: empty predicate
         '/ ==> {signature: "/", identifier: "Ⳇ", captures: []}',
         '* ==> {signature: "*", identifier: "ӿ", captures: ["?"]}',
         '** ==> {signature: "**", identifier: "ᕯ", captures: ["?"]}',
@@ -101,7 +101,7 @@ describe('Parsing a predicate string', () => {
 
     tests.forEach(test => {
         it(test, () => {
-            let source = test.split(' ==> ')[0].replace(/^∅$/, '');
+            let source = test.split(' ==> ')[0];
             let rhs = test.split(' ==> ')[1];
             let expected: PredicateAST|string = rhs === 'ERROR' ? rhs : eval(`(${rhs})`);
             if (typeof expected !== 'string') expected.captureNames = expected.captures.filter(c => c !== '?');

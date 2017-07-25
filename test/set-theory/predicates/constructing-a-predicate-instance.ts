@@ -6,7 +6,7 @@ import {parsePredicateSource, toNormalPredicate} from 'multimethods/math/predica
 describe('Constructing a Predicate instance', () => {
 
     let tests = [
-        '∅ ==> ∅ WITH []',
+        ' ==>  WITH []', // NB: empty predicate
         '/api/foo ==> /api/foo WITH []',
         '/api/foo/BAR ==> /api/foo/BAR WITH []',
         '/api/foo** ==> /api/foo** WITH []',
@@ -56,9 +56,9 @@ describe('Constructing a Predicate instance', () => {
 
     tests.forEach(test => {
         it(test, () => {
-            let predicateSource = test.split(' ==> ')[0].replace(/^∅$/, '');
+            let predicateSource = test.split(' ==> ')[0];
             let rhs = test.split(' ==> ')[1];
-            let expectedSignature = rhs.split(' WITH ')[0].replace(/^∅$/, '');
+            let expectedSignature = rhs.split(' WITH ')[0];
             let expectedCaptureNames = eval(rhs.split(' WITH ')[1] || '[]');
             let actualSignature: string;
             let actualCaptureNames: string[];

@@ -109,7 +109,7 @@ A valid pattern string conforms to the following rules:
 - `*{**path}` is invalid (two adjacent captures)
 - `**` matches all addresses
 - `*` matches all addresses that do not contain `/`
-- `∅` matches no addresses
+- `` matches only the empty string
 
 
 ## Glossary

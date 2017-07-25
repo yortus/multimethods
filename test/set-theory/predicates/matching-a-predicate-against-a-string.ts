@@ -6,10 +6,10 @@ import {toMatchFunction, toPredicate} from 'multimethods/math/predicates';
 describe('Matching a predicate against a string', () => {
 
     let tests = [
-        '∅ MATCHES ∅',
-        '* MATCHES ∅',
+        ' MATCHES ', // NB: empty predicate and string
+        '* MATCHES ', // NB: empty string
         '* MATCHES abc',
-        '∅ DOES NOT MATCH /',
+        ' DOES NOT MATCH /', // NB: empty string
         '* DOES NOT MATCH abc/def',
         '** MATCHES abc',
         '** MATCHES abc/def',
@@ -59,9 +59,9 @@ describe('Matching a predicate against a string', () => {
         it(test, () => {
             let isMatch = test.indexOf(' MATCHES ') !== -1;
             let split = isMatch ? ' MATCHES ' : ' DOES NOT MATCH ';
-            let patternSource = test.split(split)[0].replace(/^∅$/, '');
+            let patternSource = test.split(split)[0];
             let rhs = test.split(split)[1];
-            let address = rhs.split(' WITH ')[0].replace(/^∅$/, '');
+            let address = rhs.split(' WITH ')[0];
             let expectedCaptures = isMatch ? eval(`(${rhs.split(' WITH ')[1]})`) || {} : null;
             let predicate = toPredicate(patternSource);
             let actualCaptures = toMatchFunction(predicate)(address);

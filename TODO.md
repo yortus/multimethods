@@ -1,10 +1,4 @@
 ## Todo - High Priority
-- [ ] support more special characters in predicates
-  - [x] switch globstar from `...`/`…` to `**`/`ᕯ`
-  - [x] don't allow `ᕯ` in Predicate or NormalPredicate (use `**`). It should only appear in `identifier`
-  - [x] ensure predicate chars are whitelisted, not blacklisted, to avoid potential regex exploits
-  - [x] add support initially for: `:<>`
-  - [ ] remove all refs to `∅` in codebase and tests and mds
 - [ ] use `Ɱ0`, `Ɱ1`, etc for mm funcion names
 - [ ] implement `async: false` option properly, with tests
 
@@ -13,6 +7,7 @@
 
 
 ## Todo - Medium Priority
+- [ ] support even more special characters in predicates
 - [ ] support numeric discriminant matching for very fast dispatch scenarios (like my C++/C# MMs did)
 - [ ] Address code quality in /src
   - [x] Rationalise file structure under /src
@@ -434,7 +429,7 @@ Contenders
   - ??? -> discriminant
   - request --> ??? input $input in $in
   - response --> ??? result? output $output out $out
-- [ ] still need `∅` pattern anywhere in /src?
+- [x] still need `∅` pattern anywhere in /src?
 - [ ] update pattern comments/docs
 - [ ] update pattern (intersection) unit tests
 - [ ] in RuleSet, what's involved in dropping the `address` parameter from handlers? check perf diff too...
@@ -470,6 +465,12 @@ Contenders
 
 
 ## Done
+- [x] support more special characters in predicates
+  - [x] switch globstar from `...`/`…` to `**`/`ᕯ`
+  - [x] don't allow `ᕯ` in Predicate or NormalPredicate (use `**`). It should only appear in `identifier`
+  - [x] ensure predicate chars are whitelisted, not blacklisted, to avoid potential regex exploits
+  - [x] add support initially for: `:<>`
+  - [x] remove all refs to `∅` in codebase and tests and mds
 - [x] add a good default implementation for `toDiscriminant`
 - [x] fix buggy emit for isMatch and getCaptures lines (see comment there in code)
 - [x] tidy up the method/dispatcher instrumentation code

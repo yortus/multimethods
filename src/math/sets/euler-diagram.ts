@@ -134,12 +134,9 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
 
 
 // TODO: revise all comments below...
-// TODO: remove jsdoc ref to pattern '∅' below... Safe to remove? Anything to replace it?
-
 /**
- * Inserts `insertee` into the euler diagram subgraph rooted at `ancestor`, preserving all invariants
- * relating to the arrangement of sets. `insertee`'s predicate is assumed to be a proper
- * subset of `ancestor`'s predicate, and `insertee` must not hold the 'empty' predicate '∅'.
+ * Inserts `insertee` into the euler diagram subgraph rooted at `ancestor`, preserving all invariants relating to the
+ * arrangement of sets. `insertee`'s predicate is assumed to be a proper subset of `ancestor`'s predicate.
  * @param {EulerSet} insertee - the new set to be inserted into the euler diagram below `ancestor`.
  * @param {EulerSet} ancestor - the 'root' set of the euler diagram subgraph in which `insertee` belongs.
  * @param {(predicate: Predicate) => EulerSet} setFor - a function that returns the set for
@@ -153,15 +150,8 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
     let nonDisjointComparands = ancestor.subsets.reduce(
         (comparands, set) => {
-            let intersections = intersect(insertee.predicate, set.predicate); // TODO: messy... has casts... fix...
-
-            // TODO: temp testing...
+            let intersections = intersect(insertee.predicate, set.predicate);
             intersections.forEach(i => comparands.push({set, intersection: setFor(i)}));
-
-            // TODO: was...
-            // if (intersection !== Predicate.EMPTY) comparands.push({set, intersection: setFor(intersection)});
-
-
             return comparands;
         },
         [] as Array<{set: EulerSet; intersection: EulerSet}>

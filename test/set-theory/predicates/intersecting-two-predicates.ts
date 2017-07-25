@@ -5,6 +5,7 @@ import {intersect, toPredicate} from 'multimethods/math/predicates';
 describe('Intersecting two predicates', () => {
 
     let tests = [
+        // NB: `∅` is used below to mean the empty predicate (for visual clarity)
         '** ∩ ∅ = ∅',
         ' ∩ ∅ = ∅',
         'abc ∩ ∅ = []',
