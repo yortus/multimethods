@@ -5,10 +5,16 @@
     // Maps from whitelisted literal chars to their identifier equivalents.
     // NB: each identifier char must have a unique mapping from a literal char.
     var literalChars = {
-        ' ': 'ˑ', // (U+02D1)
-        '/': 'Ⳇ', // (U+2CC6)
-        '-': 'ￚ', // (U+FFDA)
-        '.': 'ˌ', // (U+02CC)
+        ' ': 'ˑ', // U+02D1 (literal space char)
+        '/': 'Ⳇ', // U+2CC6
+        '-': 'ￚ', // U+FFDA
+        '.': 'ˌ', // U+02CC
+        ':': 'ː', // U+02D0
+        '<': 'ᐸ', // U+1438
+        '>': 'ᐳ', // U+1433
+
+        // NB: *DON'T* add the following chars here... They are reserved for future operators:
+        // `| ( )`
     };
 }
 

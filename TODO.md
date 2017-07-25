@@ -3,7 +3,7 @@
   - [x] switch globstar from `...`/`…` to `**`/`ᕯ`
   - [x] don't allow `ᕯ` in Predicate or NormalPredicate (use `**`). It should only appear in `identifier`
   - [x] ensure predicate chars are whitelisted, not blacklisted, to avoid potential regex exploits
-  - [ ] add support initially for: `:<>`
+  - [x] add support initially for: `:<>`
   - [ ] remove all refs to `∅` in codebase and tests and mds
 - [ ] use `Ɱ0`, `Ɱ1`, etc for mm funcion names
 - [ ] implement `async: false` option properly, with tests
@@ -65,11 +65,11 @@
   - [ ] TODO: Implement the following operators:
     - [ ] `*` wildcard
     - [ ] `...` globstar
-      - [ ] TODO: change back to `**`? Pros: One less special char. Cons: Ambiguous?
-      - [ ] Use single unicode 'letter' char for `**` : U+156F `ᕯ`
+      - [x] TODO: change back to `**`? Pros: One less special char. Cons: Ambiguous?
+      - [x] Use single unicode 'letter' char for `**` : U+156F `ᕯ`
     - [ ] `{...}` wildcard/globstar named capture
-  - [ ] TODO: Reserve the following characters for future use:
-    - `( ) |`
+  - [x] TODO: Reserve the following characters for future use:
+    - [x] `( ) |`
     - [ ] TODO: union/or: `|`?
     - [ ] TODO: alternatives `(abc|def|123)`
     - [ ] TODO: zero or one `(abc?)`
@@ -93,33 +93,34 @@
   - [ ] TODO: doc use of special chars in emitted MM code
     - [ ] `ᐟ` (U+141F) to differentiate otherwise-equivalent identifiers
     - [ ] `ː` (U+02D0) to visually separate parts of an identifier
-    - [ ] EXPERIMENTS - valid identifier chars:
-      - M `Ɱ` (U+04CE)
-      - / `Ⳇ` (U+2CC6)
-      - \ `〵` (U+3035)
-      - * `ӿ` (U+04FF)
-      - ** `ᕯ` (U+156F)
-      - : `ː` (U+02D0)
-      - . `ˌ` (U+02CC)
-      - < `ᐸ` (U+1438)
-      - > `ᐳ` (U+1433)
-      - ? `ॽ` (U+097D)
-      - - `ￚ` (U+FFDA)
-      - # `ꐚ` (U+A41A)
-      - + `ᕀ` (U+1540)
-      - ! `ǃ` (U+01C3)
-      - | `ǀ` (U+01C0)
-      - ^ `ᣔ` (U+18D4)
-      - ~ `ᱻ` (U+1C7B)
-      - @ `ဇ` (U+1007)
-      - ' `ʼ` (U+02BC)
-      - " `ˮ` (U+02EE)
-      - ` `ˋ` (U+02CB)
-      - \s `ˑ` (U+02D1) for space
-      - % `ꕑ` (U+A551)   any better one?
-      - , `ˏ` (U+02CF)   any better one?
-      - ; `ꓼ` (U+A4FC)   any better one?
-      - = `ꘌ` (U+A60C)   any better one?
+    - [ ] SUPPORT ADDED ALREADY - valid identifier chars:
+      - \s `ˑ` U+02D1 (for space)
+      - * `ӿ` U+04FF
+      - ** `ᕯ` U+156F
+      - / `Ⳇ` U+2CC6
+      - - `ￚ` U+FFDA
+      - . `ˌ` U+02CC
+      - : `ː` U+02D0
+      - < `ᐸ` U+1438
+      - > `ᐳ` U+1433
+    - [ ] CONSIDER FUTURE SUPPORT - valid identifier chars:
+      - M `Ɱ` U+04CE
+      - \ `〵` U+3035
+      - ? `ॽ` U+097D
+      - # `ꐚ` U+A41A
+      - + `ᕀ` U+1540
+      - ! `ǃ` U+01C3
+      - | `ǀ` U+01C0
+      - ^ `ᣔ` U+18D4
+      - ~ `ᱻ` U+1C7B
+      - @ `ဇ` U+1007
+      - ' `ʼ` U+02BC
+      - " `ˮ` U+02EE
+      - ` `ˋ` U+02CB
+      - % `ꕑ` U+A551   any better one?
+      - , `ˏ` U+02CF   any better one?
+      - ; `ꓼ` U+A4FC   any better one?
+      - = `ꘌ` U+A60C   any better one?
 
       - none found for: `( ) [ ] { } &`
       -  `` (U+)
