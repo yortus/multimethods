@@ -1,3 +1,16 @@
+{
+    // TODO: doc... all permitted chars in predicates are *whilelisted* for safety.
+    //              additionally, they must all have a unique equivalent identifier char.
+
+    // Maps from whitelisted literal chars to their identifier equivalents.
+    // NB: each identifier char must have a unique mapping from a literal char.
+    var literalChars = {
+        ' ': 'ˑ', // (U+02D1)
+        '/': 'Ⳇ', // (U+2CC6)
+        '-': 'ￚ', // (U+FFDA)
+        '.': 'ˌ', // (U+02CC)
+    };
+}
 
 
 
@@ -6,7 +19,7 @@
 Predicate
 =   elems:Element*   !.
     {
-        // NB: This isn't downleveled, so only use ES5 in here...
+        // NB: This JS isn't transpiled, so only use ES5 in here...
         var captures = elems.map(function (elem) { return elem[2]; }).filter(function (c) { return !!c; });
         return {
             signature: elems.map(function (elem) { return elem[0]; }).join(''),
@@ -29,12 +42,9 @@ Wildcard 'wildcard'
 =   "*"   !("*" / "{")                              { return ['*', 'ӿ', '?']; } // (U+04FF)
 /   "{"   id:IDENTIFIER   "}"   !("*" / "{")        { return ['*', 'ӿ', id]; }
 
-Literal 'literal'
+Literal 'literal' // NB: Ensure all valid literal chars are whitelisted here. No blacklists!
 =   c:[a-zA-Z0-9_]                                  { return [c, c, null]; }
-/   c:" "                                           { return [c, 'ˑ', null]; }  // (U+02D1)
-/   c:"/"                                           { return [c, 'Ⳇ', null]; }  // (U+2CC6)
-/   c:"-"                                           { return [c, 'ￚ', null]; }  // (U+FFDA)
-/   c:"."                                           { return [c, 'ˌ', null]; }  // (U+02CC)
+/   c:. &{ return c in literalChars; }              { return [c, literalChars[c], null]; }
 
 IDENTIFIER
 =   [a-z_$]i   [a-z0-9_$]i*                         { return text(); }

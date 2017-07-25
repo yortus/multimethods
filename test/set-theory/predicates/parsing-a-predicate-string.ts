@@ -6,6 +6,58 @@ import {parsePredicateSource, PredicateAST} from 'multimethods/math/predicates';
 describe('Parsing a predicate string', () => {
 
     let tests = [
+        // Simple predicates consisting of valid characters:
+        'abcdefghijklm ==> {signature: "abcdefghijklm", identifier: "abcdefghijklm", captures: []}',
+        'nopqrstuvwxyz ==> {signature: "nopqrstuvwxyz", identifier: "nopqrstuvwxyz", captures: []}',
+        'ABCDEFGHIJKLM ==> {signature: "ABCDEFGHIJKLM", identifier: "ABCDEFGHIJKLM", captures: []}',
+        'NOPQRSTUVWXYZ ==> {signature: "NOPQRSTUVWXYZ", identifier: "NOPQRSTUVWXYZ", captures: []}',
+        '0123456789 ==> {signature: "0123456789", identifier: "0123456789", captures: []}',
+        ' /-. ==> {signature: " /-.", identifier: "ˑⳆￚˌ", captures: []}',
+
+        // All other characters should be invalid.... Test all keyboard symbols explicitly:
+        '` ==> ERROR',
+        '~ ==> ERROR',
+        '! ==> ERROR',
+        '@ ==> ERROR',
+        '# ==> ERROR',
+        '$ ==> ERROR',
+        '% ==> ERROR',
+        '^ ==> ERROR',
+        '& ==> ERROR',
+        '( ==> ERROR',
+        ') ==> ERROR',
+        '= ==> ERROR',
+        '+ ==> ERROR',
+        '[ ==> ERROR',
+        '] ==> ERROR',
+        '\\ ==> ERROR',
+        '| ==> ERROR',
+        '; ==> ERROR',
+        ': ==> ERROR',
+        `' ==> ERROR`,
+        '" ==> ERROR',
+        ', ==> ERROR',
+        '< ==> ERROR',
+        '> ==> ERROR',
+        '? ==> ERROR',
+
+        // All other characters should be invalid.... Sanity-check with a few random unicode characters:
+        'ᕯ ==> ERROR',
+        'á ==> ERROR',
+        'ß ==> ERROR',
+        'δ ==> ERROR',
+        'ᵀ ==> ERROR',
+        'औ ==> ERROR',
+        'ݵ ==> ERROR',
+        'Ϳ ==> ERROR',
+        '𝟜 ==> ERROR',
+        'Ⅳ ==> ERROR',
+        '﹍ ==> ERROR',
+        '§ ==> ERROR',
+        '∫ ==> ERROR',
+        '© ==> ERROR',
+
+        // More complex valid predicates:
         '∅ ==> {signature: "", identifier: "", captures: []}',
         '/ ==> {signature: "/", identifier: "Ⳇ", captures: []}',
         '* ==> {signature: "*", identifier: "ӿ", captures: ["?"]}',
@@ -30,7 +82,8 @@ describe('Parsing a predicate string', () => {
         'GET   /foo ==> {signature: "GET   /foo", identifier: "GETˑˑˑⳆfoo", captures: []}',
         '   GET /foo ==> {signature: "   GET /foo", identifier: "ˑˑˑGETˑⳆfoo", captures: []}',
         '   /    ==> {signature: "   /   ", identifier: "ˑˑˑⳆˑˑˑ", captures: []}',
-        'ᕯ ==> ERROR',
+
+        // Malformed predicates:
         '/*** ==> ERROR',
         '/foo/{**rest}* ==> ERROR',
         '/foo/{name}{ext} ==> ERROR',

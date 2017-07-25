@@ -2,8 +2,10 @@
 - [ ] support more special characters in predicates
   - [x] switch globstar from `...`/`…` to `**`/`ᕯ`
   - [x] don't allow `ᕯ` in Predicate or NormalPredicate (use `**`). It should only appear in `identifier`
-  - [ ] initially: ':<>'
-  - [ ] ensure predicate chars are whitelisted, not blacklisted, to avoid potential regex exploits
+  - [x] ensure predicate chars are whitelisted, not blacklisted, to avoid potential regex exploits
+  - [ ] add support initially for: `:<>`
+  - [ ] remove all refs to `∅` in codebase and tests and mds
+- [ ] use `Ɱ0`, `Ɱ1`, etc for mm funcion names
 - [ ] implement `async: false` option properly, with tests
 
 
@@ -93,7 +95,6 @@
     - [ ] `ː` (U+02D0) to visually separate parts of an identifier
     - [ ] EXPERIMENTS - valid identifier chars:
       - M `Ɱ` (U+04CE)
-      - M `ϻ` (U+03FB)
       - / `Ⳇ` (U+2CC6)
       - \ `〵` (U+3035)
       - * `ӿ` (U+04FF)
@@ -114,7 +115,7 @@
       - ' `ʼ` (U+02BC)
       - " `ˮ` (U+02EE)
       - ` `ˋ` (U+02CB)
-      - \s `ˑ` *U+02D1) for space
+      - \s `ˑ` (U+02D1) for space
       - % `ꕑ` (U+A551)   any better one?
       - , `ˏ` (U+02CF)   any better one?
       - ; `ꓼ` (U+A4FC)   any better one?
