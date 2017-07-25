@@ -4,7 +4,7 @@
 
 
 // Tell mocha where the test files are.
-//TODO: was... restore... process.argv.push('built/test/unit/**/*.js');
+// TODO: was... restore... process.argv.push('built/test/unit/**/*.js');
 process.argv.push('dist/test/**/*.js');
 
 // Tell mocha *not* to call process.exit() when tests have finished.

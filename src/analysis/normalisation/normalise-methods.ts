@@ -5,11 +5,9 @@ import NormalOptions from './normal-options';
 
 
 
-// TODO: ...
+// TODO: doc...
 export default function normaliseMethods(methods: Options['methods']) {
     methods = methods || {};
-
-    // TODO: doc...
     let result = {} as NormalOptions['methods'];
     for (let predicate in methods) {
         if (!methods.hasOwnProperty(predicate)) continue;

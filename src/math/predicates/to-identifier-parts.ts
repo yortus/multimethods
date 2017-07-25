@@ -12,8 +12,6 @@ import Predicate from './predicate';
 //  * Different normalized forms are guaranteed to have different return values from this function.
 //  */
 export default function toIdentifierParts(predicate: Predicate): string {
-
-    // TODO: ...
     let ast = parse(predicate);
     return ast.identifier;
 }

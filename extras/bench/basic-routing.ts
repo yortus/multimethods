@@ -116,7 +116,6 @@ const tests = [
 ];
 
 
-// TODO: ...
 // TODO: was... (async () => {
 
 // Set up the tests.

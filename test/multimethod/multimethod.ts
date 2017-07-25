@@ -5,7 +5,6 @@ import {create as MM, meta} from 'multimethods';
 
 
 
-// TODO: ...
 describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
 
     // TODO: temp testing...
