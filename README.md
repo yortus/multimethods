@@ -15,7 +15,7 @@
 
 ## Future Work
 - the `strictChecks` option may be changed to `true | false | { <specific checks...> }`
-- diagnostics: early detection of potential runtime error on FALLBACK when multiple possible fallbacks exist
+- diagnostics: early detection of potential runtime error on CONTINUE when multiple possible fallbacks exist
 - generator MMs - iterable functions ala ES6 generators, but with MM dispatch
 - 'adding' two multimethods to get a new multimethod
 
@@ -51,10 +51,22 @@
 - eager or lazy?
 
 
-## The FALLBACK sentinel
-- When a handler returns `FALLBACK` (or a `Promise` thereof), it instructs the library to call the next-best matching handler for the same inputs. And so on until either a handler returns a non-`FALLBACK` value (which becomes the return value of the MM call), or the last matching handler returns `FALLBACK`, which causes an 'unhandled' error to be thrown.
-- lib provides a default for this, which is exported as `FALLBACK`
-- clients can provide their own `FALLBACK` value via MM options
+## The CONTINUE sentinel
+- When a handler returns `CONTINUE` (or a `Promise` thereof), it instructs the library to call the next-best matching handler for the same inputs. And so on until either a handler returns a non-`CONTINUE` value (which becomes the return value of the MM call), or the last matching handler returns `CONTINUE`, which causes an 'unhandled' error to be thrown.
+- lib provides a default for this, which is exported as `CONTINUE`
+- clients can provide their own `CONTINUE` value via MM options
+
+
+## Strict mode (`options.strict`)
+### `strict: false` behaviour (default)
+- method results are not checked:
+  - for `async: false`, undefined behaviour if any method returns a promise
+  - for `async: true`, undefined behaviour if any method returns a non-promise or throws
+### `strict: true` behaviour
+- method results are checked:
+  - for `async: false`, if result is a promise, throws an error
+  - for `async: true`, if result is a non-promise (including if it throws), multimethod returns a rejected promise
+    - NB: this relies on runtime support for `Promise.resolve()`, where `Promise` is globally defined
 
 
 ## Handlers

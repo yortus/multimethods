@@ -13,7 +13,7 @@ describe('Identifying a Promise-like object', () => {
         `T: Promise.resolve(1)`,
         `T: Promise.reject('error').catch(()=>{})`,
         `F: null`,
-        `F: void 0`,
+        `F: undefined`,
         `F: 'a string'`,
         `F: 1234`,
         `F: {}`,

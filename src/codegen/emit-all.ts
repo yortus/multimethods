@@ -22,7 +22,7 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     // all predicates and methods, as well as the interdependent thunk function declarations that perform
     // the cascading, and possibly asynchronous, evaluation of each multimethod call.
     emitBanner(emit, 'MULTIMETHOD DISPATCHER');
-    emitDispatchFunction(emit, env.options.name, env.options.arity, names);
+    emitDispatchFunction(emit, env, names);
 
     emitBanner(emit, 'THUNK SELECTOR');
     emitSelectorFunction(emit, env, names);
@@ -38,7 +38,8 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     emitBanner(emit, 'ENVIRONMENT');
     emit(`var ${names.IS_PROMISE_LIKE} = ${names.ENV}.${names.IS_PROMISE_LIKE};`);
     emit(`var ${names.CONTINUE} = ${names.ENV}.${names.CONTINUE};`);
-    emit(`var ${names.UNHANDLED_ERROR} = ${names.ENV}.${names.UNHANDLED_ERROR};`);
+    emit(`var ${names.ERROR_UNHANDLED} = ${names.ENV}.${names.ERROR_UNHANDLED};`);
+    emit(`var ${names.ERROR_INVALID_RESULT} = ${names.ENV}.${names.ERROR_INVALID_RESULT};`);
     emit(`var ${names.TO_DISCRIMINANT} = ${names.ENV}.${names.OPTIONS}.${names.TO_DISCRIMINANT};`);
     emit(`var ${names.EMPTY_OBJECT} = Object.freeze({});`);
     env.allNodes.forEach((node, i) => {
@@ -71,6 +72,7 @@ function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
     result.isPromiseLike = isPromiseLike;
     result.CONTINUE = CONTINUE;
     result.unhandledError = fatalError.UNHANDLED;
+    result.invalidResultError = fatalError.INVALID_METHOD_RESULT;
     return result;
 }
 

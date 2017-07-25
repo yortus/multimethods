@@ -11,8 +11,6 @@ import Emitter, {EnvNames} from './emitter';
  * Generates a function that, given a discriminant, returns the best-matching route executor from the given list of
  * candidates. The returned selector function is generated for maximum readability and efficiency, using conditional
  * constructs that follow the branches of the given `eulerDiagram`.
- * @param {EulerDiagram} eulerDiagram - The arrangement of patterns on which to base the returned selector function.
- * @returns {(address: string) => Function} The generated route selector function.
  */
 export default function emitSelectorFunction(emit: Emitter, mminfo: MMInfo<MMNode>, names: typeof EnvNames) {
     emit(`function ${names.SELECT_THUNK}(discriminant) {`);

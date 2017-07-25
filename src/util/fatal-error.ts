@@ -36,6 +36,11 @@ export function INVALID_TO_DISCRIMINANT_OPTION() {
     return error(format(fmt));
 }
 
+export function INVALID_METHOD_RESULT(methodName: string, expectedResult: string, actualResult: string) {
+    let fmt = `Expected method %s to return %s, but received %s`;
+    return error(format(fmt, methodName, expectedResult, actualResult));
+}
+
 export function MIXED_CHAIN(predicate: string) {
     let fmt = `Chain for predicate '%s' has meta-method(s) to the right`
             + ` of regular method(s). Meta-methods must be leftmost in the chain.`;
@@ -57,14 +62,14 @@ export function PREDICATE_SYNTAX(message: string) {
     return error(format(fmt, message));
 }
 
-export function UNHANDLED() {
-    let fmt = `Multimethod dispatch failure: call was unhandled for the given arguments`;
-    return error(format(fmt));
-}
-
 export function STRICT_VALIDATION(problems: string[]) {
     let fmt = `Strict validation failed. The following problems were found: %s`;
     return error(format(fmt, '\n' + problems.map((p, i) => `${i + 1}. ${p}`).join('\n')));
+}
+
+export function UNHANDLED() {
+    let fmt = `Multimethod dispatch failure: call was unhandled for the given arguments`;
+    return error(format(fmt));
 }
 
 

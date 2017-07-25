@@ -12,8 +12,23 @@ import Thunk from '../thunk';
 export default function __FUNCNAME__(__VARARGS__: any[]) {
     let discriminant = $.TO_DISCRIMINANT(__VARARGS__);
     let thunk = $.SELECT_THUNK(discriminant);
-    let result = thunk(discriminant, $.CONTINUE, __VARARGS__);
-    return result === $.CONTINUE ? $.UNHANDLED_ERROR() : result;
+
+    if ($.IS_ASYNC_RESULT_REQUIRED) {
+        try {
+            var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
+        }
+        catch(error) {
+            result = Promise.resolve().then(() => {
+                $.ERROR_INVALID_RESULT('$.METHOD', 'a promise', 'an exception');
+            });
+        }
+    }
+    else {
+        var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
+    }
+
+
+    return result === $.CONTINUE ? $.ERROR_UNHANDLED() : result;
 }
 
 
@@ -21,7 +36,7 @@ export default function __FUNCNAME__(__VARARGS__: any[]) {
 
 
 // TODO: explain...
-declare const $: VariablesInScope;
+declare const $: VarsInScope & StaticConds;
 
 
 
@@ -30,9 +45,20 @@ declare const $: VariablesInScope;
 // TODO: these are replacement placeholders.
 // TODO: these must be in the lexical environment when the template is eval'd:
 // TODO: explain each of these in turn...
-export interface VariablesInScope {
+export interface VarsInScope {
     CONTINUE: any;
-    UNHANDLED_ERROR: typeof fatalError.UNHANDLED;
+    ERROR_UNHANDLED: typeof fatalError.UNHANDLED;
+    ERROR_INVALID_RESULT: typeof fatalError.INVALID_METHOD_RESULT;
     TO_DISCRIMINANT: (...args: any[]) => string;
     SELECT_THUNK: (discriminant: string) => Thunk;
+}
+
+
+
+
+
+// TODO: these are statically known conditions that facilitate dead code elimination
+// TODO: explain each of these in turn...
+export interface StaticConds {
+    IS_ASYNC_RESULT_REQUIRED: boolean;
 }
