@@ -260,6 +260,76 @@ Predicate Special Chars:
   not
 
 
+## Capturing syntax review ideas
+
+NB: general idea is to decouple named captures from wildcard/globstar operators
+
+```ts
+
+// NB: syntax highlighting would make any of these more acceptable. Write a vscode extension?
+var routes = {
+    // The basic predicate with no captures
+    '/employees/*/bank-accts/*': staticFiles('path'),
+
+    // 'capture' operator, both as prefix and postfix, using various delimiters: <>, {}, ::, "", [], __
+    // prefix: clearly states that we are naming the next thing, esp if 'the next thing' is long
+    // postfix: keeps emphasis on the predicate, names are appended and sorta de-emphasised
+    '/employees/<empId>*/bank-accts/<acctId>*': staticFiles('path'),
+    '/employees/*<empId>/bank-accts/*<acctId>': staticFiles('path'),
+    '/employees/{empId}*/bank-accts/{acctId}*': staticFiles('path'),
+    '/employees/*{empId}/bank-accts/*{acctId}': staticFiles('path'),
+    '/employees/:empId:*/bank-accts/:acctId:*': staticFiles('path'),
+    '/employees/*:empId:/bank-accts/*:acctId:': staticFiles('path'),
+    '/employees/"empId"*/bank-accts/"acctId"*': staticFiles('path'),
+    '/employees/*"empId"/bank-accts/*"acctId"': staticFiles('path'),
+    '/employees/[empId]*/bank-accts/[acctId]*': staticFiles('path'),
+    '/employees/*[empId]/bank-accts/*[acctId]': staticFiles('path'),
+    '/employees/_empId_*/bank-accts/_acctId_*': staticFiles('path'),
+    '/employees/*_empId_/bank-accts/*_acctId_': staticFiles('path'),
+
+    // better or worse to allow non-significant whitespace?
+    '/ employees / *<empId> / bank-accts / *<acctId>': staticFiles('path'),
+    '/ employees / empId:* / bank-accts / acctId:*': staticFiles('path'),
+    '/ employees / *:empId / bank-accts / *:acctId': staticFiles('path'),
+    '/employees/ *:empId /bank-accts/ *:acctId': staticFiles('path'),
+    '/employees/ (*:empId) /bank-accts/ (*:acctId)': staticFiles('path'),
+
+    // 'capture' operator with implicit closing delimiter
+    '/employees/(*:empId)/bank-accts/(*:acctId)': staticFiles('path'),  // ends because of closing parens
+    '/employees/*:empId/bank-accts/*:acctId': staticFiles('path'),      // ends after last alphanum (ie, the next '/')
+
+    // Same ideas, different predicate...
+    '/(c*t)<word>': staticFiles('path'), // postfix with both delimiters...
+    '/(c*t){word}': staticFiles('path'),
+    '/(c*t):word:': staticFiles('path'),
+    '/(c*t)"word"': staticFiles('path'),
+    '/(c*t)[word]': staticFiles('path'),
+
+    '/(c*t):word': staticFiles('path'), // fine, unambiguous - : matches single preceding thing
+    '/(c*t:word)': staticFiles('path'), // sorta ok, but need rules about how much of preceding thing gets captured
+    '/c*t:word': staticFiles('path'),   // as above, but less clear: Would the '/' be captured or not? Intuition: no it wouldn't.
+
+    '/word:(c*t)': staticFiles('path'), // prefix instead...
+    '/(word:c*t)': staticFiles('path'),
+    '/word:c*t': staticFiles('path'),
+    '/[word]c*t': staticFiles('path'),
+
+    // Positional captures - no names here - they should be documented elsewhere (but then they might get out of sync with predicate)
+    '/employees/{*}/bank-accts/{*}': staticFiles('path'),
+    '/{c*t}': staticFiles('path'),
+    '/employees/[*]/bank-accts/[*]': staticFiles('path'),
+    '/[c*t]': staticFiles('path'),
+    '/employees/*^1/bank-accts/*^2': staticFiles('path'),
+    '/(c*t)^1': staticFiles('path'),
+    '/employees/*¹/bank-accts/*²': staticFiles('path'),
+    '/(c*t)¹': staticFiles('path'),
+    '/employees/*ᵉᵐᵖⁱᵈ/bank-accts/*ᵃᶜᶜᵗⁱᵈ': staticFiles('path'), // fun fact: all latin letters except 'q' have lowercase superscript forms in unicode.
+    '/(c*t)ʷᵒʳᵈ': staticFiles('path'),
+}
+
+```
+
+
 
 
 
