@@ -27,7 +27,7 @@ export default function listDiscontinuities(methods: Options['methods']) {
 
     let hasUnhandledCatchall = unhandledPredicates.indexOf(ANY) !== -1;
     if (hasUnhandledCatchall) {
-        problems.push(`No catch-all method. To resolve, add a method for the predicate '...'.`);
+        problems.push(`No catch-all method. To resolve, add a method for the predicate '**'.`);
     }
 
     let unhandledIntersections = unhandledPredicates.filter(p => p !== ANY);

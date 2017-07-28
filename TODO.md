@@ -1,5 +1,10 @@
 ## Todo - High Priority
 - [ ] export a `Multimethod` type (or family thereof)
+  - [ ] or not, it's just a straightforward function signature, nothing special added
+- [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
+  - [ ] it might be useful if it effectively works like a no-op.
+    - [ ] check if it indeed does work like this at present, or otherwise how it can be made to do so
+    - [ ] example: routist @allow on a pattern (predicate) that exists only for permissions (ir has no handler)
 
 
 ## Todo - Medium Priority
