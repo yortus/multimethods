@@ -4,9 +4,9 @@ import analyseChildNodes from './analyse-child-nodes';
 import analyseMethodSequences from './analyse-method-sequences';
 import analyseMethodTable from './analyse-method-table';
 import analyseParentNodes from './analyse-parent-nodes';
+import {createConfiguration} from './configuration';
 import MMInfo from './mm-info';
 import MMNode from './mm-node';
-import {normaliseOptions} from './normalisation';
 
 
 
@@ -14,8 +14,8 @@ import {normaliseOptions} from './normalisation';
 
 // TODO: doc...
 export default function analyseAll(options: Options) {
-    let normalisedOptions = normaliseOptions(options);
-    let mminfo1 = MMInfo.fromOptions(normalisedOptions);
+    let config = createConfiguration(options);
+    let mminfo1 = MMInfo.fromConfig(config);
     let mminfo2 = analyseMethodTable(mminfo1);
     let mminfo3 = analyseAmbiguities(mminfo2);
     let mminfo4 = analyseChildNodes(mminfo3);

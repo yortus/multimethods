@@ -40,7 +40,7 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     emit(`var ${names.CONTINUE} = ${names.ENV}.${names.CONTINUE};`);
     emit(`var ${names.ERROR_UNHANDLED} = ${names.ENV}.${names.ERROR_UNHANDLED};`);
     emit(`var ${names.ERROR_INVALID_RESULT} = ${names.ENV}.${names.ERROR_INVALID_RESULT};`);
-    emit(`var ${names.TO_DISCRIMINANT} = ${names.ENV}.${names.OPTIONS}.${names.TO_DISCRIMINANT};`);
+    emit(`var ${names.TO_DISCRIMINANT} = ${names.ENV}.${names.CONFIG}.${names.TO_DISCRIMINANT};`);
     emit(`var ${names.EMPTY_OBJECT} = Object.freeze({});`);
     env.allNodes.forEach((node, i) => {
         const NODE_REF = `${names.ENV}.${names.ALL_NODES}[${i}]`;

@@ -41,7 +41,7 @@ export default function emitThunkFunction(emit: Emitter,
     let downstream = seq.filter((entry, j) => (j === 0 || entry.isMeta) && j < index).pop();
 
     // TODO: temp testing...
-    emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.options.arity, {
+    emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.config.arity, {
 
         // Statically known strings for substitution into the template
         IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
@@ -54,13 +54,13 @@ export default function emitThunkFunction(emit: Emitter,
         FALLBACK_THUNK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[index + 1].identifier}`,
 
         // Statically known booleans for dead code elimination
-        IS_STRICT_MODE: mminfo.options.strict,
+        IS_STRICT_MODE: mminfo.config.strict,
         ENDS_PARTITION: isLeastSpecificMethod || seq[index + 1].isMeta,
         HAS_CAPTURES: parsePredicateSource(fromNode.exactPredicate).captureNames.length > 0,
         IS_META_METHOD: isMeta,
         HAS_DOWNSTREAM: downstream != null,
-        IS_NEVER_ASYNC: mminfo.options.async === false,
-        IS_ALWAYS_ASYNC: mminfo.options.async === true,
+        IS_NEVER_ASYNC: mminfo.config.async === false,
+        IS_ALWAYS_ASYNC: mminfo.config.async === true,
     });
 }
 

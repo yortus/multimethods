@@ -8,11 +8,11 @@ import debug, {DISPATCH} from '../util/debug';
 
 // TODO: doc...
 export default function instrumentDispatchFunction(mminfo: MMInfo<MMNode>, mm: Function) {
-    let mmname = mminfo.options.name;
+    let mmname = mminfo.config.name;
     function instrumentedDispatch(...args: any[]) {
         debug(
             `${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`,
-            mminfo.options.toDiscriminant(...args),
+            mminfo.config.toDiscriminant(...args),
             args
         );
         let getResult = () => mm(...args);

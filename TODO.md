@@ -8,11 +8,12 @@
 
 
 ## Todo - Medium Priority
+- [ ] validation: check for unrecognised options
 - [ ] export an `extend` function that takes a MM and a method table and returns a new multimethod
   - [ ] use `super` in chains to control overriding behaviour w.r.t. original MM
   - [ ] makes a new method table from the two given ones and returns a new multimethod with the extended method table
   - [ ] original multimethod is unchanged
-  - [ ] new multimethod gets same options as given one
+  - [ ] new multimethod gets same config as given one
   - [ ] method chains support explicit relative specificity with `'super'`
   - [ ] explicit method specificity is *required*, otherwise throws an 'ambiguous' error
   - [ ] add tests for all of above
@@ -29,7 +30,7 @@
   - [ ] Usage example
   - [ ] Further Details
     - [ ] predicates
-    - [ ] options
+    - [ ] options / configuration
     - [ ] method table: specificity, chains, CONTINUE, meta-methods, etc
 - [ ] Improve unit test coverage
   - [ ] add basic tests for correct arg passing for variadic, nullary, unary, binary and ternary MMs
@@ -56,7 +57,6 @@
 - [ ] new option `toType: Function` - if provided and no `toDiscriminant` given, the default `toDiscriminant` uses it
 - [ ] new option `allowNulls` - mms should reject `null` args unless this is explicitly set to `true`
 - [ ] support simplified MM creation: accept method table directly instead of inside `methods` prop.
-- [ ] validation: check for unrecognised options
 - [ ] strict mode: if fixed arity, check number of arguments passed to discriminant is correct
 - [ ] review fatalError module again: 1. don't use ALL_CAPS, how best to export? c.f. TypeScript internals...
 - [ ] add sticky copyright comment at top of multimethods.min.js

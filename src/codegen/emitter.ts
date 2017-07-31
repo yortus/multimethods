@@ -72,7 +72,7 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     // in the emitted code will need to be updated to agree with the refactored code.
     const globProps = {env};
     const {...envProps} = env;
-    const {...optProps} = env.options;
+    const {...cfgProps} = env.config;
     const {...nodeProps} = env.allNodes[0];
     // tslint:disable:no-unused-expression
     [EnvNames.ENV] as Array<keyof typeof globProps>;
@@ -80,9 +80,9 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     [EnvNames.CONTINUE] as Array<keyof typeof envProps>;
     [EnvNames.ERROR_UNHANDLED] as Array<keyof typeof envProps>;
     [EnvNames.ERROR_INVALID_RESULT] as Array<keyof typeof envProps>;
-    [EnvNames.OPTIONS] as Array<keyof typeof envProps>;
+    [EnvNames.CONFIG] as Array<keyof typeof envProps>;
     [EnvNames.ALL_NODES] as Array<keyof typeof envProps>;
-    [EnvNames.TO_DISCRIMINANT] as Array<keyof typeof optProps>;
+    [EnvNames.TO_DISCRIMINANT] as Array<keyof typeof cfgProps>;
     [EnvNames.IS_MATCH] as Array<keyof typeof nodeProps>;
     [EnvNames.GET_CAPTURES] as Array<keyof typeof nodeProps>;
     [EnvNames.EXACT_METHODS] as Array<keyof typeof nodeProps>;
@@ -93,9 +93,9 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     // be considered untrusted), but that has nothing to do with the use of 'eval' here, since they would need to be
     // called by the dispatcher whether or not eval was used. More importantly, the use of eval here allows for
     // multimethod dispatch code that is both more readable and more efficient, since it is tailored specifically
-    // to the options of this multimethod, rather than having to be generalized for all possible cases.
+    // to the configuration of this multimethod, rather than having to be generalized for all possible cases.
     // tslint:disable-next-line:no-eval
-    let mm = eval(`(function () { ${source}; return ${env.options.name}; })`)() as Function;
+    let mm = eval(`(function () { ${source}; return ${env.config.name}; })`)() as Function;
     mm.toString = () => source;
     return mm;
 }
@@ -112,7 +112,7 @@ export enum EnvNames {
     CONTINUE = 'CONTINUE',
     ERROR_UNHANDLED = 'unhandledError',
     ERROR_INVALID_RESULT = 'invalidResultError',
-    OPTIONS = 'options',
+    CONFIG = 'config',
     ALL_NODES = 'allNodes',
     TO_DISCRIMINANT = 'toDiscriminant',
     IS_MATCH = 'isMatch',

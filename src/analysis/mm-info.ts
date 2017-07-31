@@ -1,6 +1,6 @@
 import {EulerDiagram, EulerSet} from '../math/sets';
 import assign from '../util/object-assign';
-import {NormalOptions} from './normalisation';
+import Configuration from './configuration';
 
 
 
@@ -9,17 +9,17 @@ import {NormalOptions} from './normalisation';
 // TODO: doc...
 export default class MMInfo<TNode> {
 
-    static fromOptions(options: NormalOptions) {
-        let ed = new EulerDiagram(Object.keys(options.methods));
+    static fromConfig(config: Configuration) {
+        let ed = new EulerDiagram(Object.keys(config.methods));
         let mminfo = new MMInfo<{}>();
-        mminfo.options = options;
+        mminfo.config = config;
         mminfo.allNodes = ed.allSets.map(() => ({}));
         mminfo.rootNode = mminfo.allNodes[ed.allSets.indexOf(ed.universalSet)];
         mminfo.eulerDiagram = ed;
         return mminfo;
     }
 
-    options: NormalOptions;
+    config: Configuration;
 
     allNodes: TNode[];
 

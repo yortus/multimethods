@@ -4,7 +4,7 @@
 
 
 // TODO: similar to Options but with more defined typing
-export default interface NormalOptions {
+export default interface Configuration {
     name: string;
     arity: number | undefined;
     async: boolean | undefined;
