@@ -12,6 +12,7 @@
         ':': 'ː', // U+02D0
         '<': 'ᐸ', // U+1438
         '>': 'ᐳ', // U+1433
+        '@': 'ဇ', // U+1007
 
         // NB: *DON'T* add the following chars here... They are reserved for future operators:
         // `| ( )`

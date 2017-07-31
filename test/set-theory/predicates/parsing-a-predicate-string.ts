@@ -15,13 +15,12 @@ describe('Parsing a predicate string', () => {
         'ABCDEFGHIJKLM ==> {signature: "ABCDEFGHIJKLM", identifier: "ABCDEFGHIJKLM", captures: []}',
         'NOPQRSTUVWXYZ ==> {signature: "NOPQRSTUVWXYZ", identifier: "NOPQRSTUVWXYZ", captures: []}',
         '0123456789 ==> {signature: "0123456789", identifier: "0123456789", captures: []}',
-        ' /-.:<> ==> {signature: " /-.:<>", identifier: "ˑⳆￚˌːᐸᐳ", captures: []}',
+        ' /-.:<>@ ==> {signature: " /-.:<>@", identifier: "ˑⳆￚˌːᐸᐳဇ", captures: []}',
 
         // All other characters should be invalid.... Test all keyboard symbols explicitly:
         '` ==> ERROR',
         '~ ==> ERROR',
         '! ==> ERROR',
-        '@ ==> ERROR',
         '# ==> ERROR',
         '$ ==> ERROR',
         '% ==> ERROR',
