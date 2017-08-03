@@ -54,6 +54,18 @@
 
 
 ## Todo - Unassigned Priority
+- [ ] support `|` alternation operator in predicates
+  - [ ] enforce restriction (for now) that a predicate cannot have *both* alternation and named captures
+  - [ ] normalisation now includes sorting alternatives into predictable order (which order?)
+  - [ ] extend peg grammar
+  - [ ] extend AST
+  - [ ] extend `makeMatchFunction()` - one regex per alternative
+  - [ ] extend `intersect()`
+  - [ ] update `EulerDiagram`
+  - [ ] fix broken tests
+- [ ] address `UnhandledPromiseRejectionWarning` in `test/**/multimethod.ts` (see TODO comments there)
+- [ ] use `benchmark.js` for benchmarks/perf tests
+- [ ] address inefficiencies in how `intersect.ts` is coded (eg use memoisation, early deduping, etc)
 - [ ] new option `toType: Function` - if provided and no `toDiscriminant` given, the default `toDiscriminant` uses it
 - [ ] new option `allowNulls` - mms should reject `null` args unless this is explicitly set to `true`
 - [ ] support simplified MM creation: accept method table directly instead of inside `methods` prop.
