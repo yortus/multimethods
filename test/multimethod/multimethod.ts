@@ -87,8 +87,8 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
         });
 
         expect(mm('foo', 42)).to.eventually.equal('first is string');
-        expect(mm(42, 'foo')).to.eventually.throw();
         expect(mm(true, 42)).to.eventually.equal('true:42');
-        expect(mm(42, true)).to.eventually.throw();
+        expect(mm(42, 'foo')).to.eventually.throw(); // TODO: why UnhandledPromiseRejectionWarning?
+        expect(mm(42, true)).to.eventually.throw(); // TODO: why UnhandledPromiseRejectionWarning?
     });
 });
