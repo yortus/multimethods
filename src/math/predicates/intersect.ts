@@ -1,4 +1,4 @@
-import {NormalPredicate, Predicate, toNormalPredicate} from '../predicates';
+import {NormalPredicate} from '../predicates'; // NB: used only for types; elided from transpiled output
 
 
 
@@ -17,13 +17,13 @@ import {NormalPredicate, Predicate, toNormalPredicate} from '../predicates';
  * (3) An array with multiple elements. The array contains a list of mutually disjoint predicates, the union
  *     of whose recognized strings are precisely those strings that are recognized by both of the arguments.
  *     Example: 'test.*' ∩ '*.js' = ['test.js', 'test.*.js']
- * @param {Predicate} a - lhs predicate to be intersected.
- * @param {Predicate} b - rhs predicate to be intersected.
+ * @param {NormalPredicate} a - lhs predicate to be intersected.
+ * @param {NormalPredicate} b - rhs predicate to be intersected.
  * @returns {NormalPredicate[]} - an array of normalized predicates representing the intersection of `a` and `b`.
  */
-export default function intersect(a: Predicate, b: Predicate): NormalPredicate[] {
-    let sa = simplify(toNormalPredicate(a));
-    let sb = simplify(toNormalPredicate(b));
+export default function intersect(a: NormalPredicate, b: NormalPredicate): NormalPredicate[] {
+    let sa = simplify(a);
+    let sb = simplify(b);
     let allIntersections = getAllIntersections(sa, sb);
     let distinctIntersections = getDistinctPredicates(allIntersections);
     let result = distinctIntersections.map(expand);
@@ -157,7 +157,7 @@ function makeSubsetRecogniser(predicate: SimplePredicate) {
 
 
 // TODO: temp testing... internal concept; makes the algos in this file simpler
-// TODO: doc... a simplified predicate is normalised with multichar symbols replaced by single chars (** => ᕯ).
+// TODO: doc... a simplified predicate is normalised with multichar symbols replaced by single chars (ie, ** => ᕯ).
 type SimplePredicate = NormalPredicate & { __simplePredicateBrand: any };
 function simplify(p: NormalPredicate) {
     return p.replace(/\*\*/g, 'ᕯ') as SimplePredicate;

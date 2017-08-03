@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {intersect, toPredicate} from 'multimethods/math/predicates';
+import {intersect, toNormalPredicate} from 'multimethods/math/predicates';
 
 
 
@@ -85,7 +85,7 @@ describe('Intersecting two predicates', () => {
             let actual: string;
             let expected = rhs;
             try {
-                let intersections = intersect(toPredicate(lhsA), toPredicate(lhsB)); // TODO: fix casts
+                let intersections = intersect(toNormalPredicate(lhsA), toNormalPredicate(lhsB)); // TODO: fix casts
                 actual = `[${intersections}]`;
                 if (intersections.length === 1) actual = actual.slice(1, -1);
             }
