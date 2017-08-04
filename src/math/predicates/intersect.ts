@@ -1,5 +1,6 @@
 import NONE from './none';
 import NormalPredicate from './normal-predicate';
+import toNormalPredicate from './to-normal-predicate';
 
 
 
@@ -35,14 +36,9 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
         }
     }
 
-    // Remove alternatives that are subsets of other alternatives.
-    let distinctIntersections = getDistinctPredicates(allIntersections);
-
-    // Order remaining alternatives lexicographically.
-    let rParts = distinctIntersections.map(expand).sort();
-
     // Finalise the result.
-    let result = rParts.length === 0 ? NONE : rParts.join('|') as NormalPredicate;
+    if (allIntersections.length === 0) return NONE;
+    let result = toNormalPredicate(allIntersections.map(expand).join('|'));
     return result;
 }
 
@@ -120,52 +116,6 @@ function getAllPredicateSplits(predicate: SimplePredicate): Array<[SimplePredica
         result.push(pair as any);
     }
     return result;
-}
-
-
-
-
-
-/**
- * Returns an array containing a subset of the elements in `predicates`, such that no predicate in
- * the returned array is a proper or improper subset of any other predicate in the returned array.
- */
-function getDistinctPredicates(predicates: SimplePredicate[]): SimplePredicate[] {
-
-    // Set up a parallel array to flag predicates that are duplicates. Start by assuming none are.
-    let isDuplicate = predicates.map(_ => false);
-
-    // Compare all predicates pairwise, marking as duplicates all those
-    // predicates that are proper or improper subsets of any other predicate.
-    for (let i = 0; i < predicates.length; ++i) {
-        if (isDuplicate[i]) continue;
-        let subsetRecogniser = makeSubsetRecogniser(predicates[i]);
-        for (let j = 0; j < predicates.length; ++j) {
-            if (i === j || isDuplicate[j]) continue;
-            isDuplicate[j] = subsetRecogniser.test(predicates[j]);
-        }
-    }
-
-    // Return only the non-duplicate predicates from the original list.
-    return predicates.filter((_, i) => !isDuplicate[i]);
-}
-
-
-
-
-
-/**
- * Returns a regular expression that matches all predicates that
- * are proper or improper subsets of the specified predicate.
- */
-function makeSubsetRecogniser(predicate: SimplePredicate) {
-    let re = predicate.split('').map(c => {
-        if (c === '*') return '[^\\/ᕯ]*';
-        if (c === 'ᕯ') return '.*';
-        if (' /._-'.indexOf(c) !== -1) return `\\${c}`; // NB: these chars need escaping in a regex
-        return c;
-    }).join('');
-    return new RegExp(`^${re}$`);
 }
 
 

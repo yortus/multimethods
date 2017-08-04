@@ -48,13 +48,3 @@ const MAPPINGS = {
     '>': 'ᐳ', // U+1433
     '@': 'ဇ', // U+1007
 };
-
-
-
-
-
-// TODO: move this to to-predicate and use it to ensure no unexpected chars creep into predicates...
-// function isWhitelisted(c: string) {
-//     if (/^[A-Za-z0-9]$/.test(c)) return true;
-//     return Object.keys(MAPPINGS).indexOf(c) !== -1;
-// }

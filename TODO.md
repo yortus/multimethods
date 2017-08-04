@@ -1,64 +1,4 @@
 ## Todo - High Priority
-- [ ] support `|` alternation operator in predicates
-  - [ ] refactor predicate code:
-    - [ ] `dsl-parser.ts` / `parsePredicateString`
-      - [ ] no longer exported
-      - [ ] just checks the source string; doesn't work out identifier parts or captures
-    - [ ] `toPredicate` - parses the source just to ensure it is valid; casts it to `Predicate` without modification
-    - [ ] `toNormalPredicate` - assumes a valid predicate; applies normalisation transforms
-    - [ ] `toIdentifierParts` - assumes a valid predicate; normalises and applies identifier transforms
-    - [ ] `toMatchFunction` - assumes a valid predicate; works out `captures` / `captureNames` as an internal function
-    - [x] `hasCaptures` - assumes a valid predicate and returns a boolean
-      - [ ] internal; not exported
-  - [ ] update parsing/normalisation logic
-    - [x] overlapping and disjoint alternatives are allowed; in normal form they are arranged in lexicographic order
-    - [x] subset/superset alternatives - the subset is removed in the normal form
-    - [ ] `intersect` already does subset removal and lexicographical ordering - factor this out into one place
-  - [x] reinstate `∅` to mean the predicate that matches no strings (not even the empty string)
-    - [x] add grammar/parser support
-    - [x] ensure handled properly everywhere in `set-theory/predicates`)
-    - [x] ensure handled properly everywhere in `set-theory/sets`)
-    - [x] while we are at it, rename `ANY` to `ALL`
-    - [x] add/fix tests
-  - [x] update `EulerDiagram`
-    - [x] use new `intersect`
-    - [x] fix broken tests
-    - [x] handle `∅` among predicates
-  - [x] fix broken tests
-  - [x] extend `intersect()`
-    - [x] return an alternation predicate instead of an array of predicates
-    - [x] handle `∅` predicate as input
-  - [x] enforce current restrictions:
-    - [x] a predicate cannot have *both* alternation and named captures
-    - [x] alternatives within a predicate must be mutually-disjoint
-    - [x] in a normalised predicate, alternatives are arranged in lexicographical order using `Array#sort` default cmpr
-  - [x] extend peg grammar
-  - [x] extend AST
-  - [x] extend `toMatchFunction()` - one regex per alternative
-- [x] more predicate tests:
-  - [x] parsing a predicate string
-    - [x] alternation with `∅` not currently allowed
-    - [x] overlapping alternations
-    - [x] subset/superset alternations
-  - [x] matching a predicate against a string
-    - [x] overlapping alternations
-    - [x] subset/superset alternations
-  - [x] intersecting two predicates
-    - [x] disjoint alternations
-    - [x] overlapping alternations
-    - [x] subset/superset alternations
-  - [x] comparing a predicate with its normal form
-    - [x] rename this test?
-    - [-] overlapping alternations
-    - [x] subset/superset alternations
-  - [x] constructing a predicate instance
-    - [x] remove this file; subsume under 'parsing a predicate string'
-
-- [ ] predicate `|` operator: determine future pathway for relaxing some/all of the current restrictions
-  - [ ] *can* mix alternation and named captures, however:
-    - [ ] capture names must be unique within a predicate
-    - [ ] upon successfully matching a predicate against a string, some names may be absent in the `captures` hash
-
 - [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
   - [ ] it might be useful if it effectively works like a no-op.
     - [ ] check if it indeed does work like this at present, or otherwise how it can be made to do so
@@ -112,6 +52,10 @@
 
 
 ## Todo - Unassigned Priority
+- [ ] predicate `|` operator: determine future pathway for relaxing some/all of the current restrictions
+  - [ ] *can* mix alternation and named captures, however:
+    - [ ] capture names must be unique within a predicate
+    - [ ] upon successfully matching a predicate against a string, some names may be absent in the `captures` hash
 - [ ] document current restrictions w.r.t `|` alternation operator in predicates:
   - [ ] a predicate cannot have *both* alternation and named captures
   - [ ] in a normalised predicate, no alternative is a subset of any other alternative (they are removed)
@@ -408,6 +352,59 @@ var routes = {
 
 
 ## Done
+- [x] support `|` alternation operator in predicates
+  - [x] refactor predicate code:
+    - [x] `dsl-parser.ts` / `parsePredicateString`
+      - [x] no longer exported
+      - [x] just checks the source string; doesn't work out identifier parts or captures
+    - [x] `toPredicate` - parses the source just to ensure it is valid; casts it to `Predicate` without modification
+    - [x] `toNormalPredicate` - assumes a valid predicate; applies normalisation transforms
+    - [x] `toIdentifierParts` - assumes a valid predicate; normalises and applies identifier transforms
+    - [x] `toMatchFunction` - assumes a valid predicate; works out `captures` / `captureNames` as an internal function
+    - [x] `hasNamedCaptures` - assumes a valid predicate and returns a boolean
+  - [x] update parsing/normalisation logic
+    - [x] overlapping and disjoint alternatives are allowed; in normal form they are arranged in lexicographic order
+    - [x] subset/superset alternatives - the subset is removed in the normal form
+    - [x] `intersect` already does subset removal and lexicographical ordering - factor this out into one place
+  - [x] reinstate `∅` to mean the predicate that matches no strings (not even the empty string)
+    - [x] add grammar/parser support
+    - [x] ensure handled properly everywhere in `set-theory/predicates`)
+    - [x] ensure handled properly everywhere in `set-theory/sets`)
+    - [x] while we are at it, rename `ANY` to `ALL`
+    - [x] add/fix tests
+  - [x] update `EulerDiagram`
+    - [x] use new `intersect`
+    - [x] fix broken tests
+    - [x] handle `∅` among predicates
+  - [x] fix broken tests
+  - [x] extend `intersect()`
+    - [x] return an alternation predicate instead of an array of predicates
+    - [x] handle `∅` predicate as input
+  - [x] enforce current restrictions:
+    - [x] a predicate cannot have *both* alternation and named captures
+    - [x] alternatives within a predicate must be mutually-disjoint
+    - [x] in a normalised predicate, alternatives are arranged in lexicographical order using `Array#sort` default cmpr
+  - [x] extend peg grammar
+  - [x] extend AST
+  - [x] extend `toMatchFunction()` - one regex per alternative
+- [x] more predicate tests:
+  - [x] parsing a predicate string
+    - [x] alternation with `∅` not currently allowed
+    - [x] overlapping alternations
+    - [x] subset/superset alternations
+  - [x] matching a predicate against a string
+    - [x] overlapping alternations
+    - [x] subset/superset alternations
+  - [x] intersecting two predicates
+    - [x] disjoint alternations
+    - [x] overlapping alternations
+    - [x] subset/superset alternations
+  - [x] comparing a predicate with its normal form
+    - [x] rename this test?
+    - [-] overlapping alternations
+    - [x] subset/superset alternations
+  - [x] constructing a predicate instance
+    - [x] remove this file; subsume under 'parsing a predicate string'
 - [x] implement `async: false` option properly, with tests
   - [x] assert method result is not promise-like in thunks (strict mode)
   - [x] document strict vs non-strict behaviour (extra checks vs trusts you to conform to options you specified)
