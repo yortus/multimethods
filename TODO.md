@@ -1,5 +1,15 @@
 ## Todo - High Priority
 - [ ] support `|` alternation operator in predicates
+  - [ ] refactor predicate code:
+    - [ ] `dsl-parser.ts` / `parsePredicateString`
+      - [ ] no longer exported
+      - [ ] just checks the source string; doesn't work out identifier parts or captures
+    - [ ] `toPredicate` - parses the source just to ensure it is valid; casts it to `Predicate` without modification
+    - [ ] `toNormalPredicate` - assumes a valid predicate; applies normalisation transforms
+    - [ ] `toIdentifierParts` - assumes a valid predicate; normalises and applies identifier transforms
+    - [ ] `toMatchFunction` - assumes a valid predicate; works out `captures` / `captureNames` as an internal function
+    - [x] `hasCaptures` - assumes a valid predicate and returns a boolean
+      - [ ] internal; not exported
   - [ ] update parsing/normalisation logic
     - [x] overlapping and disjoint alternatives are allowed; in normal form they are arranged in lexicographic order
     - [x] subset/superset alternatives - the subset is removed in the normal form

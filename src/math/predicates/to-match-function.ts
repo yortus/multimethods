@@ -1,6 +1,6 @@
 import debug, {DEOPT} from '../../util/debug';
-import parse, {PredicateAST} from './dsl-parser';
 import Predicate from './predicate';
+import toNormalPredicate from './to-normal-predicate';
 
 
 
@@ -30,8 +30,7 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
     if (predicate.indexOf('|') === -1) return toMatchFunctionForOneAlternative(predicate);
 
     // TODO: temp testing...
-    let ast = parse(predicate);
-    let predicates = ast.signature.split('|');
+    let predicates = toNormalPredicate(predicate).split('|');
     let matchFunctions = predicates.map(toMatchFunctionForOneAlternative);
     return s => {
         for (let match of matchFunctions) {
@@ -50,13 +49,13 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
 function toMatchFunctionForOneAlternative(predicate: Predicate): MatchFunction {
 
     // TODO: temp testing...
-    let ast = parse(predicate);
+    let normalPredicate = toNormalPredicate(predicate);
 
     // Compute useful invariants for the given predicate pattern.
     // These are used as precomputed values in the closures created below.
-    const captureNames = ast.captures.filter(capture => capture !== '?');
+    const captureNames = getCaptureNames(predicate).filter(name => name !== '?');
     const firstCaptureName = captureNames[0];
-    const literalChars = ast.signature.replace(/[*]/g, '');
+    const literalChars = normalPredicate.replace(/[*]/g, '');
     const literalCharCount = literalChars.length;
 
     // Characterise the given predicate pattern using a simplified 'signature'.
@@ -124,9 +123,9 @@ function toMatchFunctionForOneAlternative(predicate: Predicate): MatchFunction {
             return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
 
         case 'lit*lit':
-            let captureStart = ast.signature.indexOf('*');
-            let startLit = ast.signature.slice(0, captureStart);
-            let endLit = ast.signature.slice(captureStart + 1);
+            let captureStart = normalPredicate.indexOf('*');
+            let startLit = normalPredicate.slice(0, captureStart);
+            let endLit = normalPredicate.slice(captureStart + 1);
             return s => surroundedWith(s, startLit, endLit) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
         // TODO: consider implementing the following cases for a *marginal* performance boost
@@ -141,7 +140,7 @@ function toMatchFunctionForOneAlternative(predicate: Predicate): MatchFunction {
                 predicate,
                 simplifiedPatternSignature
             );
-            let regexp = makeRegExpForPattern(ast);
+            let regexp = makeRegExpForPredicate(predicate);
             return s => {
                 let matches = s.match(regexp);
                 if (!matches) return null;
@@ -165,15 +164,17 @@ export type MatchFunction = (_: string) => {[captureName: string]: string} | nul
  * Constructs a regular expression that matches all strings recognized by the given predicate pattern.
  * Each named globstar/wildcard in the pattern corresponds to a capture group in the regular expression.
  */
-function makeRegExpForPattern(patternAST: PredicateAST) {
+function makeRegExpForPredicate(predicate: Predicate) {
+    let signature = toNormalPredicate(predicate);
+    let captureNames = getCaptureNames(predicate);
     let captureIndex = 0;
-    let re = patternAST.signature.replace(/\*\*/g, 'ᕯ').split('').map(c => {
+    let re = signature.replace(/\*\*/g, 'ᕯ').split('').map(c => {
         if (c === '*') {
-            let isAnonymous = patternAST.captures[captureIndex++] === '?';
+            let isAnonymous = captureNames[captureIndex++] === '?';
             return isAnonymous ? '[^\\/]*' : '([^\\/]*)';
         }
         if (c === 'ᕯ') {
-            let isAnonymous = patternAST.captures[captureIndex++] === '?';
+            let isAnonymous = captureNames[captureIndex++] === '?';
             return isAnonymous ? '[\\s\\S]*' : '([\\s\\S]*)';
         }
         if (' /._-'.indexOf(c) !== -1) { // NB: these ones must be escaped in the regex.
@@ -182,6 +183,26 @@ function makeRegExpForPattern(patternAST: PredicateAST) {
         return c;
     }).join('');
     return new RegExp(`^${re}$`);
+}
+
+
+
+
+
+/**
+ * Returns an array of strings whose elements correspond, in order, to the captures in the predicate. Each element
+ * holds the name of its corresponding capture, or '?' if the corresponding capture is anonymous (i.e. '*' or '**').
+ * For example, for the predicate '{**path}/*.{ext}', the return value would be['path', '?', 'ext'].
+ */
+function getCaptureNames(predicate: Predicate): string[] {
+    let p = predicate as string;
+    p = p.replace(/\{\*\*/g, '{');
+    p = p.replace(/\*\*/g, '{}');
+    p = p.replace(/\*/g, '{}');
+
+    let result = [] as string[];
+    p = p.replace(/\{([^}]*)\}/g, (_, name) => (result.push(name || '?'), '')); // TODO: '?' --> undefined
+    return result;
 }
 
 

@@ -1,5 +1,5 @@
 import {MMInfo, MMNode} from '../analysis';
-import {parsePredicateSource, toMatchFunction, toNormalPredicate} from '../math/predicates';
+import {hasNamedCaptures, toMatchFunction, toNormalPredicate} from '../math/predicates';
 import {CONTINUE} from '../sentinels';
 import * as fatalError from '../util/fatal-error';
 import isPromiseLike from '../util/is-promise-like';
@@ -65,9 +65,9 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
 function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
     let result = mminfo.addProps((node) => {
         let isMatch = toMatchFunction(toNormalPredicate(node.exactPredicate));
-        let hasCaptures = parsePredicateSource(node.exactPredicate).captureNames.length > 0;
+        let hasCapts = hasNamedCaptures(node.exactPredicate);
         let getCaptures = toMatchFunction(node.exactPredicate) as EmitNode['getCaptures'];
-        return {isMatch, hasCaptures, getCaptures};
+        return {isMatch, hasCaptures: hasCapts, getCaptures};
     }) as EmitEnvironment;
     result.isPromiseLike = isPromiseLike;
     result.CONTINUE = CONTINUE;

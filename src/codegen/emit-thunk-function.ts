@@ -1,5 +1,5 @@
 import {MethodSequenceEntry, MMInfo, MMNode} from '../analysis';
-import {parsePredicateSource} from '../math/predicates';
+import {hasNamedCaptures} from '../math/predicates';
 import repeatString from '../util/string-repeat';
 import Emitter, {EnvNames} from './emitter';
 import {ThunkFunctionSubstitutions, thunkFunctionTemplate} from './template-code';
@@ -56,7 +56,7 @@ export default function emitThunkFunction(emit: Emitter,
         // Statically known booleans for dead code elimination
         IS_STRICT_MODE: mminfo.config.strict,
         ENDS_PARTITION: isLeastSpecificMethod || seq[index + 1].isMeta,
-        HAS_CAPTURES: parsePredicateSource(fromNode.exactPredicate).captureNames.length > 0,
+        HAS_CAPTURES: hasNamedCaptures(fromNode.exactPredicate),
         IS_META_METHOD: isMeta,
         HAS_DOWNSTREAM: downstream != null,
         IS_NEVER_ASYNC: mminfo.config.async === false,
