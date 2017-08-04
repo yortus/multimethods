@@ -5,6 +5,13 @@ import EulerSet from './euler-set';
 
 
 
+// TODO: doc... the NONE predicate `∅` is the *universal subset* or 'bottom', and is always omitted from EulerDiagram
+//       instances. It can never match anything anyway, so this omission should not cause any surpising behaviour.
+
+
+
+
+
 /**
  * A euler diagram is a directed acyclic graph (DAG) where each set holds a predicate. The sets are arranged according
  * to the relationships between their respecive predicates. More specifically, given any two sets A and B within the
@@ -117,11 +124,11 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
     // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
     let universe = eulerDiagram.universalSet = setFor(ALL);
 
-    // Insert each of the given predicates, except '**', into a DAG rooted at '**'.
+    // Insert each of the given predicates, except '**' and '∅', into a DAG rooted at '**'.
     // The insertion logic assumes only normalized patterns, which we obtain first.
     predicates
-        .map(predicate => toNormalPredicate(predicate)) // TODO: what if normalized patterns contain duplicates?
-        .filter(predicate => predicate !== ALL) // TODO: why need this??
+        .map(predicate => toNormalPredicate(predicate))
+        .filter(predicate => predicate !== ALL && predicate !== NONE)
         .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
 
     // Finally, compute the `sets` property.

@@ -4,21 +4,16 @@
     - [x] overlapping and disjoint alternatives are allowed; in normal form they are arranged in lexicographic order
     - [x] subset/superset alternatives - the subset is removed in the normal form
     - [ ] `intersect` already does subset removal and lexicographical ordering - factor this out into one place
-  - [ ] reinstate `∅` to mean the predicate that matches no strings (not even the empty string)
+  - [x] reinstate `∅` to mean the predicate that matches no strings (not even the empty string)
     - [x] add grammar/parser support
     - [x] ensure handled properly everywhere in `set-theory/predicates`)
-    - [ ] ensure handled properly everywhere in `set-theory/sets`)
+    - [x] ensure handled properly everywhere in `set-theory/sets`)
     - [x] while we are at it, rename `ANY` to `ALL`
-    - [ ] add/fix tests
-  - [ ] update `EulerDiagram`
+    - [x] add/fix tests
+  - [x] update `EulerDiagram`
     - [x] use new `intersect`
     - [x] fix broken tests
-    - [ ] handle `∅` among predicates
-  - [ ] document current restrictions:
-    - [ ] a predicate cannot have *both* alternation and named captures
-    - [ ] subset collapsing when alternatives are normalised
-    - [ ] in a normalised predicate, alternatives are arranged in lexicographical order
-      - [ ] describe the ordering in unambiguous/locale-invariant terms. ANS: uses `Array#sort` default comparer
+    - [x] handle `∅` among predicates
   - [x] fix broken tests
   - [x] extend `intersect()`
     - [x] return an alternation predicate instead of an array of predicates
@@ -107,6 +102,11 @@
 
 
 ## Todo - Unassigned Priority
+- [ ] document current restrictions w.r.t `|` alternation operator in predicates:
+  - [ ] a predicate cannot have *both* alternation and named captures
+  - [ ] in a normalised predicate, no alternative is a subset of any other alternative (they are removed)
+  - [ ] in a normalised predicate, alternatives are arranged in lexicographical order
+    - [ ] describe the ordering in unambiguous/locale-invariant terms. ANS: uses `Array#sort` default comparer
 - [ ] export a `Multimethod` type (or family thereof)
   - [ ] or not, it's just a straightforward function signature, nothing special added
 - [ ] address `UnhandledPromiseRejectionWarning` in `test/**/multimethod.ts` (see TODO comments there)

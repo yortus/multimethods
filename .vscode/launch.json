@@ -15,7 +15,7 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceRoot}/dist/test/**/set-theory/**/*.js"
+                "${workspaceRoot}/dist/test/**/*.js"
             ],
             "env": {
                 "DEBUG": "multimethods"

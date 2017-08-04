@@ -30,6 +30,7 @@ describe('Constructing an euler diagram', () => {
             // ======================================== 2. ========================================
             name: 'complex DAG',
             predicates: [
+                '∅',
                 'a*',
                 '*m*',
                 '*z',
@@ -124,8 +125,6 @@ describe('Constructing an euler diagram', () => {
                 'a*',
                 '*a',
             ],
-
-            // TODO: temp testing...
             eulerDiagram: {
                 'a*': {
                     'a|a*a': {},
@@ -181,6 +180,37 @@ describe('Constructing an euler diagram', () => {
                 },
                 'C*B': {
                     'C*A*B': {},
+                },
+            },
+        },
+        {
+            // ======================================== 5. ========================================
+            name: 'alternations',
+            predicates: [
+                'a|b|c',
+                'b|c|d',
+                'a',
+                'b',
+                'a*|*a',
+                '**c**|*',
+                '**b**|**',
+            ],
+            eulerDiagram: {
+                '*|**c**': {
+                    'a|b|c': {
+                        'b|c': {
+                            b: {},
+                        },
+                        'a': {},
+                    },
+                    'b|c|d': {
+                        'b|c': {
+                            b: {},
+                        },
+                    },
+                    '*a|a*': {
+                        a: {},
+                    },
                 },
             },
         },
