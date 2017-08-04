@@ -1,4 +1,4 @@
-import {ANY, intersect, NONE, NormalPredicate, toNormalPredicate} from '../predicates';
+import {ALL, intersect, NONE, NormalPredicate, toNormalPredicate} from '../predicates';
 import EulerSet from './euler-set';
 
 
@@ -115,13 +115,13 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
     };
 
     // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
-    let universe = eulerDiagram.universalSet = setFor(ANY);
+    let universe = eulerDiagram.universalSet = setFor(ALL);
 
     // Insert each of the given predicates, except '**', into a DAG rooted at '**'.
     // The insertion logic assumes only normalized patterns, which we obtain first.
     predicates
         .map(predicate => toNormalPredicate(predicate)) // TODO: what if normalized patterns contain duplicates?
-        .filter(predicate => predicate !== ANY) // TODO: why need this??
+        .filter(predicate => predicate !== ALL) // TODO: why need this??
         .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
 
     // Finally, compute the `sets` property.

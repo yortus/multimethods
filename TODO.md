@@ -8,7 +8,7 @@
     - [x] add grammar/parser support
     - [x] ensure handled properly everywhere in `set-theory/predicates`)
     - [ ] ensure handled properly everywhere in `set-theory/sets`)
-    - [ ] while we are at it, rename `ANY` to `ALL`
+    - [x] while we are at it, rename `ANY` to `ALL`
     - [ ] add/fix tests
   - [ ] update `EulerDiagram`
     - [x] use new `intersect`

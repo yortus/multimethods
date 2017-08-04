@@ -1,4 +1,4 @@
-import {ANY, toNormalPredicate} from '../math/predicates';
+import {ALL, toNormalPredicate} from '../math/predicates';
 import {EulerDiagram} from '../math/sets';
 import Options from '../options';
 
@@ -11,7 +11,7 @@ import Options from '../options';
 
 // Detect synthesized patterns in the euler diagram, i.e., ones with no exactly-matching predicates in the method table.
 // They get there in two ways:
-// (i)  the root Predicate.ANY where the raw methods hash doesn't explicitly handle it, and
+// (i)  the root Predicate.ALL where the raw methods hash doesn't explicitly handle it, and
 // (ii) intersections of non-disjoint predicates that aren't explicitly handled in the methods hash
 // Their presence implies that there are possibly inputs for which the multimethod provides no defined behaviour.
 // This often represents a user error, so it's a useful warning to point these patterns out so their intended
@@ -25,12 +25,12 @@ export default function listDiscontinuities(methods: Options['methods']) {
     let unhandledPredicates = euler.allSets.map(n => n.predicate).filter(p => handledPredicates.indexOf(p) === -1);
     let problems = [] as string[];
 
-    let hasUnhandledCatchall = unhandledPredicates.indexOf(ANY) !== -1;
+    let hasUnhandledCatchall = unhandledPredicates.indexOf(ALL) !== -1;
     if (hasUnhandledCatchall) {
         problems.push(`No catch-all method. To resolve, add a method for the predicate '**'.`);
     }
 
-    let unhandledIntersections = unhandledPredicates.filter(p => p !== ANY);
+    let unhandledIntersections = unhandledPredicates.filter(p => p !== ALL);
     unhandledIntersections.forEach(predicate => {
         problems.push(`Ambiguous dispatch for predicate '${predicate}'. To resolve, add a method for this predicate.`);
     });

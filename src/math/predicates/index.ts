@@ -1,4 +1,4 @@
-export {default as ANY} from './any';
+export {default as ALL} from './all';
 export {default as NONE} from './none';
 export {default as intersect} from './intersect';
 export {default as NormalPredicate} from './normal-predicate';

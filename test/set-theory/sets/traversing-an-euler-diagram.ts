@@ -1,6 +1,6 @@
 // tslint:disable:no-unused-expression
 import {expect} from 'chai';
-import {ANY, intersect, toNormalPredicate} from 'multimethods/math/predicates';
+import {ALL, intersect, toNormalPredicate} from 'multimethods/math/predicates';
 import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 
 
@@ -24,7 +24,7 @@ describe('Traversing an euler diagram', () => {
             let eulerDiagram = new EulerDiagram(predicates);
 
             // An euler diagram is always rooted at '**'.
-            expect(eulerDiagram.universalSet.predicate).equals(ANY);
+            expect(eulerDiagram.universalSet.predicate).equals(ALL);
 
             // All input predicates are in the euler diagram constructed from them.
             let eulerDiagramPredicates = eulerDiagram.allSets.map(set => set.predicate.toString());
