@@ -1,4 +1,5 @@
 export {default as ANY} from './any';
+export {default as NONE} from './none';
 export {default as intersect} from './intersect';
 export {default as NormalPredicate} from './normal-predicate';
 export {default as toIdentifierParts} from './to-identifier-parts';

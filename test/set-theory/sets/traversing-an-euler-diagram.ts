@@ -33,8 +33,8 @@ describe('Traversing an euler diagram', () => {
             // Every child set's predicate matches a subset of the addresses matched by its parent set's predicate.
             let edges = getAllEdges(eulerDiagram.universalSet);
             expect(edges.every(edge => {
-                let intersections = intersect(edge.parent.predicate, edge.child.predicate);
-                return intersections.length === 1 && intersections[0] === edge.child.predicate.toString();
+                let intersection = intersect(edge.parent.predicate, edge.child.predicate);
+                return intersection === edge.child.predicate;
             })).to.be.true;
         });
     });

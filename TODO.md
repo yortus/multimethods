@@ -1,6 +1,59 @@
 ## Todo - High Priority
-- [ ] export a `Multimethod` type (or family thereof)
-  - [ ] or not, it's just a straightforward function signature, nothing special added
+- [ ] support `|` alternation operator in predicates
+  - [ ] update parsing/normalisation logic
+    - [x] overlapping and disjoint alternatives are allowed; in normal form they are arranged in lexicographic order
+    - [x] subset/superset alternatives - the subset is removed in the normal form
+    - [ ] `intersect` already does subset removal and lexicographical ordering - factor this out into one place
+  - [ ] reinstate `∅` to mean the predicate that matches no strings (not even the empty string)
+    - [x] add grammar/parser support
+    - [x] ensure handled properly everywhere in `set-theory/predicates`)
+    - [ ] ensure handled properly everywhere in `set-theory/sets`)
+    - [ ] while we are at it, rename `ANY` to `ALL`
+    - [ ] add/fix tests
+  - [ ] update `EulerDiagram`
+    - [x] use new `intersect`
+    - [x] fix broken tests
+    - [ ] handle `∅` among predicates
+  - [ ] document current restrictions:
+    - [ ] a predicate cannot have *both* alternation and named captures
+    - [ ] subset collapsing when alternatives are normalised
+    - [ ] in a normalised predicate, alternatives are arranged in lexicographical order
+      - [ ] describe the ordering in unambiguous/locale-invariant terms. ANS: uses `Array#sort` default comparer
+  - [x] fix broken tests
+  - [x] extend `intersect()`
+    - [x] return an alternation predicate instead of an array of predicates
+    - [x] handle `∅` predicate as input
+  - [x] enforce current restrictions:
+    - [x] a predicate cannot have *both* alternation and named captures
+    - [x] alternatives within a predicate must be mutually-disjoint
+    - [x] in a normalised predicate, alternatives are arranged in lexicographical order using `Array#sort` default cmpr
+  - [x] extend peg grammar
+  - [x] extend AST
+  - [x] extend `toMatchFunction()` - one regex per alternative
+- [x] more predicate tests:
+  - [x] parsing a predicate string
+    - [x] alternation with `∅` not currently allowed
+    - [x] overlapping alternations
+    - [x] subset/superset alternations
+  - [x] matching a predicate against a string
+    - [x] overlapping alternations
+    - [x] subset/superset alternations
+  - [x] intersecting two predicates
+    - [x] disjoint alternations
+    - [x] overlapping alternations
+    - [x] subset/superset alternations
+  - [x] comparing a predicate with its normal form
+    - [x] rename this test?
+    - [-] overlapping alternations
+    - [x] subset/superset alternations
+  - [x] constructing a predicate instance
+    - [x] remove this file; subsume under 'parsing a predicate string'
+
+- [ ] predicate `|` operator: determine future pathway for relaxing some/all of the current restrictions
+  - [ ] *can* mix alternation and named captures, however:
+    - [ ] capture names must be unique within a predicate
+    - [ ] upon successfully matching a predicate against a string, some names may be absent in the `captures` hash
+
 - [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
   - [ ] it might be useful if it effectively works like a no-op.
     - [ ] check if it indeed does work like this at present, or otherwise how it can be made to do so
@@ -54,15 +107,8 @@
 
 
 ## Todo - Unassigned Priority
-- [ ] support `|` alternation operator in predicates
-  - [ ] enforce restriction (for now) that a predicate cannot have *both* alternation and named captures
-  - [ ] normalisation now includes sorting alternatives into predictable order (which order?)
-  - [ ] extend peg grammar
-  - [ ] extend AST
-  - [ ] extend `makeMatchFunction()` - one regex per alternative
-  - [ ] extend `intersect()`
-  - [ ] update `EulerDiagram`
-  - [ ] fix broken tests
+- [ ] export a `Multimethod` type (or family thereof)
+  - [ ] or not, it's just a straightforward function signature, nothing special added
 - [ ] address `UnhandledPromiseRejectionWarning` in `test/**/multimethod.ts` (see TODO comments there)
 - [ ] use `benchmark.js` for benchmarks/perf tests
 - [ ] address inefficiencies in how `intersect.ts` is coded (eg use memoisation, early deduping, etc)
@@ -182,13 +228,14 @@
     - < `ᐸ` U+1438
     - > `ᐳ` U+1433
     - @ `ဇ` U+1007
+    - | `ǀ` U+01C0
+    - ∅ `Ø` U+00D8
   - [ ] CONSIDER FUTURE SUPPORT - valid identifier chars:
     - \ `〵` U+3035
     - ? `ॽ` U+097D
     - # `ꐚ` U+A41A
     - + `ᕀ` U+1540
     - ! `ǃ` U+01C3
-    - | `ǀ` U+01C0
     - ^ `ᣔ` U+18D4
     - ~ `ᱻ` U+1C7B
     - ' `ʼ` U+02BC

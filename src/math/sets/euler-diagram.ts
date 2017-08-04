@@ -1,4 +1,4 @@
-import {ANY, intersect, NormalPredicate, toNormalPredicate} from '../predicates';
+import {ANY, intersect, NONE, NormalPredicate, toNormalPredicate} from '../predicates';
 import EulerSet from './euler-set';
 
 
@@ -150,8 +150,8 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
     let nonDisjointComparands = ancestor.subsets.reduce(
         (comparands, set) => {
-            let intersections = intersect(insertee.predicate, set.predicate);
-            intersections.forEach(i => comparands.push({set, intersection: setFor(i)}));
+            let intersection = intersect(insertee.predicate, set.predicate);
+            if (intersection !== NONE) comparands.push({set, intersection: setFor(intersection)});
             return comparands;
         },
         [] as Array<{set: EulerSet; intersection: EulerSet}>

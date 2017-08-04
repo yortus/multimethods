@@ -1,3 +1,9 @@
+// ----- NB: JS in this file is not transpiled, so use only ES5 syntax + runtime in here -----
+
+
+
+
+
 {
     // TODO: doc... all permitted chars in predicates are *whilelisted* for safety.
     //              additionally, they must all have a unique equivalent identifier char.
@@ -24,22 +30,31 @@
 
 
 Predicate
-=   elems:Element*   !.
+=   "∅"   !.   { return {signature: '∅', identifier: 'Ø', captures: [], captureNames: []}; }
+/   elems:Element*   !.
     {
-        // NB: This JS isn't transpiled, so only use ES5 in here...
+        var signature = elems.map(function (elem) { return elem[0]; }).join('');
+        var identifier = elems.map(function (elem) { return elem[1]; }).join('');
         var captures = elems.map(function (elem) { return elem[2]; }).filter(function (c) { return !!c; });
-        return {
-            signature: elems.map(function (elem) { return elem[0]; }).join(''),
-            identifier: elems.map(function (elem) { return elem[1]; }).join(''),
-            captures: captures,
-            captureNames: captures.filter(function (c) { return c !== '?'; })
-        };
+        var captureNames = captures.filter(function (c) { return c !== '?'; });
+
+        // TODO: ensure not *both* alternation and named captures
+        if (captureNames.length > 0 && signature.indexOf('|') !== -1) {
+            error('Predicate cannot contain both alternation and named captures');
+        }
+
+        // Return the 'AST'
+        return { signature: signature, identifier: identifier, captures: captures, captureNames: captureNames };
     }
 
 Element
-=   Globstar
+=   Selector
+/   Globstar
 /   Wildcard
 /   Literal
+
+Selector
+=   "|"												{ return ['|', 'ǀ', null]; } // (U+01C0)
 
 Globstar 'globstar'
 =   ("**")   !("*" / "{")                           { return ['**', 'ᕯ', '?']; } // (U+156F)

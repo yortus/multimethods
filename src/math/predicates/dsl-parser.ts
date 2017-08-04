@@ -1,4 +1,7 @@
 import * as fatalError from '../../util/fatal-error';
+import intersect from './intersect';
+// TODO: was... remove... import NONE from './none';
+import NormalPredicate from './normal-predicate';
 
 
 
@@ -23,6 +26,7 @@ const grammar: { parse(text: string): PredicateAST; } = require('./dsl-grammar')
 export default function parse(source: string): PredicateAST {
     try {
         let ast = grammar.parse(source);
+        normaliseAlternatives(ast);
         return ast;
     }
     catch (ex) {
@@ -65,4 +69,41 @@ export interface PredicateAST {
 
     // TODO: doc...
     captureNames: string[];
+}
+
+
+
+
+
+// TODO: doc... modifies ast in-place
+//       - remove alternatives that are subsets of other alternatives
+//         !!! and adjust captures[] accordingly !!! (captureNames will be empty)
+//       - order remaining alternatives lexicographically
+function normaliseAlternatives(ast: PredicateAST) {
+
+    // TODO: hacky!!!...
+    //       - factor out normalisation logic so we don't call `intersect` here
+    //       - and don't re-parse
+    if (ast.signature.indexOf('|') === -1) return;
+    let x = intersect('**' as NormalPredicate, ast.signature as NormalPredicate);
+
+    let asts = x.split('|').map(parse);
+    ast.signature = asts.map(a => a.signature).join('|');
+    ast.identifier = asts.map(a => a.identifier).join('ǀ'); // (U+01C0)
+    ast.captures = ([] as string[]).concat(...asts.map(a => a.captures));
+
+
+// TODO: was...
+    // let sigParts = ast.signature.split('|');
+    // let idParts = ast.identifier.split('ǀ'); // (U+01C0)
+    // let parts = sigParts.map((sig, i) => ({sig, id: idParts[i]}));
+    // parts.sort((partA, partB) => {
+    //     // Ensure the two parts are mutually-disjoint
+    //     if (intersect(partA.sig as NormalPredicate, partB.sig as NormalPredicate) !== NONE) {
+    //         throw new Error(`Predicate alternatives must be mutually-disjoint`);
+    //     }
+    //     return partA.sig.localeCompare(partB.sig);
+    // });
+    // ast.signature = parts.map(part => part.sig).join('|');
+    // ast.identifier = parts.map(part => part.id).join('ǀ'); // (U+01C0)
 }

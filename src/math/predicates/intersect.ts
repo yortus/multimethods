@@ -1,4 +1,5 @@
-import {NormalPredicate} from '../predicates'; // NB: used only for types; elided from transpiled output
+import NONE from './none';
+import NormalPredicate from './normal-predicate';
 
 
 
@@ -19,14 +20,29 @@ import {NormalPredicate} from '../predicates'; // NB: used only for types; elide
  *     Example: 'test.*' ∩ '*.js' = ['test.js', 'test.*.js']
  * @param {NormalPredicate} a - lhs predicate to be intersected.
  * @param {NormalPredicate} b - rhs predicate to be intersected.
- * @returns {NormalPredicate[]} - an array of normalized predicates representing the intersection of `a` and `b`.
+ * @returns {NormalPredicate} - The normalized predicate representing the intersection of `a` and `b`.
  */
-export default function intersect(a: NormalPredicate, b: NormalPredicate): NormalPredicate[] {
-    let sa = simplify(a);
-    let sb = simplify(b);
-    let allIntersections = getAllIntersections(sa, sb);
+export default function intersect(a: NormalPredicate, b: NormalPredicate): NormalPredicate {
+
+    // Compute the intersections of every alternative of `a` with every alternative of `b`.
+    let aAlts = a === NONE ? [] : simplify(a).split('|');
+    let bAlts = b === NONE ? [] : simplify(b).split('|');
+    let allIntersections = [] as SimplePredicate[];
+    for (let altA of aAlts) {
+        for (let altB of bAlts) {
+            let moreIntersections = getAllIntersections(altA as SimplePredicate, altB as SimplePredicate);
+            allIntersections = allIntersections.concat(moreIntersections);
+        }
+    }
+
+    // Remove alternatives that are subsets of other alternatives.
     let distinctIntersections = getDistinctPredicates(allIntersections);
-    let result = distinctIntersections.map(expand);
+
+    // Order remaining alternatives lexicographically.
+    let rParts = distinctIntersections.map(expand).sort();
+
+    // Finalise the result.
+    let result = rParts.length === 0 ? NONE : rParts.join('|') as NormalPredicate;
     return result;
 }
 

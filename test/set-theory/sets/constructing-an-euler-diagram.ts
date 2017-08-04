@@ -28,30 +28,6 @@ describe('Constructing an euler diagram', () => {
         },
         {
             // ======================================== 2. ========================================
-            name: 'impossible intersections',
-            predicates: [
-                '**',
-                'a*',
-                '*a',
-            ],
-
-            // TODO: temp testing...
-            eulerDiagram: {
-                'a*': {
-                    'a': {},
-                    'a*a': {},
-                },
-                '*a': {
-                    'a': {},
-                    'a*a': {},
-                },
-            },
-
-            // TODO: was...
-            // eulerDiagram: 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
-        },
-        {
-            // ======================================== 3. ========================================
             name: 'complex DAG',
             predicates: [
                 'a*',
@@ -136,6 +112,75 @@ describe('Constructing an euler diagram', () => {
                 },
                 '/*z/b': {
                     '/*o*o*z/b': {},
+                },
+            },
+        },
+        {
+            // ======================================== 3. ========================================
+            // This case used to throw 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
+            name: 'multipart intersections',
+            predicates: [
+                '**',
+                'a*',
+                '*a',
+            ],
+
+            // TODO: temp testing...
+            eulerDiagram: {
+                'a*': {
+                    'a|a*a': {},
+                },
+                '*a': {
+                    'a|a*a': {},
+                },
+            },
+        },
+        {
+            // ======================================== 4. ========================================
+            // This case caused v0.6.2 to hang computing an endless series of ever-longer synthesised intersections.
+            name: 'non-terminating intersections',
+            predicates: [
+                '*A*B*',
+                '*C*',
+                'C*',
+                'C*B',
+            ],
+            eulerDiagram: {
+                '*A*B*': {
+                    '*A*B*C*|*A*C*B*|*C*A*B*': {
+                        'C*A*B*': {
+                            'C*A*B': {},
+                        },
+                    },
+                },
+                '*C*': {
+                    '*A*B*C*|*A*C*B*|*C*A*B*': {
+                        'C*A*B*': {
+                            'C*A*B': {},
+                        },
+                    },
+                    'C*': {
+                        'C*A*B*': {
+                            'C*A*B': {},
+                        },
+                        'C*B': {
+                            'C*A*B': {},
+                        },
+                    },
+                    'C*B': {
+                        'C*A*B': {},
+                    },
+                },
+                'C*': {
+                        'C*A*B*': {
+                            'C*A*B': {},
+                        },
+                    'C*B': {
+                        'C*A*B': {},
+                    },
+                },
+                'C*B': {
+                    'C*A*B': {},
                 },
             },
         },

@@ -23,14 +23,40 @@ import Predicate from './predicate';
  */
 export default function toMatchFunction(predicate: Predicate): MatchFunction {
 
+    // TODO: temp testing... special case...
+    if (predicate === '∅') return () => null;
+
+    // TODO: temp testing... simple case... no alternation in predicate
+    if (predicate.indexOf('|') === -1) return toMatchFunctionForOneAlternative(predicate);
+
     // TODO: temp testing...
-    let predicateAST = parse(predicate);
+    let ast = parse(predicate);
+    let predicates = ast.signature.split('|');
+    let matchFunctions = predicates.map(toMatchFunctionForOneAlternative);
+    return s => {
+        for (let match of matchFunctions) {
+            let result = match(s);
+            if (result !== null) return result;
+        }
+        return null;
+    };
+}
+
+
+
+
+
+// TODO: doc...
+function toMatchFunctionForOneAlternative(predicate: Predicate): MatchFunction {
+
+    // TODO: temp testing...
+    let ast = parse(predicate);
 
     // Compute useful invariants for the given predicate pattern.
     // These are used as precomputed values in the closures created below.
-    const captureNames = predicateAST.captures.filter(capture => capture !== '?');
+    const captureNames = ast.captures.filter(capture => capture !== '?');
     const firstCaptureName = captureNames[0];
-    const literalChars = predicateAST.signature.replace(/[*]/g, '');
+    const literalChars = ast.signature.replace(/[*]/g, '');
     const literalCharCount = literalChars.length;
 
     // Characterise the given predicate pattern using a simplified 'signature'.
@@ -98,9 +124,9 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
             return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
 
         case 'lit*lit':
-            let captureStart = predicateAST.signature.indexOf('*');
-            let startLit = predicateAST.signature.slice(0, captureStart);
-            let endLit = predicateAST.signature.slice(captureStart + 1);
+            let captureStart = ast.signature.indexOf('*');
+            let startLit = ast.signature.slice(0, captureStart);
+            let endLit = ast.signature.slice(captureStart + 1);
             return s => surroundedWith(s, startLit, endLit) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
         // TODO: consider implementing the following cases for a *marginal* performance boost
@@ -115,7 +141,7 @@ export default function toMatchFunction(predicate: Predicate): MatchFunction {
                 predicate,
                 simplifiedPatternSignature
             );
-            let regexp = makeRegExpForPattern(predicateAST);
+            let regexp = makeRegExpForPattern(ast);
             return s => {
                 let matches = s.match(regexp);
                 if (!matches) return null;
