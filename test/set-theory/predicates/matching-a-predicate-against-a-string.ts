@@ -82,11 +82,12 @@ describe('Matching a predicate against a string', () => {
 
     tests.forEach(test => {
         it(test, () => {
+            test = test.replace(/⨂/g, '');
             let isMatch = test.indexOf(' MATCHES ') !== -1;
             let split = isMatch ? ' MATCHES ' : ' DOES NOT MATCH ';
-            let predicateSource = test.split(split)[0].replace(/^⨂$/, '');
+            let predicateSource = test.split(split)[0];
             let rhs = test.split(split)[1];
-            let address = rhs.split(' WITH ')[0].replace(/^⨂$/, '');
+            let address = rhs.split(' WITH ')[0];
             let expectedCaptures = isMatch ? eval(`(${rhs.split(' WITH ')[1]})`) || {} : null;
             let predicate = toPredicate(predicateSource);
             let actualCaptures = toMatchFunction(predicate)(address);

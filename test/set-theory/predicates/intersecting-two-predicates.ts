@@ -91,9 +91,10 @@ describe('Intersecting two predicates', () => {
 
     tests.forEach(test => {
         it(test, () => {
-            let lhsA = test.split(' = ')[0].split(' ∩ ')[0].replace(/^⨂$/, '');
-            let lhsB = test.split(' = ')[0].split(' ∩ ')[1].replace(/^⨂$/, '');
-            let rhs = test.split(' = ')[1].replace(/^⨂$/, '');
+            test = test.replace(/⨂/g, '');
+            let lhsA = test.split(' = ')[0].split(' ∩ ')[0];
+            let lhsB = test.split(' = ')[0].split(' ∩ ')[1];
+            let rhs = test.split(' = ')[1];
             let actual: string;
             let expected = rhs;
             try {

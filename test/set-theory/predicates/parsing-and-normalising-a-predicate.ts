@@ -133,9 +133,8 @@ describe('Parsing and normalising a predicate', () => {
 
     tests.forEach(test => {
         it(test, () => {
-            let source = test.split(' ==> ')[0];
-            let expected = test.split(' ==> ')[1];
-            let actual: {normalised: string} | string;
+            let [source, expected] = test.split(' ==> ');
+            let actual: string;
             try {
                 actual = toNormalPredicate(toPredicate(source));
             }

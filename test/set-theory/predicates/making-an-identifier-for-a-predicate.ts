@@ -105,8 +105,7 @@ describe('Making an identifier for a predicate', () => {
 
     tests.forEach(test => {
         it(test, () => {
-            let source = test.split(' ==> ')[0];
-            let expected = test.split(' ==> ')[1];
+            let [source, expected] = test.split(' ==> ');
             let actual: string;
             try {
                 actual = toIdentifierParts(toPredicate(source));
