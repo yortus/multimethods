@@ -18,7 +18,7 @@ export default function toNormalPredicate(source: string): NormalPredicate {
 
     // Remove alternatives that are subsets of other alternatives.
     let alts = np.split('|') as NormalPredicate[];
-    alts = getDistinctPredicates(alts);
+    alts = getDistinctAlternatives(alts);
 
     // Order remaining alternatives lexicographically.
     alts.sort();
@@ -31,27 +31,25 @@ export default function toNormalPredicate(source: string): NormalPredicate {
 
 
 /**
- * Returns an array containing a subset of the elements in `predicates`, such that no predicate in
- * the returned array is a proper or improper subset of any other predicate in the returned array.
- * Assumes the specified predicates contain no named captures.
+ * Returns an array containing a subset of the elements in `alts`, such that no predicate in the
+ * returned array is a proper or improper subset of any other predicate in the returned array.
+ * Assumes the specified predicates contain no named captures and no alternations.
  */
-function getDistinctPredicates(predicates: NormalPredicate[]): NormalPredicate[] {
+function getDistinctAlternatives(alts: NormalPredicate[]): NormalPredicate[] {
 
     // Set up a parallel array to flag predicates that are duplicates. Start by assuming none are.
-    let isDuplicate = predicates.map(_ => false);
+    let isDuplicate = alts.map(_ => false);
 
     // Compare all predicates pairwise, marking as duplicates all those
     // predicates that are proper or improper subsets of any other predicate.
-    for (let i = 0; i < predicates.length; ++i) {
+    for (let i = 0; i < alts.length; ++i) {
         if (isDuplicate[i]) continue;
-
-        // TODO: doc...
-        for (let j = 0; j < predicates.length; ++j) {
+        for (let j = 0; j < alts.length; ++j) {
             if (i === j || isDuplicate[j]) continue;
-            isDuplicate[j] = isSubsetOf(predicates[j], predicates[i]);
+            isDuplicate[j] = isSubsetOf(alts[j], alts[i]);
         }
     }
 
-    // Return only the non-duplicate predicates from the original list, with 'ᕯ' changed back to '**'
-    return predicates.filter((_, i) => !isDuplicate[i]);
+    // Return only the non-duplicate predicates from the original list.
+    return alts.filter((_, i) => !isDuplicate[i]);
 }

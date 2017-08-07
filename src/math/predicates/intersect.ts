@@ -134,7 +134,7 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     }
 
     // TODO: temp testing...
-    let result2 = new SetOfAlternatives().addAll(result as SimplePredicate[]).values();
+    let result2 = result.length === 0 ? [] : toNormalPredicate(result.map(expand).join('|')).split('|').map(simplify);
     CACHE.set(a < b ? a + '∩' + b : b + '∩' + a, result2);
     return result2;
 }
@@ -159,55 +159,6 @@ function getAllPredicateSplits(predicate: SimplePredicate): Array<[SimplePredica
         result.push(pair as any);
     }
     return result;
-}
-
-
-
-
-
-// TODO: doc...
-class SetOfAlternatives {
-
-    // Returns true if something added, false otherwise
-    add(value: SimplePredicate) {
-        if (this.former.has(value)) return this;
-
-        let rejected = false;
-        let isSubset = (sub: SimplePredicate) => isSubsetOf(sub, value);
-        this.current.forEach((isSub, pred) => {
-            rejected = rejected || isSub(value);
-            if (rejected) return;
-
-            if (isSubset(pred)) {
-                this.current.delete(pred);
-                this.former.add(pred);
-            }
-        });
-        if (rejected) {
-            this.former.add(value);
-        }
-        else {
-            this.current.set(value, isSubset);
-// TODO: was... if (this.current.size > 10) console.log(this.current.size, this.former.size);
-        }
-        return this;
-    }
-
-    // Returns list of predicates actually added
-    addAll(values: SimplePredicate[]) {
-        values.filter(value => this.add(value));
-        return this;
-    }
-
-    values() {
-        let result = [] as SimplePredicate[];
-        this.current.forEach((_, pred) => result.push(pred));
-        return result;
-    }
-
-    private current = new Map<SimplePredicate, (sub: SimplePredicate) => boolean>();
-
-    private former = new Set<SimplePredicate>();
 }
 
 
