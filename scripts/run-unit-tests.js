@@ -5,6 +5,7 @@
 
 // Tell mocha where the test files are.
 // TODO: was... restore... process.argv.push('built/test/unit/**/*.js');
+// process.argv.push('dist/test/**/*.js');
 process.argv.push('dist/test/**/*{relationship,intersecting}*.js');
 // process.argv.push('dist/test/**/{intersecting,constructing-an-euler}*.js');
 

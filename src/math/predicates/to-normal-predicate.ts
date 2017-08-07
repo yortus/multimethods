@@ -1,3 +1,4 @@
+import isSubsetOf from './is-subset-of';
 import NormalPredicate from './normal-predicate';
 import toPredicate from './to-predicate';
 
@@ -16,7 +17,7 @@ export default function toNormalPredicate(source: string): NormalPredicate {
     np = np.replace(/\{[^*}]+\}/g, '*');
 
     // Remove alternatives that are subsets of other alternatives.
-    let alts = np.split('|');
+    let alts = np.split('|') as NormalPredicate[];
     alts = getDistinctPredicates(alts);
 
     // Order remaining alternatives lexicographically.
@@ -34,10 +35,7 @@ export default function toNormalPredicate(source: string): NormalPredicate {
  * the returned array is a proper or improper subset of any other predicate in the returned array.
  * Assumes the specified predicates contain no named captures.
  */
-function getDistinctPredicates(predicates: string[]): string[] {
-
-    // To simplify the regex used in here, replace '**' with 'ᕯ' in all predicates so we don't need any lookahead.
-    predicates = predicates.map(p => p.replace(/\*\*/g, 'ᕯ'));
+function getDistinctPredicates(predicates: NormalPredicate[]): NormalPredicate[] {
 
     // Set up a parallel array to flag predicates that are duplicates. Start by assuming none are.
     let isDuplicate = predicates.map(_ => false);
@@ -47,22 +45,13 @@ function getDistinctPredicates(predicates: string[]): string[] {
     for (let i = 0; i < predicates.length; ++i) {
         if (isDuplicate[i]) continue;
 
-        // Build a regex that matches all predicates that are proper or improper subsets of the specified predicate.
-        let re = predicates[i].split('').map(c => {
-            if (c === '*') return '[^\\/ᕯ]*';
-            if (c === 'ᕯ') return '.*';
-            if (' /._-'.indexOf(c) !== -1) return `\\${c}`; // NB: these chars need escaping in a regex
-            return c;
-        }).join('');
-        let subsetRecogniser = new RegExp(`^${re}$`);
-
         // TODO: doc...
         for (let j = 0; j < predicates.length; ++j) {
             if (i === j || isDuplicate[j]) continue;
-            isDuplicate[j] = subsetRecogniser.test(predicates[j]);
+            isDuplicate[j] = isSubsetOf(predicates[j], predicates[i]);
         }
     }
 
     // Return only the non-duplicate predicates from the original list, with 'ᕯ' changed back to '**'
-    return predicates.filter((_, i) => !isDuplicate[i]).map(p => p.replace(/ᕯ/g, '**'));
+    return predicates.filter((_, i) => !isDuplicate[i]);
 }

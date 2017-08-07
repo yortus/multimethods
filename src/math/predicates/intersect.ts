@@ -173,7 +173,7 @@ class SetOfAlternatives {
         if (this.former.has(value)) return this;
 
         let rejected = false;
-        let isSubset = makeSubsetRecogniser(value);
+        let isSubset = (sub: SimplePredicate) => isSubsetOf(sub, value);
         this.current.forEach((isSub, pred) => {
             rejected = rejected || isSub(value);
             if (rejected) return;
@@ -208,31 +208,6 @@ class SetOfAlternatives {
     private current = new Map<SimplePredicate, (sub: SimplePredicate) => boolean>();
 
     private former = new Set<SimplePredicate>();
-}
-
-
-
-
-
-// TODO: copypasta with code in to-normal-predicate.ts
-// TODO: doc... Build a regex that matches all predicates that are proper or improper subsets of the specified predicate.
-function makeSubsetRecogniser(predicate: SimplePredicate) {
-    let src = predicate.split('').map(c => {
-        if (c === '*') return '[^\\/ᕯ]*';
-        if (c === 'ᕯ') return '.*';
-        if (' /._-'.indexOf(c) !== -1) return `\\${c}`; // NB: these chars need escaping in a regex
-        return c;
-    }).join('');
-    let re = new RegExp(`^${src}$`);
-    let result = (sub: SimplePredicate) => {
-        let a = re.test(sub);
-        let b = isSubsetOf(sub, predicate);
-        if (a !== b) {
-            debugger;
-        }
-        return a;
-    };
-    return result;
 }
 
 
