@@ -1,3 +1,4 @@
+import isSubsetOf from './is-subset-of';
 import NONE from './none';
 import NormalPredicate from './normal-predicate';
 import toNormalPredicate from './to-normal-predicate';
@@ -172,12 +173,12 @@ class SetOfAlternatives {
         if (this.former.has(value)) return this;
 
         let rejected = false;
-        let subsetRecogniser = makeSubsetRecogniser(value);
-        this.current.forEach((regex, pred) => {
-            rejected = rejected || regex.test(value);
+        let isSubset = makeSubsetRecogniser(value);
+        this.current.forEach((isSub, pred) => {
+            rejected = rejected || isSub(value);
             if (rejected) return;
 
-            if (subsetRecogniser.test(pred)) {
+            if (isSubset(pred)) {
                 this.current.delete(pred);
                 this.former.add(pred);
             }
@@ -186,7 +187,7 @@ class SetOfAlternatives {
             this.former.add(value);
         }
         else {
-            this.current.set(value, subsetRecogniser);
+            this.current.set(value, isSubset);
 // TODO: was... if (this.current.size > 10) console.log(this.current.size, this.former.size);
         }
         return this;
@@ -204,7 +205,7 @@ class SetOfAlternatives {
         return result;
     }
 
-    private current = new Map<SimplePredicate, RegExp>();
+    private current = new Map<SimplePredicate, (sub: SimplePredicate) => boolean>();
 
     private former = new Set<SimplePredicate>();
 }
@@ -216,13 +217,22 @@ class SetOfAlternatives {
 // TODO: copypasta with code in to-normal-predicate.ts
 // TODO: doc... Build a regex that matches all predicates that are proper or improper subsets of the specified predicate.
 function makeSubsetRecogniser(predicate: SimplePredicate) {
-    let re = predicate.split('').map(c => {
+    let src = predicate.split('').map(c => {
         if (c === '*') return '[^\\/ᕯ]*';
         if (c === 'ᕯ') return '.*';
         if (' /._-'.indexOf(c) !== -1) return `\\${c}`; // NB: these chars need escaping in a regex
         return c;
     }).join('');
-    return new RegExp(`^${re}$`);
+    let re = new RegExp(`^${src}$`);
+    let result = (sub: SimplePredicate) => {
+        let a = re.test(sub);
+        let b = isSubsetOf(sub, predicate);
+        if (a !== b) {
+            debugger;
+        }
+        return a;
+    };
+    return result;
 }
 
 
