@@ -25,6 +25,9 @@ import toNormalPredicate from './to-normal-predicate';
  */
 export default function intersect(a: NormalPredicate, b: NormalPredicate): NormalPredicate {
 
+    // TODO: temp testing...
+    let t0 = Date.now();
+
     // Compute the intersections of every alternative of `a` with every alternative of `b`.
     let aAlts = a === NONE ? [] : simplify(a).split('|');
     let bAlts = b === NONE ? [] : simplify(b).split('|');
@@ -36,11 +39,39 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
         }
     }
 
+    // TODO: temp testing...
+    let t1 = Date.now();
+
     // Finalise the result.
     if (allIntersections.length === 0) return NONE;
     let result = toNormalPredicate(allIntersections.map(expand).join('|'));
+
+    // TODO: temp testing...
+    let t2 = Date.now();
+    let d1 = (t1 - t0) / 1000.0;
+    let d2 = (t2 - t1) / 1000.0;
+    if (d1 + d2 > 1) {
+        console.log(`\n\n\n${a} ∩ ${b}`);
+        console.log(`intersection count: ${allIntersections.length}`);
+        console.log(`getAllIntersections time: ${d1}s`);
+        console.log(`toNormalPredicate time: ${d2}s`);
+
+        // let alts = new SetOfAlternatives();
+        // alts.addAll(allIntersections);
+        // console.log(alts.values());
+    }
+
+    console.log('CALL COUNT: ' + CALL_COUNT);
     return result;
 }
+
+
+
+
+
+// TODO: temp testing...
+const CACHE = new Map<string, SimplePredicate[]>();
+let CALL_COUNT = 0;
 
 
 
@@ -56,11 +87,17 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
  * @returns {SimplePredicate[]} - a list of simplified predicates that represent valid intersections of `a` and `b`.
  */
 function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePredicate[] {
+    let result = [] as string[];
+
+    // TODO: temp testing...
+    let cached = CACHE.get(a < b ? a + '∩' + b : b + '∩' + a);
+    if (cached) return cached;
+    ++CALL_COUNT;
 
     // An empty predicate intersects only with another empty predicate or a single wildcard.
     if (a === '' || b === '') {
         let other = a || b;
-        return other === '' || other === '*' || other === 'ᕯ' ? ['' as SimplePredicate] : [];
+        result = other === '' || other === '*' || other === 'ᕯ' ? ['' as SimplePredicate] : [];
     }
 
     // `a` starts with a wildcard. Generate all possible intersections by unifying
@@ -68,32 +105,37 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     else if (a[0] === 'ᕯ' || (a[0] === '*' && b[0] !== 'ᕯ')) {
 
         // Obtain all splits. When unifying splits against '*', do strength
-        // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*')
+        // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*').
         let splits = getAllPredicateSplits(b);
         if (a[0] === '*') splits.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
 
         // Compute and return intersections for all valid unifications. This is a recursive operation.
-        let result = splits
+        result = splits
             .filter(pair => a[0] === 'ᕯ' || (pair[0].indexOf('/') === -1 && pair[0].indexOf('ᕯ') === -1))
             .map(pair => getAllIntersections(a.slice(1) as SimplePredicate, pair[1]).map(u => pair[0] + u))
             .reduce((ar, el) => (ar.push.apply(ar, el), ar), []);
-        return result as SimplePredicate[];
     }
 
     // `b` starts with a wildcard. Delegate to previous case by swapping arguments (since intersection is commutative).
     else if (b[0] === 'ᕯ' || b[0] === '*') {
-         return getAllIntersections(b, a);
+         result = getAllIntersections(b, a);
     }
 
     // Both predicates start with the same literal. Intersect their remainders recursively.
     else if (a[0] === b[0]) {
-        let result = getAllIntersections(a.slice(1) as SimplePredicate, b.slice(1) as SimplePredicate)
+        result = getAllIntersections(a.slice(1) as SimplePredicate, b.slice(1) as SimplePredicate)
             .map(u => a[0] + u);
-        return result as SimplePredicate[];
     }
 
     // If we get here, `a` and `b` must be disjoint.
-    return [];
+    else {
+        // no-op
+    }
+
+    // TODO: temp testing...
+    let result2 = new SetOfAlternatives().addAll(result as SimplePredicate[]).values();
+    CACHE.set(a < b ? a + '∩' + b : b + '∩' + a, result2);
+    return result2;
 }
 
 
@@ -116,6 +158,71 @@ function getAllPredicateSplits(predicate: SimplePredicate): Array<[SimplePredica
         result.push(pair as any);
     }
     return result;
+}
+
+
+
+
+
+// TODO: doc...
+class SetOfAlternatives {
+
+    // Returns true if something added, false otherwise
+    add(value: SimplePredicate) {
+        if (this.former.has(value)) return this;
+
+        let rejected = false;
+        let subsetRecogniser = makeSubsetRecogniser(value);
+        this.current.forEach((regex, pred) => {
+            rejected = rejected || regex.test(value);
+            if (rejected) return;
+
+            if (subsetRecogniser.test(pred)) {
+                this.current.delete(pred);
+                this.former.add(pred);
+            }
+        });
+        if (rejected) {
+            this.former.add(value);
+        }
+        else {
+            this.current.set(value, subsetRecogniser);
+// TODO: was... if (this.current.size > 10) console.log(this.current.size, this.former.size);
+        }
+        return this;
+    }
+
+    // Returns list of predicates actually added
+    addAll(values: SimplePredicate[]) {
+        values.filter(value => this.add(value));
+        return this;
+    }
+
+    values() {
+        let result = [] as SimplePredicate[];
+        this.current.forEach((_, pred) => result.push(pred));
+        return result;
+    }
+
+    private current = new Map<SimplePredicate, RegExp>();
+
+    private former = new Set<SimplePredicate>();
+}
+
+
+
+
+
+// TODO: copypasta with code in to-normal-predicate.ts
+// TODO: doc... Build a regex that matches all predicates that are proper or improper subsets of the specified predicate.
+function makeSubsetRecogniser(predicate: SimplePredicate) {
+    let re = predicate.split('').map(c => {
+        if (c === '*') return '[^\\/ᕯ]*';
+        if (c === 'ᕯ') return '.*';
+        if (' /._-'.indexOf(c) !== -1) return `\\${c}`; // NB: these chars need escaping in a regex
+        return c;
+    }).join('');
+    return new RegExp(`^${re}$`);
 }
 
 
