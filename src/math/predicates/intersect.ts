@@ -114,43 +114,49 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
         let other = a || b;
         result = other === '' || other === '*' || other === 'ᕯ' ? ['' as SimplePredicate] : [];
     }
-
-    // `a` starts with a wildcard. Generate all possible intersections by unifying
-    // the wildcard with all substitutable prefixes of `b`, then intersecting the remainders.
-    else if (a[0] === 'ᕯ' || (a[0] === '*' && b[0] !== 'ᕯ')) {
-        let aFirstChar = a[0];
-        let aAfterFirst = a.slice(1) as SimplePredicate;
-
-        // Obtain all splits. When unifying splits against '*', do strength
-        // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*').
-        let splits = getAllPredicateSplits(b);
-        if (aFirstChar === '*') splits.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
-
-        // Compute and return intersections for all valid unifications. This is a recursive operation.
-        for (let [bFirstPart, bLastPart] of splits) {
-            let keep = aFirstChar === 'ᕯ' || (bFirstPart.indexOf('/') === -1 && bFirstPart.indexOf('ᕯ') === -1);
-            if (!keep) continue;
-
-            let more = getAllIntersections(aAfterFirst, bLastPart).map(u => bFirstPart + u) as SimplePredicate[];
-            result = result.concat(more);
-        }
-    }
-
-    // `b` starts with a wildcard. Delegate to previous case by swapping arguments (since intersection is commutative).
-    else if (b[0] === 'ᕯ' || b[0] === '*') {
-         result = getAllIntersections(b, a);
-    }
-
-    // Both predicates start with the same literal. Intersect their remainders recursively.
-    else if (a[0] === b[0]) {
-        let aAfterFirst = a.slice(1) as SimplePredicate;
-        let bAfterFirst = b.slice(1) as SimplePredicate;
-        result = getAllIntersections(aAfterFirst, bAfterFirst).map(u => a[0] + u) as SimplePredicate[];
-    }
-
-    // If we get here, `a` and `b` must be disjoint.
     else {
-        // no-op
+        let aFirstChar = a.charAt(0);
+        let bFirstChar = b.charAt(0);
+
+        if (aFirstChar !== '*' && aFirstChar !== 'ᕯ' && bFirstChar !== '*' && bFirstChar !== 'ᕯ') {
+
+            // Both predicates start with the same literal. Intersect their remainders recursively.
+            if (aFirstChar === bFirstChar) {
+                let aAfterFirst = a.slice(1) as SimplePredicate;
+                let bAfterFirst = b.slice(1) as SimplePredicate;
+                result = getAllIntersections(aAfterFirst, bAfterFirst).map(u => aFirstChar + u) as SimplePredicate[];
+            }
+
+            // Both predicates start with a literal, but they are different literals. The predicates must be disjoint.
+            else {
+                // no-op
+            }
+        }
+
+        // `a` starts with a wildcard. Generate all possible intersections by unifying
+        // the wildcard with all substitutable prefixes of `b`, then intersecting the remainders.
+        else if (aFirstChar === 'ᕯ' || (aFirstChar === '*' && bFirstChar !== 'ᕯ')) {
+            let aAfterFirst = a.slice(1) as SimplePredicate;
+
+            // Obtain all splits. When unifying splits against '*', do strength
+            // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*').
+            let splits = getAllPredicateSplits(b);
+            if (aFirstChar === '*') splits.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
+
+            // Compute and return intersections for all valid unifications. This is a recursive operation.
+            for (let [bFirstPart, bLastPart] of splits) {
+                let keep = aFirstChar === 'ᕯ' || (bFirstPart.indexOf('/') === -1 && bFirstPart.indexOf('ᕯ') === -1);
+                if (!keep) continue;
+
+                let more = getAllIntersections(aAfterFirst, bLastPart).map(u => bFirstPart + u) as SimplePredicate[];
+                result = result.concat(more);
+            }
+        }
+
+        // `b` starts with a wildcard. Delegate to previous case by swapping arguments (since intersection is commutative).
+        else /* if (bFirstChar === 'ᕯ' || bFirstChar === '*') */ {
+            result = getAllIntersections(b, a);
+        }
     }
 
     // TODO: temp testing...
