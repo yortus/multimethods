@@ -110,7 +110,7 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     }
 
     // An empty predicate intersects only with another empty predicate or a single wildcard.
-    if (a === '' || b === '') {
+    else if (a === '' || b === '') {
         let other = a || b;
         result = other === '' || other === '*' || other === 'ᕯ' ? ['' as SimplePredicate] : [];
     }
