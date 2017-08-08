@@ -1,4 +1,5 @@
 import * as fatalError from '../../util/fatal-error';
+import ALL from './all';
 import NONE from './none';
 import NormalPredicate from './normal-predicate';
 
@@ -18,21 +19,25 @@ import NormalPredicate from './normal-predicate';
 
 // TODO: doc... does *not* work with alternation in either `sub` or `sup`. Use intersect() for that.
 export default function isSubsetOf(sub: NormalPredicate, sup: NormalPredicate) {
-    if (sub === NONE) return true;
-    if (sup === NONE) return false;
+
+    // Shortcut a few simple cases.
+    if (sub === sup) return true;
+    if (sub === NONE || sup === ALL) return true;
+    if (sub === ALL || sup === NONE) return false;
 
     // TODO: can't do these... need full intersection, but intersection deps on this, so would be circular ref...
     if (sub.indexOf('|') !== -1 || sup.indexOf('|') !== -1) {
         return fatalError.PREDICATE_SYNTAX(`isSubsetOf: unsupported alternation operator '|' in predicate.`);
     }
 
-    // TODO: Consult cache...
+    // Obtain a regex that tests for subsets of the given `sup`, and memoise it.
     let regex = REGEX_CACHE.get(sup);
     if (!regex) {
         regex = makeSubsetRecogniser(sup);
         REGEX_CACHE.set(sup, regex);
     }
 
+    // Determine if `sub` is a subset using the regex.
     return regex.test(sub);
 }
 
