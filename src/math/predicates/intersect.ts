@@ -91,7 +91,11 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
 
     // TODO: temp testing...
     let cached = CACHE.get(a < b ? a + '∩' + b : b + '∩' + a);
-    if (cached) return cached;
+    if (cached) {
+        console.log(`cache HIT: ${a + ':' + b} ==> ${JSON.stringify(cached)}`);
+        return cached;
+    }
+    console.log(`cache --miss--: ${a + ':' + b}`);
     ++CALL_COUNT;
 
     // TODO: doc...
@@ -152,6 +156,7 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     // TODO: temp testing...
     let result2 = result.length === 0 ? [] : toNormalPredicate(result.map(expand).join('|')).split('|').map(simplify);
     CACHE.set(a < b ? a + '∩' + b : b + '∩' + a, result2);
+    console.log(`cache set: ${a + ':' + b} ==> ${JSON.stringify(result2)}`);
     return result2;
 }
 
