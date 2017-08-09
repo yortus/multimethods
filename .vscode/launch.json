@@ -15,7 +15,7 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceRoot}/dist/test/**/*{relationship,intersecting}*.js"
+                "${workspaceRoot}/dist/test/**/intersecting*.js"
             ],
             "env": {
                 "DEBUG": "multimethods"

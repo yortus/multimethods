@@ -118,7 +118,7 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
         let aFirstChar = a.charAt(0);
         let bFirstChar = b.charAt(0);
 
-        if (aFirstChar !== '*' && aFirstChar !== 'ᕯ' && bFirstChar !== '*' && bFirstChar !== 'ᕯ') {
+        if (isLiteral(aFirstChar) && isLiteral(bFirstChar)) {
 
             // Both predicates start with the same literal. Intersect their remainders recursively.
             if (aFirstChar === bFirstChar) {
@@ -135,17 +135,17 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
 
         // `a` starts with a wildcard. Generate all possible intersections by unifying
         // the wildcard with all substitutable prefixes of `b`, then intersecting the remainders.
-        else if (aFirstChar === 'ᕯ' || (aFirstChar === '*' && bFirstChar !== 'ᕯ')) {
+        else if (isGlobstar(aFirstChar) || (isWildcard(aFirstChar) && !isGlobstar(bFirstChar))) {
             let aAfterFirst = a.slice(1) as SimplePredicate;
 
             // Obtain all splits. When unifying splits against '*', do strength
             // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*').
             let splits = getAllPredicateSplits(b);
-            if (aFirstChar === '*') splits.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
+            if (isWildcard(aFirstChar)) splits.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
 
             // Compute and return intersections for all valid unifications. This is a recursive operation.
             for (let [bFirstPart, bLastPart] of splits) {
-                let keep = aFirstChar === 'ᕯ' || (bFirstPart.indexOf('/') === -1 && bFirstPart.indexOf('ᕯ') === -1);
+                let keep = isGlobstar(aFirstChar) || (bFirstPart.indexOf('/') === -1 && bFirstPart.indexOf('ᕯ') === -1);
                 if (!keep) continue;
 
                 let more = getAllIntersections(aAfterFirst, bLastPart).map(u => bFirstPart + u) as SimplePredicate[];
@@ -165,6 +165,15 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     console.log(`cache set: ${a + ':' + b} ==> ${JSON.stringify(result2)}`);
     return result2;
 }
+
+
+
+
+
+// TODO: doc... helper functions, will be inlined
+function isLiteral(c: string) { return c !== '' && c !== '*' && c !== 'ᕯ'; }
+function isWildcard(c: string) { return c === '*'; }
+function isGlobstar(c: string) { return c === 'ᕯ'; }
 
 
 
