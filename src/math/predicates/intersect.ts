@@ -170,7 +170,7 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
 
 // TODO: doc... helper functions, will be inlined
 function isLiteral(c: string) { return c !== '' && c !== '*' && c !== 'ᕯ'; }
-function isWildcard(c: string) { return c === '*'; }
+//function isWildcard(c: string) { return c === '*'; }
 function isGlobstar(c: string) { return c === 'ᕯ'; }
 
 
@@ -183,11 +183,11 @@ class Memoiser {
         let value: SimplePredicate[]|undefined;
         let map2 = this.map.get(a);
         if (map2) value = map2.get(b);
-//        console.log(`cache ${value ? 'HIT' : '--miss--'}: ${a + '   :   ' + b} ==> ${JSON.stringify(value)}`);
+        //console.log(`MEMO ${value ? 'HIT' : '--miss--'}: ${a + '   :   ' + b} ==> ${JSON.stringify(value || '')}`);
         return value;
     }
     set(a: SimplePredicate, b: SimplePredicate, value: SimplePredicate[]) {
-//        console.log(`cache set: ${a + '   :   ' + b} ==> ${JSON.stringify(value)}`);
+        //console.log(`MEMO set: ${a + '   :   ' + b} ==> ${JSON.stringify(value)}`);
         let map2 = this.map.get(a);
         if (!map2) this.map.set(a, map2 = new Map());
         map2.set(b, value);
