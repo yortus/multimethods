@@ -71,7 +71,6 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
 
 
 // TODO: temp testing...
-const CACHE = new Map<string, SimplePredicate[]>();
 let CALL_COUNT = 0;
 
 
@@ -93,13 +92,9 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     // so sorting `a` and `b` reduces the solution space without affecting the result.
     if (a > b) [b, a] = [a, b];
 
-    // TODO: temp testing... memoisation
-    let cached = CACHE.get(a + '∩' + b);
-    if (cached) {
-        console.log(`cache HIT: ${a + '   :   ' + b} ==> ${JSON.stringify(cached)}`);
-        return cached;
-    }
-    console.log(`cache --miss--: ${a + '   :   ' + b}`);
+    // If an intersection was already computed for these `a` and `b` values, return the previous result.
+    let memoisedResult = MEMOISER.get(a, b);
+    if (memoisedResult) return memoisedResult;
     ++CALL_COUNT;
 
     // TODO: doc...
@@ -161,10 +156,11 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
         }
     }
 
-    // TODO: temp testing...
+    // TODO: temp testing... dedupe
     let result2 = result.length === 0 ? [] : toNormalPredicate(result.map(expand).join('|')).split('|').map(simplify);
-    CACHE.set(a + '∩' + b, result2);
-    console.log(`cache set: ${a + '   :   ' + b} ==> ${JSON.stringify(result2)}`);
+
+    // Memoise the result before returning it, so that we can avoid computing it again in future.
+    MEMOISER.set(a, b, result2);
     return result2;
 }
 
@@ -176,6 +172,29 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
 function isLiteral(c: string) { return c !== '' && c !== '*' && c !== 'ᕯ'; }
 function isWildcard(c: string) { return c === '*'; }
 function isGlobstar(c: string) { return c === 'ᕯ'; }
+
+
+
+
+
+// TODO: doc...
+class Memoiser {
+    get(a: SimplePredicate, b: SimplePredicate) {
+        let value: SimplePredicate[]|undefined;
+        let map2 = this.map.get(a);
+        if (map2) value = map2.get(b);
+//        console.log(`cache ${value ? 'HIT' : '--miss--'}: ${a + '   :   ' + b} ==> ${JSON.stringify(value)}`);
+        return value;
+    }
+    set(a: SimplePredicate, b: SimplePredicate, value: SimplePredicate[]) {
+//        console.log(`cache set: ${a + '   :   ' + b} ==> ${JSON.stringify(value)}`);
+        let map2 = this.map.get(a);
+        if (!map2) this.map.set(a, map2 = new Map());
+        map2.set(b, value);
+    }
+    private map = new Map<SimplePredicate, Map<SimplePredicate, SimplePredicate[]>>();
+}
+const MEMOISER = new Memoiser();
 
 
 
