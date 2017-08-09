@@ -105,66 +105,59 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     // TODO: doc...
     let result = [] as SimplePredicate[];
 
-    // TODO: shortcut using isSubsetOf...
-    if (isSubsetOf(a, b)) {
-        result = [a];
+    // CASE 1: Either predicate is empty. An empty predicate intersects only with
+    // another empty predicate or a single wildcard/globstar. Since an empty string
+    // precedes all other strings lexicographically, we just check if `a` is empty.
+    if (a === '') {
+        if (b === '' || b === '*' || b === 'ᕯ') {
+            result.push('' as SimplePredicate);
+        }
+    }
+
+    // CASE 2: Either predicate is found to be a subset of the other, using
+    // simple pattern matching. The result in this case is the subset predicate.
+    else if (isSubsetOf(a, b)) {
+        result.push(a);
     }
     else if (isSubsetOf(b, a)) {
-        result = [b];
+        result.push(b);
     }
 
-    // CASE 1: Either predicate is empty.
-    // An empty predicate intersects only with another empty predicate or a single wildcard.
-    // Since and empty string precedes all other strings lexicographically, we only need to check `a`.
-    else if (a === '') {
-        result = b === '' || b === '*' || b === 'ᕯ' ? ['' as SimplePredicate] : [];
-    }
-    else {
-        let aFirstChar = a.charAt(0);
-        let bFirstChar = b.charAt(0);
-
-        if (aFirstChar !== '*' && aFirstChar !== 'ᕯ' && bFirstChar !== '*' && bFirstChar !== 'ᕯ') {
-
-            // Both predicates start with the same literal. Intersect their remainders recursively.
-            if (aFirstChar === bFirstChar) {
-                let aAfterFirst = a.slice(1) as SimplePredicate;
-                let bAfterFirst = b.slice(1) as SimplePredicate;
-                result = getAllIntersections(aAfterFirst, bAfterFirst).map(u => aFirstChar + u) as SimplePredicate[];
-            }
-
-            // Both predicates start with a literal, but they are different literals. The predicates must be disjoint.
-            else {
-                // no-op
-            }
-        }
-
-//TODO: one or both predicates start with a wildcard or globstar
-        else {
-
-            // TODO: Ensure `a` starts with something more greedy than what `b` starts with
-            let swap = bFirstChar === 'ᕯ' || (aFirstChar !== '*' && aFirstChar !== 'ᕯ');
-            if (swap) [b, a, bFirstChar, aFirstChar] = [a, b, aFirstChar, bFirstChar];
-
-            // `a` starts with a wildcard. Generate all possible intersections by unifying
-            // the wildcard with all substitutable prefixes of `b`, then intersecting the remainders.
+    // CASE 3: Both predicates start with a literal character. If the starting
+    // literals differ, the predicates are disjoint. Otherwise, we determine
+    // the intersection by intersecting their remainders recursively.
+    else if (isLiteral(a.charAt(0)) && isLiteral(b.charAt(0))) {
+        if (a.charAt(0) === b.charAt(0)) {
             let aAfterFirst = a.slice(1) as SimplePredicate;
+            let bAfterFirst = b.slice(1) as SimplePredicate;
+            result = getAllIntersections(aAfterFirst, bAfterFirst).map(u => a.charAt(0) + u) as SimplePredicate[];
+        }
+    }
 
-            // Obtain all splits. When unifying splits against '*', do strength
-            // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*').
-            let splits = getAllPredicateSplits(b);
-            if (aFirstChar === '*') splits.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
+    // CASE 4: At least one of the predicates starts with a wildcard or globstar. In this case we consider every
+    // way in which the second predicate may be split into a [prefix, suffix] pair. For each such pair where the
+    // prefix unifies with the starting wildcard/globstar of the first predicate, we recursively intersect the
+    // suffix with the remainder of the first predicate. All successful unifications are accumulated into the result.
+    else {
+        let [first, second] = isGlobstar(a.charAt(0)) || isLiteral(b.charAt(0)) ? [a, b] : [b, a];
 
-            // Compute and return intersections for all valid unifications. This is a recursive operation.
-            for (let [bFirstPart, bLastPart] of splits) {
-                let keep = aFirstChar === 'ᕯ' || (bFirstPart.indexOf('/') === -1 && bFirstPart.indexOf('ᕯ') === -1);
-                if (!keep) continue;
+    // `a` starts with a wildcard. Generate all possible intersections by unifying
+        // the wildcard with all substitutable prefixes of `b`, then intersecting the remainders.
+        let aFirstChar = first.charAt(0);
+        let aAfterFirst = first.slice(1) as SimplePredicate;
 
-                let more = getAllIntersections(aAfterFirst, bLastPart).map(u => bFirstPart + u) as SimplePredicate[];
-                result = result.concat(more);
-            }
+        // Obtain all splits. When unifying splits against '*', do strength
+        // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*').
+        let prefixSuffixPairs = getAllPredicateSplits(second);
+        if (aFirstChar === '*') prefixSuffixPairs.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
 
-            // TODO: swap back...
-            if (swap) [b, a] = [a, b];
+        // Compute and return intersections for all valid unifications. This is a recursive operation.
+        for (let [prefix, suffix] of prefixSuffixPairs) {
+            let keep = aFirstChar === 'ᕯ' || (prefix.indexOf('/') === -1 && prefix.indexOf('ᕯ') === -1);
+            if (!keep) continue;
+
+            let more = getAllIntersections(aAfterFirst, suffix).map(u => prefix + u) as SimplePredicate[];
+            result = result.concat(more);
         }
     }
 
@@ -174,6 +167,15 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     console.log(`cache set: ${a + '   :   ' + b} ==> ${JSON.stringify(result2)}`);
     return result2;
 }
+
+
+
+
+
+// TODO: doc... helper functions, will be inlined
+function isLiteral(c: string) { return c !== '' && c !== '*' && c !== 'ᕯ'; }
+function isWildcard(c: string) { return c === '*'; }
+function isGlobstar(c: string) { return c === 'ᕯ'; }
 
 
 
