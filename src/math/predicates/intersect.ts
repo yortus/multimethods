@@ -78,10 +78,10 @@ let CALL_COUNT = 0;
 
 
 /**
- * Computes all predicates that may be formed by unifying wildcards from one predicate with
- * substitutable substrings of the other predicate, such that all characters from both predicates
- * are present and in order in the result. All the predicates computed in this way represent
- * valid intersections of `a` and `b`. However, some may be duplicates or subsets of others.
+ * Computes all predicates that may be formed by unifying wildcards/globstars from one predicate with
+ * substitutable substrings of the other predicate, such that all characters from both predicates are
+ * present and in order in the result. All the predicates computed in this way represent valid
+ * intersections of `a` and `b`. However, some may be duplicates or subsets of others.
  * @param {NormalPredicate} a - a normalised predicate.
  * @param {NormalPredicate} b - a normalised predicate.
  * @returns {NormalPredicate[]} - a list of normalised predicates that represent valid intersections of `a` and `b`.
@@ -119,19 +119,19 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
         return MEMOISER.set(a, b, [b]);
     }
 
-    // CASE 3: Both predicates start with a literal character. If the starting
-    // literals differ, the predicates are disjoint. Otherwise, we determine
-    // the intersection by intersecting their remainders recursively.
-    if (isLiteral(a.charAt(0)) && isLiteral(b.charAt(0))) {
-        if (a.charAt(0) === b.charAt(0)) {
-            let aAfterFirst = a.slice(1) as NormalPredicate;
-            let bAfterFirst = b.slice(1) as NormalPredicate;
-            let result = getAllIntersections(aAfterFirst, bAfterFirst).map(u => a.charAt(0) + u) as NormalPredicate[];
-            return MEMOISER.set(a, b, result);
-        }
-        else {
-            return MEMOISER.set(a, b, []);
-        }
+    // CASE 3: Both predicates start with at least one literal character. If the starting
+    // literals have no common prefix, the predicates are disjoint. Otherwise, we determine
+    // the intersection by recursively intersecting everything after the common prefix.
+    let aLiteralPrefix = getLeadingLiteral(a);
+    let bLiteralPrefix = getLeadingLiteral(b);
+    if (aLiteralPrefix.length > 0 && bLiteralPrefix.length > 0) {
+        let commonPrefix = longestCommonPrefix(aLiteralPrefix, bLiteralPrefix);
+        if (commonPrefix.length === 0) return MEMOISER.set(a, b, []); // Predicates are disjoint
+
+        let aSuffix = a.slice(commonPrefix.length) as NormalPredicate;
+        let bSuffix = b.slice(commonPrefix.length) as NormalPredicate;
+        let result = getAllIntersections(aSuffix, bSuffix).map(u => commonPrefix + u) as NormalPredicate[];
+        return MEMOISER.set(a, b, result);
     }
 
     // CASE 4: At least one of the predicates starts with a wildcard or globstar. In this case we consider every
@@ -174,6 +174,27 @@ function isLiteral(c: string) { return c !== '' && c !== '*' && c !== '**'; }
 function isWildcard(c: string) { return c === '*'; }
 //function isGlobstar(c: string) { return c === 'ᕯ'; }
 function startsWithGlobstar(s: string) { return s.length > 1 && s.charAt(0) === '*' && s.charAt(1) === '*'; }
+
+
+
+
+
+// TODO: doc... `p` is assumed to be non-empty
+function getLeadingLiteral(p: NormalPredicate) {
+    let firstNonLiteralIndex = p.indexOf('*');
+    if (firstNonLiteralIndex === -1) return p;
+    if (firstNonLiteralIndex === 1) return p.charAt(0) as NormalPredicate;
+    return p.slice(0, firstNonLiteralIndex) as NormalPredicate;
+}
+function longestCommonPrefix(p1: NormalPredicate, p2: NormalPredicate) {
+    let shorter = p1.length < p2.length ? p1 : p2;
+    let shorterLength = shorter === p1 ? p1.length : p2.length;
+    for (let i = 0; i < shorterLength; ++i) {
+        if (p1.charAt(i) === p2.charAt(i)) continue;
+        return p1.slice(0, i) as NormalPredicate;
+    }
+    return shorter;
+}
 
 
 
