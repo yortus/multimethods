@@ -89,13 +89,17 @@ let CALL_COUNT = 0;
  */
 function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePredicate[] {
 
-    // TODO: temp testing...
-    let cached = CACHE.get(a < b ? a + '∩' + b : b + '∩' + a);
+    // Ensure `a` always precedes `b` lexicographically. Intersection is commutative,
+    // so sorting `a` and `b` reduces the solution space without affecting the result.
+    if (a > b) [b, a] = [a, b];
+
+    // TODO: temp testing... memoisation
+    let cached = CACHE.get(a + '∩' + b);
     if (cached) {
-        console.log(`cache HIT: ${a + ':' + b} ==> ${JSON.stringify(cached)}`);
+        console.log(`cache HIT: ${a + '   :   ' + b} ==> ${JSON.stringify(cached)}`);
         return cached;
     }
-    console.log(`cache --miss--: ${a + ':' + b}`);
+    console.log(`cache --miss--: ${a + '   :   ' + b}`);
     ++CALL_COUNT;
 
     // TODO: doc...
@@ -109,16 +113,17 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
         result = [b];
     }
 
+    // CASE 1: Either predicate is empty.
     // An empty predicate intersects only with another empty predicate or a single wildcard.
-    else if (a === '' || b === '') {
-        let other = a || b;
-        result = other === '' || other === '*' || other === 'ᕯ' ? ['' as SimplePredicate] : [];
+    // Since and empty string precedes all other strings lexicographically, we only need to check `a`.
+    else if (a === '') {
+        result = b === '' || b === '*' || b === 'ᕯ' ? ['' as SimplePredicate] : [];
     }
     else {
         let aFirstChar = a.charAt(0);
         let bFirstChar = b.charAt(0);
 
-        if (isLiteral(aFirstChar) && isLiteral(bFirstChar)) {
+        if (aFirstChar !== '*' && aFirstChar !== 'ᕯ' && bFirstChar !== '*' && bFirstChar !== 'ᕯ') {
 
             // Both predicates start with the same literal. Intersect their remainders recursively.
             if (aFirstChar === bFirstChar) {
@@ -133,47 +138,42 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
             }
         }
 
-        // `a` starts with a wildcard. Generate all possible intersections by unifying
-        // the wildcard with all substitutable prefixes of `b`, then intersecting the remainders.
-        else if (isGlobstar(aFirstChar) || (isWildcard(aFirstChar) && !isGlobstar(bFirstChar))) {
+//TODO: one or both predicates start with a wildcard or globstar
+        else {
+
+            // TODO: Ensure `a` starts with something more greedy than what `b` starts with
+            let swap = bFirstChar === 'ᕯ' || (aFirstChar !== '*' && aFirstChar !== 'ᕯ');
+            if (swap) [b, a, bFirstChar, aFirstChar] = [a, b, aFirstChar, bFirstChar];
+
+            // `a` starts with a wildcard. Generate all possible intersections by unifying
+            // the wildcard with all substitutable prefixes of `b`, then intersecting the remainders.
             let aAfterFirst = a.slice(1) as SimplePredicate;
 
             // Obtain all splits. When unifying splits against '*', do strength
             // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*').
             let splits = getAllPredicateSplits(b);
-            if (isWildcard(aFirstChar)) splits.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
+            if (aFirstChar === '*') splits.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
 
             // Compute and return intersections for all valid unifications. This is a recursive operation.
             for (let [bFirstPart, bLastPart] of splits) {
-                let keep = isGlobstar(aFirstChar) || (bFirstPart.indexOf('/') === -1 && bFirstPart.indexOf('ᕯ') === -1);
+                let keep = aFirstChar === 'ᕯ' || (bFirstPart.indexOf('/') === -1 && bFirstPart.indexOf('ᕯ') === -1);
                 if (!keep) continue;
 
                 let more = getAllIntersections(aAfterFirst, bLastPart).map(u => bFirstPart + u) as SimplePredicate[];
                 result = result.concat(more);
             }
-        }
 
-        // `b` starts with a wildcard. Delegate to previous case by swapping arguments (since intersection is commutative).
-        else /* if (bFirstChar === 'ᕯ' || bFirstChar === '*') */ {
-            result = getAllIntersections(b, a);
+            // TODO: swap back...
+            if (swap) [b, a] = [a, b];
         }
     }
 
     // TODO: temp testing...
     let result2 = result.length === 0 ? [] : toNormalPredicate(result.map(expand).join('|')).split('|').map(simplify);
-    CACHE.set(a < b ? a + '∩' + b : b + '∩' + a, result2);
-    console.log(`cache set: ${a + ':' + b} ==> ${JSON.stringify(result2)}`);
+    CACHE.set(a + '∩' + b, result2);
+    console.log(`cache set: ${a + '   :   ' + b} ==> ${JSON.stringify(result2)}`);
     return result2;
 }
-
-
-
-
-
-// TODO: doc... helper functions, will be inlined
-function isLiteral(c: string) { return c !== '' && c !== '*' && c !== 'ᕯ'; }
-function isWildcard(c: string) { return c === '*'; }
-function isGlobstar(c: string) { return c === 'ᕯ'; }
 
 
 
