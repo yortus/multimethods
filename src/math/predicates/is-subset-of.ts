@@ -7,7 +7,6 @@ import NormalPredicate from './normal-predicate';
 
 
 
-// TODO: this is handling both NormalPredicate and SimplePredicate - phase out SimplePredicate support...
 // TODO: schedule clear cache on next tick
 //       - do it on every call
 //       - in a cross-platform way
@@ -60,9 +59,9 @@ function makeSubsetRecogniser(predicate: NormalPredicate) {
 
         let fragment = c;
         if (c === '*') {
-            fragment = '((?!\\*\\*)[^\\/ᕯ])*';
+            fragment = '((?!\\*\\*)[^\\/])*';
         }
-        else if (c === '**' || c === 'ᕯ') {
+        else if (c === '**') {
             fragment = '.*';
         }
         else if (' /._-'.indexOf(c) !== -1) {

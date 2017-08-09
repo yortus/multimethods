@@ -30,12 +30,12 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
     let t0 = Date.now();
 
     // Compute the intersections of every alternative of `a` with every alternative of `b`.
-    let aAlts = a === NONE ? [] : simplify(a).split('|');
-    let bAlts = b === NONE ? [] : simplify(b).split('|');
-    let allIntersections = [] as SimplePredicate[];
+    let aAlts = a === NONE ? [] : a.split('|') as NormalPredicate[];
+    let bAlts = b === NONE ? [] : b.split('|') as NormalPredicate[];
+    let allIntersections = [] as NormalPredicate[];
     for (let altA of aAlts) {
         for (let altB of bAlts) {
-            let moreIntersections = getAllIntersections(altA as SimplePredicate, altB as SimplePredicate);
+            let moreIntersections = getAllIntersections(altA, altB);
             allIntersections = allIntersections.concat(moreIntersections);
         }
     }
@@ -45,7 +45,7 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
 
     // Finalise the result.
     if (allIntersections.length === 0) return NONE;
-    let result = toNormalPredicate(allIntersections.map(expand).join('|'));
+    let result = toNormalPredicate(allIntersections.join('|'));
 
     // TODO: temp testing...
     let t2 = Date.now();
@@ -82,11 +82,11 @@ let CALL_COUNT = 0;
  * substitutable substrings of the other predicate, such that all characters from both predicates
  * are present and in order in the result. All the predicates computed in this way represent
  * valid intersections of `a` and `b`. However, some may be duplicates or subsets of others.
- * @param {SimplePredicate} a - a simplified predicate.
- * @param {SimplePredicate} b - a simplified predicate.
- * @returns {SimplePredicate[]} - a list of simplified predicates that represent valid intersections of `a` and `b`.
+ * @param {NormalPredicate} a - a normalised predicate.
+ * @param {NormalPredicate} b - a normalised predicate.
+ * @returns {NormalPredicate[]} - a list of normalised predicates that represent valid intersections of `a` and `b`.
  */
-function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePredicate[] {
+function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPredicate[] {
 
     // Ensure `a` always precedes `b` lexicographically. Intersection is commutative,
     // so sorting `a` and `b` reduces the solution space without affecting the result.
@@ -98,14 +98,14 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     ++CALL_COUNT;
 
     // TODO: doc...
-    let result = [] as SimplePredicate[];
+    let result = [] as NormalPredicate[];
 
     // CASE 1: Either predicate is empty. An empty predicate intersects only with
     // another empty predicate or a single wildcard/globstar. Since an empty string
     // precedes all other strings lexicographically, we just check if `a` is empty.
     if (a === '') {
-        if (b === '' || b === '*' || b === 'ᕯ') {
-            result.push('' as SimplePredicate);
+        if (b === '' || b === '*' || b === '**') {
+            result.push('' as NormalPredicate);
         }
     }
 
@@ -123,9 +123,9 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     // the intersection by intersecting their remainders recursively.
     else if (isLiteral(a.charAt(0)) && isLiteral(b.charAt(0))) {
         if (a.charAt(0) === b.charAt(0)) {
-            let aAfterFirst = a.slice(1) as SimplePredicate;
-            let bAfterFirst = b.slice(1) as SimplePredicate;
-            result = getAllIntersections(aAfterFirst, bAfterFirst).map(u => a.charAt(0) + u) as SimplePredicate[];
+            let aAfterFirst = a.slice(1) as NormalPredicate;
+            let bAfterFirst = b.slice(1) as NormalPredicate;
+            result = getAllIntersections(aAfterFirst, bAfterFirst).map(u => a.charAt(0) + u) as NormalPredicate[];
         }
     }
 
@@ -134,30 +134,30 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
     // prefix unifies with the starting wildcard/globstar of the first predicate, we recursively intersect the
     // suffix with the remainder of the first predicate. All successful unifications are accumulated into the result.
     else {
-        let [first, second] = isGlobstar(a.charAt(0)) || isLiteral(b.charAt(0)) ? [a, b] : [b, a];
+        let [first, second] = startsWithGlobstar(a) || isLiteral(b.charAt(0)) ? [a, b] : [b, a];
 
-    // `a` starts with a wildcard. Generate all possible intersections by unifying
-        // the wildcard with all substitutable prefixes of `b`, then intersecting the remainders.
-        let aFirstChar = first.charAt(0);
-        let aAfterFirst = first.slice(1) as SimplePredicate;
+        let firstChar = startsWithGlobstar(first) ? '**' : first.charAt(0);
+        let afterFirst = first.slice(firstChar.length) as NormalPredicate;
 
         // Obtain all splits. When unifying splits against '*', do strength
-        // reduction on split prefixes containing 'ᕯ' (ie replace 'ᕯ' with '*').
+        // reduction on split prefixes containing '**' (ie replace '**' with '*').
         let prefixSuffixPairs = getAllPredicateSplits(second);
-        if (aFirstChar === '*') prefixSuffixPairs.forEach(pair => pair[0] = pair[0].replace(/ᕯ/g, '*') as SimplePredicate);
+        if (isWildcard(firstChar)) {
+            prefixSuffixPairs.forEach(pair => pair[0] = pair[0].replace(/\*\*/g, '*') as NormalPredicate);
+        }
 
         // Compute and return intersections for all valid unifications. This is a recursive operation.
         for (let [prefix, suffix] of prefixSuffixPairs) {
-            let keep = aFirstChar === 'ᕯ' || (prefix.indexOf('/') === -1 && prefix.indexOf('ᕯ') === -1);
-            if (!keep) continue;
+            let isUnifiable = firstChar === '**' || (prefix.indexOf('/') === -1 && prefix.indexOf('**') === -1);
+            if (!isUnifiable) continue;
 
-            let more = getAllIntersections(aAfterFirst, suffix).map(u => prefix + u) as SimplePredicate[];
+            let more = getAllIntersections(afterFirst, suffix).map(u => prefix + u) as NormalPredicate[];
             result = result.concat(more);
         }
     }
 
     // TODO: temp testing... dedupe
-    let result2 = result.length === 0 ? [] : toNormalPredicate(result.map(expand).join('|')).split('|').map(simplify);
+    let result2 = result.length === 0 ? [] : toNormalPredicate(result.join('|')).split('|') as NormalPredicate[];
 
     // Memoise the result before returning it, so that we can avoid computing it again in future.
     MEMOISER.set(a, b, result2);
@@ -169,9 +169,10 @@ function getAllIntersections(a: SimplePredicate, b: SimplePredicate): SimplePred
 
 
 // TODO: doc... helper functions, will be inlined
-function isLiteral(c: string) { return c !== '' && c !== '*' && c !== 'ᕯ'; }
-//function isWildcard(c: string) { return c === '*'; }
-function isGlobstar(c: string) { return c === 'ᕯ'; }
+function isLiteral(c: string) { return c !== '' && c !== '*' && c !== '**'; }
+function isWildcard(c: string) { return c === '*'; }
+//function isGlobstar(c: string) { return c === 'ᕯ'; }
+function startsWithGlobstar(s: string) { return s.length > 1 && s.charAt(0) === '*' && s.charAt(1) === '*'; }
 
 
 
@@ -179,20 +180,20 @@ function isGlobstar(c: string) { return c === 'ᕯ'; }
 
 // TODO: doc...
 class Memoiser {
-    get(a: SimplePredicate, b: SimplePredicate) {
-        let value: SimplePredicate[]|undefined;
+    get(a: NormalPredicate, b: NormalPredicate) {
+        let value: NormalPredicate[]|undefined;
         let map2 = this.map.get(a);
         if (map2) value = map2.get(b);
         //console.log(`MEMO ${value ? 'HIT' : '--miss--'}: ${a + '   :   ' + b} ==> ${JSON.stringify(value || '')}`);
         return value;
     }
-    set(a: SimplePredicate, b: SimplePredicate, value: SimplePredicate[]) {
+    set(a: NormalPredicate, b: NormalPredicate, value: NormalPredicate[]) {
         //console.log(`MEMO set: ${a + '   :   ' + b} ==> ${JSON.stringify(value)}`);
         let map2 = this.map.get(a);
         if (!map2) this.map.set(a, map2 = new Map());
         map2.set(b, value);
     }
-    private map = new Map<SimplePredicate, Map<SimplePredicate, SimplePredicate[]>>();
+    private map = new Map<NormalPredicate, Map<NormalPredicate, NormalPredicate[]>>();
 }
 const MEMOISER = new Memoiser();
 
@@ -201,33 +202,26 @@ const MEMOISER = new Memoiser();
 
 
 /**
- * Returns an array of all the [prefix, suffix] pairs into which `predicate` may be split. Splits that occur on a
- * wildcard character have the wildcard on both sides of the split (i.e. as the last character of the prefix and the
- * first character of the suffix). E.g., 'abᕯc' splits into: ['','abᕯc'], ['a','bᕯc'], ['abᕯ','ᕯc'], and ['abᕯc',''].
+ * Returns an array of all the [prefix, suffix] pairs into which `predicate` may be split. Splits that
+ * occur on a wildcard/globstar have the wildcard/globstar on both sides of the split (i.e. as the last
+ * character(s) of the prefix and the first character(s) of the suffix). E.g., 'ab**c' splits into:
+ * ['','ab**c'], ['a','b**c'], ['ab**','**c'], and ['ab**c',''].
  */
-function getAllPredicateSplits(predicate: SimplePredicate): Array<[SimplePredicate, SimplePredicate]> {
-    let result = [] as Array<[SimplePredicate, SimplePredicate]>;
+function getAllPredicateSplits(predicate: NormalPredicate): Array<[NormalPredicate, NormalPredicate]> {
+    let result = [] as Array<[NormalPredicate, NormalPredicate]>;
     for (let i = 0; i <= predicate.length; ++i) {
-        let pair = [predicate.substring(0, i), predicate.substring(i)];
-        if (predicate[i] === 'ᕯ' || predicate[i] === '*') {
-            pair[0] += predicate[i];
-            ++i; // skip next iteration
+        let [prefix, suffix] = [predicate.slice(0, i), predicate.slice(i)];
+        if (suffix.length > 0 && suffix.charAt(0) === '*') {
+            if (suffix.length > 1 && suffix.charAt(1) === '*') {
+                prefix += '**';
+                i += 2;
+            }
+            else {
+                prefix += '*';
+                i += 1;
+            }
         }
-        result.push(pair as any);
+        result.push([prefix as NormalPredicate, suffix as NormalPredicate]);
     }
     return result;
-}
-
-
-
-
-
-// TODO: temp testing... internal concept; makes the algos in this file simpler
-// TODO: doc... a simplified predicate is normalised with multichar symbols replaced by single chars (ie, ** => ᕯ).
-type SimplePredicate = NormalPredicate & { __simplePredicateBrand: any };
-function simplify(p: NormalPredicate) {
-    return p.replace(/\*\*/g, 'ᕯ') as SimplePredicate;
-}
-function expand(p: SimplePredicate) {
-    return p.replace(/ᕯ/g, '**') as NormalPredicate;
 }
