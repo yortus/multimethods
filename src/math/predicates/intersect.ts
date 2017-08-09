@@ -122,10 +122,10 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
     // CASE 3: Both predicates start with at least one literal character. If the starting
     // literals have no common prefix, the predicates are disjoint. Otherwise, we determine
     // the intersection by recursively intersecting everything after the common prefix.
-    let aLiteralPrefix = getLeadingLiteral(a);
-    let bLiteralPrefix = getLeadingLiteral(b);
-    if (aLiteralPrefix.length > 0 && bLiteralPrefix.length > 0) {
-        let commonPrefix = longestCommonPrefix(aLiteralPrefix, bLiteralPrefix);
+    let aFirstToken = getFirstToken(a);
+    let bFirstToken = getFirstToken(b);
+    if (aFirstToken.charAt(0) !== '*' && bFirstToken.charAt(0) !== '*') {
+        let commonPrefix = longestCommonPrefix(aFirstToken, bFirstToken);
         if (commonPrefix.length === 0) return MEMOISER.set(a, b, []); // Predicates are disjoint
 
         let aSuffix = a.slice(commonPrefix.length) as NormalPredicate;
@@ -134,29 +134,29 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
         return MEMOISER.set(a, b, result);
     }
 
-    // CASE 4: At least one of the predicates starts with a wildcard or globstar. In this case we consider every
-    // way in which the second predicate may be split into a [prefix, suffix] pair. For each such pair where the
-    // prefix unifies with the starting wildcard/globstar of the first predicate, we recursively intersect the
-    // suffix with the remainder of the first predicate. All successful unifications are accumulated into the result.
-    let [first, second] = startsWithGlobstar(a) || isLiteral(b.charAt(0)) ? [a, b] : [b, a];
+    // CASE 4: At least one of the predicates starts with a wildcard or globstar. Let's call this predicate p1, and
+    // the other predicate p2. We split p1 into a [prefix, suffix] pair, where p1.prefix is p1's leading wildcard
+    // or globstar, and p1.suffix is the remainder of p1. We now consider *every* [prefix, suffix] pair of p2 such that
+    // p1.prefix unifies with p2.prefix. We now determine the intersection by recursively intersecting p1.suffix
+    // against each remaining p2.suffix, and accumulating the results.
+    let [p1, p2] = aFirstToken === '**' || bFirstToken.charAt(0) !== '*' ? [a, b] : [b, a];
+    let p1Prefix = p1 === a ? aFirstToken : bFirstToken;
+    let p1Suffix = p1.slice(p1Prefix.length) as NormalPredicate;
 
-    let firstChar = startsWithGlobstar(first) ? '**' : first.charAt(0);
-    let afterFirst = first.slice(firstChar.length) as NormalPredicate;
-
-    // Obtain all splits. When unifying splits against '*', do strength
+    // Obtain all splits for p2. When unifying splits against '*', do strength
     // reduction on split prefixes containing '**' (ie replace '**' with '*').
-    let prefixSuffixPairs = getAllPredicateSplits(second);
-    if (isWildcard(firstChar)) {
-        prefixSuffixPairs.forEach(pair => pair[0] = pair[0].replace(/\*\*/g, '*') as NormalPredicate);
+    let p2Pairs = getAllPredicateSplits(p2);
+    if (p1Prefix === '*') {
+        p2Pairs.forEach(pair => pair[0] = pair[0].replace(/\*\*/g, '*') as NormalPredicate);
     }
 
     // Compute and return intersections for all valid unifications. This is a recursive operation.
     let result1 = [] as NormalPredicate[];
-    for (let [prefix, suffix] of prefixSuffixPairs) {
-        let isUnifiable = firstChar === '**' || (prefix.indexOf('/') === -1 && prefix.indexOf('**') === -1);
+    for (let [p2Prefix, p2Suffix] of p2Pairs) {
+        let isUnifiable = p1Prefix === '**' || (p2Prefix.indexOf('/') === -1 && p2Prefix.indexOf('**') === -1);
         if (!isUnifiable) continue;
 
-        let more = getAllIntersections(afterFirst, suffix).map(u => prefix + u) as NormalPredicate[];
+        let more = getAllIntersections(p1Suffix, p2Suffix).map(u => p2Prefix + u) as NormalPredicate[];
         result1 = result1.concat(more);
     }
 
@@ -169,23 +169,20 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
 
 
 
-// TODO: doc... helper functions, will be inlined
-function isLiteral(c: string) { return c !== '' && c !== '*' && c !== '**'; }
-function isWildcard(c: string) { return c === '*'; }
-//function isGlobstar(c: string) { return c === 'ᕯ'; }
-function startsWithGlobstar(s: string) { return s.length > 1 && s.charAt(0) === '*' && s.charAt(1) === '*'; }
-
-
-
-
-
-// TODO: doc... `p` is assumed to be non-empty
-function getLeadingLiteral(p: NormalPredicate) {
-    let firstNonLiteralIndex = p.indexOf('*');
-    if (firstNonLiteralIndex === -1) return p;
-    if (firstNonLiteralIndex === 1) return p.charAt(0) as NormalPredicate;
-    return p.slice(0, firstNonLiteralIndex) as NormalPredicate;
+// TODO: doc helper... `p` is assumed to be non-empty; result is promised to be non-empty
+function getFirstToken(p: NormalPredicate) {
+    let literalCount = p.indexOf('*');
+    if (literalCount === -1) return p; // The whole of p is a literal
+    if (literalCount === 0) return (p.length > 1 && p.charAt(1) === '*' ? '**' : '*') as NormalPredicate;
+    if (literalCount === 1) return p.charAt(0) as NormalPredicate;
+    return p.slice(0, literalCount) as NormalPredicate;
 }
+
+
+
+
+
+// TODO: doc helper...
 function longestCommonPrefix(p1: NormalPredicate, p2: NormalPredicate) {
     let shorter = p1.length < p2.length ? p1 : p2;
     let shorterLength = shorter === p1 ? p1.length : p2.length;
