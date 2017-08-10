@@ -137,7 +137,7 @@ describe('Constructing an euler diagram', () => {
         // {
         //     // ======================================== 4. ========================================
         //     // This case caused v0.6.2 to hang computing an endless series of ever-longer synthesised intersections.
-        //     name: 'non-terminating intersections',
+        //     name: 'high intersection complexity',
         //     predicates: [
         //         '*A*B*',
         //         '*C*',
@@ -217,7 +217,7 @@ describe('Constructing an euler diagram', () => {
         {
             // ======================================== 6. ========================================
             // This case took about 40 seconds to complete in v0.7.0.
-            name: 'non-terminating intersections II',
+            name: 'high intersection complexity II',
             predicates: [
                 '*J*I*S*W*',
                 '*A*W*',
@@ -243,6 +243,23 @@ describe('Constructing an euler diagram', () => {
                         },
                     },
                 },
+            },
+        },
+        {
+            // ======================================== 6. ========================================
+            // Ensure even more complex intersections can be computed in reasonable times
+            name: 'high intersection complexity III',
+            predicates: [
+                '*J*I*S*W*',
+                '*A*W*',
+                '*A*I*M*W*',
+                '*W*',
+                '*B*M*W*',
+                '*J*A*S*M*',
+                '*W*A*T*',
+                '*W*A*S*T*E*',
+            ],
+            eulerDiagram: {
             },
         },
     ];

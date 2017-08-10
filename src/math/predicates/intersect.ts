@@ -57,6 +57,7 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
         console.log(`intersection count: ${allIntersections.length}`);
         console.log(`getAllIntersections time: ${d1}s`);
         console.log(`toNormalPredicate time: ${d2}s`);
+        process.exit(999);
 
         // let alts = new SetOfAlternatives();
         // alts.addAll(allIntersections);
