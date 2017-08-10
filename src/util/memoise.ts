@@ -3,11 +3,11 @@
 
 
 
+// TODO: automatically clear stored results on a future tick
 // TODO: doc or remove these restrictions:
 // - only works for unary/binary/ternary functions, detected using fn.length
-// - only works for functions whose parameters are all primitive types (i.e. string, number, ...)
-function memoise<T0 extends primitive, T1 extends primitive, TR>(fn: ($0: T0, $1: T1) => TR): ($0: T0, $1: T1) => TR;
-function memoise<T0 extends primitive, T1 extends primitive, T2 extends primitive, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR): ($0: T0, $1: T1, $2: T2) => TR;
+function memoise<T0, T1, TR>(fn: ($0: T0, $1: T1) => TR): ($0: T0, $1: T1) => TR;
+function memoise<T0, T1, T2, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR): ($0: T0, $1: T1, $2: T2) => TR;
 function memoise(fn: Function) {
 
     // This internal util only supports functions with arities of 1-3 at the moment. Sanity check the input accordingly.
@@ -26,14 +26,7 @@ export default memoise;
 
 
 // TODO: doc...
-export type primitive = string|number;
-
-
-
-
-
-// TODO: doc...
-function makeUnaryMemoiser<T0 extends primitive, TR>(fn: ($0: T0) => TR) {
+function makeUnaryMemoiser<T0, TR>(fn: ($0: T0) => TR) {
     const map0 = new Map<T0, TR>();
     return ($0: T0): TR => {
 
@@ -53,7 +46,7 @@ function makeUnaryMemoiser<T0 extends primitive, TR>(fn: ($0: T0) => TR) {
 
 
 // TODO: doc...
-function makeBinaryMemoiser<T0 extends primitive, T1 extends primitive, TR>(fn: ($0: T0, $1: T1) => TR) {
+function makeBinaryMemoiser<T0, T1, TR>(fn: ($0: T0, $1: T1) => TR) {
     const map0 = new Map<T0, Map<T1, TR>>();
     return ($0: T0, $1: T1): TR => {
 
@@ -75,7 +68,7 @@ function makeBinaryMemoiser<T0 extends primitive, T1 extends primitive, TR>(fn: 
 
 
 // TODO: doc...
-function makeTernaryMemoiser<T0 extends primitive, T1 extends primitive, T2 extends primitive, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR) {
+function makeTernaryMemoiser<T0, T1, T2, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR) {
     const map0 = new Map<T0, Map<T1, Map<T2, TR>>>();
     return ($0: T0, $1: T1, $2: T2): TR => {
 
