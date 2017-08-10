@@ -1,3 +1,4 @@
+import memoise from '../../util/memoise';
 import isSubsetOf from './is-subset-of';
 import NONE from './none';
 import NormalPredicate from './normal-predicate';
@@ -86,37 +87,35 @@ let CALL_COUNT = 0;
  * @param {NormalPredicate} b - a normalised predicate.
  * @returns {NormalPredicate[]} - a list of normalised predicates that represent valid intersections of `a` and `b`.
  */
-function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPredicate[] {
+let getAllIntersections: (a: NormalPredicate, b: NormalPredicate) => NormalPredicate[];
+getAllIntersections = memoise((a, b) => {
+
+    // TODO: temp testing...
+    ++CALL_COUNT;
 
     // Ensure `a` always precedes `b` lexicographically. Intersection is commutative,
     // so sorting `a` and `b` reduces the solution space without affecting the result.
-    if (a > b) [b, a] = [a, b];
-
-    // If an intersection was already computed for these `a` and `b` values, return the previously memoised result.
-    // All code paths beyond this point memoise the result before returning it, so it becomes available to future calls.
-    let memoisedResult = MEMOISER.get(a, b);
-    if (memoisedResult) return memoisedResult;
-    ++CALL_COUNT;
+    if (a > b) return getAllIntersections(b, a);
 
     // CASE 1: Either predicate is empty. An empty predicate intersects only with
     // another empty predicate or a single wildcard/globstar. Since an empty string
     // precedes all other strings lexicographically, we just check if `a` is empty.
     if (a === '') {
         if (b === '' || b === '*' || b === '**') {
-            return MEMOISER.set(a, b, ['' as NormalPredicate]);
+            return ['' as NormalPredicate];
         }
         else {
-            return MEMOISER.set(a, b, []);
+            return [];
         }
     }
 
     // CASE 2: Either predicate is found to be a subset of the other, using
     // simple pattern matching. The result in this case is the subset predicate.
     if (isSubsetOf(a, b)) {
-        return MEMOISER.set(a, b, [a]);
+        return [a];
     }
     if (isSubsetOf(b, a)) {
-        return MEMOISER.set(a, b, [b]);
+        return [b];
     }
 
     // CASE 3: Both predicates start with at least one literal character. If the starting
@@ -126,26 +125,25 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
     let bFirstToken = getFirstToken(b);
     if (aFirstToken.charAt(0) !== '*' && bFirstToken.charAt(0) !== '*') {
         let commonPrefix = longestCommonPrefix(aFirstToken, bFirstToken);
-        if (commonPrefix.length === 0) return MEMOISER.set(a, b, []); // Predicates are disjoint
+        if (commonPrefix.length === 0) return []; // Predicates are disjoint
 
         let aSuffix = a.slice(commonPrefix.length) as NormalPredicate;
         let bSuffix = b.slice(commonPrefix.length) as NormalPredicate;
         let result = getAllIntersections(aSuffix, bSuffix).map(u => commonPrefix + u) as NormalPredicate[];
-        return MEMOISER.set(a, b, result);
+        return result;
     }
 
     // CASE 4: At least one of the predicates starts with a wildcard or globstar. Let's call this predicate p1, and
-    // the other predicate p2. We split p1 into a [prefix, suffix] pair, where p1.prefix is p1's leading wildcard
-    // or globstar, and p1.suffix is the remainder of p1. We now consider *every* [prefix, suffix] pair of p2 such that
+    // the other predicate p2. We split p1 into a [prefix, suffix] pair, where p1.prefix is p1's leading wildcard or
+    // globstar, and p1.suffix is the remainder of p1. We now consider *every* [prefix, suffix] pair of p2 such that
     // p1.prefix unifies with p2.prefix. We now determine the intersection by recursively intersecting p1.suffix
-    // against each remaining p2.suffix, and accumulating the results.
+    // against every p2.suffix, and accumulating the results.
     let [p1, p2] = aFirstToken === '**' || bFirstToken.charAt(0) !== '*' ? [a, b] : [b, a];
     let p1Prefix = (p1 === a ? aFirstToken : bFirstToken) as string as '*'|'**';
     let p1Suffix = p1.slice(p1Prefix.length) as NormalPredicate;
 
-    // Obtain all splits for p2. When unifying splits against '*', do strength
-    // reduction on split prefixes containing '**' (ie replace '**' with '*').
-    let p2Pairs = getPredicateSplits(p2, p1Prefix);
+    // Obtain all [prefix, suffix] pairs of p2 that potentially unify with p1.
+    let p2Pairs = getUnifiableSplits(p2, p1Prefix);
 
     // Compute and return intersections for all valid unifications. This is a recursive operation.
     let result1 = [] as NormalPredicate[];
@@ -156,13 +154,14 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
 
     // TODO: temp testing... dedupe
     let result2 = result1.length === 0 ? [] : toNormalPredicate(result1.join('|')).split('|') as NormalPredicate[];
-    return MEMOISER.set(a, b, result2);
-}
+    return result2;
+});
 
 
 
 
 
+// TODO: doc helper...
 function getFirstToken(p: NormalPredicate) {
     if (p.length === 0) return p;
     let literalCount = p.indexOf('*');
@@ -197,17 +196,13 @@ function longestCommonPrefix(p1: NormalPredicate, p2: NormalPredicate) {
  * of the split (i.e. as the last character(s) of the prefix and the first character(s) of the suffix).
  * E.g., 'ab**c' splits into: ['','ab**c'], ['a','b**c'], ['ab**','**c'], and ['ab**c',''].
  */
-function getPredicateSplits(p: NormalPredicate, prefixUnifier: '*'|'**') {
-
-    // TODO: temp testing...
-    let memoisedResult = MEMOISER2.get(p, prefixUnifier);
-    if (memoisedResult) return memoisedResult;
-
+let getUnifiableSplits: (p: NormalPredicate, prefixUnifier: '*'|'**') => Array<[NormalPredicate, NormalPredicate]>;
+getUnifiableSplits = memoise((p, prefixUnifier) => {
     let result = [] as string[][];
     let prefix = '';
     let suffix = p as string;
-    let strengthReduce = prefixUnifier === '*';
     while (true) {
+
         // Before we issue the next [prefix, suffix] pair, check whether `suffix` starts with a wildcard or globstar.
         let splitType: ''|'*'|'**';
         splitType = suffix.charAt(0) !== '*' ? '' : suffix.charAt(1) === '*' ? '**' : '*';
@@ -215,7 +210,7 @@ function getPredicateSplits(p: NormalPredicate, prefixUnifier: '*'|'**') {
         // If so, the wildcard/globstar needs to *also* appear at the end of the prefix for this pair. Furthermore,
         // if the prefix is being unified with a wildcard (not a globstar), then we strenth-reduce globstars to
         // wildcards on appending them to the prefix, so that the prefix always unifies with `prefixUnifier`.
-        if (splitType) prefix += (strengthReduce ? '*' : splitType);
+        if (splitType) prefix += (prefixUnifier === '*' ? '*' : splitType);
 
         // Now we can issue the pair.
         result.push([prefix, suffix]);
@@ -236,30 +231,5 @@ function getPredicateSplits(p: NormalPredicate, prefixUnifier: '*'|'**') {
         prefix += suffix.charAt(0);
         suffix = suffix.slice(1);
     }
-    return MEMOISER2.set(p, prefixUnifier, result as Array<[NormalPredicate, NormalPredicate]>);
-}
-
-
-
-
-
-// TODO: doc...
-class BinaryMemoiser<T0, T1, TR> {
-    get(a: T0, b: T1) {
-        let value: TR|undefined;
-        let map2 = this.map.get(a);
-        if (map2) value = map2.get(b);
-        //console.log(`MEMO ${value ? 'HIT' : '--miss--'}: ${a + '   :   ' + b} ==> ${JSON.stringify(value || '')}`);
-        return value;
-    }
-    set(a: T0, b: T1, value: TR) {
-        //console.log(`MEMO set: ${a + '   :   ' + b} ==> ${JSON.stringify(value)}`);
-        let map2 = this.map.get(a);
-        if (!map2) this.map.set(a, map2 = new Map());
-        map2.set(b, value);
-        return value;
-    }
-    private map = new Map<T0, Map<T1, TR>>();
-}
-const MEMOISER = new BinaryMemoiser<NormalPredicate, NormalPredicate, NormalPredicate[]>();
-const MEMOISER2 = new BinaryMemoiser<NormalPredicate, '*'|'**', Array<[NormalPredicate, NormalPredicate]>>();
+    return result as Array<[NormalPredicate, NormalPredicate]>;
+});
