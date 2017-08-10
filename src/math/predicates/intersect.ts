@@ -140,22 +140,16 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
     // p1.prefix unifies with p2.prefix. We now determine the intersection by recursively intersecting p1.suffix
     // against each remaining p2.suffix, and accumulating the results.
     let [p1, p2] = aFirstToken === '**' || bFirstToken.charAt(0) !== '*' ? [a, b] : [b, a];
-    let p1Prefix = p1 === a ? aFirstToken : bFirstToken;
+    let p1Prefix = (p1 === a ? aFirstToken : bFirstToken) as string as '*'|'**';
     let p1Suffix = p1.slice(p1Prefix.length) as NormalPredicate;
 
     // Obtain all splits for p2. When unifying splits against '*', do strength
     // reduction on split prefixes containing '**' (ie replace '**' with '*').
-    let p2Pairs = getAllPredicateSplits(p2);
-    if (p1Prefix === '*') {
-        p2Pairs.forEach(pair => pair[0] = pair[0].replace(/\*\*/g, '*') as NormalPredicate);
-    }
+    let p2Pairs = getPredicateSplits(p2, p1Prefix);
 
     // Compute and return intersections for all valid unifications. This is a recursive operation.
     let result1 = [] as NormalPredicate[];
     for (let [p2Prefix, p2Suffix] of p2Pairs) {
-        let isUnifiable = p1Prefix === '**' || (p2Prefix.indexOf('/') === -1 && p2Prefix.indexOf('**') === -1);
-        if (!isUnifiable) continue;
-
         let more = getAllIntersections(p1Suffix, p2Suffix).map(u => p2Prefix + u) as NormalPredicate[];
         result1 = result1.concat(more);
     }
@@ -169,8 +163,8 @@ function getAllIntersections(a: NormalPredicate, b: NormalPredicate): NormalPred
 
 
 
-// TODO: doc helper... `p` is assumed to be non-empty; result is promised to be non-empty
 function getFirstToken(p: NormalPredicate) {
+    if (p.length === 0) return p;
     let literalCount = p.indexOf('*');
     if (literalCount === -1) return p; // The whole of p is a literal
     if (literalCount === 0) return (p.length > 1 && p.charAt(1) === '*' ? '**' : '*') as NormalPredicate;
@@ -197,6 +191,65 @@ function longestCommonPrefix(p1: NormalPredicate, p2: NormalPredicate) {
 
 
 
+/**
+ * Returns an array of all the [prefix, suffix] pairs into which the predicate `p` may be split, such that `prefix`
+ * is a subset of `prefixUnifier`. Splits that occur on a wildcard/globstar have the wildcard/globstar on both sides
+ * of the split (i.e. as the last character(s) of the prefix and the first character(s) of the suffix).
+ * E.g., 'ab**c' splits into: ['','ab**c'], ['a','b**c'], ['ab**','**c'], and ['ab**c',''].
+ */
+function getPredicateSplits(p: NormalPredicate, prefixUnifier: '*'|'**') {
+
+    // TODO: temp testing...
+    DUMP[p] = (DUMP[p] || 0) + 1;
+
+
+
+    let result = [] as string[][];
+    let prefix = '';
+    let suffix = p as string;
+    let strengthReduce = prefixUnifier === '*';
+    while (true) {
+        // Before we issue the next [prefix, suffix] pair, check whether `suffix` starts with a wildcard or globstar.
+        let splitType: ''|'*'|'**';
+        splitType = suffix.charAt(0) !== '*' ? '' : suffix.charAt(1) === '*' ? '**' : '*';
+
+        // If so, the wildcard/globstar needs to *also* appear at the end of the prefix for this pair. Furthermore,
+        // if the prefix is being unified with a wildcard (not a globstar), then we strenth-reduce globstars to
+        // wildcards on appending them to the prefix, so that the prefix always unifies with `prefixUnifier`.
+        if (splitType) prefix += (strengthReduce ? '*' : splitType);
+
+        // Now we can issue the pair.
+        result.push([prefix, suffix]);
+
+        // If the pair just issued was split on a wildcard/globstar, the next split comes *after* the char following it.
+        if (splitType) suffix = suffix.slice(splitType.length);
+
+        // There are two possible stopping conditions:
+        // 1. we just issued the last possible pair (i.e. `suffix` is empty)
+        // 2. the remaining prefixes cannot possibly unify with `prefixUnifier`
+        if (suffix === '' || (prefixUnifier === '*' && suffix.charAt(0) === '/')) break;
+
+        // If we get here, we know the suffix is non-empty. Furthermore, the suffix must start with a literal, since:
+        // - if the just-issued suffix *did* start with a wildcard/globstar, we sliced it off right after issuing it
+        // - a wildcard/globstar cannot be followed by another wildcard/globstar
+        // - the suffix is non-empty, so the only possibility left is that it starts with a literal.
+        // We transfer this literal from the start of the suffix to the end of the prefix, and iterate again.
+        prefix += suffix.charAt(0);
+        suffix = suffix.slice(1);
+    }
+    return result as Array<[NormalPredicate, NormalPredicate]>;
+}
+
+// TODO: temp testing...
+let DUMP = {} as any;
+setTimeout(() => {
+    console.log(DUMP, null, 4);
+}, 5000);
+
+
+
+
+
 // TODO: doc...
 class Memoiser {
     get(a: NormalPredicate, b: NormalPredicate) {
@@ -216,32 +269,4 @@ class Memoiser {
     private map = new Map<NormalPredicate, Map<NormalPredicate, NormalPredicate[]>>();
 }
 const MEMOISER = new Memoiser();
-
-
-
-
-
-/**
- * Returns an array of all the [prefix, suffix] pairs into which `predicate` may be split. Splits that
- * occur on a wildcard/globstar have the wildcard/globstar on both sides of the split (i.e. as the last
- * character(s) of the prefix and the first character(s) of the suffix). E.g., 'ab**c' splits into:
- * ['','ab**c'], ['a','b**c'], ['ab**','**c'], and ['ab**c',''].
- */
-function getAllPredicateSplits(predicate: NormalPredicate): Array<[NormalPredicate, NormalPredicate]> {
-    let result = [] as Array<[NormalPredicate, NormalPredicate]>;
-    for (let i = 0; i <= predicate.length; ++i) {
-        let [prefix, suffix] = [predicate.slice(0, i), predicate.slice(i)];
-        if (suffix.length > 0 && suffix.charAt(0) === '*') {
-            if (suffix.length > 1 && suffix.charAt(1) === '*') {
-                prefix += '**';
-                i += 2;
-            }
-            else {
-                prefix += '*';
-                i += 1;
-            }
-        }
-        result.push([prefix as NormalPredicate, suffix as NormalPredicate]);
-    }
-    return result;
-}
+//const MEMOISER2 = new Memoiser();
