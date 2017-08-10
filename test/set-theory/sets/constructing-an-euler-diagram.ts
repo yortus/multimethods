@@ -245,23 +245,23 @@ describe('Constructing an euler diagram', () => {
                 },
             },
         },
-        {
-            // ======================================== 6. ========================================
-            // Ensure even more complex intersections can be computed in reasonable times
-            name: 'high intersection complexity III',
-            predicates: [
-                '*J*I*S*W*',
-                '*A*W*',
-                '*A*I*M*W*',
-                '*W*',
-                '*B*M*W*',
-                '*J*A*S*M*',
-                '*W*A*T*',
-                '*W*A*S*T*E*',
-            ],
-            eulerDiagram: {
-            },
-        },
+        // {
+        //     // ======================================== 6. ========================================
+        //     // Ensure even more complex intersections can be computed in reasonable times
+        //     name: 'high intersection complexity III',
+        //     predicates: [
+        //         '*J*I*S*W*',
+        //         '*A*W*',
+        //         '*A*I*M*W*',
+        //         '*W*',
+        //         '*B*M*W*',
+        //         '*J*A*S*M*',
+        //         '*W*A*T*',
+        //         '*W*A*S*T*E*',
+        //     ],
+        //     eulerDiagram: {
+        //     },
+        // },
     ];
 
     tests.forEach(test => {

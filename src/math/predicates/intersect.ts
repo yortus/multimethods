@@ -89,7 +89,7 @@ let CALL_COUNT = 0;
  * @returns {NormalPredicate[]} - a list of normalised predicates that represent valid intersections of `a` and `b`.
  */
 let getAllIntersections: (a: NormalPredicate, b: NormalPredicate) => NormalPredicate[];
-getAllIntersections = memoise((a, b) => {
+getAllIntersections = memoise((a: NormalPredicate, b: NormalPredicate) => {
 
     // TODO: temp testing...
     ++CALL_COUNT;
@@ -130,8 +130,8 @@ getAllIntersections = memoise((a, b) => {
 
         let aSuffix = a.slice(commonPrefix.length) as NormalPredicate;
         let bSuffix = b.slice(commonPrefix.length) as NormalPredicate;
-        let result = getAllIntersections(aSuffix, bSuffix).map(u => commonPrefix + u) as NormalPredicate[];
-        return result;
+        let result = getAllIntersections(aSuffix, bSuffix).map(u => commonPrefix + u);
+        return result as NormalPredicate[];
     }
 
     // CASE 4: At least one of the predicates starts with a wildcard or globstar. Let's call this predicate p1, and
@@ -149,14 +149,28 @@ getAllIntersections = memoise((a, b) => {
     // Compute and return intersections for all valid unifications. This is a recursive operation.
     let result1 = [] as NormalPredicate[];
     for (let [p2Prefix, p2Suffix] of p2Pairs) {
-        let more = getAllIntersections(p1Suffix, p2Suffix).map(u => p2Prefix + u) as NormalPredicate[];
-        result1 = result1.concat(more);
+        let more = getAllIntersections(p1Suffix, p2Suffix).map(u => p2Prefix + u);
+        result1 = result1.concat(more as NormalPredicate[]);
+    }
+
+    // TODO: temp testing...
+    if (result1.length > MAXLEN) {
+        MAXLEN = result1.length;
+        console.log('MAXLEN = ' + MAXLEN);
+        console.log(result1);
     }
 
     // TODO: temp testing... dedupe
     let result2 = result1.length === 0 ? [] : toNormalPredicate(result1.join('|')).split('|') as NormalPredicate[];
     return result2;
 });
+
+
+
+
+
+// TODO: temp testing...
+let MAXLEN = 0;
 
 
 
@@ -198,7 +212,7 @@ function longestCommonPrefix(p1: NormalPredicate, p2: NormalPredicate) {
  * E.g., 'ab**c' splits into: ['','ab**c'], ['a','b**c'], ['ab**','**c'], and ['ab**c',''].
  */
 let getUnifiableSplits: (p: NormalPredicate, prefixUnifier: '*'|'**') => Array<[NormalPredicate, NormalPredicate]>;
-getUnifiableSplits = memoise((p, prefixUnifier) => {
+getUnifiableSplits = memoise((p: NormalPredicate, prefixUnifier: '*'|'**') => {
     let result = [] as string[][];
     let prefix = '';
     let suffix = p as string;
