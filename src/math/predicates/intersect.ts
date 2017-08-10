@@ -200,9 +200,8 @@ function longestCommonPrefix(p1: NormalPredicate, p2: NormalPredicate) {
 function getPredicateSplits(p: NormalPredicate, prefixUnifier: '*'|'**') {
 
     // TODO: temp testing...
-    DUMP[p] = (DUMP[p] || 0) + 1;
-
-
+    let memoisedResult = MEMOISER2.get(p, prefixUnifier);
+    if (memoisedResult) return memoisedResult;
 
     let result = [] as string[][];
     let prefix = '';
@@ -237,36 +236,30 @@ function getPredicateSplits(p: NormalPredicate, prefixUnifier: '*'|'**') {
         prefix += suffix.charAt(0);
         suffix = suffix.slice(1);
     }
-    return result as Array<[NormalPredicate, NormalPredicate]>;
+    return MEMOISER2.set(p, prefixUnifier, result as Array<[NormalPredicate, NormalPredicate]>);
 }
-
-// TODO: temp testing...
-let DUMP = {} as any;
-setTimeout(() => {
-    console.log(DUMP, null, 4);
-}, 5000);
 
 
 
 
 
 // TODO: doc...
-class Memoiser {
-    get(a: NormalPredicate, b: NormalPredicate) {
-        let value: NormalPredicate[]|undefined;
+class BinaryMemoiser<T0, T1, TR> {
+    get(a: T0, b: T1) {
+        let value: TR|undefined;
         let map2 = this.map.get(a);
         if (map2) value = map2.get(b);
         //console.log(`MEMO ${value ? 'HIT' : '--miss--'}: ${a + '   :   ' + b} ==> ${JSON.stringify(value || '')}`);
         return value;
     }
-    set(a: NormalPredicate, b: NormalPredicate, value: NormalPredicate[]) {
+    set(a: T0, b: T1, value: TR) {
         //console.log(`MEMO set: ${a + '   :   ' + b} ==> ${JSON.stringify(value)}`);
         let map2 = this.map.get(a);
         if (!map2) this.map.set(a, map2 = new Map());
         map2.set(b, value);
         return value;
     }
-    private map = new Map<NormalPredicate, Map<NormalPredicate, NormalPredicate[]>>();
+    private map = new Map<T0, Map<T1, TR>>();
 }
-const MEMOISER = new Memoiser();
-//const MEMOISER2 = new Memoiser();
+const MEMOISER = new BinaryMemoiser<NormalPredicate, NormalPredicate, NormalPredicate[]>();
+const MEMOISER2 = new BinaryMemoiser<NormalPredicate, '*'|'**', Array<[NormalPredicate, NormalPredicate]>>();
