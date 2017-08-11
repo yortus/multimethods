@@ -10,6 +10,7 @@ import toNormalPredicate from './to-normal-predicate';
 
 // TODO: temp testing...
 let isUnreachable = (p: NormalPredicate) => {
+//    return (p = p), false;
 
     // Only consider the form *A*B*C*...*
     if (p.length < 3) return;
@@ -45,9 +46,11 @@ let isUnreachable = (p: NormalPredicate) => {
  * @param {NormalPredicate} b - rhs predicate to be intersected.
  * @returns {NormalPredicate} - The normalized predicate representing the intersection of `a` and `b`.
  */
-export default function intersect(a: NormalPredicate, b: NormalPredicate): NormalPredicate {
+let intersect: (a: NormalPredicate, b: NormalPredicate) => NormalPredicate;
+intersect = memoise((a: NormalPredicate, b: NormalPredicate): NormalPredicate => {
 
     // TODO: temp testing...
+    ++CALL_COUNT_EXTERNAL;
     let t0 = Date.now();
 
     // Compute the intersections of every alternative of `a` with every alternative of `b`.
@@ -80,16 +83,18 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
         //process.exit(999);
     }
 
-    console.log('CALL COUNT: ' + CALL_COUNT);
+    console.log(`CALL COUNTS:   external=${CALL_COUNT_EXTERNAL}   internal=${CALL_COUNT_INTERNAL}`);
     return result;
-}
+});
+export default intersect;
 
 
 
 
 
 // TODO: temp testing...
-let CALL_COUNT = 0;
+let CALL_COUNT_EXTERNAL = 0;
+let CALL_COUNT_INTERNAL = 0;
 
 
 
@@ -107,8 +112,19 @@ let CALL_COUNT = 0;
 let getAllIntersections: (commonPrefix: string, a: NormalPredicate, b: NormalPredicate) => NormalPredicate[];
 getAllIntersections = memoise((commonPrefix: string, a: NormalPredicate, b: NormalPredicate) => {
 
+//TODO: check here also that the two given predicates are reachable. If either is not, return [] immediately
+//for starters, detect unreachable inputs and log to console
+    if (isUnreachable(commonPrefix + a as any)) {
+        //console.log('Unreachable: ' + commonPrefix + a);
+        return [];
+    }
+    if (isUnreachable(commonPrefix + b as any)) {
+        //console.log('Unreachable: ' + commonPrefix + b);
+        return [];
+    }
+
     // TODO: temp testing...
-    ++CALL_COUNT;
+    ++CALL_COUNT_INTERNAL;
 
     // Ensure `a` always precedes `b` lexicographically. Intersection is commutative,
     // so sorting `a` and `b` reduces the solution space without affecting the result.
