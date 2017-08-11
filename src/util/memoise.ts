@@ -47,18 +47,18 @@ function makeUnaryMemoiser<T0, TR>(fn: ($0: T0) => TR) {
 
 // TODO: doc...
 function makeBinaryMemoiser<T0, T1, TR>(fn: ($0: T0, $1: T1) => TR) {
-    const map0 = new Map<T0, Map<T1, TR>>();
+    const mapA = new Map<T1, Map<T0, TR>>();
     return ($0: T0, $1: T1): TR => {
 
         // Return the previously memoised result, if any.
         let value: TR|undefined;
-        let map1 = map0.get($0);
-        if (!map1) map0.set($0, map1 = new Map());
-        if (map1.has($1)) return map1.get($1)!;
+        let mapB = mapA.get($1);
+        if (!mapB) mapA.set($1, mapB = new Map());
+        if (mapB.has($0)) return mapB.get($0)!;
 
         // Compute, memoise, and return the result.
         value = fn($0, $1);
-        map1.set($1, value);
+        mapB.set($0, value);
         return value;
     };
 }
@@ -69,20 +69,20 @@ function makeBinaryMemoiser<T0, T1, TR>(fn: ($0: T0, $1: T1) => TR) {
 
 // TODO: doc...
 function makeTernaryMemoiser<T0, T1, T2, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR) {
-    const map0 = new Map<T0, Map<T1, Map<T2, TR>>>();
+    const mapA = new Map<T2, Map<T1, Map<T0, TR>>>();
     return ($0: T0, $1: T1, $2: T2): TR => {
 
         // Return the previously memoised result, if any.
         let value: TR|undefined;
-        let map1 = map0.get($0);
-        if (!map1) map0.set($0, map1 = new Map());
-        let map2 = map1.get($1);
-        if (!map2) map1.set($1, map2 = new Map());
-        if (map2.has($2)) return map2.get($2)!;
+        let mapB = mapA.get($2);
+        if (!mapB) mapA.set($2, mapB = new Map());
+        let mapC = mapB.get($1);
+        if (!mapC) mapB.set($1, mapC = new Map());
+        if (mapC.has($0)) return mapC.get($0)!;
 
         // Compute, memoise, and return the result.
         value = fn($0, $1, $2);
-        map2.set($2, value);
+        mapC.set($0, value);
         return value;
     };
 }
