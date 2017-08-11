@@ -214,54 +214,205 @@ describe('Constructing an euler diagram', () => {
         //         },
         //     },
         // },
-        {
-            // ======================================== 6. ========================================
-            // This case took about 40 seconds to complete in v0.7.0.
-            name: 'high intersection complexity II',
-            predicates: [
-                '*J*I*S*W*',
-                '*A*W*',
-                '*A*I*M*W*',
-                '*W*',
-            ],
-            eulerDiagram: {
-                '*W*': {
-                    '*A*I*M*W*': {
-                        '*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*': {},
-                    },
-                    '*A*W*': {
-                        '*A*I*M*W*': {
-                            '*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*': {},
-                        },
-                        '*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*': {
-                            '*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*': {},
-                        },
-                    },
-                    '*J*I*S*W*': {
-                        '*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*': {
-                            '*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*': {},
-                        },
-                    },
-                },
-            },
-        },
         // {
         //     // ======================================== 6. ========================================
-        //     // Ensure even more complex intersections can be computed in reasonable times
-        //     name: 'high intersection complexity III',
+        //     // This case took about 40 seconds to complete in v0.7.0.
+        //     name: 'high intersection complexity II',
         //     predicates: [
         //         '*J*I*S*W*',
         //         '*A*W*',
         //         '*A*I*M*W*',
         //         '*W*',
-        //         '*B*M*W*',
-        //         '*J*A*S*M*',
-        //         '*W*A*T*',
-        //         '*W*A*S*T*E*',
         //     ],
         //     eulerDiagram: {
+        //         '*W*': {
+        //             '*A*I*M*W*': {
+        //                 '*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*': {},
+        //             },
+        //             '*A*W*': {
+        //                 '*A*I*M*W*': {
+        //                     '*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*': {},
+        //                 },
+        //                 '*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*': {
+        //                     '*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*': {},
+        //                 },
+        //             },
+        //             '*J*I*S*W*': {
+        //                 '*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*': {
+        //                     '*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*': {},
+        //                 },
+        //             },
+        //         },
         //     },
         // },
+        {
+            // ======================================== 6. ========================================
+            // This test will combinatorially explode your engine without the `isUnreachable` option.
+            // The intersections are orders of magnitude more complex to compute than the previous test.
+            // This demonstrates the effect of reducing the solution space using `isUnreachable`. As a
+            // result of the reduced search space, this test runs faster than the previous simpler one.
+            name: 'high intersection complexity III',
+            predicates: [
+                '*A*I*S*W*',
+                '*B*W*',
+                '*A*I*M*W*',
+                '*W*',
+                '*B*M*W*',
+                '*A*J*S*M*',
+                '*A*T*W*',
+                //'*A*E*S*T*W*',
+                //'*B*I*M*S*T*U*W*Y*Z*',
+                //'*A*B*X*Z*',
+                //'*B*A*M*W*X*Y*',
+                //'*D*E*Q*',
+            ],
+            eulerDiagram: {
+                '*W*': {
+                    '*A*I*S*W*': {
+                        '*A*B*I*S*W*': {
+                            '*A*B*I*M*S*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*B*I*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*A*I*M*S*W*': {
+                            '*A*B*I*M*S*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*I*M*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*A*I*S*T*W*': {
+                            '*A*B*I*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*I*M*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                    },
+                    '*B*W*': {
+                        '*A*B*I*S*W*': {
+                            '*A*B*I*M*S*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*B*I*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*B*M*W*': {
+                            '*A*B*I*M*W*': {
+                                '*A*B*I*M*S*W*': {
+                                    '*A*B*I*M*S*T*W*': {},
+                                },
+                                '*A*B*I*M*T*W*': {
+                                    '*A*B*I*M*S*T*W*': {},
+                                },
+                            },
+                            '*A*B*M*T*W*': {
+                                '*A*B*I*M*T*W*': {
+                                    '*A*B*I*M*S*T*W*': {},
+                                },
+                            },
+                        },
+                        '*A*B*T*W*': {
+                            '*A*B*I*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*B*M*T*W*': {
+                                '*A*B*I*M*T*W*': {
+                                    '*A*B*I*M*S*T*W*': {},
+                                },
+                            },
+                            '*A*B*I*M*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                    },
+                    '*A*I*M*W*': {
+                        '*A*I*M*S*W*': {
+                            '*A*B*I*M*S*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*I*M*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*A*B*I*M*W*': {
+                            '*A*B*I*M*S*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*B*I*M*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*A*I*M*T*W*': {
+                            '*A*I*M*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*B*I*M*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                    },
+                    '*B*M*W*': {
+                        '*A*B*I*M*W*': {
+                            '*A*B*I*M*S*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*B*I*M*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*A*B*M*T*W*': {
+                            '*A*B*I*M*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                    },
+                    '*A*T*W*': {
+                        '*A*I*S*T*W*': {
+                            '*A*B*I*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*I*M*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*A*B*T*W*': {
+                            '*A*B*I*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*B*M*T*W*': {
+                                '*A*B*I*M*T*W*': {
+                                    '*A*B*I*M*S*T*W*': {},
+                                },
+                            },
+                            '*A*B*I*M*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*A*I*M*T*W*': {
+                            '*A*I*M*S*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                            '*A*B*I*M*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                        '*A*B*M*T*W*': {
+                            '*A*B*I*M*T*W*': {
+                                '*A*B*I*M*S*T*W*': {},
+                            },
+                        },
+                    },
+                },
+                '*A*J*S*M*': {},
+            },
+        },
     ];
 
     tests.forEach(test => {

@@ -8,6 +8,26 @@ import toNormalPredicate from './to-normal-predicate';
 
 
 
+// TODO: temp testing...
+let isUnreachable = (p: NormalPredicate) => {
+
+    // Only consider the form *A*B*C*...*
+    if (p.length < 3) return;
+    if (p.charAt(0) !== '*' || p.charAt(p.length - 1) !== '*') return;
+    if (p.indexOf('**') !== -1 || p.indexOf('/') !== -1) return;
+
+    // If the parts aren't strictly ordered, it's unreachable
+    let parts = p.slice(1, -1).split('*');
+    for (let i = 0, j = 1; j < parts.length; ++i, ++j) {
+        if (parts[i] >= parts[j]) return true;
+    }
+    return;
+};
+
+
+
+
+
 /**
  * Computes the intersection of the two given predicates. The intersection recognizes a string if and only if that
  * string is recognized by *both* given predicates. Because intersections cannot in general be expressed as a single
@@ -36,7 +56,7 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
     let allIntersections = [] as NormalPredicate[];
     for (let altA of aAlts) {
         for (let altB of bAlts) {
-            let moreIntersections = getAllIntersections(altA, altB);
+            let moreIntersections = getAllIntersections('', altA, altB).filter(p => !isUnreachable(p));
             allIntersections = allIntersections.concat(moreIntersections);
         }
     }
@@ -57,11 +77,7 @@ export default function intersect(a: NormalPredicate, b: NormalPredicate): Norma
         console.log(`intersection count: ${allIntersections.length}`);
         console.log(`getAllIntersections time: ${d1}s`);
         console.log(`toNormalPredicate time: ${d2}s`);
-        process.exit(999);
-
-        // let alts = new SetOfAlternatives();
-        // alts.addAll(allIntersections);
-        // console.log(alts.values());
+        //process.exit(999);
     }
 
     console.log('CALL COUNT: ' + CALL_COUNT);
@@ -88,22 +104,23 @@ let CALL_COUNT = 0;
  * @param {NormalPredicate} b - a normalised predicate.
  * @returns {NormalPredicate[]} - a list of normalised predicates that represent valid intersections of `a` and `b`.
  */
-let getAllIntersections: (a: NormalPredicate, b: NormalPredicate) => NormalPredicate[];
-getAllIntersections = memoise((a: NormalPredicate, b: NormalPredicate) => {
+let getAllIntersections: (commonPrefix: string, a: NormalPredicate, b: NormalPredicate) => NormalPredicate[];
+getAllIntersections = memoise((commonPrefix: string, a: NormalPredicate, b: NormalPredicate) => {
 
     // TODO: temp testing...
     ++CALL_COUNT;
 
     // Ensure `a` always precedes `b` lexicographically. Intersection is commutative,
     // so sorting `a` and `b` reduces the solution space without affecting the result.
-    if (a > b) return getAllIntersections(b, a);
+    if (a > b) return getAllIntersections(commonPrefix, b, a);
 
     // CASE 1: Either predicate is empty. An empty predicate intersects only with
     // another empty predicate or a single wildcard/globstar. Since an empty string
     // precedes all other strings lexicographically, we just check if `a` is empty.
     if (a === '') {
         if (b === '' || b === '*' || b === '**') {
-            return ['' as NormalPredicate];
+            let resultA = [commonPrefix as NormalPredicate];
+            return resultA.filter(p => !isUnreachable(p));
         }
         else {
             return [];
@@ -113,10 +130,12 @@ getAllIntersections = memoise((a: NormalPredicate, b: NormalPredicate) => {
     // CASE 2: Either predicate is found to be a subset of the other, using
     // simple pattern matching. The result in this case is the subset predicate.
     if (isSubsetOf(a, b)) {
-        return [a];
+        let resultA = [commonPrefix + a] as NormalPredicate[];
+        return resultA.filter(p => !isUnreachable(p));
     }
     if (isSubsetOf(b, a)) {
-        return [b];
+        let resultA = [commonPrefix + b] as NormalPredicate[];
+        return resultA.filter(p => !isUnreachable(p));
     }
 
     // CASE 3: Both predicates start with at least one literal character. If the starting
@@ -125,13 +144,14 @@ getAllIntersections = memoise((a: NormalPredicate, b: NormalPredicate) => {
     let aFirstToken = getFirstToken(a);
     let bFirstToken = getFirstToken(b);
     if (aFirstToken.charAt(0) !== '*' && bFirstToken.charAt(0) !== '*') {
-        let commonPrefix = longestCommonPrefix(aFirstToken, bFirstToken);
-        if (commonPrefix.length === 0) return []; // Predicates are disjoint
+        let commonPrefix2 = longestCommonPrefix(aFirstToken, bFirstToken);
+        if (commonPrefix2.length === 0) return []; // Predicates are disjoint
 
-        let aSuffix = a.slice(commonPrefix.length) as NormalPredicate;
-        let bSuffix = b.slice(commonPrefix.length) as NormalPredicate;
-        let result = getAllIntersections(aSuffix, bSuffix).map(u => commonPrefix + u);
-        return result as NormalPredicate[];
+        let aSuffix = a.slice(commonPrefix2.length) as NormalPredicate;
+        let bSuffix = b.slice(commonPrefix2.length) as NormalPredicate;
+        let resultA = getAllIntersections(commonPrefix + commonPrefix2, aSuffix, bSuffix);
+        let resultB = resultA.filter(p => !isUnreachable(p));
+        return resultB;
     }
 
     // CASE 4: At least one of the predicates starts with a wildcard or globstar. Let's call this predicate p1, and
@@ -149,20 +169,27 @@ getAllIntersections = memoise((a: NormalPredicate, b: NormalPredicate) => {
     // Compute and return intersections for all valid unifications. This is a recursive operation.
     let result1 = [] as NormalPredicate[];
     for (let [p2Prefix, p2Suffix] of p2Pairs) {
-        let more = getAllIntersections(p1Suffix, p2Suffix).map(u => p2Prefix + u);
-        result1 = result1.concat(more as NormalPredicate[]);
+        let more = getAllIntersections(commonPrefix + p2Prefix, p1Suffix, p2Suffix);
+        result1 = result1.concat(more);
     }
+
+    // TODO: temp testing... dedupe
+    let result2 = result1.length === 0 ? [] : toNormalPredicate(result1.join('|')).split('|') as NormalPredicate[];
+
+    // TODO: temp testing... remove unreachables... but these are predicate fragments!
+    // - is it reliable anyway? What would make it reliable?
+    // - reinstate the `commonPrefix` parameter so we always generate full predicates for testing reachability?
+    let result3 = result2.filter(p => !isUnreachable(p));
 
     // TODO: temp testing...
     if (result1.length > MAXLEN) {
         MAXLEN = result1.length;
         console.log('MAXLEN = ' + MAXLEN);
         console.log(result1);
+        if (MAXLEN > 1000) process.exit(991);
     }
 
-    // TODO: temp testing... dedupe
-    let result2 = result1.length === 0 ? [] : toNormalPredicate(result1.join('|')).split('|') as NormalPredicate[];
-    return result2;
+    return result3;
 });
 
 
