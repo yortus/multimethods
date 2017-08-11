@@ -9,7 +9,7 @@ import toNormalPredicate from './to-normal-predicate';
 
 
 // TODO: temp testing...
-let isUnreachable = (p: NormalPredicate) => {
+let isUnreachable = memoise((p: NormalPredicate) => {
 //    return (p = p), false;
 
     // Only consider the form *A*B*C*...*
@@ -23,7 +23,7 @@ let isUnreachable = (p: NormalPredicate) => {
         if (parts[i] >= parts[j]) return true;
     }
     return;
-};
+});
 
 
 
