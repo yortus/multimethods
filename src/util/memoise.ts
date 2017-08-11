@@ -5,9 +5,11 @@
 
 // TODO: automatically clear stored results on a future tick
 // TODO: doc or remove these restrictions:
-// - only works for unary/binary/ternary functions, detected using fn.length
+// - only works for arities 1-4, detected using fn.length. Generalise?
+function memoise<T0, TR>(fn: ($0: T0) => TR): ($0: T0) => TR;
 function memoise<T0, T1, TR>(fn: ($0: T0, $1: T1) => TR): ($0: T0, $1: T1) => TR;
 function memoise<T0, T1, T2, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR): ($0: T0, $1: T1, $2: T2) => TR;
+function memoise<T0, T1, T2, T3, TR>(fn: ($0: T0, $1: T1, $2: T2, $3: T3) => TR): ($0: T0, $1: T1, $2: T2, $3: T3) => TR;
 function memoise(fn: Function) {
 
     // This internal util only supports functions with arities of 1-3 at the moment. Sanity check the input accordingly.
@@ -16,6 +18,7 @@ function memoise(fn: Function) {
         case 1: return makeUnaryMemoiser(fn as any);
         case 2: return makeBinaryMemoiser(fn as any);
         case 3: return makeTernaryMemoiser(fn as any);
+        case 4: return makeQuaternaryMemoiser(fn as any);
         default: throw new Error(`Internal error: memoise: unsupported arity ${fn.length}`);
     }
 }
@@ -83,6 +86,32 @@ function makeTernaryMemoiser<T0, T1, T2, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR)
         // Compute, memoise, and return the result.
         value = fn($0, $1, $2);
         mapC.set($0, value);
+        return value;
+    };
+}
+
+
+
+
+
+// TODO: doc...
+function makeQuaternaryMemoiser<T0, T1, T2, T3, TR>(fn: ($0: T0, $1: T1, $2: T2, $3: T3) => TR) {
+    const mapA = new Map<T3, Map<T2, Map<T1, Map<T0, TR>>>>();
+    return ($0: T0, $1: T1, $2: T2, $3: T3): TR => {
+
+        // Return the previously memoised result, if any.
+        let value: TR|undefined;
+        let mapB = mapA.get($3);
+        if (!mapB) mapA.set($3, mapB = new Map());
+        let mapC = mapB.get($2);
+        if (!mapC) mapB.set($2, mapC = new Map());
+        let mapD = mapC.get($1);
+        if (!mapD) mapC.set($1, mapD = new Map());
+        if (mapD.has($0)) return mapD.get($0)!;
+
+        // Compute, memoise, and return the result.
+        value = fn($0, $1, $2, $3);
+        mapD.set($0, value);
         return value;
     };
 }
