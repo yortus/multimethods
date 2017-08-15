@@ -4,7 +4,6 @@ import {NormalPredicate} from '../predicates';
 
 
 
-// TODO: review all comments...
 /** Represents a single set contained in an euler diagram. */
 export default interface EulerSet {
 
@@ -19,4 +18,12 @@ export default interface EulerSet {
 
     /** Links to this set's direct children (i.e., more specialised or 'narrower' predicates). */
     subsets: EulerSet[];
+
+
+    /**
+     * True iff this set's predicate is the normal form of a predicate supplied explicitly to the ED constructor.
+     * Otherwise, this is an auxiliary set. Auxiliary sets are created to represent the intersection of other sets
+     * in the ED. The root set '**' is also auxiliary iff it was not supplied explicitly to the ED constructor.
+     */
+    isPrincipal: boolean;
 }

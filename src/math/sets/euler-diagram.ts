@@ -109,25 +109,29 @@ export default class EulerDiagram {
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
 
-    // Create the setFor() function to return the set corresponding to a given pattern,
+    // Create the setFor() function to return the set corresponding to a given predicate,
     // creating it on demand if it doesn't already exist. This function ensures that every
-    // request for the same pattern gets the same singleton set.
+    // request for the same predicate gets the same singleton set.
     let setLookup = new Map<NormalPredicate, EulerSet>();
     let setFor = (predicate: NormalPredicate) => {
         if (!setLookup.has(predicate)) {
-            let newSet: EulerSet = {predicate, supersets: [], subsets: []};
+            let newSet: EulerSet = {predicate, supersets: [], subsets: [], isPrincipal: false};
             setLookup.set(predicate, newSet);
         }
         return setLookup.get(predicate)!;
     };
 
+    // Mark all sets corresponding to the given `predicates` as principal sets.
+    let principalPredicates = predicates.map(predicate => toNormalPredicate(predicate));
+    principalPredicates.forEach(p => setFor(p).isPrincipal = true);
+
     // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
     let universe = eulerDiagram.universalSet = setFor(ALL);
 
-    // Insert each of the given predicates, except '**' and '∅', into a DAG rooted at '**'.
-    // The insertion logic assumes only normalized patterns, which we obtain first.
-    predicates
-        .map(predicate => toNormalPredicate(predicate))
+    // Insert each of the principal predicates into a DAG rooted at '**'.
+    // We never insert '**', because it is already the root set, and we just need to insert all its proper subsets.
+    // We never insert '∅', because it will never match any string, so its presence is unnecessary.
+    principalPredicates
         .filter(predicate => predicate !== ALL && predicate !== NONE)
         .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
 
