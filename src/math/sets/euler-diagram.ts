@@ -153,6 +153,9 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
  */
 function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (predicate: NormalPredicate) => EulerSet) {
 
+    // If `insertee` already exists as a direct child of `ancestor`, there is nothing to do.
+    if (hasChild(ancestor, insertee)) return;
+
     // Determine the set relationship between `insertee` and each of the `ancestor` set's existing children.
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
     let nonDisjointComparands = ancestor.subsets.reduce(
@@ -164,38 +167,42 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
         [] as Array<{set: EulerSet; intersection: EulerSet}>
     );
 
-    // If the `ancestor` pattern has no existing children that are non-disjoint
-    // with `insertee`, then we simply add `insertee` as a direct child of `ancestor`.
+    // If the `ancestor` predicate has no existing children, or they are all disjoint with `insertee`,
+    // then we simply add `insertee` as a direct child of `ancestor`, and we are done.
     if (nonDisjointComparands.length === 0) {
         insertChild(ancestor, insertee);
+        return;
     }
 
-    // If `insertee` already exists as a direct child of `ancestor` at this point
-    // (including if it was just added above), then the insertion is complete.
-    if (hasChild(ancestor, insertee)) return;
-
-    // `insertee` has subset/superset/overlapping relationships with one or more of
+    // `insertee` does have subset/superset/overlapping relationships with one or more of
     // `ancestor`'s existing children. Work out how and where to insert it.
     nonDisjointComparands.forEach(comparand => {
-        let isSubsetOfComparand = comparand.intersection === insertee;
-        let isSupersetOfComparand = comparand.intersection === comparand.set;
-        let isOverlappingComparand = !isSubsetOfComparand && !isSupersetOfComparand;
 
-        if (isSupersetOfComparand) {
-            // Remove the comparand from `ancestor`. It will be re-inserted as a child of `insertee` in the next step.
+        // `insertee` is a superset of the current comparand.
+        if (comparand.intersection === comparand.set) {
+            // Remove the comparand from `ancestor`.
             removeChild(ancestor, comparand.set);
-        }
 
-        if (isSupersetOfComparand || isOverlappingComparand) {
             // Add `insertee` as a direct child of `ancestor`.
             insertChild(ancestor, insertee);
 
-            // Recursively re-insert the comparand (or insert the overlap) as a child of `insertee`.
-            insertAsDescendent(comparand.intersection, insertee, setFor);
+            // Recursively re-insert the comparand as a child of `insertee`.
+            insertAsDescendent(comparand.set, insertee, setFor);
         }
 
-        if (isSubsetOfComparand || isOverlappingComparand) {
-            // Recursively insert `insertee` (or insert the overlap) as a child of the comparand.
+        // `insertee` is a subset of the current comparand.
+        else if (comparand.intersection === insertee) {
+            // Recursively insert `insertee` as a child of the comparand.
+            insertAsDescendent(insertee, comparand.set, setFor);
+        }
+
+        // `insertee` overlaps with the current comparand (i.e., it is not disjoint, nor a superset or subset).
+        else {
+            // Add `insertee` as a direct child of `ancestor`.
+            insertChild(ancestor, insertee);
+
+            // Recursively re-insert the the overlap as a child of both `insertee` and the comparand.
+            insertAsDescendent(comparand.intersection, insertee, setFor);
             insertAsDescendent(comparand.intersection, comparand.set, setFor);
         }
     });
