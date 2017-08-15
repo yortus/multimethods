@@ -205,6 +205,19 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
             // Add `insertee` as a direct child of `ancestor`.
             insertChild(ancestor, insertee);
 
+            // As an optimisation, we *don't* recursively insert the intersection of `insertee` and the comparand
+            // when they are both auxiliary sets. Doing so adds needless extra recursive computation of intersections
+            // that can dominate total ED construction time in many cases. This optimisation is safe (i.e. it doesn't
+            // produce an invalid ED), because:
+            // - auxiliary sets (other than root) represent 'ambiguous' outcomes:
+            //   - they are *always* produced as the intersection of other sets;
+            //   - therefore, they *always* have more than one parent;
+            //   - therefore, there are *always* multiple paths to them from the root set.
+            // - if the best-matching set for some string is an auxiliary set, then we have an ambiguous outcome.
+            // - it is therefore unecessary to further refine the ED by adding the intersection of two auxiliary sets,
+            //   as the outcome will still be ambiguous so the additional set adds no functional distinction to the ED.
+            if (!insertee.isPrincipal && !comparand.set.isPrincipal) return;
+
             // Recursively re-insert the the overlap as a child of both `insertee` and the comparand.
             insertAsDescendent(comparand.intersection, insertee, setFor);
             insertAsDescendent(comparand.intersection, comparand.set, setFor);

@@ -10,7 +10,7 @@ import toNormalPredicate from './to-normal-predicate';
 
 // TODO: temp testing...
 let isUnreachable = memoise((p: NormalPredicate) => {
-//    return (p = p), false;
+    //return (p = p), false;
 
     // Only consider the form *A*B*C*...*
     if (p.length < 3) return;
@@ -201,8 +201,8 @@ getAllIntersections = memoise((commonPrefix: string, a: NormalPredicate, b: Norm
     if (result1.length > MAXLEN) {
         MAXLEN = result1.length;
         console.log('MAXLEN = ' + MAXLEN);
-        console.log(result1);
-        if (MAXLEN > 1000) process.exit(991);
+        //console.log(result1);
+        //if (MAXLEN > 1000) process.exit(991);
     }
 
     return result3;
