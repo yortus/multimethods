@@ -1,3 +1,52 @@
+## Temp
+```
+**        ===insert==>   *A*I*
+**        ===insert==>   *B*
+*B*       ===insert==>   *A*B*I*
+*A*I*     ===insert==>   *A*B*I*
+**        ===insert==>   *A*T*
+*A*T*     ===insert==>   *A*I*T*
+*A*I*     ===insert==>   *A*I*T*
+*A*T*     ===insert==>   *A*B*T*
+*B*       ===insert==>   *A*B*T*
+**        ===insert==>   *B*I*T*
+*B*I*T*   ===insert==>   *A*B*I*T*
+*A*I*     ===insert==>   *A*B*I*T*
+*A*B*I*   ===insert==>   *A*B*I*T*
+*A*I*T*   ===insert==>   *A*B*I*T*
+*B*       ===insert==>   *B*I*T*
+*B*I*T*   ===insert==>   *A*B*I*T*
+*A*B*I*   ===insert==>   *A*B*I*T*
+*B*I*T*   ===insert==>   *A*B*I*T*
+*A*B*T*   ===insert==>   *A*B*I*T*
+*B*I*T*   ===insert==>   *A*B*I*T*
+*A*T*     ===insert==>   *A*B*I*T*
+*A*I*T*   ===insert==>   *A*B*I*T*
+*A*B*T*   ===insert==>   *A*B*I*T*
+----------------------------------------
+**        ===insert==>   *B*I*T*
+**        ===insert==>   *A*T*
+*A*T*     ===insert==>   *A*B*I*T*
+*B*I*T*   ===insert==>   *A*B*I*T*
+**        ===insert==>   *B*
+*B*       ===insert==>   *B*I*T*
+*B*       ===insert==>   *A*B*T*
+*A*B*T*   ===insert==>   *A*B*I*T*
+*B*I*T*   ===insert==>   *A*B*I*T*
+*A*T*     ===insert==>   *A*B*T*
+*A*B*T*   ===insert==>   *A*B*I*T*
+**        ===insert==>   *A*I*
+*A*I*     ===insert==>   *A*I*T*
+*A*T*     ===insert==>   *A*I*T*
+*A*I*     ===insert==>   *A*B*I*
+*B*       ===insert==>   *A*B*I*
+*A*B*I*   ===insert==>   *A*B*I*T*
+*B*I*T*   ===insert==>   *A*B*I*T*
+```
+
+
+
+
 ## Todo - High Priority
 - [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
   - [ ] it might be useful if it effectively works like a no-op.

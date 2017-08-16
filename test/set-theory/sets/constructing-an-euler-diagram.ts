@@ -1233,11 +1233,14 @@ describe('Constructing an euler diagram', () => {
                     actual = actual.slice(0, expected.length - 3) + '...';
                 }
             }
-console.log(JSON.stringify(actual, null, 4));
+//console.log(JSON.stringify(actual, null, 4));
             expect(actual).deep.equal(expected);
         });
     });
 });
+
+
+
 
 
 /** Helper function that converts an EulerDiagram to a simple nested object with predicate sources for keys */

@@ -135,6 +135,9 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
         .filter(predicate => predicate !== ALL && predicate !== NONE)
         .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
 
+    // TODO: temp testing...
+    removeSuperfluousSets(setLookup);
+
     // Finally, compute the `sets` property.
     let allSets = eulerDiagram.allSets = [] as EulerSet[];
     setLookup.forEach(value => allSets.push(value));
@@ -156,15 +159,19 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
  *        is used to synthesize the additional intersection set(s).
  */
 function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (predicate: NormalPredicate) => EulerSet) {
+    //console.log(`${ancestor.predicate}   ===insert==>   ${insertee.predicate}`);
 
     // If `insertee` already exists as a direct child of `ancestor`, there is nothing to do.
-    if (hasChild(ancestor, insertee)) return;
+    if (hasChild(insertee, ancestor)) return;
 
     // Determine the set relationship between `insertee` and each of the `ancestor` set's existing children.
     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
+    let hasSubsetOrSupersetComparands = false;
     let nonDisjointComparands = ancestor.subsets.reduce(
         (comparands, set) => {
             let intersection = intersect(insertee.predicate, set.predicate);
+            if (intersection === insertee.predicate) hasSubsetOrSupersetComparands = true;
+            if (intersection === set.predicate) hasSubsetOrSupersetComparands = true;
             if (intersection !== NONE) comparands.push({set, intersection: setFor(intersection)});
             return comparands;
         },
@@ -174,7 +181,7 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
     // If the `ancestor` predicate has no existing children, or they are all disjoint with `insertee`,
     // then we simply add `insertee` as a direct child of `ancestor`, and we are done.
     if (nonDisjointComparands.length === 0) {
-        insertChild(ancestor, insertee);
+        insertChild(insertee, ancestor);
         return;
     }
 
@@ -185,10 +192,10 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
         // `insertee` is a superset of the current comparand.
         if (comparand.intersection === comparand.set) {
             // Remove the comparand from `ancestor`.
-            removeChild(ancestor, comparand.set);
+            removeChild(comparand.set, ancestor);
 
             // Add `insertee` as a direct child of `ancestor`.
-            insertChild(ancestor, insertee);
+            insertChild(insertee, ancestor);
 
             // Recursively re-insert the comparand as a child of `insertee`.
             insertAsDescendent(comparand.set, insertee, setFor);
@@ -202,8 +209,15 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
 
         // `insertee` overlaps with the current comparand (i.e., it is not disjoint, nor a superset or subset).
         else {
+            // TODO: document mod: *only* add as child if not a superset or subset of any other comparand
             // Add `insertee` as a direct child of `ancestor`.
-            insertChild(ancestor, insertee);
+            if (!hasSubsetOrSupersetComparands) insertChild(insertee, ancestor);
+
+            // TODO: BUG!!!...
+            // The following optimisation breaks invariants in some cases...
+            // - if the omitted intersection is added later elsewhere in the ED, then it may *not* end up being
+            //   a descendent of all supersets as it should be.
+
 
             // As an optimisation, we *don't* recursively insert the intersection of `insertee` and the comparand
             // when they are both auxiliary sets. Doing so adds needless extra recursive computation of intersections
@@ -216,11 +230,19 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
             // - if the best-matching set for some string is an auxiliary set, then we have an ambiguous outcome.
             // - it is therefore unecessary to further refine the ED by adding the intersection of two auxiliary sets,
             //   as the outcome will still be ambiguous so the additional set adds no functional distinction to the ED.
-            if (!insertee.isPrincipal && !comparand.set.isPrincipal) return;
+            //if (!insertee.isPrincipal && !comparand.set.isPrincipal) return;
+            if (!insertee.isPrincipal && !comparand.set.isPrincipal && comparand.intersection.supersets.length === 0) return;
+            
+            // TODO: temp testing...
+            // Recursively insert the intersection (i.e. the set representing the overlap between `insertee` and the
+            // comparand) into the EulerDiagram. By inserting it at root level, it will 'trickle down' to become a
+            // descendent of all existing supersets. This restores the invariant that the previous step may have
+            // suspended. At the very least, the overlap will become a child of both `insertee` and the comparand.
+            insertAsDescendent(comparand.intersection, setFor(ALL), setFor);
 
-            // Recursively re-insert the the overlap as a child of both `insertee` and the comparand.
-            insertAsDescendent(comparand.intersection, insertee, setFor);
-            insertAsDescendent(comparand.intersection, comparand.set, setFor);
+            // TODO: was...
+            //insertAsDescendent(comparand.intersection, insertee, setFor);
+            //insertAsDescendent(comparand.intersection, comparand.set, setFor);
         }
     });
 }
@@ -230,7 +252,7 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
 
 
 /** Checks if parent/child links exist directly between `set` and `child`. */
-function hasChild(set: EulerSet, child: EulerSet): boolean {
+function hasChild(child: EulerSet, set: EulerSet): boolean {
     return set.subsets.indexOf(child) !== -1;
 }
 
@@ -239,9 +261,9 @@ function hasChild(set: EulerSet, child: EulerSet): boolean {
 
 
 /** Ensures parent/child links exist directly between `set` and `child`. */
-function insertChild(set: EulerSet, child: EulerSet) {
+function insertChild(child: EulerSet, set: EulerSet) {
     // NB: If the child is already there, make this a no-op.
-    if (hasChild(set, child)) return;
+    if (hasChild(child, set)) return;
     set.subsets.push(child);
     child.supersets.push(set);
 }
@@ -251,7 +273,35 @@ function insertChild(set: EulerSet, child: EulerSet) {
 
 
 /** Removes the existing parent/child links between `set` and `child`. */
-function removeChild(set: EulerSet, child: EulerSet) {
+function removeChild(child: EulerSet, set: EulerSet) {
     set.subsets.splice(set.subsets.indexOf(child), 1);
     child.supersets.splice(child.supersets.indexOf(set), 1);
+}
+
+
+
+
+
+// TODO: doc... defn superfluous set:
+// - is auxiliary
+// - has no children
+// - all parents are auxiliary
+function removeSuperfluousSets(allSets: Map<NormalPredicate, EulerSet>) {
+
+    while (true) {
+        let isUnchanged = true;
+        allSets.forEach((set, predicate) => {
+            let isKeeper = set.isPrincipal;
+            isKeeper = isKeeper || set.subsets.length > 0;
+            isKeeper = isKeeper || set.supersets.some(superset => superset.isPrincipal);
+            if (!isKeeper) {
+                isUnchanged = false;
+                allSets.delete(predicate);
+                set.supersets.slice().forEach(superset => {
+                    removeChild(set, superset);
+                });
+            }
+        });
+        if (isUnchanged) break;
+    }
 }
