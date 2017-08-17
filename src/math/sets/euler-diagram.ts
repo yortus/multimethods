@@ -325,7 +325,10 @@ function init2(predicates: string[]) {
     let normalPredicates = predicates.map(toNormalPredicate);
     normalPredicates = normalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // dedupe
     let root = setFor(ALL);
-    normalPredicates.forEach(p => setFor(p).ancestors.push(root));
+    normalPredicates.map(setFor).forEach(eulerSet => {
+        eulerSet.isPrincipal = true;
+        eulerSet.ancestors.push(root);
+    });
 
     // Phase I   O(n^3)   add all intersections to the list of NormalPredicates
     // TODO: make O(n^2) using HashSet of some kind
