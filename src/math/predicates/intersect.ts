@@ -83,7 +83,7 @@ intersect = memoise((a: NormalPredicate, b: NormalPredicate): NormalPredicate =>
         //process.exit(999);
     }
 
-    console.log(`CALL COUNTS:   external=${CALL_COUNT_EXTERNAL}   internal=${CALL_COUNT_INTERNAL}`);
+    //console.log(`CALL COUNTS:   external=${CALL_COUNT_EXTERNAL}   internal=${CALL_COUNT_INTERNAL}`);
     return result;
 });
 export default intersect;

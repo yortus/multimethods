@@ -16,8 +16,8 @@
                 "999999",
                 "--colors",
 //                "${workspaceRoot}/dist/test/**/intersecting*.js"
-//                "${workspaceRoot}/dist/test/**/constructing-an-euler*.js"
-                "${workspaceRoot}/dist/test/**/constructing-equivalent-euler*.js"
+                "${workspaceRoot}/dist/test/**/constructing-an-euler*.js"
+//                "${workspaceRoot}/dist/test/**/constructing-equivalent-euler*.js"
 ],
             "env": {
                 "DEBUG": "multimethods"

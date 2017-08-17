@@ -1,4 +1,4 @@
-import {ALL, intersect, NONE, NormalPredicate, toNormalPredicate} from '../predicates';
+import {ALL, intersect, isSubsetOf, NONE, NormalPredicate, toNormalPredicate} from '../predicates';
 import EulerSet from './euler-set';
 
 
@@ -108,6 +108,10 @@ export default class EulerDiagram {
 
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[]) {
+
+    let eulerSets = eulerDiagram.allSets = init2(predicates);
+    eulerDiagram.universalSet = eulerSets.filter(s => s.predicate === ALL)[0];
+    if (!!true) return;
 
     // Create the setFor() function to return the set corresponding to a given predicate,
     // creating it on demand if it doesn't already exist. This function ensures that every
@@ -230,19 +234,19 @@ function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (pre
             // - if the best-matching set for some string is an auxiliary set, then we have an ambiguous outcome.
             // - it is therefore unecessary to further refine the ED by adding the intersection of two auxiliary sets,
             //   as the outcome will still be ambiguous so the additional set adds no functional distinction to the ED.
-            //if (!insertee.isPrincipal && !comparand.set.isPrincipal) return;
-            if (!insertee.isPrincipal && !comparand.set.isPrincipal && comparand.intersection.supersets.length === 0) return;
+            if (!insertee.isPrincipal && !comparand.set.isPrincipal) return;
+            //if (!insertee.isPrincipal && !comparand.set.isPrincipal && comparand.intersection.supersets.length === 0) return;
             
             // TODO: temp testing...
             // Recursively insert the intersection (i.e. the set representing the overlap between `insertee` and the
             // comparand) into the EulerDiagram. By inserting it at root level, it will 'trickle down' to become a
             // descendent of all existing supersets. This restores the invariant that the previous step may have
             // suspended. At the very least, the overlap will become a child of both `insertee` and the comparand.
-            insertAsDescendent(comparand.intersection, setFor(ALL), setFor);
+            //insertAsDescendent(comparand.intersection, setFor(ALL), setFor);
 
             // TODO: was...
-            //insertAsDescendent(comparand.intersection, insertee, setFor);
-            //insertAsDescendent(comparand.intersection, comparand.set, setFor);
+            insertAsDescendent(comparand.intersection, insertee, setFor);
+            insertAsDescendent(comparand.intersection, comparand.set, setFor);
         }
     });
 }
@@ -304,4 +308,136 @@ function removeSuperfluousSets(allSets: Map<NormalPredicate, EulerSet>) {
         });
         if (isUnchanged) break;
     }
+}
+
+
+
+
+
+
+
+
+
+
+function init2(predicates: string[]) {
+    let eulerSets = new Map<NormalPredicate, EuSet>();
+
+    let normalPredicates = predicates.map(toNormalPredicate);
+    normalPredicates = normalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // dedupe
+    let root = setFor(ALL);
+    normalPredicates.forEach(p => setFor(p).ancestors.push(root));
+
+    // Phase I   O(n^3)   add all intersections to the list of NormalPredicates
+    // TODO: make O(n^2) using HashSet of some kind
+    for (let i = 0, len = normalPredicates.length; i < len; ++i) {
+        let pi = normalPredicates[i];
+        for (let j = i + 1; j < len; ++j) {
+            let pj = normalPredicates[j];
+            let intersection = intersect(pi, pj);
+            if (intersection === NONE || intersection === pi || intersection === pj) continue;
+            if (normalPredicates.indexOf(intersection) === -1) normalPredicates.push(intersection); // NB makes O(n^3)!
+        }
+    }
+
+    // Phase II   O(n^2)
+    for (let i = 0, len = normalPredicates.length; i < len; ++i) {
+        let pi = normalPredicates[i];
+        let si = setFor(pi);
+        for (let j = 0; j < len; ++j) {
+            if (i === j) continue;
+            let pj = normalPredicates[j];
+            if (isSubsetOf(pj, pi)) setFor(pj).ancestors.push(si);
+        }
+    }
+
+
+
+    // // TODO: temp print...
+    // console.log('\n');
+    // eulerSets.forEach(eset => {
+    //     let ancs = eset.ancestors.map(s => s.predicate);
+    //     console.log(`Ancestors:  ${eset.predicate}  <---  ${ancs.join(' ')}`);
+    // });
+    // console.log('\n');
+
+
+
+    root.stage = 'doing';
+    let doneCount = 0;
+    while (doneCount < eulerSets.size) {
+
+        // 1. Work out direct children of sets marked 'doing'
+        eulerSets.forEach(eulerSet => {
+            if (eulerSet.stage !== 'todo') return;
+            if (eulerSet.ancestors.some(anc => anc.stage === 'todo')) return;
+            eulerSet.ancestors.forEach(anc => {
+                if (anc.stage === 'doing') {
+                    anc.subsets.push(eulerSet);
+                    eulerSet.supersets.push(anc);
+                }
+            });
+        });
+
+        // 2. Mark all 'doing' as 'done'
+        eulerSets.forEach(eulerSet => {
+            if (eulerSet.stage !== 'doing') return;
+            eulerSet.stage = 'done';
+            ++doneCount;
+        });
+
+        // 3. Mark next round of 'todo' sets as 'doing'
+        eulerSets.forEach(eulerSet => {
+            if (eulerSet.stage !== 'todo') return;
+            if (eulerSet.ancestors.some(anc => anc.stage !== 'done')) return;
+            eulerSet.stage = 'doing';
+        });
+    }
+
+
+
+    // // TODO: temp print...
+    // console.log('\n');
+    // eulerSets.forEach(eset => {
+    //     let children = eset.subsets.map(c => c.predicate);
+    //     console.log(`Children:  ${eset.predicate}  --->  ${children.join(' ')}`);
+    // });
+    // console.log('\n');
+
+
+
+    let allSets = [] as EulerSet[];
+    eulerSets.forEach(eset => allSets.push(eset));
+    return allSets;
+
+
+
+    function setFor(predicate: NormalPredicate) {
+        let eulerSet = eulerSets.get(predicate);
+        if (!eulerSet) {
+            eulerSet = {
+                predicate,
+                supersets: [],
+                subsets: [],
+                isPrincipal: false,
+                ancestors: [],
+                stage: 'todo',
+            };
+            eulerSets.set(predicate, eulerSet);
+        }
+        return eulerSet;
+    }
+}
+
+
+
+
+
+interface EuSet {
+    predicate: NormalPredicate;
+    supersets: EuSet[];
+    subsets: EuSet[];
+    isPrincipal: boolean;
+
+    ancestors: EuSet[];
+    stage: 'todo'|'doing'|'done';
 }

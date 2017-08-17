@@ -265,105 +265,39 @@ describe('Constructing an euler diagram', () => {
                 '*D*E*Q*',
             ],
             eulerDiagram: {
-                '*W*': {
-                    '*A*I*S*W*': {
+                '[*W*]': {
+                    '[*A*I*S*W*]': {
                         '[*A*B*I*S*W*]': {
-                            '[*A*B*I*M*S*W*]': {
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*B*I*S*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*W*X*Y*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
+                            '[*A*B*I*S*W*X*Z*]': {},
                         },
                         '[*A*I*M*S*W*]': {
-                            '[*A*B*I*M*S*W*]': {
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*I*J*M*S*W*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            },
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*W*X*Y*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*I*J*M*S*W*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
+                            '[*A*I*J*M*S*W*]': {},
                         },
                         '[*A*I*S*T*W*]': {
                             '[*A*E*I*S*T*W*]': {
-                                '[*A*E*I*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                },
+                                '[*A*E*I*M*S*T*W*]': {},
                             },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*E*I*S*T*W*]': {
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*I*S*W*X*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*I*M*S*W*X*Y*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                         },
                         '[*A*D*E*I*Q*S*W*]': {},
                     },
-                    '*B*W*': {
-                        '[*A*B*I*S*W*]': {
-                            '[*A*B*I*M*S*W*]': {
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                    '[*B*W*]': {
+                        '[*B*M*W*]': {
+                            '[*B*I*M*S*T*U*W*Y*Z*]': {
+                                '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
+                            },
+                            '[*A*B*M*W*X*Y*]': {
+                                '[*A*B*I*M*W*X*Y*]': {
+                                    '[*A*B*I*M*S*W*X*Y*]': {
+                                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                                    },
                                 },
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                                '[*A*B*J*M*S*W*X*Y*]': {},
+                                '[*A*B*M*T*W*X*Y*]': {
+                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
                                 },
+                                '[*A*B*M*W*X*Y*Z*]': {},
+                                '[*A*B*D*E*M*Q*W*X*Y*]': {},
                             },
-                            '[*A*B*I*S*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*W*X*Y*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '*B*M*W*': {
                             '[*A*B*I*M*W*]': {
                                 '[*A*B*I*M*S*W*]': {
                                     '[*A*B*I*M*S*T*U*W*Y*Z*]': {
@@ -375,9 +309,7 @@ describe('Constructing an euler diagram', () => {
                                         '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                                     },
                                 },
-                                '[*A*B*I*M*W*X*Z*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
+                                '[*A*B*I*M*W*X*Z*]': {},
                                 '[*A*B*I*M*W*X*Y*]': {
                                     '[*A*B*I*M*S*W*X*Y*]': {
                                         '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
@@ -385,166 +317,56 @@ describe('Constructing an euler diagram', () => {
                                 },
                             },
                             '[*A*B*J*M*S*W*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
                                 '[*A*B*J*M*S*W*X*Y*]': {},
                             },
                             '[*A*B*M*T*W*]': {
                                 '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
                                     '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                                 },
                                 '[*A*B*M*T*W*X*Y*]': {
                                     '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                                 },
-                            },
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '*B*I*M*S*T*U*W*Y*Z*': {
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
                             },
                             '[*A*B*M*W*X*Z*]': {
-                                '[*A*B*I*M*W*X*Z*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*A*B*M*W*X*Y*Z*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                            '*A*B*M*W*X*Y*': {
-                                '[*A*B*I*M*W*X*Y*]': {
-                                    '[*A*B*I*M*S*W*X*Y*]': {
-                                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                    },
-                                },
-                                '[*A*B*J*M*S*W*X*Y*]': {},
-                                '[*A*B*M*T*W*X*Y*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                '[*A*B*M*W*X*Y*Z*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                '[*A*B*D*E*M*Q*W*X*Y*]': {},
+                                '[*A*B*I*M*W*X*Z*]': {},
+                                '[*A*B*M*W*X*Y*Z*]': {},
                             },
                             '[*B*D*E*M*Q*W*]': {
                                 '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
                                 '[*A*B*D*E*M*Q*W*X*Y*]': {},
                             },
                         },
-                        '[*A*B*J*M*S*W*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*J*M*S*W*X*Y*]': {},
+                        '[*A*B*I*S*W*]': {
+                            '[*A*B*I*S*W*X*Z*]': {},
                         },
                         '[*A*B*T*W*]': {
-                            '[*A*B*M*T*W*]': {
+                            '[*A*B*E*S*T*W*]': {
                                 '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
                                     '[*A*B*E*M*S*T*W*X*Y*]': {},
                                 },
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                                '[*A*B*E*S*T*W*X*Z*]': {},
+                            },
+                            '[*A*B*M*T*W*]': {
+                                '[*A*B*E*M*S*T*W*]': {
+                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
                                 },
                                 '[*A*B*M*T*W*X*Y*]': {
                                     '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                                 },
-                            },
-                            '[*A*B*E*S*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                             },
                             '[*A*B*T*W*X*Z*]': {
                                 '[*A*B*E*S*T*W*X*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                             },
-                            '[*A*B*M*T*W*X*Y*]': {
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*E*S*T*W*]': {
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '*B*I*M*S*T*U*W*Y*Z*': {
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
                         },
                         '[*A*B*W*X*Z*]': {
-                            '[*A*B*I*S*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
+                            '[*A*B*I*S*W*X*Z*]': {},
                             '[*A*B*M*W*X*Z*]': {
-                                '[*A*B*I*M*W*X*Z*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*A*B*M*W*X*Y*Z*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*B*I*M*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                                '[*A*B*I*M*W*X*Z*]': {},
+                                '[*A*B*M*W*X*Y*Z*]': {},
                             },
                             '[*A*B*T*W*X*Z*]': {
                                 '[*A*B*E*S*T*W*X*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                             },
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*M*W*X*Y*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '*A*B*M*W*X*Y*': {
-                            '[*A*B*I*M*W*X*Y*]': {
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*B*J*M*S*W*X*Y*]': {},
-                            '[*A*B*M*T*W*X*Y*]': {
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            '[*A*B*M*W*X*Y*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            '[*A*B*D*E*M*Q*W*X*Y*]': {},
                         },
                         '[*B*D*E*Q*W*]': {
                             '[*B*D*E*M*Q*W*]': {
@@ -553,640 +375,64 @@ describe('Constructing an euler diagram', () => {
                             },
                         },
                     },
-                    '*A*I*M*W*': {
+                    '[*A*I*M*W*]': {
                         '[*A*I*M*S*W*]': {
-                            '[*A*B*I*M*S*W*]': {
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*I*J*M*S*W*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            },
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*W*X*Y*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
+                            '[*A*I*J*M*S*W*]': {},
                         },
-                        '[*A*B*I*M*W*]': {
-                            '[*A*B*I*M*S*W*]': {
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*B*I*M*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*W*X*Y*]': {
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                        },
-                        '[*A*I*J*M*S*W*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*I*M*T*W*]': {
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*E*I*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*I*M*W*X*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*I*M*W*X*Y*]': {
-                            '[*A*B*I*M*S*W*X*Y*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
+                        '[*A*I*M*T*W*]': {},
                         '[*A*D*E*I*M*Q*W*]': {},
                     },
-                    '*B*M*W*': {
-                        '[*A*B*I*M*W*]': {
-                            '[*A*B*I*M*S*W*]': {
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                    '[*A*T*W*]': {
+                        '[*A*E*S*T*W*]': {
+                            '[*A*E*I*S*T*W*]': {
+                                '[*A*E*I*M*S*T*W*]': {},
+                            },
+                            '[*A*B*E*S*T*W*]': {
+                                '[*A*B*E*M*S*T*W*]': {
+                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
                                 },
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
+                                '[*A*B*E*S*T*W*X*Z*]': {},
                             },
-                            '[*A*B*I*M*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*W*X*Y*]': {
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                        },
-                        '[*A*B*J*M*S*W*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*J*M*S*W*X*Y*]': {},
-                        },
-                        '[*A*B*M*T*W*]': {
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*M*T*W*X*Y*]': {
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*E*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '*B*I*M*S*T*U*W*Y*Z*': {
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*B*M*W*X*Z*]': {
-                            '[*A*B*I*M*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*M*W*X*Y*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '*A*B*M*W*X*Y*': {
-                            '[*A*B*I*M*W*X*Y*]': {
-                                '[*A*B*I*M*S*W*X*Y*]': {
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*B*J*M*S*W*X*Y*]': {},
-                            '[*A*B*M*T*W*X*Y*]': {
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            '[*A*B*M*W*X*Y*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                        },
-                        '[*B*D*E*M*Q*W*]': {
-                            '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                        },
-                    },
-                    '[*A*J*M*S*W*]': {
-                        '[*A*I*J*M*S*W*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*B*J*M*S*W*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*J*M*S*W*X*Y*]': {},
-                        },
-                        '[*A*J*M*S*T*W*]': {
                             '[*A*E*J*M*S*T*W*]': {},
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
+                            '[*A*D*E*Q*S*T*W*]': {},
                         },
-                        '[*A*E*J*M*S*T*W*]': {},
-                        '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*J*M*S*W*X*Y*]': {},
-                    },
-                    '*A*T*W*': {
                         '[*A*I*S*T*W*]': {
                             '[*A*E*I*S*T*W*]': {
-                                '[*A*E*I*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                                '[*A*E*I*M*S*T*W*]': {},
                             },
                         },
                         '[*A*B*T*W*]': {
-                            '[*A*B*M*T*W*]': {
+                            '[*A*B*E*S*T*W*]': {
                                 '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
                                     '[*A*B*E*M*S*T*W*X*Y*]': {},
                                 },
-                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                    '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                                '[*A*B*E*S*T*W*X*Z*]': {},
+                            },
+                            '[*A*B*M*T*W*]': {
+                                '[*A*B*E*M*S*T*W*]': {
+                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
                                 },
                                 '[*A*B*M*T*W*X*Y*]': {
                                     '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                                 },
-                            },
-                            '[*A*B*E*S*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                             },
                             '[*A*B*T*W*X*Z*]': {
                                 '[*A*B*E*S*T*W*X*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*M*T*W*X*Y*]': {
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                             },
                         },
-                        '[*A*I*M*T*W*]': {
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*M*T*W*]': {
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*M*T*W*X*Y*]': {
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
+                        '[*A*I*M*T*W*]': {},
                         '[*A*J*M*S*T*W*]': {
                             '[*A*E*J*M*S*T*W*]': {},
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '*A*E*S*T*W*': {
-                            '[*A*E*I*S*T*W*]': {
-                                '[*A*E*I*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                },
-                            },
-                            '[*A*B*E*S*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*E*J*M*S*T*W*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            '[*A*D*E*Q*S*T*W*]': {},
-                        },
-                        '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*T*W*X*Z*]': {
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*M*T*W*X*Y*]': {
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                         },
                         '[*A*D*E*Q*T*W*]': {
                             '[*A*D*E*Q*S*T*W*]': {},
                         },
                     },
-                    '*A*E*S*T*W*': {
-                        '[*A*E*I*S*T*W*]': {
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*E*S*T*W*]': {
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '[*A*E*I*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*B*E*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '[*A*E*J*M*S*T*W*]': {},
-                        '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*E*S*T*W*X*Z*]': {},
-                        '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        '[*A*D*E*Q*S*T*W*]': {},
-                    },
-                    '*B*I*M*S*T*U*W*Y*Z*': {
-                        '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                    },
-                    '[*A*B*W*X*Z*]': {
-                        '[*A*B*I*S*W*X*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*M*W*X*Z*]': {
-                            '[*A*B*I*M*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*M*W*X*Y*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*I*M*W*X*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*T*W*X*Z*]': {
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*E*S*T*W*X*Z*]': {},
-                        '[*A*B*M*W*X*Y*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                    },
-                    '*A*B*M*W*X*Y*': {
-                        '[*A*B*I*M*W*X*Y*]': {
-                            '[*A*B*I*M*S*W*X*Y*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*J*M*S*W*X*Y*]': {},
-                        '[*A*B*M*T*W*X*Y*]': {
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        '[*A*B*M*W*X*Y*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                    },
-                    '[*D*E*Q*W*]': {
-                        '[*A*D*E*I*Q*S*W*]': {},
-                        '[*B*D*E*Q*W*]': {
-                            '[*B*D*E*M*Q*W*]': {
-                                '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                            },
-                        },
-                        '[*A*D*E*I*M*Q*W*]': {},
-                        '[*B*D*E*M*Q*W*]': {
-                            '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                        },
-                        '[*A*D*E*Q*T*W*]': {
-                            '[*A*D*E*Q*S*T*W*]': {},
-                        },
-                        '[*A*D*E*Q*S*T*W*]': {},
-                        '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                    },
-                },
-                '*A*J*M*S*': {
                     '[*A*J*M*S*W*]': {
-                        '[*A*I*J*M*S*W*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*B*J*M*S*W*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*J*M*S*W*X*Y*]': {},
-                        },
                         '[*A*J*M*S*T*W*]': {
                             '[*A*E*J*M*S*T*W*]': {},
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*E*J*M*S*T*W*]': {},
-                        '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*J*M*S*W*X*Y*]': {},
-                    },
-                    '[*A*B*J*M*S*X*Z*]': {},
-                    '[*A*B*J*M*S*W*X*Y*]': {},
-                    '[*A*D*E*J*M*Q*S*]': {},
-                },
-                '*A*T*W*': {
-                    '[*A*I*S*T*W*]': {
-                        '[*A*E*I*S*T*W*]': {
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                         },
                     },
-                    '[*A*B*T*W*]': {
-                        '[*A*B*M*T*W*]': {
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*M*T*W*X*Y*]': {
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*E*S*T*W*]': {
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*T*W*X*Z*]': {
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*M*T*W*X*Y*]': {
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                    },
-                    '[*A*I*M*T*W*]': {
-                        '[*A*E*I*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                    },
-                    '[*A*B*M*T*W*]': {
-                        '[*A*B*E*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                            '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*M*T*W*X*Y*]': {
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                    },
-                    '[*A*J*M*S*T*W*]': {
-                        '[*A*E*J*M*S*T*W*]': {},
-                        '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                    },
-                    '*A*E*S*T*W*': {
-                        '[*A*E*I*S*T*W*]': {
-                            '[*A*E*I*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*E*S*T*W*]': {
-                            '[*A*B*E*M*S*T*W*]': {
-                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*E*M*S*T*W*X*Y*]': {},
-                            },
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '[*A*E*I*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        },
-                        '[*A*B*E*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '[*A*E*J*M*S*T*W*]': {},
-                        '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*E*S*T*W*X*Z*]': {},
-                        '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        '[*A*D*E*Q*S*T*W*]': {},
-                    },
-                    '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                        '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    },
-                    '[*A*B*T*W*X*Z*]': {
-                        '[*A*B*E*S*T*W*X*Z*]': {},
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    },
-                    '[*A*B*M*T*W*X*Y*]': {
-                        '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    },
-                    '[*A*D*E*Q*T*W*]': {
-                        '[*A*D*E*Q*S*T*W*]': {},
-                    },
-                },
-                '*A*E*S*T*W*': {
-                    '[*A*E*I*S*T*W*]': {
-                        '[*A*E*I*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        },
-                    },
-                    '[*A*B*E*S*T*W*]': {
-                        '[*A*B*E*M*S*T*W*]': {
-                            '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        },
-                        '[*A*B*E*S*T*W*X*Z*]': {},
-                        '[*A*B*E*M*S*T*W*X*Y*]': {},
-                    },
-                    '[*A*E*I*M*S*T*W*]': {
-                        '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                    },
-                    '[*A*B*E*M*S*T*W*]': {
-                        '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*E*M*S*T*W*X*Y*]': {},
-                    },
-                    '[*A*E*J*M*S*T*W*]': {},
-                    '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                    '[*A*B*E*S*T*W*X*Z*]': {},
-                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                    '[*A*D*E*Q*S*T*W*]': {},
-                },
-                '*B*I*M*S*T*U*W*Y*Z*': {
-                    '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                        '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    },
-                    '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                },
-                '*A*B*X*Z*': {
-                    '[*A*B*W*X*Z*]': {
-                        '[*A*B*I*S*W*X*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*M*W*X*Z*]': {
-                            '[*A*B*I*M*W*X*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*M*W*X*Y*Z*]': {
-                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                            },
-                        },
-                        '[*A*B*I*M*W*X*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*T*W*X*Z*]': {
-                            '[*A*B*E*S*T*W*X*Z*]': {},
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                        '[*A*B*E*S*T*W*X*Z*]': {},
-                        '[*A*B*M*W*X*Y*Z*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                    },
-                    '[*A*B*J*M*S*X*Z*]': {},
-                    '[*A*B*T*W*X*Z*]': {
-                        '[*A*B*E*S*T*W*X*Z*]': {},
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    },
-                    '[*A*B*E*S*T*W*X*Z*]': {},
-                    '[*A*B*M*W*X*Y*Z*]': {
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    },
-                    '[*A*B*D*E*Q*X*Z*]': {},
-                },
-                '*A*B*M*W*X*Y*': {
-                    '[*A*B*I*M*W*X*Y*]': {
-                        '[*A*B*I*M*S*W*X*Y*]': {
-                            '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                        },
-                    },
-                    '[*A*B*J*M*S*W*X*Y*]': {},
-                    '[*A*B*M*T*W*X*Y*]': {
-                        '[*A*B*E*M*S*T*W*X*Y*]': {},
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    },
-                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                    '[*A*B*M*W*X*Y*Z*]': {
-                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    },
-                    '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                    '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                },
-                '*D*E*Q*': {
                     '[*D*E*Q*W*]': {
                         '[*A*D*E*I*Q*S*W*]': {},
                         '[*B*D*E*Q*W*]': {
@@ -1196,25 +442,40 @@ describe('Constructing an euler diagram', () => {
                             },
                         },
                         '[*A*D*E*I*M*Q*W*]': {},
-                        '[*B*D*E*M*Q*W*]': {
-                            '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                            '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                        },
                         '[*A*D*E*Q*T*W*]': {
                             '[*A*D*E*Q*S*T*W*]': {},
                         },
-                        '[*A*D*E*Q*S*T*W*]': {},
-                        '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                        '[*A*B*D*E*M*Q*W*X*Y*]': {},
+                    },
+                },
+                '[*A*J*M*S*]': {
+                    '[*A*J*M*S*W*]': {
+                        '[*A*J*M*S*T*W*]': {
+                            '[*A*E*J*M*S*T*W*]': {},
+                        },
+                    },
+                    '[*A*B*J*M*S*X*Z*]': {},
+                    '[*A*D*E*J*M*Q*S*]': {},
+                },
+                '[*A*B*X*Z*]': {
+                    '[*A*B*J*M*S*X*Z*]': {},
+                    '[*A*B*D*E*Q*X*Z*]': {},
+                },
+                '[*D*E*Q*]': {
+                    '[*D*E*Q*W*]': {
+                        '[*A*D*E*I*Q*S*W*]': {},
+                        '[*B*D*E*Q*W*]': {
+                            '[*B*D*E*M*Q*W*]': {
+                                '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
+                                '[*A*B*D*E*M*Q*W*X*Y*]': {},
+                            },
+                        },
+                        '[*A*D*E*I*M*Q*W*]': {},
+                        '[*A*D*E*Q*T*W*]': {
+                            '[*A*D*E*Q*S*T*W*]': {},
+                        },
                     },
                     '[*A*D*E*J*M*Q*S*]': {},
-                    '[*A*D*E*Q*T*W*]': {
-                        '[*A*D*E*Q*S*T*W*]': {},
-                    },
-                    '[*A*D*E*Q*S*T*W*]': {},
-                    '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
                     '[*A*B*D*E*Q*X*Z*]': {},
-                    '[*A*B*D*E*M*Q*W*X*Y*]': {},
                 },
             },
         },
