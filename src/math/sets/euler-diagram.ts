@@ -5,6 +5,20 @@ import EulerSet from './euler-set';
 
 
 
+// TODO: update ED description. Ideas:
+/**
+ * An EulerDiagram instance depicts the important relationships between the given predicates.
+ * An EulerDiagram instance is equivalent to a directed acyclic graph (DAG) with nodes/edges ... with invariants:
+ * - '**' is a node
+ * - for any given predicate P, P is a node
+ * - for any two given predicates P and Q, PnQ is a node
+ * - there is an edge from P to Q *iff* P is a proper superset of Q *and* there does not exist a predicate R such that
+ *   P is a proper superset of R and R is a proper superset of Q.
+ */
+
+
+
+
 // TODO: doc... the NONE predicate `∅` is the *universal subset* or 'bottom', and is always omitted from EulerDiagram
 //       instances. It can never match anything anyway, so this omission should not cause any surpising behaviour.
 
