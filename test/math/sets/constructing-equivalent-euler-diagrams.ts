@@ -25,7 +25,6 @@ describe('Constructing equivalent euler diagrams', () => {
             '*A*I*S*W*', '*B*W*', '*A*I*M*W*', '*W*', '*B*M*W*', '*A*J*M*S*', '*A*T*W*',
             '*A*E*S*T*W*', '*B*I*M*S*T*U*W*Y*Z*', '*A*B*X*Z*', '*A*B*M*W*X*Y*', '*D*E*Q*',
         ],
-        // TODO: perf issue: takes ~10sec to compute forward+reverse EDs
         [
             '*A*', '*B*', '*C*', '*D*', '*E*', '*F*', '*G*', '*H*', '*I*', '*J*',
             '*K*', '*L*', '*M*', '*N*', '*O*', '*P*', '*Q*', '*R*', '*S*', '*T*',

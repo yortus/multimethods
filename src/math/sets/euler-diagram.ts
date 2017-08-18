@@ -1,4 +1,4 @@
-import {ALL, intersect, NONE, NormalPredicate, toNormalPredicate, Unreachable} from '../predicates';
+import {ALL, intersect, isSubsetOf, NONE, NormalPredicate, toNormalPredicate, Unreachable} from '../predicates';
 import EulerSet from './euler-set';
 
 
@@ -365,25 +365,11 @@ function init2(predicates: string[], unreachable?: Unreachable) {
         for (let j = 0; j < len; ++j) {
             if (i === j) continue;
             let pj = normalPredicates[j];
-            //TODO: BUG: if either pi or pj have alternations, `isSubsetOf` will throw
-            if (intersect(pi, pj, unreachable) === pj) {
-            //TODO: was... if (isSubsetOf(pj, pi)) {
+            if (isSubsetOf(pj, pi)) {
                 setFor(pj).ancestors.push(si);
             }
         }
     }
-
-
-
-    // // TODO: temp print...
-    // console.log('\n');
-    // eulerSets.forEach(eset => {
-    //     let ancs = eset.ancestors.map(s => s.predicate);
-    //     console.log(`Ancestors:  ${eset.predicate}  <---  ${ancs.join(' ')}`);
-    // });
-    // console.log('\n');
-
-
 
     root.stage = 'doing';
     let doneCount = 0;
@@ -416,23 +402,9 @@ function init2(predicates: string[], unreachable?: Unreachable) {
         });
     }
 
-
-
-    // // TODO: temp print...
-    // console.log('\n');
-    // eulerSets.forEach(eset => {
-    //     let children = eset.subsets.map(c => c.predicate);
-    //     console.log(`Children:  ${eset.predicate}  --->  ${children.join(' ')}`);
-    // });
-    // console.log('\n');
-
-
-
     let allSets = [] as EulerSet[];
     eulerSets.forEach(eset => allSets.push(eset));
     return allSets;
-
-
 
     function setFor(predicate: NormalPredicate) {
         let eulerSet = eulerSets.get(predicate);
