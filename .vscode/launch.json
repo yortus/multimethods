@@ -15,9 +15,11 @@
                 "--timeout",
                 "999999",
                 "--colors",
+                "${workspaceRoot}/dist/test/**/*.js"
 //                "${workspaceRoot}/dist/test/**/intersecting*.js"
-                "${workspaceRoot}/dist/test/**/constructing-an-euler*.js"
+//                "${workspaceRoot}/dist/test/**/constructing-an-euler*.js"
 //                "${workspaceRoot}/dist/test/**/constructing-equivalent-euler*.js"
+//                "${workspaceRoot}/dist/test/**/traversing-an-euler*.js"
 ],
             "env": {
                 "DEBUG": "multimethods"

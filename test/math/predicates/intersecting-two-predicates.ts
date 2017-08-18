@@ -5,59 +5,13 @@ import {intersect, toNormalPredicate} from 'multimethods/math/predicates';
 
 
 
+// TODO: add tests for optional `unreachable` argument
+
+
+
+
+
 describe('Intersecting two predicates', () => {
-
-    // TODO: temp testing...
-    it('SPECIAL', () => {
-        let preds = [
-            // '*A*I*S*W*',
-            // '*B*W*',
-            // '*A*I*M*W*',
-            // '*W*',
-            // '*B*M*W*',
-            // '*A*J*M*S*',
-            // '*A*T*W*',
-            // '*A*E*S*T*W*',
-            // '*B*I*M*S*T*U*W*Y*Z*',
-            // '*A*B*X*Z*',
-            // '*A*B*M*W*X*Y*',
-            // '*D*E*Q*',
-            '*A*',
-            '*B*',
-            '*C*',
-            '*D*',
-            '*E*',
-            '*F*',
-            '*G*',
-        ];
-
-        let bottomA = preds.map(toNormalPredicate).reduce(
-            (bottom, pred) => intersect(bottom, pred),
-            toNormalPredicate('**')
-        );
-        //expect(bottomA).to.equal('*A*B*D*E*I*J*M*Q*S*T*U*W*X*Y*Z*');
-
-        let bottomBs = [] as string[];
-        for (let i = 0; i < preds.length; ++i) {
-            for (let j = i + 1; j < preds.length; ++j) {
-                let p1 = preds[i];
-                let p2 = preds[j];
-                let join = intersect(toNormalPredicate(p1), toNormalPredicate(p2));
-                bottomBs.push(join);
-            }
-        }
-        let bottomB = toNormalPredicate(bottomBs.join('|'));
-        //expect(bottomB).to.equal('*A*B*D*E*Q*X*Z*|*A*B*J*M*S*X*Z*|*A*D*E*J*M*Q*S*|*A*I*M*W*|*A*I*S*W*|*A*J*M*S*W*|*A*T*W*|*B*W*|*D*E*Q*W*');
-
-        let bottomC = preds.map(p => intersect(toNormalPredicate(p), bottomB));
-        console.log(bottomC);
-
-    });
-
-
-
-
-
 
     // NB: For visual clarity, `⨂` is used below to mean the empty predicate. This is not the
     //     same as the ∅ predicate. ∅ does not match any strings, but ⨂ matches the empty string.

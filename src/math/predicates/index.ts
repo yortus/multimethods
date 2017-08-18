@@ -9,3 +9,4 @@ export {default as toMatchFunction} from './to-match-function';
 export {default as hasNamedCaptures} from './has-named-captures';
 export {default as isSubsetOf} from './is-subset-of';
 export {default as intersect} from './intersect';
+export {default as Unreachable} from './unreachable';

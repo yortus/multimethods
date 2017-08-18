@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import {NormalPredicate} from 'multimethods/math/predicates';
 import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 
 
@@ -8,241 +9,221 @@ import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 describe('Constructing an euler diagram', () => {
 
     let tests = [
-        // {
-        //     // ======================================== 1. ========================================
-        //     name: 'simple tree',
-        //     predicates: [
-        //         '/**',
-        //         '/foo/*',
-        //         '/bar/*',
-        //         '/foo/bar',
-        //     ],
-        //     eulerDiagram: {
-        //         '/**': {
-        //             '/foo/*': {
-        //                 '/foo/bar': {},
-        //             },
-        //             '/bar/*': {},
-        //         },
-        //     },
-        // },
-        // {
-        //     // ======================================== 2. ========================================
-        //     name: 'complex DAG',
-        //     predicates: [
-        //         '∅',
-        //         'a*',
-        //         '*m*',
-        //         '*z',
-        //         '**',
-        //         '/bar',
-        //         '/*',
-        //         '/foo',
-        //         '/foo/*.html',
-        //         '/**o**o**.html',
-        //         '/**o**o**',
-        //         '/bar',
-        //         'a*',
-        //         '/a/*',
-        //         '/*/b',
-        //         '/*z/b',
-        //     ],
-        //     eulerDiagram: {
-        //         'a*': {
-        //             '[a*m*]': {},
-        //             '[a*z]': {},
-        //         },
-        //         '*m*': {
-        //             '[a*m*]': {},
-        //             '[*m*z]': {},
-        //         },
-        //         '*z': {
-        //             '[a*z]': {},
-        //             '[*m*z]': {},
-        //         },
-        //         '/*': {
-        //             '/bar': {},
-        //             '[/*o*o*]': {
-        //                 '/foo': {},
-        //                 '[/*o*o*.html]': {},
-        //             },
-        //         },
-        //         '/**o**o**': {
-        //             '[/*o*o*]': {
-        //                 '/foo': {},
-        //                 '[/*o*o*.html]': {},
-        //             },
-        //             '/**o**o**.html': {
-        //                 '[/*o*o*.html]': {},
-        //                 '/foo/*.html': {},
-        //                 '[/a/*o*o*.html]': {},
-        //             },
-        //             '[/a/*o*o*]': {
-        //                 '[/a/*o*o*.html]': {},
-        //             },
-        //             '[/*o*o*/b]': {
-        //                 '[/*o*o*z/b]': {},
-        //             },
-        //         },
-        //         '/a/*': {
-        //             '[/a/*o*o*]': {
-        //                 '[/a/*o*o*.html]': {},
-        //             },
-        //             '[/a/b]': {},
-        //         },
-        //         '/*/b': {
-        //             '[/*o*o*/b]': {
-        //                 '[/*o*o*z/b]': {},
-        //             },
-        //             '[/a/b]': {},
-        //             '/*z/b': {
-        //                 '[/*o*o*z/b]': {},
-        //             },
-        //         },
-        //         '/*z/b': {
-        //             '[/*o*o*z/b]': {},
-        //         },
-        //     },
-        // },
-        // {
-        //     // ======================================== 3. ========================================
-        //     // This case used to throw 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
-        //     name: 'multipart intersections',
-        //     predicates: [
-        //         '**',
-        //         'a*',
-        //         '*a',
-        //     ],
-        //     eulerDiagram: {
-        //         'a*': {
-        //             '[a|a*a]': {},
-        //         },
-        //         '*a': {
-        //             '[a|a*a]': {},
-        //         },
-        //     },
-        // },
-        // {
-        //     // ======================================== 4. ========================================
-        //     // This case caused v0.6.2 to hang computing an endless series of ever-longer synthesised intersections.
-        //     name: 'high intersection complexity',
-        //     predicates: [
-        //         '*A*B*',
-        //         '*C*',
-        //         'C*',
-        //         'C*B',
-        //     ],
-        //     eulerDiagram: {
-        //         '*A*B*': {
-        //             '[*A*B*C*|*A*C*B*|*C*A*B*]': {
-        //                 '[C*A*B*]': {
-        //                     '[C*A*B]': {},
-        //                 },
-        //             },
-        //         },
-        //         '*C*': {
-        //             '[*A*B*C*|*A*C*B*|*C*A*B*]': {
-        //                 '[C*A*B*]': {
-        //                     '[C*A*B]': {},
-        //                 },
-        //             },
-        //             'C*': {
-        //                 '[C*A*B*]': {
-        //                     '[C*A*B]': {},
-        //                 },
-        //                 'C*B': {
-        //                     '[C*A*B]': {},
-        //                 },
-        //             },
-        //             'C*B': {
-        //                 '[C*A*B]': {},
-        //             },
-        //         },
-        //         'C*': {
-        //                 '[C*A*B*]': {
-        //                     '[C*A*B]': {},
-        //                 },
-        //             'C*B': {
-        //                 '[C*A*B]': {},
-        //             },
-        //         },
-        //         'C*B': {
-        //             '[C*A*B]': {},
-        //         },
-        //     },
-        // },
-        // {
-        //     // ======================================== 5. ========================================
-        //     name: 'alternations',
-        //     predicates: [
-        //         'a|b|c',
-        //         'b|c|d',
-        //         'a',
-        //         'b',
-        //         'a*|*a',
-        //         '**c**|*',
-        //         '**b**|**',
-        //     ],
-        //     eulerDiagram: {
-        //         '*|**c**': {
-        //             'a|b|c': {
-        //                 '[b|c]': {
-        //                     b: {},
-        //                 },
-        //                 'a': {},
-        //             },
-        //             'b|c|d': {
-        //                 '[b|c]': {
-        //                     b: {},
-        //                 },
-        //             },
-        //             '*a|a*': {
-        //                 a: {},
-        //             },
-        //         },
-        //     },
-        // },
-        // {
-        //     // ======================================== 6. ========================================
-        //     // This case took ~40 seconds to complete in v0.7.0. The given predicates produce a very large
-        //     // number of valid intersections, which are eventually reduced down to those shown in the ED below.
-        //     name: 'high intersection complexity II',
-        //     predicates: [
-        //         '*J*I*S*W*',
-        //         '*A*W*',
-        //         '*A*I*M*W*',
-        //         '*W*',
-        //     ],
-        //     eulerDiagram: {
-        //         '*W*': {
-        //             '*A*I*M*W*': {
-        //                 ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
-        //                 + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
-        //             },
-        //             '*A*W*': {
-        //                 '*A*I*M*W*': {
-        //                     ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
-        //                     + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
-        //                 },
-        //                 '[*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*]': {
-        //                     ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
-        //                     + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
-        //                 },
-        //             },
-        //             '*J*I*S*W*': {
-        //                 '[*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*]': {
-        //                     ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
-        //                     + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
-        //                 },
-        //             },
-        //         },
-        //     },
-        // },
-
-
-
-
-
+        {
+            // ======================================== 1. ========================================
+            name: 'simple tree',
+            predicates: [
+                '/**',
+                '/foo/*',
+                '/bar/*',
+                '/foo/bar',
+            ],
+            unreachable: undefined,
+            eulerDiagram: {
+                '/**': {
+                    '/foo/*': {
+                        '/foo/bar': {},
+                    },
+                    '/bar/*': {},
+                },
+            },
+        },
+        {
+            // ======================================== 2. ========================================
+            name: 'complex DAG',
+            predicates: [
+                '∅',
+                'a*',
+                '*m*',
+                '*z',
+                '**',
+                '/bar',
+                '/*',
+                '/foo',
+                '/foo/*.html',
+                '/**o**o**.html',
+                '/**o**o**',
+                '/bar',
+                'a*',
+                '/a/*',
+                '/*/b',
+                '/*z/b',
+            ],
+            unreachable: undefined,
+            eulerDiagram: {
+                'a*': {
+                    '[a*m*]': {},
+                    '[a*z]': {},
+                },
+                '*m*': {
+                    '[a*m*]': {},
+                    '[*m*z]': {},
+                },
+                '*z': {
+                    '[a*z]': {},
+                    '[*m*z]': {},
+                },
+                '/*': {
+                    '/bar': {},
+                    '[/*o*o*]': {
+                        '/foo': {},
+                        '[/*o*o*.html]': {},
+                    },
+                },
+                '/**o**o**': {
+                    '[/*o*o*]': {
+                        '/foo': {},
+                        '[/*o*o*.html]': {},
+                    },
+                    '/**o**o**.html': {
+                        '[/*o*o*.html]': {},
+                        '/foo/*.html': {},
+                        '[/a/*o*o*.html]': {},
+                    },
+                    '[/a/*o*o*]': {
+                        '[/a/*o*o*.html]': {},
+                    },
+                    '[/*o*o*/b]': {
+                        '[/*o*o*z/b]': {},
+                    },
+                },
+                '/a/*': {
+                    '[/a/*o*o*]': {
+                        '[/a/*o*o*.html]': {},
+                    },
+                    '[/a/b]': {},
+                },
+                '/*/b': {
+                    '[/*o*o*/b]': {
+                        '[/*o*o*z/b]': {},
+                    },
+                    '[/a/b]': {},
+                    '/*z/b': {
+                        '[/*o*o*z/b]': {},
+                    },
+                },
+            },
+        },
+        {
+            // ======================================== 3. ========================================
+            // This case used to throw 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
+            name: 'multipart intersections',
+            predicates: [
+                '**',
+                'a*',
+                '*a',
+            ],
+            unreachable: undefined,
+            eulerDiagram: {
+                'a*': {
+                    '[a|a*a]': {},
+                },
+                '*a': {
+                    '[a|a*a]': {},
+                },
+            },
+        },
+        {
+            // ======================================== 4. ========================================
+            // This case caused v0.6.2 to hang computing an endless series of ever-longer synthesised intersections.
+            name: 'high intersection complexity',
+            predicates: [
+                '*A*B*',
+                '*C*',
+                'C*',
+                'C*B',
+            ],
+            unreachable: undefined,
+            eulerDiagram: {
+                '*A*B*': {
+                    '[*A*B*C*|*A*C*B*|*C*A*B*]': {
+                        '[C*A*B*]': {
+                            '[C*A*B]': {},
+                        },
+                    },
+                },
+                '*C*': {
+                    '[*A*B*C*|*A*C*B*|*C*A*B*]': {
+                        '[C*A*B*]': {
+                            '[C*A*B]': {},
+                        },
+                    },
+                    'C*': {
+                        '[C*A*B*]': {
+                            '[C*A*B]': {},
+                        },
+                        'C*B': {
+                            '[C*A*B]': {},
+                        },
+                    },
+                },
+            },
+        },
+        {
+            // ======================================== 5. ========================================
+            name: 'alternations',
+            predicates: [
+                'a|b|c',
+                'b|c|d',
+                'a',
+                'b',
+                'a*|*a',
+                '**c**|*',
+                '**b**|**',
+            ],
+            unreachable: undefined,
+            eulerDiagram: {
+                '*|**c**': {
+                    'a|b|c': {
+                        '[b|c]': {
+                            b: {},
+                        },
+                        'a': {},
+                    },
+                    'b|c|d': {
+                        '[b|c]': {
+                            b: {},
+                        },
+                    },
+                    '*a|a*': {
+                        a: {},
+                    },
+                },
+            },
+        },
+        {
+            // ======================================== 6. ========================================
+            // This case took ~40 seconds to complete in v0.7.0. The given predicates produce a very large
+            // number of valid intersections, which are eventually reduced down to those shown in the ED below.
+            name: 'high intersection complexity II',
+            predicates: [
+                '*J*I*S*W*',
+                '*A*W*',
+                '*A*I*M*W*',
+                '*W*',
+            ],
+            unreachable: undefined,
+            eulerDiagram: {
+                '*W*': {
+                    '*A*W*': {
+                        '*A*I*M*W*': {
+                            ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
+                            + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
+                        },
+                        '[*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*]': {
+                            ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
+                            + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
+                        },
+                    },
+                    '*J*I*S*W*': {
+                        '[*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*]': {
+                            ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
+                            + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
+                        },
+                    },
+                },
+            },
+        },
         {
             // ======================================== 7. ========================================
             // This test will combinatorially explode your engine if the `isUnreachable` option is not used. The
@@ -264,6 +245,7 @@ describe('Constructing an euler diagram', () => {
                 '*A*B*M*W*X*Y*',
                 '*D*E*Q*',
             ],
+            unreachable: isUnreachable,
             eulerDiagram: {
                 '*W*': {
                     '*A*I*S*W*': {
@@ -486,7 +468,7 @@ describe('Constructing an euler diagram', () => {
             let expected: any = test.eulerDiagram;
             let actual: any;
             try {
-                actual = setToObj(new EulerDiagram(test.predicates).universalSet);
+                actual = setToObj(new EulerDiagram(test.predicates, test.unreachable).universalSet);
             }
             catch (ex) {
                 actual = 'ERROR: ' + ex.message;
@@ -494,7 +476,6 @@ describe('Constructing an euler diagram', () => {
                     actual = actual.slice(0, expected.length - 3) + '...';
                 }
             }
-//console.log(JSON.stringify(actual, null, 4));
             expect(actual).deep.equal(expected);
         });
     });
@@ -515,4 +496,24 @@ function setToObj(set: EulerSet): {} {
         },
         {}
     );
+}
+
+
+
+
+
+// TODO: temp testing...
+function isUnreachable(p: NormalPredicate) {
+
+    // Only consider the form *A*B*C*...*
+    if (p.length < 3) return;
+    if (p.charAt(0) !== '*' || p.charAt(p.length - 1) !== '*') return;
+    if (p.indexOf('**') !== -1 || p.indexOf('/') !== -1) return;
+
+    // If the parts aren't strictly ordered, it's unreachable
+    let parts = p.slice(1, -1).split('*');
+    for (let i = 0, j = 1; j < parts.length; ++i, ++j) {
+        if (parts[i] >= parts[j]) return true;
+    }
+    return;
 }
