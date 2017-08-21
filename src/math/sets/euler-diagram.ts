@@ -1,4 +1,4 @@
-import {ALL, intersect, isSubsetOf, NONE, NormalPredicate, toNormalPredicate, Unreachable} from '../predicates';
+import {ALL, intersect, isSubsetOf, NONE, toNormalPredicate, Unreachable} from '../predicates';
 import EulerSet from './euler-set';
 
 
@@ -123,7 +123,7 @@ export default class EulerDiagram {
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unreachable?: Unreachable) {
 
-    let eulerSets = eulerDiagram.allSets = init2(predicates, unreachable);
+    let eulerSets = eulerDiagram.allSets = init3(predicates, unreachable);
     eulerDiagram.universalSet = eulerSets.filter(s => s.predicate === ALL)[0];
     if (!!true) return;
 
@@ -165,274 +165,120 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
 
 
 
-// // TODO: revise all comments below...
-// /**
-//  * Inserts `insertee` into the euler diagram subgraph rooted at `ancestor`, preserving all invariants relating to the
-//  * arrangement of sets. `insertee`'s predicate is assumed to be a proper subset of `ancestor`'s predicate.
-//  * @param {EulerSet} insertee - the new set to be inserted into the euler diagram below `ancestor`.
-//  * @param {EulerSet} ancestor - the 'root' set of the euler diagram subgraph in which `insertee` belongs.
-//  * @param {(predicate: Predicate) => EulerSet} setFor - a function that returns the set for
-//  *        a given predicate. It is expected to return the same instance when passed the same predicate for
-//  *        the same euler diagram. When `insertee` overlaps an existing set in the subgraph, this function
-//  *        is used to synthesize the additional intersection set(s).
-//  */
-// function insertAsDescendent(insertee: EulerSet, ancestor: EulerSet, setFor: (predicate: NormalPredicate) => EulerSet) {
-//     //console.log(`${ancestor.predicate}   ===insert==>   ${insertee.predicate}`);
+function init3(predicates: string[], unreachable?: Unreachable) {
 
-//     // If `insertee` already exists as a direct child of `ancestor`, there is nothing to do.
-//     if (hasChild(insertee, ancestor)) return;
-
-//     // Determine the set relationship between `insertee` and each of the `ancestor` set's existing children.
-//     // Subsequent steps only need to know about those children of `ancestor` that are non-disjoint with `insertee`.
-//     let hasSubsetOrSupersetComparands = false;
-//     let nonDisjointComparands = ancestor.subsets.reduce(
-//         (comparands, set) => {
-//             let intersection = intersect(insertee.predicate, set.predicate);
-//             if (intersection === insertee.predicate) hasSubsetOrSupersetComparands = true;
-//             if (intersection === set.predicate) hasSubsetOrSupersetComparands = true;
-//             if (intersection !== NONE) comparands.push({set, intersection: setFor(intersection)});
-//             return comparands;
-//         },
-//         [] as Array<{set: EulerSet; intersection: EulerSet}>
-//     );
-
-//     // If the `ancestor` predicate has no existing children, or they are all disjoint with `insertee`,
-//     // then we simply add `insertee` as a direct child of `ancestor`, and we are done.
-//     if (nonDisjointComparands.length === 0) {
-//         insertChild(insertee, ancestor);
-//         return;
-//     }
-
-//     // `insertee` does have subset/superset/overlapping relationships with one or more of
-//     // `ancestor`'s existing children. Work out how and where to insert it.
-//     nonDisjointComparands.forEach(comparand => {
-
-//         // `insertee` is a superset of the current comparand.
-//         if (comparand.intersection === comparand.set) {
-//             // Remove the comparand from `ancestor`.
-//             removeChild(comparand.set, ancestor);
-
-//             // Add `insertee` as a direct child of `ancestor`.
-//             insertChild(insertee, ancestor);
-
-//             // Recursively re-insert the comparand as a child of `insertee`.
-//             insertAsDescendent(comparand.set, insertee, setFor);
-//         }
-
-//         // `insertee` is a subset of the current comparand.
-//         else if (comparand.intersection === insertee) {
-//             // Recursively insert `insertee` as a child of the comparand.
-//             insertAsDescendent(insertee, comparand.set, setFor);
-//         }
-
-//         // `insertee` overlaps with the current comparand (i.e., it is not disjoint, nor a superset or subset).
-//         else {
-//             // TODO: document mod: *only* add as child if not a superset or subset of any other comparand
-//             // Add `insertee` as a direct child of `ancestor`.
-//             if (!hasSubsetOrSupersetComparands) insertChild(insertee, ancestor);
-
-//             // TODO: BUG!!!...
-//             // The following optimisation breaks invariants in some cases...
-//             // - if the omitted intersection is added later elsewhere in the ED, then it may *not* end up being
-//             //   a descendent of all supersets as it should be.
-
-
-//             // As an optimisation, we *don't* recursively insert the intersection of `insertee` and the comparand
-//             // when they are both auxiliary sets. Doing so adds needless extra recursive computation of intersections
-//             // that can dominate total ED construction time in many cases. This optimisation is safe (i.e. it doesn't
-//             // produce an invalid ED), because:
-//             // - auxiliary sets (other than root) represent 'ambiguous' outcomes:
-//             //   - they are *always* produced as the intersection of other sets;
-//             //   - therefore, they *always* have more than one parent;
-//             //   - therefore, there are *always* multiple paths to them from the root set.
-//             // - if the best-matching set for some string is an auxiliary set, then we have an ambiguous outcome.
-//             // - it is therefore unecessary to further refine the ED by adding the intersection of two auxiliary sets,
-//             //   as the outcome will still be ambiguous so the additional set adds no functional distinction to the ED.
-//             if (!insertee.isPrincipal && !comparand.set.isPrincipal) return;
-//             //if (!insertee.isPrincipal && !comparand.set.isPrincipal && comparand.intersection.supersets.length === 0) return;
-
-//             // TODO: temp testing...
-//             // Recursively insert the intersection (i.e. the set representing the overlap between `insertee` and the
-//             // comparand) into the EulerDiagram. By inserting it at root level, it will 'trickle down' to become a
-//             // descendent of all existing supersets. This restores the invariant that the previous step may have
-//             // suspended. At the very least, the overlap will become a child of both `insertee` and the comparand.
-//             //insertAsDescendent(comparand.intersection, setFor(ALL), setFor);
-
-//             // TODO: was...
-//             insertAsDescendent(comparand.intersection, insertee, setFor);
-//             insertAsDescendent(comparand.intersection, comparand.set, setFor);
-//         }
-//     });
-// }
-
-
-
-
-
-// /** Checks if parent/child links exist directly between `set` and `child`. */
-// function hasChild(child: EulerSet, set: EulerSet): boolean {
-//     return set.subsets.indexOf(child) !== -1;
-// }
-
-
-
-
-
-// /** Ensures parent/child links exist directly between `set` and `child`. */
-// function insertChild(child: EulerSet, set: EulerSet) {
-//     // NB: If the child is already there, make this a no-op.
-//     if (hasChild(child, set)) return;
-//     set.subsets.push(child);
-//     child.supersets.push(set);
-// }
-
-
-
-
-
-// /** Removes the existing parent/child links between `set` and `child`. */
-// function removeChild(child: EulerSet, set: EulerSet) {
-//     set.subsets.splice(set.subsets.indexOf(child), 1);
-//     child.supersets.splice(child.supersets.indexOf(set), 1);
-// }
-
-
-
-
-
-// // TODO: doc... defn superfluous set:
-// // - is auxiliary
-// // - has no children
-// // - all parents are auxiliary
-// function removeSuperfluousSets(allSets: Map<NormalPredicate, EulerSet>) {
-
-//     while (true) {
-//         let isUnchanged = true;
-//         allSets.forEach((set, predicate) => {
-//             let isKeeper = set.isPrincipal;
-//             isKeeper = isKeeper || set.subsets.length > 0;
-//             isKeeper = isKeeper || set.supersets.some(superset => superset.isPrincipal);
-//             if (!isKeeper) {
-//                 isUnchanged = false;
-//                 allSets.delete(predicate);
-//                 set.supersets.slice().forEach(superset => {
-//                     removeChild(set, superset);
-//                 });
-//             }
-//         });
-//         if (isUnchanged) break;
-//     }
-// }
-
-
-
-
-
-
-
-
-
-
-function init2(predicates: string[], unreachable?: Unreachable) {
-    let eulerSets = new Map<NormalPredicate, EuSet>();
+    console.log('AAA');
 
     let normalPredicates = predicates.map(toNormalPredicate);
+    normalPredicates.unshift(ALL); // ensure '**' is there at the start
     normalPredicates = normalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
     normalPredicates = normalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
-    let root = setFor(ALL);
-    normalPredicates.map(setFor).forEach(eulerSet => {
-        eulerSet.isPrincipal = true;
-        eulerSet.ancestors.push(root);
-    });
-    normalPredicates = normalPredicates.filter(p => p !== ALL); // TODO: explain... If there, remove '**'
 
-    // Phase I   O(n^3)   add all intersections to the list of NormalPredicates
-    // TODO: make O(n^2) using HashSet of some kind
-    for (let i = 0, len = normalPredicates.length; i < len; ++i) {
-        let pi = normalPredicates[i];
-        for (let j = i + 1; j < len; ++j) {
-            let pj = normalPredicates[j];
-            let intersection = intersect(pi, pj, unreachable);
-            if (intersection === NONE || intersection === pi || intersection === pj) continue;
-            if (normalPredicates.indexOf(intersection) === -1) normalPredicates.push(intersection); // NB makes O(n^3)!
-        }
-    }
+    let principalCount = normalPredicates.length;
+    let descendents = normalPredicates.map(_ => [] as number[]);
 
-    // Phase II   O(n^2)
-    for (let i = 0, len = normalPredicates.length; i < len; ++i) {
-        let pi = normalPredicates[i];
-        let si = setFor(pi);
-        for (let j = 0; j < len; ++j) {
-            if (i === j) continue;
-            let pj = normalPredicates[j];
-            if (isSubsetOf(pj, pi)) {
-                setFor(pj).ancestors.push(si);
+    for (let i = 0; i < normalPredicates.length; ++i) {
+        let lhs = normalPredicates[i];
+        for (let j = 0; j < i && j < principalCount; ++j) {
+            let rhs = normalPredicates[j];
+            if (i < principalCount) {
+
+                // LHS and RHS are both principal predicates - we need to intersect them
+                let intersection = intersect(lhs, rhs, unreachable);
+                if (intersection === rhs) {
+                    descendents[i].push(j);
+                }
+                else if (intersection === lhs) {
+                    descendents[j].push(i);
+                }
+                else if (intersection !== NONE) {
+                    // an auxiliary is born or recalled
+                    let k = normalPredicates.indexOf(intersection);
+                    if (k === -1) {
+                        k = normalPredicates.push(intersection) - 1;
+                        descendents.push([]);
+                    }
+                    descendents[i].push(k);
+                    descendents[j].push(k);
+                }
+            }
+            else {
+                // LHS is an auxiliary predicate - only use isSubsetOf - no more intersections
+                if (isSubsetOf(lhs, rhs)) {
+                    descendents[j].push(i);
+                }
+                else if (isSubsetOf(rhs, lhs)) {
+                    descendents[i].push(j);
+                }
             }
         }
     }
 
-    root.stage = 'doing';
-    let doneCount = 0;
-    while (doneCount < eulerSets.size) {
+    console.log('BBB');
 
-        // 1. Work out direct children of sets marked 'doing'
-        eulerSets.forEach(eulerSet => {
-            if (eulerSet.stage !== 'todo') return;
-            if (eulerSet.ancestors.some(anc => anc.stage === 'todo')) return;
-            eulerSet.ancestors.forEach(anc => {
-                if (anc.stage === 'doing') {
-                    anc.subsets.push(eulerSet);
-                    eulerSet.supersets.push(anc);
+    // // TODO: what we got?
+    // normalPredicates.forEach((p, i) => {
+    //     console.log(`${i}   ${p}   ${ancestors[i].join(' ')}`);
+    // });
+    // console.log('\n');
+    // matrix.forEach(row => {
+    //     let s = row.map(cmp => {
+    //         switch (cmp) {
+    //             case 0: return ' ';
+    //             case 1: return 'v';
+    //         }
+    //     }).join(' ');
+    //     console.log(s);
+    // });
+    // console.log('\n');
+
+    let allSets = normalPredicates.map((predicate, i) => {
+        let eulerSet: EulerSet = {
+            predicate,
+            supersets: [],
+            subsets: [],
+            isPrincipal: i < principalCount,
+        };
+        return eulerSet;
+    });
+
+    console.log('CCC');
+
+    const enum Stage {TODO, DOING, DONE}
+    let stage = normalPredicates.map(_ => Stage.TODO);
+    let doneCount = 0;
+    while (doneCount < allSets.length) {
+
+        // 1. Mark next round of 'todo' sets as 'doing'
+        for (let i = 0; i < allSets.length; ++i) {
+            if (stage[i] !== Stage.TODO) continue;
+            if (descendents[i].some(dsc => stage[dsc] !== Stage.DONE)) continue;
+            stage[i] = Stage.DOING;
+        }
+
+        // 2. Work out direct children of sets marked 'doing'
+        for (let i = 0; i < allSets.length; ++i) {
+            if (stage[i] !== Stage.TODO) continue;
+            if (descendents[i].some(dsc => stage[dsc] === Stage.TODO)) continue;
+            descendents[i].forEach(dsc => {
+                if (stage[dsc] === Stage.DOING) {
+                    let child = allSets[dsc];
+                    let parent = allSets[i];
+                    parent.subsets.push(child);
+                    child.supersets.push(parent);
                 }
             });
-        });
-
-        // 2. Mark all 'doing' as 'done'
-        eulerSets.forEach(eulerSet => {
-            if (eulerSet.stage !== 'doing') return;
-            eulerSet.stage = 'done';
-            ++doneCount;
-        });
-
-        // 3. Mark next round of 'todo' sets as 'doing'
-        eulerSets.forEach(eulerSet => {
-            if (eulerSet.stage !== 'todo') return;
-            if (eulerSet.ancestors.some(anc => anc.stage !== 'done')) return;
-            eulerSet.stage = 'doing';
-        });
-    }
-
-    let allSets = [] as EulerSet[];
-    eulerSets.forEach(eset => allSets.push(eset));
-    return allSets;
-
-    function setFor(predicate: NormalPredicate) {
-        let eulerSet = eulerSets.get(predicate);
-        if (!eulerSet) {
-            eulerSet = {
-                predicate,
-                supersets: [],
-                subsets: [],
-                isPrincipal: false,
-                ancestors: [],
-                stage: 'todo',
-            };
-            eulerSets.set(predicate, eulerSet);
         }
-        return eulerSet;
+
+        // 3. Mark all 'doing' as 'done'
+        for (let i = 0; i < allSets.length; ++i) {
+            if (stage[i] !== Stage.DOING) continue;
+            stage[i] = Stage.DONE;
+            ++doneCount;
+        }
     }
-}
 
+    console.log('DDD');
 
-
-
-
-interface EuSet {
-    predicate: NormalPredicate;
-    supersets: EuSet[];
-    subsets: EuSet[];
-    isPrincipal: boolean;
-
-    ancestors: EuSet[];
-    stage: 'todo'|'doing'|'done';
+    return allSets;
 }
