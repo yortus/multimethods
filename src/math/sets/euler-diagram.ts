@@ -180,6 +180,14 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
 
     ancestors = ancestors.map(anc => anc.filter((el, i, arr) => arr.indexOf(el) === i)); // de-duplicate.
 
+
+    console.log('\n\n');
+    normalPredicates.forEach((p, i) => {
+        console.log(`${i}   ${p}   ${ancestors[i].join(' ')}`);
+    });
+    console.log('\n\n');
+    
+
     const enum Stage {TODO, DOING, DONE}
     let stage = normalPredicates.map(_ => Stage.TODO);
     let doneCount = 0;
