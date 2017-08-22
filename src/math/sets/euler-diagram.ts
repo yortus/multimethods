@@ -123,50 +123,6 @@ export default class EulerDiagram {
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unreachable?: Unreachable) {
 
-    let eulerSets = eulerDiagram.allSets = init3(predicates, unreachable);
-    eulerDiagram.universalSet = eulerSets.filter(s => s.predicate === ALL)[0];
-    if (!!true) return;
-
-    // // Create the setFor() function to return the set corresponding to a given predicate,
-    // // creating it on demand if it doesn't already exist. This function ensures that every
-    // // request for the same predicate gets the same singleton set.
-    // let setLookup = new Map<NormalPredicate, EulerSet>();
-    // let setFor = (predicate: NormalPredicate) => {
-    //     if (!setLookup.has(predicate)) {
-    //         let newSet: EulerSet = {predicate, supersets: [], subsets: [], isPrincipal: false};
-    //         setLookup.set(predicate, newSet);
-    //     }
-    //     return setLookup.get(predicate)!;
-    // };
-
-    // // Mark all sets corresponding to the given `predicates` as principal sets.
-    // let principalPredicates = predicates.map(predicate => toNormalPredicate(predicate));
-    // principalPredicates.forEach(p => setFor(p).isPrincipal = true);
-
-    // // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
-    // let universe = eulerDiagram.universalSet = setFor(ALL);
-
-    // // Insert each of the principal predicates into a DAG rooted at '**'.
-    // // We never insert '**', because it is already the root set, and we just need to insert all its proper subsets.
-    // // We never insert '∅', because it will never match any string, so its presence is unnecessary.
-    // principalPredicates
-    //     .filter(predicate => predicate !== ALL && predicate !== NONE)
-    //     .forEach(predicate => insertAsDescendent(setFor(predicate), universe, setFor));
-
-    // // TODO: temp testing...
-    // removeSuperfluousSets(setLookup);
-
-    // // Finally, compute the `sets` property.
-    // let allSets = eulerDiagram.allSets = [] as EulerSet[];
-    // setLookup.forEach(value => allSets.push(value));
-}
-
-
-
-
-
-function init3(predicates: string[], unreachable?: Unreachable) {
-
     let normalPredicates = predicates.map(toNormalPredicate);
     normalPredicates.unshift(ALL); // ensure '**' is there at the start
     normalPredicates = normalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
@@ -211,23 +167,7 @@ function init3(predicates: string[], unreachable?: Unreachable) {
         }
     }
 
-    // // TODO: what we got?
-    // normalPredicates.forEach((p, i) => {
-    //     console.log(`${i}   ${p}   ${ancestors[i].join(' ')}`);
-    // });
-    // console.log('\n');
-    // matrix.forEach(row => {
-    //     let s = row.map(cmp => {
-    //         switch (cmp) {
-    //             case 0: return ' ';
-    //             case 1: return 'v';
-    //         }
-    //     }).join(' ');
-    //     console.log(s);
-    // });
-    // console.log('\n');
-
-    let allSets = normalPredicates.map((predicate, i) => {
+    let allSets = eulerDiagram.allSets = normalPredicates.map((predicate, i) => {
         let eulerSet: EulerSet = {
             predicate,
             supersets: [],
@@ -271,5 +211,12 @@ function init3(predicates: string[], unreachable?: Unreachable) {
         }
     }
 
-    return allSets;
+    // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
+    eulerDiagram.universalSet = allSets[0];
+
+    // Mark all sets corresponding to the given `predicates` as principal sets.
+    //...
+
+    // Finally, compute the `sets` property.
+    //...
 }
