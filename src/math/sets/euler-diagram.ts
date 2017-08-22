@@ -124,7 +124,8 @@ export default class EulerDiagram {
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unreachable?: Unreachable) {
 
     let normalPredicates = predicates.map(toNormalPredicate);
-    normalPredicates.unshift(ALL); // ensure '**' is there at the start
+    let rootIsPrincipal = normalPredicates.filter(p => p === ALL).length > 0;
+    normalPredicates.unshift(ALL); // ensure '**' is always the first predicate
     normalPredicates = normalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
     normalPredicates = normalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
 
@@ -172,7 +173,7 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
             predicate,
             supersets: [],
             subsets: [],
-            isPrincipal: i < principalCount,
+            isPrincipal: i === 0 ? rootIsPrincipal : i < principalCount,
         };
         return eulerSet;
     });
