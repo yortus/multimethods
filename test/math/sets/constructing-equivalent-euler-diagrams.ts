@@ -9,37 +9,44 @@ import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
 describe('Constructing equivalent euler diagrams', () => {
 
     let tests = [
-        ['∅', 'foo', 'bar', 'f{chars}', '*o'],
-        ['**', '/f**', '/foo/*', '/foo', '/*o', '/foo'],
-        ['a', 'b', 'c', 'd', 'e', 'f', '∅'],
-        ['a', 'a', 'a', 'a', 'a', 'a'],
-        ['**', '*', '*/*', '**/*', '*/*', '*/*/*'],
-        ['**', '*', '*/*', '**/*', '*/*', '*/*/*', '∅', 'a/b', 'a/*', '*/b/b'],
-        ['*A*', '*B*', '*BB*'],
-        ['*A*', '*BB*', '*B*'],
-        ['*A*S*', '*B*', '*A*M*', '*B*M*'],
-        ['*A*I*', '*B*', '*A*T*', '*B*I*T*'],
-        ['*A*', '*B*', '*C*', '*B*C*D*'],
-        ['*A*', '*B*', '*C*', '*B*C*D*', '*C*D*'],
+        // ['∅', 'foo', 'bar', 'f{chars}', '*o'],
+        // ['**', '/f**', '/foo/*', '/foo', '/*o', '/foo'],
+        // ['a', 'b', 'c', 'd', 'e', 'f', '∅'],
+        // ['a', 'a', 'a', 'a', 'a', 'a'],
+        // ['**', '*', '*/*', '**/*', '*/*', '*/*/*'],
+        // ['**', '*', '*/*', '**/*', '*/*', '*/*/*', '∅', 'a/b', 'a/*', '*/b/b'],
+        // ['*A*', '*B*', '*BB*'],
+        // ['*A*', '*BB*', '*B*'],
+        // ['*A*S*', '*B*', '*A*M*', '*B*M*'],
+        // ['*A*I*', '*B*', '*A*T*', '*B*I*T*'],
+        // ['*A*', '*B*', '*C*', '*B*C*D*'],
+        // ['*A*', '*B*', '*C*', '*B*C*D*', '*C*D*'],
+        // [
+        //     '*A*I*S*W*', '*B*W*', '*A*I*M*W*', '*W*', '*B*M*W*', '*A*J*M*S*', '*A*T*W*',
+        //     '*A*E*S*T*W*', '*B*I*M*S*T*U*W*Y*Z*', '*A*B*X*Z*', '*A*B*M*W*X*Y*', '*D*E*Q*',
+        // ],
+        // [
+        //     // Pathological case: everything overlaps with almost everything else (25 predicates)
+        //     '*.A*', '*.B*', '*.C*', '*.D*', '*.E*', '*.F*', '*.G*', '*.H*', '*.I*', '*.J*',
+        //     '*.K*', '*.L*', '*.M*', '*.N*', '*.O*', '*.P*', '*.Q*', '*.R*', '*.S*', '*.T*',
+        //     '*.0*', '*.1*', '*.2*', '*.3*', '*.4*',
+        // ],
+        // [
+        //     //TODO: takes ~1s on LAJESTIC. Make that close to the complexity limit. See next TODO comment.
+        //     // - 1206 auxiliary predicates
+        //     // Pathological case: everything overlaps with almost everything else (50 predicates)
+        //     '*A*', '*B*', '*C*', '*D*', '*E*', '*F*', '*G*', '*H*', '*I*', '*J*',
+        //     '*K*', '*L*', '*M*', '*N*', '*O*', '*P*', '*Q*', '*R*', '*S*', '*T*',
+        //     '*0*', '*1*', '*2*', '*3*', '*4*', '*5*', '*6*', '*7*', '*8*', '*9*',
+        //     '*@A*', '*@B*', '*@C*', '*@D*', '*@E*', '*@F*', '*@G*', '*@H*', '*@I*', '*@J*',
+        //     '*A@*', '*B@*', '*C@*', '*D@*', '*E@*', '*F@*', '*G@*', '*H@*', '*I@*', '*J@*',
+        // ],
+        // //TODO: temp testing move above...
+        // ['*A*', '*B*', '*B*C*', '*A*B*C*D*'],
+        // ['*A*', '*B*', '*C*', '*D*', '*E*', 'A', 'B', 'C', 'D', 'E'],
         [
-            '*A*I*S*W*', '*B*W*', '*A*I*M*W*', '*W*', '*B*M*W*', '*A*J*M*S*', '*A*T*W*',
-            '*A*E*S*T*W*', '*B*I*M*S*T*U*W*Y*Z*', '*A*B*X*Z*', '*A*B*M*W*X*Y*', '*D*E*Q*',
-        ],
-        [
-            // Pathological case: everything overlaps with almost everything else (25 predicates)
-            '*.A*', '*.B*', '*.C*', '*.D*', '*.E*', '*.F*', '*.G*', '*.H*', '*.I*', '*.J*',
-            '*.K*', '*.L*', '*.M*', '*.N*', '*.O*', '*.P*', '*.Q*', '*.R*', '*.S*', '*.T*',
-            '*.0*', '*.1*', '*.2*', '*.3*', '*.4*',
-        ],
-        [
-            // Pathological case: everything overlaps with almost everything else (50 predicates)
-            '*A*', '*B*', '*C*', '*D*', '*E*', '*F*', '*G*', '*H*', '*I*', '*J*',
-            '*K*', '*L*', '*M*', '*N*', '*O*', '*P*', '*Q*', '*R*', '*S*', '*T*',
-            '*0*', '*1*', '*2*', '*3*', '*4*', '*5*', '*6*', '*7*', '*8*', '*9*',
-            '*@A*', '*@B*', '*@C*', '*@D*', '*@E*', '*@F*', '*@G*', '*@H*', '*@I*', '*@J*',
-            '*A@*', '*B@*', '*C@*', '*D@*', '*E@*', '*F@*', '*G@*', '*H@*', '*I@*', '*J@*',
-        ],
-        [
+            //TODO: takes ~10s on LAJESTIC. Add a 'too complex' error and revisit optimisations later. Threshold?
+            // - 4461 auxiliary predicates
             // Pathological case: everything overlaps with almost everything else (100 predicates)
             '*AA*', '*BB*', '*CC*', '*DD*', '*EE*', '*FF*', '*GG*', '*HH*', '*II*', '*JJ*',
             '*KK*', '*LL*', '*MM*', '*NN*', '*OO*', '*PP*', '*QQ*', '*RR*', '*SS*', '*TT*',

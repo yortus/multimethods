@@ -122,6 +122,7 @@ export default class EulerDiagram {
 
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unreachable?: Unreachable) {
+    const enum Rel { unknown, super, sub, disjoint, noncom, dontcare }
 
     let normalPredicates = predicates.map(toNormalPredicate);
     let rootIsPrincipal = normalPredicates.filter(p => p === ALL).length > 0;
@@ -130,43 +131,112 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
     normalPredicates = normalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
 
     let principalCount = normalPredicates.length;
-    let ancestors = normalPredicates.map(_ => [] as number[]);
+    let rels = normalPredicates.map(_ => normalPredicates.map(__ => Rel.unknown));
 
-    for (let i = 0; i < normalPredicates.length; ++i) {
+console.log('AAA');
+//TODO: SLOWEST PART...
+
+// ---------- Pass 1 ----------
+    for (let i = 0; i < principalCount; ++i) {
         let lhs = normalPredicates[i];
-        for (let j = 0; j < i && j < principalCount; ++j) {
+        for (let j = 0; j < i; ++j) {
             let rhs = normalPredicates[j];
-            if (i < principalCount) {
 
-                // LHS and RHS are both principal predicates - we need to intersect them
-                let intersection = intersect(lhs, rhs, unreachable);
-                if (intersection === rhs) {
-                    ancestors[j].push(i);
-                }
-                else if (intersection === lhs) {
-                    ancestors[i].push(j);
-                }
-                else if (intersection !== NONE) {
-                    // an auxiliary is born or recalled
-                    let k = normalPredicates.indexOf(intersection);
-                    if (k === -1) {
-                        k = normalPredicates.push(intersection) - 1;
-                        ancestors.push([]);
-                    }
-                    ancestors[k].push(i, j);
-                }
+            let intersection = intersect(lhs, rhs, unreachable);
+            if (intersection === rhs) {
+                rels[i][j] = Rel.super;
+                rels[j][i] = Rel.sub;
             }
-            else {
-                // LHS is an auxiliary predicate - only use isSubsetOf - no more intersections
-                if (isSubsetOf(lhs, rhs)) {
-                    ancestors[i].push(j);
+            else if (intersection === lhs) {
+                rels[i][j] = Rel.sub;
+                rels[j][i] = Rel.super;
+            }
+            else if (intersection === NONE) {
+                rels[i][j] = Rel.disjoint;
+                rels[j][i] = Rel.disjoint;
+            }
+            else /* overlapping */ {
+                // an auxiliary is born or recalled
+                let k = normalPredicates.indexOf(intersection);
+                if (k === -1) {
+                    k = normalPredicates.push(intersection) - 1;
+                    rels.push(normalPredicates.map(_ => Rel.unknown));
+                    rels.forEach(rel => rel.push(Rel.unknown));
                 }
-                else if (isSubsetOf(rhs, lhs)) {
-                    ancestors[j].push(i);
+                rels[i][j] = rels[j][i] = Rel.noncom;
+                rels[k][i] = rels[k][j] = Rel.sub;
+                rels[i][k] = rels[j][k] = Rel.super;
+
+                // intersection inherits all supersets and disjoint sets from both lhs and rhs
+                for (let kk = 0; kk < normalPredicates.length; ++kk) {
+                    if (rels[k][kk] !== Rel.unknown) continue;
+                    if (rels[i][kk] === Rel.disjoint || rels[j][kk] === Rel.disjoint) {
+                        rels[k][kk] = rels[kk][k] = Rel.disjoint;
+                    }
+                    if (rels[i][kk] === Rel.sub || rels[j][kk] === Rel.sub) {
+                        rels[k][kk] = Rel.sub;
+                        rels[kk][k] = Rel.super;
+                    }
                 }
             }
         }
     }
+
+    console.log('BBB');
+
+    // ---------- Pass 2 ----------
+    let hasPrincipalDescendents = normalPredicates.map(_ => false);
+    for (let i = principalCount; i < normalPredicates.length; ++i) {
+        let lhs = normalPredicates[i];
+        for (let j = 0; j < principalCount; ++j) {
+            if (rels[i][j] !== Rel.unknown) {
+                if (rels[i][j] === Rel.super) hasPrincipalDescendents[i] = true;
+                continue;
+            }
+            let rhs = normalPredicates[j];
+
+            if (isSubsetOf(lhs, rhs)) {
+                rels[i][j] = Rel.sub;
+                rels[j][i] = Rel.super;
+            }
+            else if (isSubsetOf(rhs, lhs)) {
+                rels[i][j] = Rel.super;
+                rels[j][i] = Rel.sub;
+                hasPrincipalDescendents[i] = true;
+            }
+            else {
+                rels[i][j] = rels[j][i] = Rel.noncom;
+            }
+        }
+    }
+
+    console.log('CCC');
+
+    // ---------- Pass 3 ----------
+    for (let i = principalCount; i < normalPredicates.length; ++i) {
+        let lhs = normalPredicates[i];
+        for (let j = principalCount; j < i; ++j) {
+            if (rels[i][j] !== Rel.unknown) continue;
+            let rhs = normalPredicates[j];
+
+            if (!hasPrincipalDescendents[i] && !hasPrincipalDescendents[j]) {
+                rels[i][j] = rels[j][i] = Rel.dontcare;
+            }
+            else if (isSubsetOf(lhs, rhs)) {
+                rels[i][j] = Rel.sub;
+                rels[j][i] = Rel.super;
+            }
+            else if (isSubsetOf(rhs, lhs)) {
+                rels[i][j] = Rel.super;
+                rels[j][i] = Rel.sub;
+            }
+            else {
+                rels[i][j] = rels[j][i] = Rel.noncom;
+            }
+        }
+    }
+
+    console.log('DDD');
 
     let allSets = eulerDiagram.allSets = normalPredicates.map((predicate, i) => {
         let eulerSet: EulerSet = {
@@ -178,15 +248,37 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
         return eulerSet;
     });
 
-    ancestors = ancestors.map(anc => anc.filter((el, i, arr) => arr.indexOf(el) === i)); // de-duplicate.
+    let ancestors = normalPredicates.map(_ => [] as number[]);
+    for (let i = 0; i < normalPredicates.length; ++i) {
+        for (let j = 0; j < normalPredicates.length; ++j) {
+            if (rels[i][j] === Rel.sub) {
+                ancestors[i].push(j);
+            }
+        }
+    }
+
+    // console.log('\n\n');
+    // normalPredicates.forEach((p, i) => {
+    //     console.log(`${i}   ${p}   ${ancestors[i].join(' ')}`);
+    // });
+    // console.log('\n');
+    // rels.forEach(rel => {
+    //     let strs = rel.map(r => {
+    //         switch (r) {
+    //             case Rel.unknown: return ' ';
+    //             case Rel.disjoint: return '∙';
+    //             case Rel.super: return '>';
+    //             case Rel.sub: return '<';
+    //             case Rel.noncom: return '~';
+    //             case Rel.dontcare: return '#';
+    //         }
+    //     });
+    //     console.log(strs.join(' '));
+    // });
+    // console.log('\n\n');
 
 
-    console.log('\n\n');
-    normalPredicates.forEach((p, i) => {
-        console.log(`${i}   ${p}   ${ancestors[i].join(' ')}`);
-    });
-    console.log('\n\n');
-    
+    console.log('EEE');
 
     const enum Stage {TODO, DOING, DONE}
     let stage = normalPredicates.map(_ => Stage.TODO);
@@ -221,6 +313,8 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
             ++doneCount;
         }
     }
+
+    console.log('FFF');
 
     // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
     eulerDiagram.universalSet = allSets[0];
