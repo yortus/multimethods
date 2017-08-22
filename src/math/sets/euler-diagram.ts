@@ -167,15 +167,13 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
 
 function init3(predicates: string[], unreachable?: Unreachable) {
 
-    console.log('AAA');
-
     let normalPredicates = predicates.map(toNormalPredicate);
     normalPredicates.unshift(ALL); // ensure '**' is there at the start
     normalPredicates = normalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
     normalPredicates = normalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
 
     let principalCount = normalPredicates.length;
-    let descendents = normalPredicates.map(_ => [] as number[]);
+    let ancestors = normalPredicates.map(_ => [] as number[]);
 
     for (let i = 0; i < normalPredicates.length; ++i) {
         let lhs = normalPredicates[i];
@@ -186,35 +184,32 @@ function init3(predicates: string[], unreachable?: Unreachable) {
                 // LHS and RHS are both principal predicates - we need to intersect them
                 let intersection = intersect(lhs, rhs, unreachable);
                 if (intersection === rhs) {
-                    descendents[i].push(j);
+                    ancestors[j].push(i);
                 }
                 else if (intersection === lhs) {
-                    descendents[j].push(i);
+                    ancestors[i].push(j);
                 }
                 else if (intersection !== NONE) {
                     // an auxiliary is born or recalled
                     let k = normalPredicates.indexOf(intersection);
                     if (k === -1) {
                         k = normalPredicates.push(intersection) - 1;
-                        descendents.push([]);
+                        ancestors.push([]);
                     }
-                    descendents[i].push(k);
-                    descendents[j].push(k);
+                    ancestors[k].push(i, j);
                 }
             }
             else {
                 // LHS is an auxiliary predicate - only use isSubsetOf - no more intersections
                 if (isSubsetOf(lhs, rhs)) {
-                    descendents[j].push(i);
+                    ancestors[i].push(j);
                 }
                 else if (isSubsetOf(rhs, lhs)) {
-                    descendents[i].push(j);
+                    ancestors[j].push(i);
                 }
             }
         }
     }
-
-    console.log('BBB');
 
     // // TODO: what we got?
     // normalPredicates.forEach((p, i) => {
@@ -242,8 +237,6 @@ function init3(predicates: string[], unreachable?: Unreachable) {
         return eulerSet;
     });
 
-    console.log('CCC');
-
     const enum Stage {TODO, DOING, DONE}
     let stage = normalPredicates.map(_ => Stage.TODO);
     let doneCount = 0;
@@ -252,18 +245,18 @@ function init3(predicates: string[], unreachable?: Unreachable) {
         // 1. Mark next round of 'todo' sets as 'doing'
         for (let i = 0; i < allSets.length; ++i) {
             if (stage[i] !== Stage.TODO) continue;
-            if (descendents[i].some(dsc => stage[dsc] !== Stage.DONE)) continue;
+            if (ancestors[i].some(anc => stage[anc] !== Stage.DONE)) continue;
             stage[i] = Stage.DOING;
         }
 
         // 2. Work out direct children of sets marked 'doing'
         for (let i = 0; i < allSets.length; ++i) {
             if (stage[i] !== Stage.TODO) continue;
-            if (descendents[i].some(dsc => stage[dsc] === Stage.TODO)) continue;
-            descendents[i].forEach(dsc => {
-                if (stage[dsc] === Stage.DOING) {
-                    let child = allSets[dsc];
-                    let parent = allSets[i];
+            if (ancestors[i].some(anc => stage[anc] === Stage.TODO)) continue;
+            ancestors[i].forEach(anc => {
+                if (stage[anc] === Stage.DOING) {
+                    let child = allSets[i];
+                    let parent = allSets[anc];
                     parent.subsets.push(child);
                     child.supersets.push(parent);
                 }
@@ -277,8 +270,6 @@ function init3(predicates: string[], unreachable?: Unreachable) {
             ++doneCount;
         }
     }
-
-    console.log('DDD');
 
     return allSets;
 }

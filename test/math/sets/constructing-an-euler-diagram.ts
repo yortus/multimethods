@@ -10,7 +10,7 @@ describe('Constructing an euler diagram', () => {
 
     let tests = [
         {
-            // ======================================== 1. ========================================
+            // ================================================================================
             name: 'simple tree',
             predicates: [
                 '/**',
@@ -29,7 +29,28 @@ describe('Constructing an euler diagram', () => {
             },
         },
         {
-            // ======================================== 2. ========================================
+            // ================================================================================
+            name: 'simple tree II',
+            predicates: [
+                '*A*',
+                '*B*',
+                '*B*C*',
+            ],
+            unreachable: isUnreachable,
+            eulerDiagram: {
+                '*A*': {
+                    '[*A*B*]': {},
+                },
+                '*B*': {
+                    '*B*C*': {
+                        '[*A*B*C*]': {},
+                    },
+                    '[*A*B*]': {},
+                },
+            },
+        },
+        {
+            // ================================================================================
             name: 'complex DAG',
             predicates: [
                 '∅',
@@ -67,13 +88,11 @@ describe('Constructing an euler diagram', () => {
                     '/bar': {},
                     '[/*o*o*]': {
                         '/foo': {},
-                        '[/*o*o*.html]': {},
                     },
                 },
                 '/**o**o**': {
                     '[/*o*o*]': {
                         '/foo': {},
-                        '[/*o*o*.html]': {},
                     },
                     '/**o**o**.html': {
                         '[/*o*o*.html]': {},
@@ -81,21 +100,17 @@ describe('Constructing an euler diagram', () => {
                         '[/a/*o*o*.html]': {},
                     },
                     '[/a/*o*o*]': {
-                        '[/a/*o*o*.html]': {},
                     },
                     '[/*o*o*/b]': {
-                        '[/*o*o*z/b]': {},
                     },
                 },
                 '/a/*': {
                     '[/a/*o*o*]': {
-                        '[/a/*o*o*.html]': {},
                     },
                     '[/a/b]': {},
                 },
                 '/*/b': {
                     '[/*o*o*/b]': {
-                        '[/*o*o*z/b]': {},
                     },
                     '[/a/b]': {},
                     '/*z/b': {
@@ -105,7 +120,7 @@ describe('Constructing an euler diagram', () => {
             },
         },
         {
-            // ======================================== 3. ========================================
+            // ================================================================================
             // This case used to throw 'ERROR: Intersection of *a and a* cannot be expressed as a single predicate...'
             name: 'multipart intersections',
             predicates: [
@@ -124,7 +139,7 @@ describe('Constructing an euler diagram', () => {
             },
         },
         {
-            // ======================================== 4. ========================================
+            // ================================================================================
             // This case caused v0.6.2 to hang computing an endless series of ever-longer synthesised intersections.
             name: 'high intersection complexity',
             predicates: [
@@ -137,20 +152,13 @@ describe('Constructing an euler diagram', () => {
             eulerDiagram: {
                 '*A*B*': {
                     '[*A*B*C*|*A*C*B*|*C*A*B*]': {
-                        '[C*A*B*]': {
-                            '[C*A*B]': {},
-                        },
                     },
                 },
                 '*C*': {
                     '[*A*B*C*|*A*C*B*|*C*A*B*]': {
-                        '[C*A*B*]': {
-                            '[C*A*B]': {},
-                        },
                     },
                     'C*': {
                         '[C*A*B*]': {
-                            '[C*A*B]': {},
                         },
                         'C*B': {
                             '[C*A*B]': {},
@@ -160,7 +168,7 @@ describe('Constructing an euler diagram', () => {
             },
         },
         {
-            // ======================================== 5. ========================================
+            // ================================================================================
             name: 'alternations',
             predicates: [
                 'a|b|c',
@@ -192,7 +200,7 @@ describe('Constructing an euler diagram', () => {
             },
         },
         {
-            // ======================================== 6. ========================================
+            // ================================================================================
             // This case took ~40 seconds to complete in v0.7.0. The given predicates produce a very large
             // number of valid intersections, which are eventually reduced down to those shown in the ED below.
             name: 'high intersection complexity II',
@@ -211,21 +219,17 @@ describe('Constructing an euler diagram', () => {
                             + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
                         },
                         '[*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*]': {
-                            ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
-                            + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
                         },
                     },
                     '*J*I*S*W*': {
                         '[*A*J*I*S*W*|*J*A*I*S*W*|*J*I*A*S*W*|*J*I*S*A*W*]': {
-                            ['[*A*I*J*M*I*S*W*|*A*I*M*J*I*S*W*|*A*J*I*M*S*W*|*A*J*I*S*M*W*'
-                            + '|*J*A*I*M*S*W*|*J*A*I*S*M*W*|*J*I*A*S*I*M*W*|*J*I*S*A*I*M*W*]']: {},
                         },
                     },
                 },
             },
         },
         {
-            // ======================================== 7. ========================================
+            // ================================================================================
             // This test will combinatorially explode your engine if the `isUnreachable` option is not used. The
             // full set of intersections are orders of magnitude more complex to compute than in the previous
             // test. This demonstrates the effect of reducing the solution space using `isUnreachable`. As a result
@@ -249,192 +253,76 @@ describe('Constructing an euler diagram', () => {
             eulerDiagram: {
                 '*W*': {
                     '*A*I*S*W*': {
-                        '[*A*B*I*S*W*]': {
-                            '[*A*B*I*S*W*X*Z*]': {},
-                        },
-                        '[*A*I*M*S*W*]': {
-                            '[*A*I*J*M*S*W*]': {},
-                        },
-                        '[*A*I*S*T*W*]': {
-                            '[*A*E*I*S*T*W*]': {
-                                '[*A*E*I*M*S*T*W*]': {},
-                            },
-                        },
+                        '[*A*B*I*S*W*]': {},
+                        '[*A*I*M*S*W*]': {},
+                        '[*A*I*J*M*S*W*]': {},
+                        '[*A*I*S*T*W*]': {},
+                        '[*A*B*I*S*W*X*Z*]': {},
                         '[*A*D*E*I*Q*S*W*]': {},
                     },
                     '*B*W*': {
                         '*B*M*W*': {
                             '*B*I*M*S*T*U*W*Y*Z*': {
+                                '[*A*B*I*M*S*T*U*W*Y*Z*]': {},
+                                '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
+                                '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
+                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
                                 '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
                             },
                             '*A*B*M*W*X*Y*': {
-                                '[*A*B*I*M*W*X*Y*]': {
-                                    '[*A*B*I*M*S*W*X*Y*]': {
-                                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                    },
-                                },
+                                '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
+                                '[*A*B*I*M*S*W*X*Y*]': {},
+                                '[*A*B*I*M*W*X*Y*]': {},
                                 '[*A*B*J*M*S*W*X*Y*]': {},
-                                '[*A*B*M*T*W*X*Y*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
+                                '[*A*B*M*T*W*X*Y*]': {},
+                                '[*A*B*E*M*S*T*W*X*Y*]': {},
                                 '[*A*B*M*W*X*Y*Z*]': {},
                                 '[*A*B*D*E*M*Q*W*X*Y*]': {},
                             },
-                            '[*A*B*I*M*W*]': {
-                                '[*A*B*I*M*S*W*]': {
-                                    '[*A*B*I*M*S*T*U*W*Y*Z*]': {
-                                        '[*A*B*I*J*M*S*T*U*W*Y*Z*]': {},
-                                        '[*A*B*E*I*M*S*T*U*W*Y*Z*]': {},
-                                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                    },
-                                    '[*A*B*I*M*S*W*X*Y*]': {
-                                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                    },
-                                },
-                                '[*A*B*I*M*W*X*Z*]': {},
-                                '[*A*B*I*M*W*X*Y*]': {
-                                    '[*A*B*I*M*S*W*X*Y*]': {
-                                        '[*A*B*I*M*S*T*U*W*X*Y*Z*]': {},
-                                    },
-                                },
-                            },
-                            '[*A*B*J*M*S*W*]': {
-                                '[*A*B*J*M*S*W*X*Y*]': {},
-                            },
-                            '[*A*B*M*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*M*T*W*X*Y*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                            },
-                            '[*A*B*M*W*X*Z*]': {
-                                '[*A*B*I*M*W*X*Z*]': {},
-                                '[*A*B*M*W*X*Y*Z*]': {},
-                            },
-                            '[*B*D*E*M*Q*W*]': {
-                                '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                            },
+                            '[*A*B*I*M*W*]': {},
+                            '[*A*B*I*M*S*W*]': {},
+                            '[*A*B*J*M*S*W*]': {},
+                            '[*A*B*M*T*W*]': {},
+                            '[*A*B*E*M*S*T*W*]': {},
+                            '[*A*B*I*M*W*X*Z*]': {},
+                            '[*A*B*M*W*X*Z*]': {},
+                            '[*B*D*E*M*Q*W*]': {},
                         },
-                        '[*A*B*I*S*W*]': {
-                            '[*A*B*I*S*W*X*Z*]': {},
-                        },
-                        '[*A*B*T*W*]': {
-                            '[*A*B*E*S*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                            },
-                            '[*A*B*M*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*M*T*W*X*Y*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                            },
-                            '[*A*B*T*W*X*Z*]': {
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                            },
-                        },
-                        '[*A*B*W*X*Z*]': {
-                            '[*A*B*I*S*W*X*Z*]': {},
-                            '[*A*B*M*W*X*Z*]': {
-                                '[*A*B*I*M*W*X*Z*]': {},
-                                '[*A*B*M*W*X*Y*Z*]': {},
-                            },
-                            '[*A*B*T*W*X*Z*]': {
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                            },
-                        },
-                        '[*B*D*E*Q*W*]': {
-                            '[*B*D*E*M*Q*W*]': {
-                                '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                            },
-                        },
+                        '[*A*B*I*S*W*]': {},
+                        '[*A*B*T*W*]': {},
+                        '[*A*B*I*S*W*X*Z*]': {},
+                        '[*A*B*W*X*Z*]': {},
+                        '[*A*B*T*W*X*Z*]': {},
+                        '[*B*D*E*Q*W*]': {},
                     },
                     '*A*I*M*W*': {
-                        '[*A*I*M*S*W*]': {
-                            '[*A*I*J*M*S*W*]': {},
-                        },
+                        '[*A*I*M*S*W*]': {},
+                        '[*A*I*J*M*S*W*]': {},
                         '[*A*I*M*T*W*]': {},
                         '[*A*D*E*I*M*Q*W*]': {},
                     },
                     '*A*T*W*': {
                         '*A*E*S*T*W*': {
-                            '[*A*E*I*S*T*W*]': {
-                                '[*A*E*I*M*S*T*W*]': {},
-                            },
-                            '[*A*B*E*S*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                            },
+                            '[*A*E*I*S*T*W*]': {},
+                            '[*A*B*E*S*T*W*]': {},
+                            '[*A*E*I*M*S*T*W*]': {},
+                            '[*A*B*E*M*S*T*W*]': {},
                             '[*A*E*J*M*S*T*W*]': {},
+                            '[*A*B*E*S*T*W*X*Z*]': {},
                             '[*A*D*E*Q*S*T*W*]': {},
                         },
-                        '[*A*I*S*T*W*]': {
-                            '[*A*E*I*S*T*W*]': {
-                                '[*A*E*I*M*S*T*W*]': {},
-                            },
-                        },
-                        '[*A*B*T*W*]': {
-                            '[*A*B*E*S*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                            },
-                            '[*A*B*M*T*W*]': {
-                                '[*A*B*E*M*S*T*W*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                                '[*A*B*M*T*W*X*Y*]': {
-                                    '[*A*B*E*M*S*T*W*X*Y*]': {},
-                                },
-                            },
-                            '[*A*B*T*W*X*Z*]': {
-                                '[*A*B*E*S*T*W*X*Z*]': {},
-                            },
-                        },
+                        '[*A*I*S*T*W*]': {},
+                        '[*A*B*T*W*]': {},
                         '[*A*I*M*T*W*]': {},
-                        '[*A*J*M*S*T*W*]': {
-                            '[*A*E*J*M*S*T*W*]': {},
-                        },
-                        '[*A*D*E*Q*T*W*]': {
-                            '[*A*D*E*Q*S*T*W*]': {},
-                        },
+                        '[*A*J*M*S*T*W*]': {},
+                        '[*A*B*T*W*X*Z*]': {},
+                        '[*A*D*E*Q*T*W*]': {},
                     },
-                    '[*A*J*M*S*W*]': {
-                        '[*A*J*M*S*T*W*]': {
-                            '[*A*E*J*M*S*T*W*]': {},
-                        },
-                    },
-                    '[*D*E*Q*W*]': {
-                        '[*A*D*E*I*Q*S*W*]': {},
-                        '[*B*D*E*Q*W*]': {
-                            '[*B*D*E*M*Q*W*]': {
-                                '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                            },
-                        },
-                        '[*A*D*E*I*M*Q*W*]': {},
-                        '[*A*D*E*Q*T*W*]': {
-                            '[*A*D*E*Q*S*T*W*]': {},
-                        },
-                    },
+                    '[*A*J*M*S*W*]': {},
+                    '[*D*E*Q*W*]': {},
                 },
                 '*A*J*M*S*': {
-                    '[*A*J*M*S*W*]': {
-                        '[*A*J*M*S*T*W*]': {
-                            '[*A*E*J*M*S*T*W*]': {},
-                        },
-                    },
+                    '[*A*J*M*S*W*]': {},
                     '[*A*B*J*M*S*X*Z*]': {},
                     '[*A*D*E*J*M*Q*S*]': {},
                 },
@@ -443,19 +331,7 @@ describe('Constructing an euler diagram', () => {
                     '[*A*B*D*E*Q*X*Z*]': {},
                 },
                 '*D*E*Q*': {
-                    '[*D*E*Q*W*]': {
-                        '[*A*D*E*I*Q*S*W*]': {},
-                        '[*B*D*E*Q*W*]': {
-                            '[*B*D*E*M*Q*W*]': {
-                                '[*B*D*E*I*M*Q*S*T*U*W*Y*Z*]': {},
-                                '[*A*B*D*E*M*Q*W*X*Y*]': {},
-                            },
-                        },
-                        '[*A*D*E*I*M*Q*W*]': {},
-                        '[*A*D*E*Q*T*W*]': {
-                            '[*A*D*E*Q*S*T*W*]': {},
-                        },
-                    },
+                    '[*D*E*Q*W*]': {},
                     '[*A*D*E*J*M*Q*S*]': {},
                     '[*A*B*D*E*Q*X*Z*]': {},
                 },
