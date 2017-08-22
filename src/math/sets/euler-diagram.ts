@@ -177,6 +177,8 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
         return eulerSet;
     });
 
+    ancestors = ancestors.map(anc => anc.filter((el, i, arr) => arr.indexOf(el) === i)); // de-duplicate.
+
     const enum Stage {TODO, DOING, DONE}
     let stage = normalPredicates.map(_ => Stage.TODO);
     let doneCount = 0;
