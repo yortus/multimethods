@@ -1,5 +1,5 @@
 import {TOO_COMPLEX} from '../../util/fatal-error';
-import {ALL, intersect, isSubsetOf, NONE, toNormalPredicate, Unreachable} from '../predicates';
+import {ALL, intersect, isSubsetOf, NONE, NormalPredicate, toNormalPredicate, Unreachable} from '../predicates';
 import EulerSet from './euler-set';
 
 
@@ -123,7 +123,6 @@ export default class EulerDiagram {
 
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unreachable?: Unreachable) {
-    const enum Rel {unknown = 0, super, sub, noncom, dontcare }
 
     let normalPredicates = predicates.map(toNormalPredicate);
     if (normalPredicates.length > MAX_PRINCIPAL_PREDICATES) return TOO_COMPLEX();
@@ -134,9 +133,8 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
     normalPredicates = normalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
 
     let principalCount = normalPredicates.length;
-    let stride = principalCount * 2;
-    let rels = new Uint8Array(stride ** 2);
     let ancestors = normalPredicates.map(_ => new Set<number>());
+    let auxiliaries = new Set<NormalPredicate>();
 
     console.log('AAA');
     //TODO: SLOWEST PART...
@@ -149,43 +147,24 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
 
             let intersection = intersect(lhs, rhs, unreachable);
             if (intersection === rhs) {
-                rels[i * stride + j] = Rel.super;
-                rels[j * stride + i] = Rel.sub;
                 ancestors[j].add(i);
             }
             else if (intersection === lhs) {
-                rels[i * stride + j] = Rel.sub;
-                rels[j * stride + i] = Rel.super;
                 ancestors[i].add(j);
             }
-            else {
-                rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
-                if (intersection !== NONE) {
-                    // an auxiliary is born or recalled
-                    let k = normalPredicates.indexOf(intersection);
-                    if (k === -1) {
-                        k = normalPredicates.push(intersection) - 1;
-                        ancestors.push(new Set());
-                    }
-                    rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
-                }
+            else if (intersection !== NONE) {
+                auxiliaries.add(intersection);
             }
         }
     }
 
-    //TODO:... expand if necessary
-    if (normalPredicates.length - principalCount > MAX_AUXILIARY_PREDICATES) return TOO_COMPLEX();
-    if (normalPredicates.length > stride) {
-        let newStride = normalPredicates.length;
-        let newRels = new Uint8Array(newStride ** 2);
-        for (let i = 0; i < principalCount; ++i) {
-            for (let j = 0; j < principalCount; ++j) {
-                newRels[i * newStride + j] = rels[i * stride + j];
-            }
-        }
-        rels = newRels;
-        stride = newStride;
-    }
+    //TODO:...
+    normalPredicates.forEach(p => auxiliaries.delete(p));
+    if (auxiliaries.size > MAX_AUXILIARY_PREDICATES) return TOO_COMPLEX();
+    auxiliaries.forEach(aux => {
+        normalPredicates.push(aux);
+        ancestors.push(new Set());
+    });
 
     console.log('BBB');
 
@@ -197,18 +176,11 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
             let rhs = normalPredicates[j];
 
             if (isSubsetOf(lhs, rhs)) {
-                rels[i * stride + j] = Rel.sub;
-                rels[j * stride + i] = Rel.super;
                 ancestors[i].add(j);
             }
             else if (isSubsetOf(rhs, lhs)) {
-                rels[i * stride + j] = Rel.super;
-                rels[j * stride + i] = Rel.sub;
                 hasPrincipalDescendents[i] = true;
                 ancestors[j].add(i);
-            }
-            else {
-                rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
             }
         }
     }
@@ -222,20 +194,13 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
             let rhs = normalPredicates[j];
 
             if (!hasPrincipalDescendents[i] && !hasPrincipalDescendents[j]) {
-                rels[i * stride + j] = rels[j * stride + i] = Rel.dontcare;
+                continue;
             }
             else if (isSubsetOf(lhs, rhs)) {
-                rels[i * stride + j] = Rel.sub;
-                rels[j * stride + i] = Rel.super;
                 ancestors[i].add(j);
             }
             else if (isSubsetOf(rhs, lhs)) {
-                rels[i * stride + j] = Rel.super;
-                rels[j * stride + i] = Rel.sub;
                 ancestors[j].add(i);
-            }
-            else {
-                rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
             }
         }
     }
