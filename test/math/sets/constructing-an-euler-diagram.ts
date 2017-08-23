@@ -99,11 +99,13 @@ describe('Constructing an euler diagram', () => {
                     '/bar': {},
                     '[/*o*o*]': {
                         '/foo': {},
+                        '[/*o*o*.html]': {},
                     },
                 },
                 '/**o**o**': {
                     '[/*o*o*]': {
                         '/foo': {},
+                        '[/*o*o*.html]': {},
                     },
                     '/**o**o**.html': {
                         '[/*o*o*.html]': {},

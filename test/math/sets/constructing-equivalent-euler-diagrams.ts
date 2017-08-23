@@ -59,7 +59,33 @@ describe('Constructing equivalent euler diagrams', () => {
             '*-*0*', '*-*1*', '*-*2*', '*-*3*', '*-*4*', '*-*5*', '*-*6*', '*-*7*', '*-*8*', '*-*9*',
             '00*', '11*', '22*', '33*', '44*', '55*', '66*', '77*', '88*', '99*',
         ],
+        [
+            'a*', 'b*', 'c*', 'd*', 'e*', 'f*', 'g*', 'h*', 'i*', 'j*',
+            'a/*', 'b/*', 'c/*', 'd/*', 'e/*', 'f/*', 'g/*', 'h/*', 'i/*', 'j/*',
+            'a/a*', 'b/a*', 'c/a*', 'd/a*', 'e/a*', 'f/a*', 'g/a*', 'h/a*', 'i/a*', 'j/a*',
+            'a/a*', 'a/b*', 'a/c*', 'a/d*', 'a/e*', 'a/f*', 'a/g*', 'a/h*', 'a/i*', 'a/j*',
+            'a*/a*', 'b*/a*', 'c*/a*', 'd*/a*', 'e*/a*', 'f*/a*', 'g*/a*', 'h*/a*', 'i*/a*', 'j*/a*',
+            'a/aa*', 'a/ab*', 'a/ac*', 'a/ad*', 'a/ae*', 'a/af*', 'a/ag*', 'a/ah*', 'a/ai*', 'a/aj*',
+            'aa*', 'ab*', 'ac*', 'ad*', 'ae*', 'af*', 'ag*', 'ah*', 'ai*', 'aj*',
+            'aa/*', 'ab/*', 'ac/*', 'ad/*', 'ae/*', 'af/*', 'ag/*', 'ah/*', 'ai/*', 'aj/*',
+            'aa*/a*', 'ab*/a*', 'ac*/a*', 'ad*/a*', 'ae*/a*', 'af*/a*', 'ag*/a*', 'ah*/a*', 'ai*/a*', 'aj*/a*',
+            'a/aaa*', 'a/aab*', 'a/aac*', 'a/aad*', 'a/aae*', 'a/aaf*', 'a/aag*', 'a/aah*', 'a/aai*', 'a/aaj*',
+        ],
     ];
+
+    //TODO: temp testing...
+    let aj = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+    let test100 = [] as string[];
+    let test1000 = [] as string[];
+    tests.push(test100, test1000);
+    aj.forEach(c1 => {
+        aj.forEach(c2 => {
+            test100.push(c1 + c2 + '*');
+            aj.forEach(c3 => {
+                test1000.push(c1 + c2 + c3 + '*');
+            });
+        });
+    });
 
     tests.forEach(test => {
         let testName = test.join(', ');

@@ -122,7 +122,7 @@ export default class EulerDiagram {
 
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unreachable?: Unreachable) {
-    const enum Rel { unknown, super, sub, disjoint, noncom, dontcare }
+    const enum Rel {unknown = 0, super, sub, disjoint, noncom, dontcare }
 
     let normalPredicates = predicates.map(toNormalPredicate);
     let rootIsPrincipal = normalPredicates.filter(p => p === ALL).length > 0;
@@ -131,8 +131,9 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
     normalPredicates = normalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
 
     let principalCount = normalPredicates.length;
-    let rels = normalPredicates.map(_ => normalPredicates.map(__ => Rel.unknown));
-
+    let prerels = new Uint8Array((principalCount * 2) ** 2);
+    let stride = principalCount * 2;
+    
 console.log('AAA');
 //TODO: SLOWEST PART...
 
@@ -144,43 +145,63 @@ console.log('AAA');
 
             let intersection = intersect(lhs, rhs, unreachable);
             if (intersection === rhs) {
-                rels[i][j] = Rel.super;
-                rels[j][i] = Rel.sub;
+                prerels[i * stride + j] = Rel.super;
+                prerels[j * stride + i] = Rel.sub;
             }
             else if (intersection === lhs) {
-                rels[i][j] = Rel.sub;
-                rels[j][i] = Rel.super;
+                prerels[i * stride + j] = Rel.sub;
+                prerels[j * stride + i] = Rel.super;
             }
             else if (intersection === NONE) {
-                rels[i][j] = Rel.disjoint;
-                rels[j][i] = Rel.disjoint;
+                prerels[i * stride + j] = prerels[j * stride + i] = Rel.disjoint;
             }
             else /* overlapping */ {
                 // an auxiliary is born or recalled
                 let k = normalPredicates.indexOf(intersection);
                 if (k === -1) {
                     k = normalPredicates.push(intersection) - 1;
-                    rels.push(normalPredicates.map(_ => Rel.unknown));
-                    rels.forEach(rel => rel.push(Rel.unknown));
+                    //rels.push(normalPredicates.map(_ => Rel.unknown));
+                    //rels.forEach(rel => rel.push(Rel.unknown));
                 }
-                rels[i][j] = rels[j][i] = Rel.noncom;
-                rels[k][i] = rels[k][j] = Rel.sub;
-                rels[i][k] = rels[j][k] = Rel.super;
+                prerels[i * stride + j] = prerels[j * stride + i] = Rel.noncom;
+                //rels[k * stride + i] = rels[k * stride + j] = Rel.sub;
+                //rels[i * stride + k] = rels[j * stride + k] = Rel.super;
 
                 // intersection inherits all supersets and disjoint sets from both lhs and rhs
-                for (let kk = 0; kk < normalPredicates.length; ++kk) {
-                    if (rels[k][kk] !== Rel.unknown) continue;
-                    if (rels[i][kk] === Rel.disjoint || rels[j][kk] === Rel.disjoint) {
-                        rels[k][kk] = rels[kk][k] = Rel.disjoint;
-                    }
-                    if (rels[i][kk] === Rel.sub || rels[j][kk] === Rel.sub) {
-                        rels[k][kk] = Rel.sub;
-                        rels[kk][k] = Rel.super;
-                    }
-                }
+//TODO: it's a little faster with this commented out - why?
+                // if (normalPredicates.length < stride) { //TODO: explain / use better var names
+                //     for (let kk = 0; kk < normalPredicates.length; ++kk) {
+                //         if (prerels[k * stride + kk] !== Rel.unknown) continue;
+                //         if (prerels[i * stride + kk] === Rel.disjoint || prerels[j * stride + kk] === Rel.disjoint) {
+                //             prerels[k * stride + kk] = prerels[kk * stride + k] = Rel.disjoint;
+                //         }
+                //         if (prerels[i * stride + kk] === Rel.sub || prerels[j * stride + kk] === Rel.sub) {
+                //             prerels[k * stride + kk] = Rel.sub;
+                //             prerels[kk * stride + k] = Rel.super;
+                //         }
+                //     }
+                // }
             }
         }
     }
+
+    console.log(`AAA+ ${normalPredicates.length > principalCount * 2 ? 'COPYING' : 'KEEPING'}`);
+    let rels: Uint8Array;
+    if (normalPredicates.length > principalCount * 2) {
+        let potentialCount = normalPredicates.length;
+        rels = new Uint8Array(potentialCount ** 2);
+        let prestride = stride;
+        stride = potentialCount;
+        for (let i = 0; i < principalCount; ++i) {
+            for (let j = 0; j < potentialCount; ++j) {
+                rels[i * stride + j] = prerels[i * prestride + j];
+            }
+        }
+    }
+    else {
+        rels = prerels;
+    }
+
 
     console.log('BBB');
 
@@ -189,23 +210,23 @@ console.log('AAA');
     for (let i = principalCount; i < normalPredicates.length; ++i) {
         let lhs = normalPredicates[i];
         for (let j = 0; j < principalCount; ++j) {
-            if (rels[i][j] !== Rel.unknown) {
-                if (rels[i][j] === Rel.super) hasPrincipalDescendents[i] = true;
+            if (rels[i * stride + j] !== Rel.unknown) {
+                if (rels[i * stride + j] === Rel.super) hasPrincipalDescendents[i] = true;
                 continue;
             }
             let rhs = normalPredicates[j];
 
             if (isSubsetOf(lhs, rhs)) {
-                rels[i][j] = Rel.sub;
-                rels[j][i] = Rel.super;
+                rels[i * stride + j] = Rel.sub;
+                rels[j * stride + i] = Rel.super;
             }
             else if (isSubsetOf(rhs, lhs)) {
-                rels[i][j] = Rel.super;
-                rels[j][i] = Rel.sub;
+                rels[i * stride + j] = Rel.super;
+                rels[j * stride + i] = Rel.sub;
                 hasPrincipalDescendents[i] = true;
             }
             else {
-                rels[i][j] = rels[j][i] = Rel.noncom;
+                rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
             }
         }
     }
@@ -216,22 +237,22 @@ console.log('AAA');
     for (let i = principalCount; i < normalPredicates.length; ++i) {
         let lhs = normalPredicates[i];
         for (let j = principalCount; j < i; ++j) {
-            if (rels[i][j] !== Rel.unknown) continue;
+            if (rels[i * stride + j] !== Rel.unknown) continue;
             let rhs = normalPredicates[j];
 
             if (!hasPrincipalDescendents[i] && !hasPrincipalDescendents[j]) {
-                rels[i][j] = rels[j][i] = Rel.dontcare;
+                rels[i * stride + j] = rels[j * stride + i] = Rel.dontcare;
             }
             else if (isSubsetOf(lhs, rhs)) {
-                rels[i][j] = Rel.sub;
-                rels[j][i] = Rel.super;
+                rels[i * stride + j] = Rel.sub;
+                rels[j * stride + i] = Rel.super;
             }
             else if (isSubsetOf(rhs, lhs)) {
-                rels[i][j] = Rel.super;
-                rels[j][i] = Rel.sub;
+                rels[i * stride + j] = Rel.super;
+                rels[j * stride + i] = Rel.sub;
             }
             else {
-                rels[i][j] = rels[j][i] = Rel.noncom;
+                rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
             }
         }
     }
@@ -251,7 +272,7 @@ console.log('AAA');
     let ancestors = normalPredicates.map(_ => [] as number[]);
     for (let i = 0; i < normalPredicates.length; ++i) {
         for (let j = 0; j < normalPredicates.length; ++j) {
-            if (rels[i][j] === Rel.sub) {
+            if (rels[i * stride + j] === Rel.sub) {
                 ancestors[i].push(j);
             }
         }
@@ -262,21 +283,21 @@ console.log('AAA');
     //     console.log(`${i}   ${p}   ${ancestors[i].join(' ')}`);
     // });
     // console.log('\n');
-    // rels.forEach(rel => {
-    //     let strs = rel.map(r => {
-    //         switch (r) {
-    //             case Rel.unknown: return ' ';
-    //             case Rel.disjoint: return '∙';
-    //             case Rel.super: return '>';
-    //             case Rel.sub: return '<';
-    //             case Rel.noncom: return '~';
-    //             case Rel.dontcare: return '#';
+    // for (let i = 0; i < normalPredicates.length; ++i) {
+    //     let s = '';
+    //     for (let j = 0; j < normalPredicates.length; ++j) {
+    //         switch (rels[i * stride + j]) {
+    //             case Rel.unknown: s += '  '; break;
+    //             case Rel.disjoint: s += '∙ '; break;
+    //             case Rel.super: s += '> '; break;
+    //             case Rel.sub: s += '< '; break;
+    //             case Rel.noncom: s += '~ '; break;
+    //             case Rel.dontcare: s += '# '; break;
     //         }
-    //     });
-    //     console.log(strs.join(' '));
-    // });
+    //     }
+    //     console.log(s);
+    // }
     // console.log('\n\n');
-
 
     console.log('EEE');
 
