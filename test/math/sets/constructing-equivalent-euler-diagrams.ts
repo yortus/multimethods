@@ -42,7 +42,7 @@ describe('Constructing equivalent euler diagrams', () => {
         //     '*A@*', '*B@*', '*C@*', '*D@*', '*E@*', '*F@*', '*G@*', '*H@*', '*I@*', '*J@*',
         // ],
         // //TODO: temp testing move above...
-        // ['*A*', '*B*', '*B*C*', '*A*B*C*D*'],
+        ['*A*', '*B*', '*B*C*', '*A*B*C*D*'],
         // ['*A*', '*B*', '*C*', '*D*', '*E*', 'A', 'B', 'C', 'D', 'E'],
         [
             // Pathological case: everything overlaps with almost everything else (100 principal, 4461 auxiliary)

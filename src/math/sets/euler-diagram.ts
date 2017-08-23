@@ -136,11 +136,12 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
     let principalCount = normalPredicates.length;
     let stride = principalCount * 2;
     let rels = new Uint8Array(stride ** 2);
+    let ancestors = normalPredicates.map(_ => new Set<number>());
 
-console.log('AAA');
-//TODO: SLOWEST PART...
+    console.log('AAA');
+    //TODO: SLOWEST PART...
 
-// ---------- Pass 1 ----------
+    // ---------- Pass 1 ----------
     for (let i = 0; i < principalCount; ++i) {
         let lhs = normalPredicates[i];
         for (let j = 0; j < i; ++j) {
@@ -150,10 +151,12 @@ console.log('AAA');
             if (intersection === rhs) {
                 rels[i * stride + j] = Rel.super;
                 rels[j * stride + i] = Rel.sub;
+                ancestors[j].add(i);
             }
             else if (intersection === lhs) {
                 rels[i * stride + j] = Rel.sub;
                 rels[j * stride + i] = Rel.super;
+                ancestors[i].add(j);
             }
             else {
                 rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
@@ -162,6 +165,7 @@ console.log('AAA');
                     let k = normalPredicates.indexOf(intersection);
                     if (k === -1) {
                         k = normalPredicates.push(intersection) - 1;
+                        ancestors.push(new Set());
                     }
                     rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
                 }
@@ -190,20 +194,18 @@ console.log('AAA');
     for (let i = principalCount; i < normalPredicates.length; ++i) {
         let lhs = normalPredicates[i];
         for (let j = 0; j < principalCount; ++j) {
-            if (rels[i * stride + j] !== Rel.unknown) {
-                if (rels[i * stride + j] === Rel.super) hasPrincipalDescendents[i] = true;
-                continue;
-            }
             let rhs = normalPredicates[j];
 
             if (isSubsetOf(lhs, rhs)) {
                 rels[i * stride + j] = Rel.sub;
                 rels[j * stride + i] = Rel.super;
+                ancestors[i].add(j);
             }
             else if (isSubsetOf(rhs, lhs)) {
                 rels[i * stride + j] = Rel.super;
                 rels[j * stride + i] = Rel.sub;
                 hasPrincipalDescendents[i] = true;
+                ancestors[j].add(i);
             }
             else {
                 rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
@@ -217,7 +219,6 @@ console.log('AAA');
     for (let i = principalCount; i < normalPredicates.length; ++i) {
         let lhs = normalPredicates[i];
         for (let j = principalCount; j < i; ++j) {
-            if (rels[i * stride + j] !== Rel.unknown) continue;
             let rhs = normalPredicates[j];
 
             if (!hasPrincipalDescendents[i] && !hasPrincipalDescendents[j]) {
@@ -226,10 +227,12 @@ console.log('AAA');
             else if (isSubsetOf(lhs, rhs)) {
                 rels[i * stride + j] = Rel.sub;
                 rels[j * stride + i] = Rel.super;
+                ancestors[i].add(j);
             }
             else if (isSubsetOf(rhs, lhs)) {
                 rels[i * stride + j] = Rel.super;
                 rels[j * stride + i] = Rel.sub;
+                ancestors[j].add(i);
             }
             else {
                 rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
@@ -248,15 +251,6 @@ console.log('AAA');
         };
         return eulerSet;
     });
-
-    let ancestors = normalPredicates.map(_ => [] as number[]);
-    for (let i = 0; i < normalPredicates.length; ++i) {
-        for (let j = 0; j < normalPredicates.length; ++j) {
-            if (rels[i * stride + j] === Rel.sub) {
-                ancestors[i].push(j);
-            }
-        }
-    }
 
     // console.log('\n\n');
     // normalPredicates.forEach((p, i) => {
@@ -289,14 +283,18 @@ console.log('AAA');
         // 1. Mark next round of 'todo' sets as 'doing'
         for (let i = 0; i < allSets.length; ++i) {
             if (stage[i] !== Stage.TODO) continue;
-            if (ancestors[i].some(anc => stage[anc] !== Stage.DONE)) continue;
+            let allAncestorsDone = true;
+            ancestors[i].forEach(anc => allAncestorsDone = allAncestorsDone && stage[anc] === Stage.DONE);
+            if (!allAncestorsDone) continue;
             stage[i] = Stage.DOING;
         }
 
         // 2. Work out direct children of sets marked 'doing'
         for (let i = 0; i < allSets.length; ++i) {
             if (stage[i] !== Stage.TODO) continue;
-            if (ancestors[i].some(anc => stage[anc] === Stage.TODO)) continue;
+            let someAncestorsTodo = false;
+            ancestors[i].forEach(anc => someAncestorsTodo = someAncestorsTodo || stage[anc] === Stage.TODO);
+            if (someAncestorsTodo) continue;
             ancestors[i].forEach(anc => {
                 if (stage[anc] === Stage.DOING) {
                     let child = allSets[i];
