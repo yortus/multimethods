@@ -9,7 +9,8 @@
 // process.argv.push('dist/test/**/*{relationship,intersecting}*.js');
 // process.argv.push('dist/test/**/intersecting*.js');
 // process.argv.push('dist/test/**/constructing-an-euler*.js');
-process.argv.push('dist/test/**/constructing-equivalent-euler*.js');
+// process.argv.push('dist/test/**/constructing-equivalent-euler*.js');
+process.argv.push('dist/test/**/constructing-*-euler*.js');
 // process.argv.push('dist/test/**/{intersecting,constructing-an-euler}*.js');
 // process.argv.push('dist/test/**/*{intersecting,euler}*.js');
 

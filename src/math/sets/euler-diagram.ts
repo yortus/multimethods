@@ -123,7 +123,7 @@ export default class EulerDiagram {
 
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unreachable?: Unreachable) {
-    const enum Rel {unknown = 0, super, sub, disjoint, noncom, dontcare }
+    const enum Rel {unknown = 0, super, sub, noncom, dontcare }
 
     let normalPredicates = predicates.map(toNormalPredicate);
     if (normalPredicates.length > MAX_PRINCIPAL_PREDICATES) return TOO_COMPLEX();
@@ -134,9 +134,9 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
     normalPredicates = normalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
 
     let principalCount = normalPredicates.length;
-    let prerels = new Uint8Array((principalCount * 2) ** 2);
     let stride = principalCount * 2;
-    
+    let rels = new Uint8Array(stride ** 2);
+
 console.log('AAA');
 //TODO: SLOWEST PART...
 
@@ -148,65 +148,40 @@ console.log('AAA');
 
             let intersection = intersect(lhs, rhs, unreachable);
             if (intersection === rhs) {
-                prerels[i * stride + j] = Rel.super;
-                prerels[j * stride + i] = Rel.sub;
+                rels[i * stride + j] = Rel.super;
+                rels[j * stride + i] = Rel.sub;
             }
             else if (intersection === lhs) {
-                prerels[i * stride + j] = Rel.sub;
-                prerels[j * stride + i] = Rel.super;
+                rels[i * stride + j] = Rel.sub;
+                rels[j * stride + i] = Rel.super;
             }
-            else if (intersection === NONE) {
-                prerels[i * stride + j] = prerels[j * stride + i] = Rel.disjoint;
-            }
-            else /* overlapping */ {
-                // an auxiliary is born or recalled
-                let k = normalPredicates.indexOf(intersection);
-                if (k === -1) {
-                    k = normalPredicates.push(intersection) - 1;
-                    //rels.push(normalPredicates.map(_ => Rel.unknown));
-                    //rels.forEach(rel => rel.push(Rel.unknown));
+            else {
+                rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
+                if (intersection !== NONE) {
+                    // an auxiliary is born or recalled
+                    let k = normalPredicates.indexOf(intersection);
+                    if (k === -1) {
+                        k = normalPredicates.push(intersection) - 1;
+                    }
+                    rels[i * stride + j] = rels[j * stride + i] = Rel.noncom;
                 }
-                prerels[i * stride + j] = prerels[j * stride + i] = Rel.noncom;
-                //rels[k * stride + i] = rels[k * stride + j] = Rel.sub;
-                //rels[i * stride + k] = rels[j * stride + k] = Rel.super;
-
-                // intersection inherits all supersets and disjoint sets from both lhs and rhs
-//TODO: it's a little faster with this commented out - why?
-                // if (normalPredicates.length < stride) { //TODO: explain / use better var names
-                //     for (let kk = 0; kk < normalPredicates.length; ++kk) {
-                //         if (prerels[k * stride + kk] !== Rel.unknown) continue;
-                //         if (prerels[i * stride + kk] === Rel.disjoint || prerels[j * stride + kk] === Rel.disjoint) {
-                //             prerels[k * stride + kk] = prerels[kk * stride + k] = Rel.disjoint;
-                //         }
-                //         if (prerels[i * stride + kk] === Rel.sub || prerels[j * stride + kk] === Rel.sub) {
-                //             prerels[k * stride + kk] = Rel.sub;
-                //             prerels[kk * stride + k] = Rel.super;
-                //         }
-                //     }
-                // }
             }
         }
     }
 
+    //TODO:... expand if necessary
     if (normalPredicates.length - principalCount > MAX_AUXILIARY_PREDICATES) return TOO_COMPLEX();
-
-    console.log(`AAA+ ${normalPredicates.length > principalCount * 2 ? 'COPYING' : 'KEEPING'}`);
-    let rels: Uint8Array;
-    if (normalPredicates.length > principalCount * 2) {
-        let potentialCount = normalPredicates.length;
-        rels = new Uint8Array(potentialCount ** 2);
-        let prestride = stride;
-        stride = potentialCount;
+    if (normalPredicates.length > stride) {
+        let newStride = normalPredicates.length;
+        let newRels = new Uint8Array(newStride ** 2);
         for (let i = 0; i < principalCount; ++i) {
-            for (let j = 0; j < potentialCount; ++j) {
-                rels[i * stride + j] = prerels[i * prestride + j];
+            for (let j = 0; j < principalCount; ++j) {
+                newRels[i * newStride + j] = rels[i * stride + j];
             }
         }
+        rels = newRels;
+        stride = newStride;
     }
-    else {
-        rels = prerels;
-    }
-
 
     console.log('BBB');
 
