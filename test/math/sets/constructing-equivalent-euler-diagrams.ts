@@ -26,7 +26,7 @@ describe('Constructing equivalent euler diagrams', () => {
         //     '*A*E*S*T*W*', '*B*I*M*S*T*U*W*Y*Z*', '*A*B*X*Z*', '*A*B*M*W*X*Y*', '*D*E*Q*',
         // ],
         // [
-        //     // Pathological case: everything overlaps with almost everything else (25 predicates)
+        //     // Pathological case: everything overlaps with almost everything else (25 principal)
         //     '*.A*', '*.B*', '*.C*', '*.D*', '*.E*', '*.F*', '*.G*', '*.H*', '*.I*', '*.J*',
         //     '*.K*', '*.L*', '*.M*', '*.N*', '*.O*', '*.P*', '*.Q*', '*.R*', '*.S*', '*.T*',
         //     '*.0*', '*.1*', '*.2*', '*.3*', '*.4*',
@@ -34,7 +34,7 @@ describe('Constructing equivalent euler diagrams', () => {
         // [
         //     //TODO: takes ~1s on LAJESTIC. Make that close to the complexity limit. See next TODO comment.
         //     // - 1206 auxiliary predicates
-        //     // Pathological case: everything overlaps with almost everything else (50 predicates)
+        //     // Pathological case: everything overlaps with almost everything else (50 principal)
         //     '*A*', '*B*', '*C*', '*D*', '*E*', '*F*', '*G*', '*H*', '*I*', '*J*',
         //     '*K*', '*L*', '*M*', '*N*', '*O*', '*P*', '*Q*', '*R*', '*S*', '*T*',
         //     '*0*', '*1*', '*2*', '*3*', '*4*', '*5*', '*6*', '*7*', '*8*', '*9*',
@@ -45,9 +45,7 @@ describe('Constructing equivalent euler diagrams', () => {
         // ['*A*', '*B*', '*B*C*', '*A*B*C*D*'],
         // ['*A*', '*B*', '*C*', '*D*', '*E*', 'A', 'B', 'C', 'D', 'E'],
         [
-            //TODO: takes ~10s on LAJESTIC. Add a 'too complex' error and revisit optimisations later. Threshold?
-            // - 4461 auxiliary predicates
-            // Pathological case: everything overlaps with almost everything else (100 predicates)
+            // Pathological case: everything overlaps with almost everything else (100 principal, 4461 auxiliary)
             '*AA*', '*BB*', '*CC*', '*DD*', '*EE*', '*FF*', '*GG*', '*HH*', '*II*', '*JJ*',
             '*KK*', '*LL*', '*MM*', '*NN*', '*OO*', '*PP*', '*QQ*', '*RR*', '*SS*', '*TT*',
             '*00*', '*11*', '*22*', '*33*', '*44*', '*55*', '*66*', '*77*', '*88*', '*99*',
@@ -73,35 +71,66 @@ describe('Constructing equivalent euler diagrams', () => {
         ],
     ];
 
+    let testsThatThrow = [
+        [
+            // Pathological case: everything overlaps with almost everything else (110 principal, 5496 auxiliary)
+            '*AA*', '*BB*', '*CC*', '*DD*', '*EE*', '*FF*', '*GG*', '*HH*', '*II*', '*JJ*',
+            '*KK*', '*LL*', '*MM*', '*NN*', '*OO*', '*PP*', '*QQ*', '*RR*', '*SS*', '*TT*',
+            '*00*', '*11*', '*22*', '*33*', '*44*', '*55*', '*66*', '*77*', '*88*', '*99*',
+            '*A*Z*', '*B*Z*', '*C*Z*', '*D*Z*', '*E*Z*', '*F*Z*', '*G*Z*', '*H*Z*', '*I*Z*', '*J*Z*',
+            '*K*Z*', '*L*Z*', '*M*Z*', '*N*Z*', '*O*Z*', '*P*Z*', '*Q*Z*', '*R*Z*', '*S*Z*', '*T*Z*',
+            '*0*Z*', '*1*Z*', '*2*Z*', '*3*Z*', '*4*Z*', '*5*Z*', '*6*Z*', '*7*Z*', '*8*Z*', '*9*Z*',
+            '*-*A*', '*-*B*', '*-*C*', '*-*D*', '*-*E*', '*-*F*', '*-*G*', '*-*H*', '*-*I*', '*-*J*',
+            '*-*K*', '*-*L*', '*-*M*', '*-*N*', '*-*O*', '*-*P*', '*-*Q*', '*-*R*', '*-*S*', '*-*T*',
+            '*-*0*', '*-*1*', '*-*2*', '*-*3*', '*-*4*', '*-*5*', '*-*6*', '*-*7*', '*-*8*', '*-*9*',
+            '00*', '11*', '22*', '33*', '44*', '55*', '66*', '77*', '88*', '99*',
+            '*00-*', '*11-*', '*22-*', '*33-*', '*44-*', '*55-*', '*66-*', '*77-*', '*88-*', '*99-*',
+        ],
+    ];
+
     //TODO: temp testing...
     let aj = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
     let test100 = [] as string[];
     let test1000 = [] as string[];
+    let test10000 = [] as string[];
     tests.push(test100, test1000);
+    testsThatThrow.push(test10000);
     aj.forEach(c1 => {
         aj.forEach(c2 => {
             test100.push(c1 + c2 + '*');
             aj.forEach(c3 => {
                 test1000.push(c1 + c2 + c3 + '*');
+                aj.forEach(c4 => {
+                    test10000.push(c1 + c2 + c3 + c4 + '*');
+                });
             });
         });
     });
 
-    tests.forEach(test => {
+    tests.concat(testsThatThrow).forEach((test, i) => {
         let testName = test.join(', ');
         if (testName.length > 60) testName = testName.slice(0, 60) + '...';
+        testName = `${test.length} items (${testName})`;
         it(testName, () => {
-
-            // Construct an ED from the given predicates in the given order.
             let predicates = test;
-            let ed1 = new EulerDiagram(predicates, isUnreachable);
+            let ed1: EulerDiagram;
+            let ed2: EulerDiagram;
+            let attempt = () => {
+                // Construct an ED from the given predicates in the given order and in reverse order.
+                ed1 = new EulerDiagram(predicates, isUnreachable);
+                ed2 = new EulerDiagram(predicates.reverse(), isUnreachable);
+            };
 
-            // Construct another ED from the same predicates arranged in reverse order.
-            predicates.reverse();
-            let ed2 = new EulerDiagram(predicates, isUnreachable);
+            let expectedToThrow = i >= tests.length;
+            if (expectedToThrow) {
+                expect(attempt).to.throw();
+            }
+            else {
+                expect(attempt).not.to.throw();
 
-            // The two EDs should represent identical DAGs.
-            expect(setToObj(ed1.universalSet)).to.deep.equal(setToObj(ed2.universalSet));
+                // The two EDs should represent identical DAGs.
+                expect(setToObj(ed1!.universalSet)).to.deep.equal(setToObj(ed2!.universalSet));
+            }
         });
     });
 });

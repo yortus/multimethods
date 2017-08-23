@@ -1,3 +1,4 @@
+import {TOO_COMPLEX} from '../../util/fatal-error';
 import {ALL, intersect, isSubsetOf, NONE, toNormalPredicate, Unreachable} from '../predicates';
 import EulerSet from './euler-set';
 
@@ -125,6 +126,8 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, predicates: string[], unre
     const enum Rel {unknown = 0, super, sub, disjoint, noncom, dontcare }
 
     let normalPredicates = predicates.map(toNormalPredicate);
+    if (normalPredicates.length > MAX_PRINCIPAL_PREDICATES) return TOO_COMPLEX();
+
     let rootIsPrincipal = normalPredicates.filter(p => p === ALL).length > 0;
     normalPredicates.unshift(ALL); // ensure '**' is always the first predicate
     normalPredicates = normalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
@@ -184,6 +187,8 @@ console.log('AAA');
             }
         }
     }
+
+    if (normalPredicates.length - principalCount > MAX_AUXILIARY_PREDICATES) return TOO_COMPLEX();
 
     console.log(`AAA+ ${normalPredicates.length > principalCount * 2 ? 'COPYING' : 'KEEPING'}`);
     let rels: Uint8Array;
@@ -346,3 +351,10 @@ console.log('AAA');
     // Finally, compute the `sets` property.
     //...
 }
+
+
+
+
+
+const MAX_PRINCIPAL_PREDICATES = 1000;
+const MAX_AUXILIARY_PREDICATES = 5000;

@@ -67,6 +67,11 @@ export function STRICT_VALIDATION(problems: string[]) {
     return error(format(fmt, '\n' + problems.map((p, i) => `${i + 1}. ${p}`).join('\n')));
 }
 
+export function TOO_COMPLEX() {
+    let fmt = `Method table is too complex. Try reducing the number of predicates or their degree of overlap.`;
+    return error(format(fmt));
+}
+
 export function UNHANDLED() {
     let fmt = `Multimethod dispatch failure: call was unhandled for the given arguments`;
     return error(format(fmt));
