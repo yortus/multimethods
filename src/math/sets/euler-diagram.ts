@@ -121,6 +121,14 @@ export default class EulerDiagram {
 
 
 
+//TODO: doc... NB overall worst case O(N^4) in number of principal predicates, but much lower in practice
+const MAX_PRINCIPAL_PREDICATES = 625;
+const MAX_AUXILIARY_PREDICATES = 3125;
+
+
+
+
+
 /** Internal helper function used by the EulerDiagram constructor. */
 function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: string[], unreachable?: Unreachable) {
 
@@ -258,8 +266,6 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
     // }
     // console.log('\n\n');
 
-    console.log('EEE');
-
     // now the edges for the DAG... this does the 'transitive reduction' of ancestors
     const enum Stage {TODO, DOING, DONE}
     let stage = predicates.map(_ => Stage.TODO);
@@ -299,8 +305,6 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
         }
     }
 
-    console.log('FFF');
-
     // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
     eulerDiagram.universalSet = allSets[0];
 
@@ -310,10 +314,3 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
     // Finally, compute the `sets` property.
     //...
 }
-
-
-
-
-
-const MAX_PRINCIPAL_PREDICATES = 1000;
-const MAX_AUXILIARY_PREDICATES = 5000;
