@@ -6,6 +6,7 @@
 
 
 ## Todo - Medium Priority
+- [ ] rename `Configuration` to `Settings`? Or leave it?
 - [ ] validation: check for unrecognised options
 - [ ] export an `extend` function that takes a MM and a method table and returns a new multimethod
   - [ ] use `super` in chains to control overriding behaviour w.r.t. original MM
