@@ -3,79 +3,67 @@ import {ALL, intersect, isSubsetOf, NONE, NormalPredicate, toNormalPredicate, Un
 import EulerSet from './euler-set';
 
 
-
-
-
-// TODO: update ED description. Ideas:
-/**
- * An EulerDiagram instance depicts the important relationships between the given predicates.
- * An EulerDiagram instance is equivalent to a directed acyclic graph (DAG) with nodes/edges ... with invariants:
- * - '**' is a node
- * - for any given predicate P, P is a node
- * - for any two given predicates P and Q, PnQ is a node
- * - there is an edge from P to Q *iff* P is a proper superset of Q *and* there does not exist a predicate R such that
- *   P is a proper superset of R and R is a proper superset of Q.
- */
-
-
-
-
-// TODO: doc... the NONE predicate `∅` is the *universal subset* or 'bottom', and is always omitted from EulerDiagram
-//       instances. It can never match anything anyway, so this omission should not cause any surpising behaviour.
-
-
-
-
-
-/**
- * A euler diagram is a directed acyclic graph (DAG) where each set holds a predicate. The sets are arranged according
- * to the relationships between their respecive predicates. More specifically, given any two sets A and B within the
- * same euler diagram, set B is a descendent of set A if and only if the set of strings matched by set B's predicate is
- * a proper subset of the set of strings matched by set A's predicate.
+/*
+ * An EulerDiagram depicts the relationships between a given list of predicates, such as those comprising the method
+ * table of a multimethod. The predicates and their relationships are represented as a directed acyclic graph (DAG),
+ * with predicates for nodes, and superset/subset relationships for edges. The DAG is in the form of a minimum
+ * equivalent graph w.r.t. superset/subset relationships (i.e., only irreducible relationships have edges).
  *
- *  and where the sets are arranged
- * according to the set relationships between the predicate's sets of matching strings.
+ * The predicates in DAG nodes are all normalised, with no duplicates, and are of two kinds:
+ * 1. 'principal predicates' are the normal forms of the predicates passed to the constructor.
+ *    They are all guaranteed to be present in the DAG.
+ * 2. 'auxiliary predicates' are added to the DAG to represent the intersections between principal predicates. For
+ *    example, if `a*` and `*b` are the principal predicates, then `ab|a*b` will be added as an auxiliary predicate.
  *
+ * Every DAG is rooted at the universal predicate `**`, which is added as an auxiliary predicate if not supplied as a
+ * principal predicate. The predicate `∅` is always omitted from EulerDiagrams.
  *
+ * The main use for an EulerDiagram is to find all matching predicates and the best-matching predicate for any given
+ * discriminant string. This is achieved by traversing the DAG from the root, and following edges leading to nodes
+ * whose predicate matches the discriminant. This may yield one or more paths, which may terminate at either a principal
+ * predicate or an auxiliary predicate. These cases are described below:
+ * a) The path(s) terminate at an auxiliary predicate. This means there is no unambiguous best-matching principal
+ *    predicate for the discriminant. Recall that an auxiliary predicate is the intersection of two principal
+ *    predicates, and thus has at least two principal supersets, which are equally-good matches for the discriminant.
+ * b) The paths(s) terminate at a principal predicate. Due to the nature of the DAG, if there are multiple paths, then
+ *    they will all terminate at the same principal predicate, which is the unambiguous best-match for the discriminant.
+ * c) There is a single path to the best-matching predicate. The path contains all principal predicates that match the
+ *    discriminant, ordered unambiguously from most-general match to most-specific match.
+ * d) There are multiple paths to the best-matching predicate. The best-matching predicate is unambiguous,
+ *    but there are multiple distinct ways to reach it and hence no unambiguous ordering of matching predicates
+ *    from most-general to most-specific.
  *
+ * EXAMPLE:
+ * The input predicates `foo`, `bar`, `f{chars}`, `*o` result in the following
+ * six-node DAG, with auxiliary predicates indicated by square brackets:
  *
- *
- *
- *  The predicates in a
- * euler diagram are arranged according to the relationships between the sets of strings they match.
- *
- * Recall that a predicate matches a particular set of strings. Accordingly, two predicates may have
- * a subset, superset, disjoint, or other relationship, according to the respective sets of string they match.
- *
- * Each set in a euler diagram holds a single predicate, as well as links to all parent and child sets.
- * Every euler diagram has a single root set that holds the universal predicate '**' that matches all strings.
- *
- * In any given euler diagram,
- * for any two sets holding predicates P and Q, if Q is a proper subset of P, then Q will be a
- * descendent of P in the euler diagram. Overlapping predicates (i.e., predicates whose intersection is
- * non-empty but neither is a subset of the other) are siblings in the euler diagram. For overlapping
- * patterns, an additional pattern representing their intersection is synthesized and added to the
- * euler diagram as a descendent of both patterns. All patterns in a euler diagram are normalized. Some sets
- * (such as intersection sets) may be reached via more than one path from the root, but no two
- * sets in a euler diagram hold the same pattern. A euler diagram may thus contain 'diamonds', making it a
- * DAG rather than a tree.
- *
- * NB: The patterns in a euler diagram may not correspond identically to its input patterns, due to (i)
- * pattern normalization, (ii) the addition of the '**' pattern if it was not among the input
- * patterns, and (iii) the addition of intersection patterns for each pair of overlapping input
- * patterns.
- *
- * For example, the input patterns ['foo', 'bar', 'f{chars}', '*o'] result in this 6-set euler diagram:
- *
- *        f*
- *      /    \
- *     /      \
- *    /        \
- * ** --- *o --- f*o --- foo
- *    \
- *     \
+ *          f*
+ *        /    \
+ *       /      \
+ *      /        \
+ * [**] --- *o --- [f*o] --- foo
  *      \
- *        bar
+ *       \
+ *        \
+ *          bar
+ *
+ * PERFORMANCE NOTES:
+ * Instantiating an EulerDiagram can be computationally expensive, with a worst case complexity of O(N^4), N being the
+ * number of principal predicates. If every pair of principal predicates has a distinct non-empty intersection, then
+ * there are O(N^2) auxiliary predicates, and all of these are potentially pairwise-compared for superset/subset
+ * relationships, leading to the O(N^4) figure. In practice however, the amount of computation is typically orders of
+ * magnitude less than the worst case because:
+ * - the number of auxiliary predicates generated by intersecting principal predicates is typically far lower than
+ *   O(N^2), and often closer to O(N), taking into account the likelihood of superset/subset/disjoint relationships
+ *   between many pairs of principal predicates; and
+ * - pairs of auxiliary predicates only need to be compared if either or both have at least one principal predicate as
+ *   a subset. This eliminates the vast majority of auxiliary pair comparisons in typical cases.
+ *
+ * Upper bounds on the number of principal and auxiliary predicates are imposed so that instantiations do not cause
+ * unresponsiveness or process crashes in pathological cases. The upper bounds are currently 625 and 3125 respectively.
+ *
+ * In the context of multimethods, it may also be pointed out that EulerDiagram instantiation is not on a critical path.
+ * For each multimethod created, a single EulerDiagram is instantiated during the multimethod creation process.
  */
 export default class EulerDiagram {
 
@@ -121,7 +109,7 @@ export default class EulerDiagram {
 
 
 
-//TODO: doc... NB overall worst case O(N^4) in number of principal predicates, but much lower in practice
+//TODO: doc...
 const MAX_PRINCIPAL_PREDICATES = 625;
 const MAX_AUXILIARY_PREDICATES = 3125;
 
@@ -134,22 +122,48 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
 
     // Generate the list of principal predicates. They are all normalised predicates.
     // The list always includes '**', always excludes '∅', and contains no duplicates.
-    let predicates = methodTablePredicates.map(toNormalPredicate);
-    let rootIsPrincipal = predicates.filter(p => p === ALL).length > 0;
-    predicates.unshift(ALL); // ensure '**' is always first in the list.
-    predicates = predicates.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
-    predicates = predicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
+    let principalPredicates = methodTablePredicates.map(toNormalPredicate);
+    let rootIsPrincipal = principalPredicates.filter(p => p === ALL).length > 0;
+    principalPredicates.unshift(ALL); // ensure '**' is always first in the list.
+    principalPredicates = principalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
+    principalPredicates = principalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
+
+    //TODO: temp testing...
+    let {predicates, ancestors} = getSupersetRelationships(principalPredicates, unreachable);
+
+    //TODO: temp testing...
+    let allSets = eulerDiagram.allSets = makeDAG(predicates, rootIsPrincipal, principalPredicates.length, ancestors);
+
+    // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
+    eulerDiagram.universalSet = allSets[0];
+
+    // Mark all sets corresponding to the given `predicates` as principal sets.
+    //...
+
+    // Finally, compute the `sets` property.
+    //...
+}
+
+
+
+
+
+// TODO: doc...
+function getSupersetRelationships(principalPredicates: NormalPredicate[], unreachable?: Unreachable) {
 
     // Count up the principal predicates. Ensure the count does not exceed the complexity limit (more on this below).
-    let principalCount = predicates.length;
+    let principalCount = principalPredicates.length;
     if (principalCount > MAX_PRINCIPAL_PREDICATES) return TOO_COMPLEX();
 
-    // Prepare for the generation of auxiliary predicates and ancestry information below.
-    // NB: `ancestors` is an array of sets corresponding 1:1 to the elements in the `predicates` array.
-    //     Each set contains numbers; each number in the set at `ancestors[i]` is an index into the
-    //     `predicates` array of a predicate that is a proper superset of the predicate at `predicates[i]`.
-    let auxiliaries = new Set<NormalPredicate>();
-    let ancestors = predicates.map(_ => new Set<number>());
+    // Create a list to hold all principal and auxiliary predicates. It always starts with the principal predicates
+    // in the order given. Create a separate variable to accumulate auxiliary predicates as they are generated.
+    let predicates = principalPredicates.slice();
+    let auxiliaryPredicates = new Set<NormalPredicate>();
+
+    // `ancestors` is an array of sets corresponding 1:1 to the elements in the `predicates` array.
+    // Each set contains numbers; each number in the set at `ancestors[i]` is an index into the
+    // `predicates` array of a predicate that is a proper superset of the predicate at `predicates[i]`.
+    let ancestors = principalPredicates.map(_ => new Set<number>());
 
     // [PASS 1]: Compute the intersection of every possible pair of principal predicates. This will generate
     // all auxiliary predicates. It will also reveal the ancestry relationships between principal predicates.
@@ -167,7 +181,7 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
                 ancestors[i].add(j);
             }
             else if (intersection !== NONE) {
-                auxiliaries.add(intersection);
+                auxiliaryPredicates.add(intersection);
             }
         }
     }
@@ -177,18 +191,18 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
     // next passes from being too computationally expensive. However, the upper bound for auxiliary predicates
     // is higher than that for principal predicates, because the `isSubSetOf` checks done in the following passes
     // are significantly less costly than the `intersect` operations in pass 1.
-    predicates.forEach(p => auxiliaries.delete(p));
-    if (auxiliaries.size > MAX_AUXILIARY_PREDICATES) return TOO_COMPLEX();
+    principalPredicates.forEach(p => auxiliaryPredicates.delete(p));
+    if (auxiliaryPredicates.size > MAX_AUXILIARY_PREDICATES) return TOO_COMPLEX();
 
     // Add the auxiliary predicates to the predicates list, and extend `ancestors` to cover the new predicates.
-    auxiliaries.forEach(aux => {
+    auxiliaryPredicates.forEach(aux => {
         predicates.push(aux);
         ancestors.push(new Set());
     });
 
     // [PASS 2]: Check for subset/superset relationships between every possible pairing of a principal
     // predicate with an auxiliary predicate. This adds essential information to `ancestors`. In this pass
-    // we also detect auxiliary predicates that have no principal descendents, in order to speed up pass 3.
+    // we also detect auxiliary predicates that have no principal subsets, in order to speed up pass 3.
     let hasPrincipalDescendents = predicates.map(_ => false);
     for (let i = principalCount; i < predicates.length; ++i) {
         let lhs = predicates[i];
@@ -205,7 +219,11 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
     }
 
     // [PASS 3]: Check for subset/superset relationships between every possible pair of auxiliary predicates.
-    // We can skip the check where neither predicate has any principal descendents, as detected in pass 2.
+    // We can skip this comparison when neither predicate has any principal subsets, as detected in pass 2.
+    // This is because in such cases, each auxiliary predicate represents a better match for some subset of a
+    // best-matching principal predicate, and that is all the information needed to determine the cases in which
+    // a principal predicate is not an unambiguous best-match for a discriminant. Comparing two such auxiliary
+    // predicates adds no useful information in this regard, so can be skipped.
     for (let i = principalCount; i < predicates.length; ++i) {
         let lhs = predicates[i];
         for (let j = principalCount; j < i; ++j) {
@@ -220,6 +238,18 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
         }
     }
 
+    // All done. Return the full predicate list, and the ancestry information that indexes into it.
+    return {predicates, ancestors};
+}
+
+
+
+
+
+function makeDAG(predicates: NormalPredicate[],
+                 rootIsPrincipal: boolean,
+                 principalCount: number,
+                 ancestors: Array<Set<number>>) {
     // We now have enough ancestry information to construct a DAG with a node for each predicate, and edges
     // corresponding to every superset/subset relationship between nodes. In particular, we want the 'minimum
     // equivalent graph' with only edges for direct parent/child relationships between supersets/subsets.
@@ -235,7 +265,7 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
 
 
     // first make the nodes for the DAG.
-    let allSets = eulerDiagram.allSets = predicates.map((predicate, i) => {
+    let allSets = predicates.map((predicate, i) => {
         let eulerSet: EulerSet = {
             predicate,
             supersets: [],
@@ -244,27 +274,6 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
         };
         return eulerSet;
     });
-
-    // console.log('\n\n');
-    // normalPredicates.forEach((p, i) => {
-    //     console.log(`${i}   ${p}   ${ancestors[i].join(' ')}`);
-    // });
-    // console.log('\n');
-    // for (let i = 0; i < normalPredicates.length; ++i) {
-    //     let s = '';
-    //     for (let j = 0; j < normalPredicates.length; ++j) {
-    //         switch (rels[i * stride + j]) {
-    //             case Rel.unknown: s += '  '; break;
-    //             case Rel.disjoint: s += '∙ '; break;
-    //             case Rel.super: s += '> '; break;
-    //             case Rel.sub: s += '< '; break;
-    //             case Rel.noncom: s += '~ '; break;
-    //             case Rel.dontcare: s += '# '; break;
-    //         }
-    //     }
-    //     console.log(s);
-    // }
-    // console.log('\n\n');
 
     // now the edges for the DAG... this does the 'transitive reduction' of ancestors
     const enum Stage {TODO, DOING, DONE}
@@ -305,12 +314,6 @@ function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: str
         }
     }
 
-    // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
-    eulerDiagram.universalSet = allSets[0];
-
-    // Mark all sets corresponding to the given `predicates` as principal sets.
-    //...
-
-    // Finally, compute the `sets` property.
-    //...
+    //TODO: all done
+    return allSets;
 }

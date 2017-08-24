@@ -1,46 +1,7 @@
-## Temp
-```
-**      ===insert==>   *A*
-**      ===insert==>   *B*
-*B*     ===insert==>   *A*B*
-*A*     ===insert==>   *A*B*
-**      ===insert==>   *C*
-*C*     ===insert==>   *A*C*
-*A*     ===insert==>   *A*C*
-*C*     ===insert==>   *B*C*
-*B*     ===insert==>   *B*C*
-**      ===insert==>   *B*C*D*
-*B*C*D* ===insert==>   *A*B*C*D*
-*A*     ===insert==>   *A*B*C*D*
-*A*B*   ===insert==>   *A*B*C*D*
-*A*C*   ===insert==>   *A*B*C*D*
-*B*     ===insert==>   *B*C*D*
-*B*C*D* ===insert==>   *A*B*C*D*
-*A*B*   ===insert==>   *A*B*C*D*
-*B*C*   ===insert==>   *B*C*D*
-*C*     ===insert==>   *B*C*D*
-*B*C*D* ===insert==>   *A*B*C*D*
-*A*C*   ===insert==>   *A*B*C*D*
-*B*C*   ===insert==>   *B*C*D*
-----------------------------------------
-**    ===insert==>   *B*C*D*
-**    ===insert==>   *C*
-*C*   ===insert==>   *B*C*D*
-**    ===insert==>   *B*
-*B*   ===insert==>   *B*C*
-*C*   ===insert==>   *B*C*
-*B*C* ===insert==>   *B*C*D*
-**    ===insert==>   *A*
-*A*   ===insert==>   *A*C*
-*C*   ===insert==>   *A*C*
-*A*   ===insert==>   *A*B*
-*B*   ===insert==>   *A*B*
-```
-
-
-
-
 ## Todo - High Priority
+- [ ] minimal doc comments / cleanup in ED
+- [ ] surface `unreachable` in mm creation options
+
 - [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
   - [ ] it might be useful if it effectively works like a no-op.
     - [ ] check if it indeed does work like this at present, or otherwise how it can be made to do so
