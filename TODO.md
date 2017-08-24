@@ -1,7 +1,4 @@
 ## Todo - High Priority
-- [x] minimal doc comments / cleanup in ED
-- [ ] surface `unreachable` in mm creation options
-
 - [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
   - [ ] it might be useful if it effectively works like a no-op.
     - [ ] check if it indeed does work like this at present, or otherwise how it can be made to do so
@@ -355,6 +352,8 @@ var routes = {
 
 
 ## Done
+- [x] minimal doc comments / cleanup in ED
+- [x] surface `unreachable` in mm creation options
 - [x] support `|` alternation operator in predicates
   - [x] refactor predicate code:
     - [x] `dsl-parser.ts` / `parsePredicateString`

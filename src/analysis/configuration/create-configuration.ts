@@ -14,8 +14,9 @@ export default function createConfiguration(options: Options) {
     let strict = options.strict || false;
     let toDiscriminant = options.toDiscriminant || defaultDiscriminator;
     let methods = getNormalisedMethods(options.methods);
+    let unreachable = options.unreachable || alwaysReachable;
 
-    return {name, arity, async, strict, toDiscriminant, methods} as Configuration;
+    return {name, arity, async, strict, toDiscriminant, methods, unreachable} as Configuration;
 }
 
 
@@ -33,6 +34,15 @@ function getNormalisedMethods(methods: Options['methods']) {
         result[predicate] = chain;
     }
     return result;
+}
+
+
+
+
+
+// TODO: doc...
+function alwaysReachable() {
+    return false;
 }
 
 

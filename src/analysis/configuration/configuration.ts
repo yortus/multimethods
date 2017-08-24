@@ -1,3 +1,4 @@
+import {Unreachable} from '../../math/predicates';
 
 
 
@@ -11,4 +12,5 @@ export default interface Configuration {
     strict: boolean;
     toDiscriminant: Function;
     methods: {[predicate: string]: Function[]};
+    unreachable: Unreachable;
 }

@@ -36,6 +36,11 @@ export function INVALID_TO_DISCRIMINANT_OPTION() {
     return error(format(fmt));
 }
 
+export function INVALID_UNREACHABLE_OPTION() {
+    let fmt = `Expected a function or undefined value for options.unreachable.`;
+    return error(format(fmt));
+}
+
 export function INVALID_METHOD_RESULT(methodName: string, expectedResult: string, actualResult: string) {
     let fmt = `Expected method %s to return %s, but received %s`;
     return error(format(fmt, methodName, expectedResult, actualResult));

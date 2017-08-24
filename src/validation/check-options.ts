@@ -49,6 +49,12 @@ export default function checkOptions(options: Options) {
         checkMethods(options.methods);
     }
 
+    // `unreachable` must be either undefined, or else a function.
+    if (options.unreachable !== undefined) {
+        let isValid = typeof options.unreachable === 'function';
+        if (!isValid) return fatalError.INVALID_UNREACHABLE_OPTION();
+    }
+
     // Perform strict validation. If any problems are found:
     // - issue a fatal error if options.strict is true.
     // - otherwise issue debug messages if debug.enabled is true

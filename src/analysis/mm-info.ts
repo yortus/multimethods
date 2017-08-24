@@ -10,7 +10,7 @@ import Configuration from './configuration';
 export default class MMInfo<TNode> {
 
     static fromConfig(config: Configuration) {
-        let ed = new EulerDiagram(Object.keys(config.methods));
+        let ed = new EulerDiagram(Object.keys(config.methods), config.unreachable);
         let mminfo = new MMInfo<{}>();
         mminfo.config = config;
         mminfo.allNodes = ed.allSets.map(() => ({}));

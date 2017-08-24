@@ -1,3 +1,4 @@
+import {Unreachable} from './math/predicates';
 
 
 
@@ -33,4 +34,7 @@ export default interface Options {
     methods?: {
         [predicate: string]: Function|Function[];
     };
+
+    // TODO: doc... advanced option...
+    unreachable?: Unreachable;
 }
