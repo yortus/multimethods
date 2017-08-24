@@ -1,5 +1,5 @@
 ## Todo - High Priority
-- [ ] minimal doc comments / cleanup in ED
+- [x] minimal doc comments / cleanup in ED
 - [ ] surface `unreachable` in mm creation options
 
 - [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?

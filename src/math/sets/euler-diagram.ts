@@ -67,22 +67,19 @@ import EulerSet from './euler-set';
  */
 export default class EulerDiagram {
 
-
-    /**
-     * Constructs a new euler diagram comprising the sets defined by the given predicates.
-     */
+    /** Constructs a new EulerDiagram instance. */
     constructor(predicates: string[], unreachable?: Unreachable) {
-        initEulerDiagram(this, predicates, unreachable);
+        let principalPredicates = getPrincipalPredicates(predicates);
+        let {allPredicates, supersets} = getSupersetRelationships(principalPredicates, unreachable);
+        this.allSets = getMinimumEquivalentDAG(allPredicates, principalPredicates, supersets);
+        this.universalSet = this.allSets.filter(s => s.predicate === ALL)[0];
     }
-
 
     /** Holds the root set of the euler diagram. */
     universalSet: EulerSet;
 
-
     /** Holds a snapshot of all the sets in the euler diagram at the time of construction. */
     allSets: EulerSet[];
-
 
     // TODO: temp testing... doc... looks up the set for the given predicate. returns undefined if not found.
     // algo: exact match using canonical form of given Predicate/string
@@ -91,7 +88,6 @@ export default class EulerDiagram {
         let result = this.allSets.filter(set => set.predicate === p)[0];
         return result;
     }
-
 
     /**
      * Enumerates every walk[1] in the euler diagram from the root to the given `set` following 'subset' edges.
@@ -109,7 +105,7 @@ export default class EulerDiagram {
 
 
 
-//TODO: doc...
+// TODO: doc...
 const MAX_PRINCIPAL_PREDICATES = 625;
 const MAX_AUXILIARY_PREDICATES = 3125;
 
@@ -117,38 +113,19 @@ const MAX_AUXILIARY_PREDICATES = 3125;
 
 
 
-/** Internal helper function used by the EulerDiagram constructor. */
-function initEulerDiagram(eulerDiagram: EulerDiagram, methodTablePredicates: string[], unreachable?: Unreachable) {
-
-    // Generate the list of principal predicates. They are all normalised predicates.
-    // The list always includes '**', always excludes '∅', and contains no duplicates.
-    let principalPredicates = methodTablePredicates.map(toNormalPredicate);
-    let rootIsPrincipal = principalPredicates.filter(p => p === ALL).length > 0;
-    principalPredicates.unshift(ALL); // ensure '**' is always first in the list.
+/** Helper to generate the list of principal predicates. These are normalised, duplicate-free, and exclude '∅'. */
+function getPrincipalPredicates(originalPredicates: string[]) {
+    let principalPredicates = originalPredicates.map(toNormalPredicate);
     principalPredicates = principalPredicates.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
-    principalPredicates = principalPredicates.filter(p => p !== NONE); // '∅' is always omitted from EDs.
-
-    //TODO: temp testing...
-    let {predicates, ancestors} = getSupersetRelationships(principalPredicates, unreachable);
-
-    //TODO: temp testing...
-    let allSets = eulerDiagram.allSets = makeDAG(predicates, rootIsPrincipal, principalPredicates.length, ancestors);
-
-    // Retrieve the universal set for this euler diagram, which always corresponds to the '**' predicate.
-    eulerDiagram.universalSet = allSets[0];
-
-    // Mark all sets corresponding to the given `predicates` as principal sets.
-    //...
-
-    // Finally, compute the `sets` property.
-    //...
+    principalPredicates = principalPredicates.filter(p => p !== NONE); // '∅' is always omitted.
+    return principalPredicates;
 }
 
 
 
 
 
-// TODO: doc...
+/** Helper to obtain all auxiliary predicates, and all superset/subset relationships between predicates. */
 function getSupersetRelationships(principalPredicates: NormalPredicate[], unreachable?: Unreachable) {
 
     // Count up the principal predicates. Ensure the count does not exceed the complexity limit (more on this below).
@@ -157,28 +134,31 @@ function getSupersetRelationships(principalPredicates: NormalPredicate[], unreac
 
     // Create a list to hold all principal and auxiliary predicates. It always starts with the principal predicates
     // in the order given. Create a separate variable to accumulate auxiliary predicates as they are generated.
-    let predicates = principalPredicates.slice();
+    let allPredicates = principalPredicates.slice();
     let auxiliaryPredicates = new Set<NormalPredicate>();
 
-    // `ancestors` is an array of sets corresponding 1:1 to the elements in the `predicates` array.
-    // Each set contains numbers; each number in the set at `ancestors[i]` is an index into the
-    // `predicates` array of a predicate that is a proper superset of the predicate at `predicates[i]`.
-    let ancestors = principalPredicates.map(_ => new Set<number>());
+    // Add an auxiliary predicate for the universal set '**' if it is not already a principal predicate.
+    if (principalPredicates.indexOf(ALL) === -1) auxiliaryPredicates.add(ALL);
+
+    // `supersets` is an array whose elements correspond 1:1 to the elements in the `predicates` array, in the
+    // same order. Each element in `supersets` holds a set of numbers; each number `j` in the set at `supersets[i]`
+    // is an index into the `predicates` array, and indicates that `predicates[j]` is a superset of `predicates[i]`.
+    let supersets = principalPredicates.map(_ => new Set<number>());
 
     // [PASS 1]: Compute the intersection of every possible pair of principal predicates. This will generate
     // all auxiliary predicates. It will also reveal the ancestry relationships between principal predicates.
     // NB: This is O(N^2) in the number of principal predicates. We imposed a modest upper bound on N above
     // because computing N^2 intersections rapidly becomes expensive with increasing N.
     for (let i = 0; i < principalCount; ++i) {
-        let lhs = predicates[i];
+        let lhs = allPredicates[i];
         for (let j = 0; j < i; ++j) {
-            let rhs = predicates[j];
+            let rhs = allPredicates[j];
             let intersection = intersect(lhs, rhs, unreachable);
             if (intersection === rhs) {
-                ancestors[j].add(i);
+                supersets[j].add(i);
             }
             else if (intersection === lhs) {
-                ancestors[i].add(j);
+                supersets[i].add(j);
             }
             else if (intersection !== NONE) {
                 auxiliaryPredicates.add(intersection);
@@ -194,26 +174,26 @@ function getSupersetRelationships(principalPredicates: NormalPredicate[], unreac
     principalPredicates.forEach(p => auxiliaryPredicates.delete(p));
     if (auxiliaryPredicates.size > MAX_AUXILIARY_PREDICATES) return TOO_COMPLEX();
 
-    // Add the auxiliary predicates to the predicates list, and extend `ancestors` to cover the new predicates.
+    // Add the auxiliary predicates to the predicates list, and extend `supersets` to cover the new predicates.
     auxiliaryPredicates.forEach(aux => {
-        predicates.push(aux);
-        ancestors.push(new Set());
+        allPredicates.push(aux);
+        supersets.push(new Set());
     });
 
     // [PASS 2]: Check for subset/superset relationships between every possible pairing of a principal
-    // predicate with an auxiliary predicate. This adds essential information to `ancestors`. In this pass
+    // predicate with an auxiliary predicate. This adds essential information to `supersets`. In this pass
     // we also detect auxiliary predicates that have no principal subsets, in order to speed up pass 3.
-    let hasPrincipalDescendents = predicates.map(_ => false);
-    for (let i = principalCount; i < predicates.length; ++i) {
-        let lhs = predicates[i];
+    let hasPrincipalSubsets = allPredicates.map(_ => false);
+    for (let i = principalCount; i < allPredicates.length; ++i) {
+        let lhs = allPredicates[i];
         for (let j = 0; j < principalCount; ++j) {
-            let rhs = predicates[j];
+            let rhs = allPredicates[j];
             if (isSubsetOf(lhs, rhs)) {
-                ancestors[i].add(j);
+                supersets[i].add(j);
             }
             else if (isSubsetOf(rhs, lhs)) {
-                hasPrincipalDescendents[i] = true;
-                ancestors[j].add(i);
+                hasPrincipalSubsets[i] = true;
+                supersets[j].add(i);
             }
         }
     }
@@ -224,96 +204,95 @@ function getSupersetRelationships(principalPredicates: NormalPredicate[], unreac
     // best-matching principal predicate, and that is all the information needed to determine the cases in which
     // a principal predicate is not an unambiguous best-match for a discriminant. Comparing two such auxiliary
     // predicates adds no useful information in this regard, so can be skipped.
-    for (let i = principalCount; i < predicates.length; ++i) {
-        let lhs = predicates[i];
+    for (let i = principalCount; i < allPredicates.length; ++i) {
+        let lhs = allPredicates[i];
         for (let j = principalCount; j < i; ++j) {
-            if (!hasPrincipalDescendents[i] && !hasPrincipalDescendents[j]) continue;
-            let rhs = predicates[j];
+            if (!hasPrincipalSubsets[i] && !hasPrincipalSubsets[j]) continue;
+            let rhs = allPredicates[j];
             if (isSubsetOf(lhs, rhs)) {
-                ancestors[i].add(j);
+                supersets[i].add(j);
             }
             else if (isSubsetOf(rhs, lhs)) {
-                ancestors[j].add(i);
+                supersets[j].add(i);
             }
         }
     }
 
-    // All done. Return the full predicate list, and the ancestry information that indexes into it.
-    return {predicates, ancestors};
+    // All done. Return the principal + auxiliary predicate array, and the superset information that indexes into it.
+    return {allPredicates, supersets};
 }
 
 
 
 
+/**
+ * Helper to generate a minimum equivalent DAG. `allPredicates` represents the nodes in the DAG, and `supersets`
+ * represents the edges. We create a minimal DAG by performing a transitive reduction [1] over the edges. For example,
+ * if the predicates are `a*`, `a*t`, and `ant`, then `supersets` will contain 3 corresponding edges: `a*<-a*t`,
+ * `a*<-ant` and `a*t<-ant`. After transitive reduction, the edge `a*<-ant` is removed, since there is still a path
+ * from `a*` to `ant` via the other two edges.
+ *
+ * After transitive reduction, the DAG has the property that each path from the root to
+ * a node represents a list of predicates in strict order from most-general to most-specific.
+ *
+ * [1] see transitive reduction: https://en.wikipedia.org/wiki/Transitive_reduction
+ */
+function getMinimumEquivalentDAG(allPredicates: NormalPredicate[],
+                                 principalPredicates: NormalPredicate[],
+                                 supersets: Array<Set<number>>) {
 
-function makeDAG(predicates: NormalPredicate[],
-                 rootIsPrincipal: boolean,
-                 principalCount: number,
-                 ancestors: Array<Set<number>>) {
-    // We now have enough ancestry information to construct a DAG with a node for each predicate, and edges
-    // corresponding to every superset/subset relationship between nodes. In particular, we want the 'minimum
-    // equivalent graph' with only edges for direct parent/child relationships between supersets/subsets.
-    // Note that we left out the computation of some ancestry information in the passes above (e.g. in pass 3).
-    // That is an optimisation to greatly reduce combinatorial complexity based on the observation that not
-    // all of the ancestry information is necessary for our purposes. What we essentially need to know is every
-    // 'way into' and 'way out of' every principal predicate via supersets/subsets, such that we know (i) precisely
-    // which principal predicate (if any) is the unambiguous best match for any given discriminant string; and
-    // (ii) regardless which path we take from the root following matching predicates, we will arrive at the
-    // same best-matching predicate if a unique one exists; and (iii) leaves = carve-outs showing ambiguities
+    // Create a node for each principal and auxiliary predicate. Each node has the shape of an EulerSet.
+    let nodes: EulerSet[] = allPredicates.map(predicate => ({
+        predicate,
+        supersets: [],
+        subsets: [],
+        isPrincipal: principalPredicates.indexOf(predicate) !== -1,
+    }));
 
-    // [1] see transitive reduction: https://en.wikipedia.org/wiki/Transitive_reduction
+    // Give every node a state, being either TODO, DOING, or DONE.
+    const enum State {TODO, DOING, DONE}
+    let state = nodes.map(_ => State.TODO);
 
-
-    // first make the nodes for the DAG.
-    let allSets = predicates.map((predicate, i) => {
-        let eulerSet: EulerSet = {
-            predicate,
-            supersets: [],
-            subsets: [],
-            isPrincipal: i === 0 ? rootIsPrincipal : i < principalCount,
-        };
-        return eulerSet;
-    });
-
-    // now the edges for the DAG... this does the 'transitive reduction' of ancestors
-    const enum Stage {TODO, DOING, DONE}
-    let stage = predicates.map(_ => Stage.TODO);
+    // Iterate until every node's edges have been reduced.
     let doneCount = 0;
-    while (doneCount < allSets.length) {
+    while (doneCount < nodes.length) {
 
-        // 1. Mark next round of 'todo' sets as 'doing'
-        for (let i = 0; i < allSets.length; ++i) {
-            if (stage[i] !== Stage.TODO) continue;
-            let allAncestorsDone = true;
-            ancestors[i].forEach(anc => allAncestorsDone = allAncestorsDone && stage[anc] === Stage.DONE);
-            if (!allAncestorsDone) continue;
-            stage[i] = Stage.DOING;
+        // 1. Mark next round of nodes to be reduced. These are nodes in the TODO state, whose superset nodes (if any)
+        // are all in the DONE state. On the first iteration, this will be just the root `**` node. On the next
+        // The next iteration, it will be the 'direct' subsets of '**', and so on. This implies a breadth-first search.
+        for (let i = 0; i < nodes.length; ++i) {
+            if (state[i] !== State.TODO) continue; // Only consider nodes marked TODO.
+            let allSupersetsDone = true;
+            supersets[i].forEach(sup => allSupersetsDone = allSupersetsDone && state[sup] === State.DONE);
+            if (!allSupersetsDone) continue; // Skip nodes with any supersets that are not marked DONE.
+            state[i] = State.DOING;
         }
 
-        // 2. Work out direct children of sets marked 'doing'
-        for (let i = 0; i < allSets.length; ++i) {
-            if (stage[i] !== Stage.TODO) continue;
-            let someAncestorsTodo = false;
-            ancestors[i].forEach(anc => someAncestorsTodo = someAncestorsTodo || stage[anc] === Stage.TODO);
-            if (someAncestorsTodo) continue;
-            ancestors[i].forEach(anc => {
-                if (stage[anc] === Stage.DOING) {
-                    let child = allSets[i];
-                    let parent = allSets[anc];
+        // 2. Work out 'direct' subsets of all nodes marked DOING.
+        for (let i = 0; i < nodes.length; ++i) {
+            if (state[i] !== State.TODO) continue; // Only consider nodes marked TODO.
+            let someSupersetsTodo = false;
+            supersets[i].forEach(sup => someSupersetsTodo = someSupersetsTodo || state[sup] === State.TODO);
+            if (someSupersetsTodo) continue; // Skip nodes with any supersets marked TODO.
+            supersets[i].forEach(sup => {
+                // The 'direct' supersets of the TODO node are those of its supersets that are marked DOING.
+                if (state[sup] === State.DOING) {
+                    let child = nodes[i];
+                    let parent = nodes[sup];
                     parent.subsets.push(child);
                     child.supersets.push(parent);
                 }
             });
         }
 
-        // 3. Mark all 'doing' as 'done'
-        for (let i = 0; i < allSets.length; ++i) {
-            if (stage[i] !== Stage.DOING) continue;
-            stage[i] = Stage.DONE;
+        // 3. Mark all DOING nodes as DONE.
+        for (let i = 0; i < nodes.length; ++i) {
+            if (state[i] !== State.DOING) continue;
+            state[i] = State.DONE;
             ++doneCount;
         }
     }
 
-    //TODO: all done
-    return allSets;
+    // `nodes` now represents a DAG with minimal superset/subset edges.
+    return nodes;
 }
