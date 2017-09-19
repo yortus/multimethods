@@ -1,4 +1,10 @@
 ## Todo - High Priority
+- [ ] if two ambiguous cases have the same handler, then make that NOT ambiguous...
+  - [ ] can't in general because they may fall back to different handlers
+  - [ ] but if we know there are no fallbacks, the cases are def not ambiguous
+  - [ ] need a marker (like the `meta` function) or option indicating no fallbacks
+    - [ ] per method? or per multimethod?
+- [ ] memoise: auto-clear on future tick
 - [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
   - [ ] it might be useful if it effectively works like a no-op.
     - [ ] check if it indeed does work like this at present, or otherwise how it can be made to do so
