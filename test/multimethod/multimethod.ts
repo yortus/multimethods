@@ -72,7 +72,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
     });
 
     // TODO: temp testing... strict+async - ensure method result is checked properly
-    it('TEMP4', () => {
+    it('TEMP4', async () => {
 
         let mm = MM({
             arity: 2,
@@ -86,9 +86,9 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
             },
         });
 
-        expect(mm('foo', 42)).to.eventually.equal('first is string');
-        expect(mm(true, 42)).to.eventually.equal('true:42');
-        expect(mm(42, 'foo')).to.eventually.throw(); // TODO: why UnhandledPromiseRejectionWarning?
-        expect(mm(42, true)).to.eventually.throw(); // TODO: why UnhandledPromiseRejectionWarning?
+        await expect(mm('foo', 42)).to.eventually.equal('first is string');
+        await expect(mm(true, 42)).to.eventually.equal('true:42');
+        await expect(mm(42, 'foo')).to.be.rejected;
+        await expect(mm(42, true)).to.be.rejected;
     });
 });
