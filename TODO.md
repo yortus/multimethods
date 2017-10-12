@@ -4,6 +4,9 @@
   - [ ] but if we know there are no fallbacks, the cases are def not ambiguous
   - [ ] need a marker (like the `meta` function) or option indicating no fallbacks
     - [ ] per method? or per multimethod?
+    - [ ] idea: support second handler qualifier (first is meta vs nonmeta): cascading vs non-cascading (can/t fallback)
+      - [ ] which one requires explicit qualifier? Probably cascading since it has more complex behaviour
+      - [ ] name? `cascade`, `casc`, `try`, `step`, `option`, bid, best, first, race, partial, part, test, layer, `cont`
 - [ ] memoise: auto-clear on future tick
 - [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
   - [ ] it might be useful if it effectively works like a no-op.

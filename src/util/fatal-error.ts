@@ -77,9 +77,9 @@ export function TOO_COMPLEX() {
     return error(format(fmt));
 }
 
-export function UNHANDLED() {
-    let fmt = `Multimethod dispatch failure: call was unhandled for the given arguments`;
-    return error(format(fmt));
+export function UNHANDLED(discriminant: string) {
+    let fmt = `Multimethod dispatch failure: call was unhandled for the given arguments (discriminant = '%s').`;
+    return error(format(fmt, discriminant));
 }
 
 

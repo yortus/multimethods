@@ -28,7 +28,7 @@ export default function __FUNCNAME__(__VARARGS__: any[]) {
     }
 
 
-    return result === $.CONTINUE ? $.ERROR_UNHANDLED() : result;
+    return result === $.CONTINUE ? $.ERROR_UNHANDLED(discriminant) : result;
 }
 
 
