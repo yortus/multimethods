@@ -91,4 +91,21 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
         await expect(mm(42, 'foo')).to.be.rejected;
         await expect(mm(42, true)).to.be.rejected;
     });
+
+    it('TEMP5', () => {
+
+        let mm = MM<string, any>({
+            arity: 1,
+            async: false,
+            strict: true,
+            toDiscriminant: (a: string) => a,
+            methods: {
+                '**':       meta((a, {}, next) => { console.log('**'); return next(a); }),
+                'a*':       _ => { console.log('a*'); return 'a*'; },
+                'aa*':      meta((a, {}, next) => { console.log('aa*'); return next(a); }),
+            },
+        });
+
+        expect(mm('aaa')).to.equal('a*');
+    });
 });
