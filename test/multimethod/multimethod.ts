@@ -1,6 +1,6 @@
 import {expect, use as chaiUse} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import {create as MM, meta} from 'multimethods';
+import {CONTINUE, create as MM, meta} from 'multimethods';
 
 
 
@@ -100,12 +100,12 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
             strict: true,
             toDiscriminant: (a: string) => a,
             methods: {
-                '**':       meta((a, {}, next) => { console.log('**'); return next(a); }),
-                'a*':       _ => { console.log('a*'); return 'a*'; },
-                'aa*':      meta((a, {}, next) => { console.log('aa*'); return next(a); }),
+                '**':       meta((a, {}, next) => `-${next(a)}-`),
+                'a*':       _ => 'a*',
+                'aa*':      meta((a, {}, next) => { let r = next(a); return r === CONTINUE ? CONTINUE : `(${r})`; }),
             },
         });
 
-        expect(mm('aaa')).to.equal('a*');
+        expect(mm('aaa')).to.equal('-a*-');
     });
 });

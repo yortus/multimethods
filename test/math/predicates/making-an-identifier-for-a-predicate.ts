@@ -16,12 +16,11 @@ describe('Making an identifier for a predicate', () => {
         'ABCDEFGHIJKLM ==> ABCDEFGHIJKLM',
         'NOPQRSTUVWXYZ ==> NOPQRSTUVWXYZ',
         '0123456789 ==> 0123456789',
-        ' /-.:<>@ ==> ˑⳆￚˌːᐸᐳဇ',
+        ' /-.:<>@! ==> ˑⳆￚˌːᐸᐳဇǃ',
 
         // All other characters should be invalid.... Test all keyboard symbols explicitly:
         '` ==> ERROR',
         '~ ==> ERROR',
-        '! ==> ERROR',
         '# ==> ERROR',
         '$ ==> ERROR',
         '% ==> ERROR',
@@ -67,12 +66,14 @@ describe('Making an identifier for a predicate', () => {
         '/api/foo/BAR ==> ⳆapiⳆfooⳆBAR',
         '/api/foo** ==> ⳆapiⳆfooᕯ',
         '/api/foo/** ==> ⳆapiⳆfooⳆᕯ',
+        '/api/foo/**! ==> ⳆapiⳆfooⳆᕯǃ',
         '/api/foo/{**rest} ==> ⳆapiⳆfooⳆᕯ',
         '/API/f* ==> ⳆAPIⳆfӿ',
         '/api/{foO}O ==> ⳆapiⳆӿO',
 
         'foo*|*oops ==> ӿoopsǀfooӿ',
         '*|aaa ==> ӿ',
+        '*!|aaa ==> ӿǃǀaaa',
         '| ==> ', // NB: two empty alternatives
         'abc|def ==> abcǀdef',
         'def|abc ==> abcǀdef',
@@ -83,6 +84,7 @@ describe('Making an identifier for a predicate', () => {
         '**|** ==> ᕯ',
         '*|*|* ==> ӿ',
         '**|*|** ==> ᕯ',
+        '**|*|**! ==> ᕯ',
         'a*|a*|B* ==> Bӿǀaӿ',
         'a*|abc*d|aa* ==> aӿ',
         'a*|*a ==> ӿaǀaӿ',

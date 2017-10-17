@@ -16,12 +16,11 @@ describe('Parsing and normalising a predicate', () => {
         'ABCDEFGHIJKLM ==> ABCDEFGHIJKLM',
         'NOPQRSTUVWXYZ ==> NOPQRSTUVWXYZ',
         '0123456789 ==> 0123456789',
-        ' /-.:<>@ ==>  /-.:<>@',
+        ' /-.:<>@! ==>  /-.:<>@!',
 
         // All other characters should be invalid.... Test all keyboard symbols explicitly:
         '` ==> ERROR',
         '~ ==> ERROR',
-        '! ==> ERROR',
         '# ==> ERROR',
         '$ ==> ERROR',
         '% ==> ERROR',
@@ -67,12 +66,14 @@ describe('Parsing and normalising a predicate', () => {
         '/api/foo/BAR ==> /api/foo/BAR',
         '/api/foo** ==> /api/foo**',
         '/api/foo/** ==> /api/foo/**',
+        '/api/foo/**! ==> /api/foo/**!',
         '/api/foo/{**rest} ==> /api/foo/**',
         '/API/f* ==> /API/f*',
         '/api/{foO}O ==> /api/*O',
 
         'foo*|*oops ==> *oops|foo*',
         '*|aaa ==> *',
+        '*!|aaa ==> *!|aaa',
         '| ==> ', // NB: two empty alternatives
         'abc|def ==> abc|def',
         'def|abc ==> abc|def',
@@ -83,6 +84,7 @@ describe('Parsing and normalising a predicate', () => {
         '**|** ==> **',
         '*|*|* ==> *',
         '**|*|** ==> **',
+        '**|*|**! ==> **',
         'a*|a*|B* ==> B*|a*',
         'a*|abc*d|aa* ==> a*',
         'a*|*a ==> *a|a*',

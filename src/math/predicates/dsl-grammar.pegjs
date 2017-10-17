@@ -1,8 +1,8 @@
 // ----- NB: JS in this file is not transpiled, so use only ES5 syntax + runtime in here -----
 {
     // Whitelisting is super-important here in the parser. Everything after this assumes a valid predicate.
-    // TODO: must keep in sync with `./to-predicate.ts`. Better way? Pass this in via options?
-    function isWhitelisted(c) { return /^[a-zA-Z0-9_]$/.test(c) || ' /-.:<>@'.indexOf(c) !== -1; }
+    // TODO: must keep in sync with `./to-predicate.ts` and `./to-identifier-parts.ts`. Better way?
+    function isWhitelisted(c) { return /^[a-zA-Z0-9_]$/.test(c) || ' /-.:<>@!'.indexOf(c) !== -1; }
 }
 
 

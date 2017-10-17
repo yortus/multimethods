@@ -135,26 +135,26 @@
 - [ ] use URI ref: https://tools.ietf.org/html/rfc3986
 - [ ] TODO: char pool yet to classify:
 
-  - [ ] unallocated: `% ^ < > | ! $ ' " ( ) + , ;`
+  - [ ] unallocated: `% ^ | $ ' " ( ) + , ;`
                         was:
                         - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
                         - [ ] Others: `% ^ ~ < > " |`
 
 - [ ] support predicate 'type' indicators - eg binary predicates like `*100*10`, and maybe more future ones
 - [ ] treat the following as literal match characters:
-  - [ ] `a-z A-Z 0-9 _ . - /`  (already supported)
+  - [ ] `a-z A-Z 0-9 <space> _ / - . : < > @ !`  (already supported)
   - [ ] `~` (unreserved in URIs - so may commonly appear in URLs)
-  - [ ] `: ? = & #` (commonly appear in URIs as delimiters)
-  - [ ] `[ ] @` (also used in some URI schemes according to RFC3986#1.1.2)
+  - [ ] `? = & #` (commonly appear in URIs as delimiters)
+  - [ ] `[ ]` (also used in some URI schemes according to RFC3986#1.1.2)
   - [ ] `+` is this always unescaped to space? The RFC lists it as a reserved demiliter
 - [ ] TODO: revise whether to treat the following as literal match characters. List pros/cons
   - [ ] <space> (already supported)
 - [ ] TODO: Implement the following operators:
   - [ ] `*` wildcard
-  - [ ] `...` globstar
+  - [ ] `...` / `**` globstar
     - [x] TODO: change back to `**`? Pros: One less special char. Cons: Ambiguous?
     - [x] Use single unicode 'letter' char for `**` : U+156F `ᕯ`
-  - [ ] `{...}` wildcard/globstar named capture
+  - [ ] `{...}` / `{**}` wildcard/globstar named capture
 - [x] TODO: Reserve the following characters for future use:
   - [x] `( ) |`
   - [ ] TODO: union/or: `|`?
@@ -168,7 +168,7 @@
   - [ ] doc why to have this:
     - [ ] so client have a few special characters for augmenting predicates for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the predicate
     - [ ] for safely putting other props in same hash as rules, eg `$toDiscriminant` or similar
-  - [ ] TODO: `$ ; < >`
+  - [ ] TODO: `$ ;`
 
 - [ ] TODO: Support escape sequences for any character as follows:
   - [ ] TODO: ...
