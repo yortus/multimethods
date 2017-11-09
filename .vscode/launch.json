@@ -16,6 +16,7 @@
                 "999999",
                 "--colors",
                 "${workspaceRoot}/dist/test/**/*.js"
+//                "${workspaceRoot}/dist/test/multimethod/constructing*.js"
 //                "${workspaceRoot}/dist/test/**/intersecting*.js"
 //                "${workspaceRoot}/dist/test/**/constructing-an-euler*.js"
 //                "${workspaceRoot}/dist/test/**/constructing-equivalent-euler*.js"
@@ -24,7 +25,10 @@
             "env": {
                 "DEBUG": "multimethods"
             },
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         },
         {
             "type": "node",
@@ -36,7 +40,10 @@
             ],
             "env": {
                 "DEBUG": "multimethods"
-            }
+            },
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
         }
     ]
 }

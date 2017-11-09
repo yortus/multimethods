@@ -1,4 +1,6 @@
 ## Todo - High Priority
+- [ ] decide: `captures` gets all matches, even anon ones as `[0]`, `[1]`, etc (like express `req.params`)
+- [ ] rename CONTINUE --> FALLTHROUGH ?? Compare implications of terms...
 - [ ] if two ambiguous cases have the same handler, then make that NOT ambiguous...
   - [ ] can't in general because they may fall back to different handlers
   - [ ] but if we know there are no fallbacks, the cases are def not ambiguous

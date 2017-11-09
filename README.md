@@ -105,11 +105,12 @@ A valid pattern string conforms to the following rules:
 - An anonymous wildcard is designated with `*`.
 - A named wildcard is designated with `{id}` where id is a valid JS identifier.
 - Two captures may not occupy adjacent positions in a pattern.
-- Patterns may have trailing whitespace, which is removed.
-- Whitespace consists of spaces and/or comments.
+- Patterns may have trailing whitespace, which is removed. (TODO: not any more? check tests)
+- Whitespace consists of spaces and/or comments. (TODO: not any more? check tests)
+- TODO: a|b alternatives syntax
 #### Deprecated/removed:
 - A comment begins with `#` and continues to the end of the string.
-- The special pattern `∅` is permitted. It represents a pattern that matches no addresses.
+- The special pattern `∅` is permitted. It represents a pattern that matches no addresses. (TODO: re-instated? check tests)
 
 
 ## Pattern DSL Examples

@@ -12,11 +12,13 @@ export default function emitDispatchFunction(emit: Emitter, mminfo: MMInfo<MMNod
 
     // TODO: temp testing...
     emitDispatchFunctionFromTemplate(emit, mminfo.config.name, mminfo.config.arity, {
+        IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
         CONTINUE: names.CONTINUE,
         ERROR_UNHANDLED: names.ERROR_UNHANDLED,
         ERROR_INVALID_RESULT: names.ERROR_INVALID_RESULT,
         TO_DISCRIMINANT: names.TO_DISCRIMINANT,
         SELECT_THUNK: names.SELECT_THUNK,
+        IS_NEVER_ASYNC: mminfo.config.async === false,
         IS_ASYNC_RESULT_REQUIRED: mminfo.config.strict && mminfo.config.async === true,
     });
 }
