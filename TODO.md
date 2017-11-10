@@ -1,4 +1,6 @@
 ## Todo - High Priority
+- [ ] use `this` to pass captures and next, then `arity` opt is just an optimisation
+- [ ] have a `trust: boolean` option instead of `strict`? Since it's more about whether methods are trusted to comply
 - [ ] decide: `captures` gets all matches, even anon ones as `[0]`, `[1]`, etc (like express `req.params`)
 - [ ] rename CONTINUE --> FALLTHROUGH ?? Compare implications of terms...
 - [ ] if two ambiguous cases have the same handler, then make that NOT ambiguous...
