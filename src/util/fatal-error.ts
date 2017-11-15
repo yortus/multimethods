@@ -1,4 +1,5 @@
 import {format} from 'util';  // TODO: ensure this node.js dep doesn't prevent clientside use (eg via webpack)
+import {AMBIGUOUS_DISPATCH, UNHANDLED_DISPATCH} from '../sentinels';
 import debug, {FATAL} from './debug';
 
 
@@ -54,7 +55,7 @@ export function MIXED_CHAIN(predicate: string) {
 
 export function MULTIPLE_FALLBACKS_FROM(predicate: string, fallbacks: string) {
     let fmt = `Multiple possible fallbacks from '%s': %s`;
-    return error(format(fmt, predicate, fallbacks));
+    return error(format(fmt, predicate, fallbacks), AMBIGUOUS_DISPATCH);
 }
 
 export function MULTIPLE_PATHS_TO(predicate: string) {
@@ -79,16 +80,16 @@ export function TOO_COMPLEX() {
 
 export function UNHANDLED(discriminant: string) {
     let fmt = `Multimethod dispatch failure: call was unhandled for the given arguments (discriminant = '%s').`;
-    return error(format(fmt, discriminant));
+    return error(format(fmt, discriminant), UNHANDLED_DISPATCH);
 }
 
 
 
 
 
-function error(message: string): never {
+function error(message: string, code?: any): never {
     debug(`${FATAL} %s`, message);
-    throw new MultimethodError(message);
+    throw new MultimethodError(message, code);
 }
 
 
@@ -98,13 +99,19 @@ function error(message: string): never {
 // TODO: doc...
 class MultimethodError extends Error {
 
-    constructor(message: string) {
+    constructor(message: string, code?: any) {
         super(message);
 
         // Workaround for ES5. See:
         // https://github.com/Microsoft/TypeScript/wiki/FAQ#why-doesnt-extending-built-ins-like-error-array-and-map-work
         Object.setPrototypeOf(this, MultimethodError.prototype);
+
+        if (code) {
+            this.code = code;
+        }
     }
+
+    code: any;
 }
 
 
