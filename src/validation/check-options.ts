@@ -9,7 +9,7 @@ import listDiscontinuities from './list-discontinuities';
 
 
 // TODO: doc...
-export default function checkOptions(options: Options) {
+export default function checkOptions(options: Options): void {
 
     // `name` must be either undefined, or conform to [A-Za-z$_][A-Za-z$_0-9]* (ie a simple JS indentifier).
     if (options.name !== undefined) {

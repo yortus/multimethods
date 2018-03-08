@@ -35,7 +35,7 @@ export default function analyseAmbiguities<T extends MethodTableEntry>(mminfo: M
 
             // Ensure the divergent sets contain NO meta-methods. Otherwise, fail immediately.
             // This guarantees the dispatch result is the same regardless of which path is taken through the methods.
-            pathsFromRoot.forEach(path => {
+            pathsFromRoot.forEach((path): void => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
                 let divergentNodes = divergentSets.map(s => nodes[sets.indexOf(s)]);
                 let hasMetaMethods = divergentNodes.some(n => n.exactMethods.some(m => isMetaMethod(m)));

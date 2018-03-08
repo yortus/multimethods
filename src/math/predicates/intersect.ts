@@ -30,7 +30,7 @@ let intersect: (a: NormalPredicate, b: NormalPredicate, unreachable?: Unreachabl
 intersect = memoise((a: NormalPredicate, b: NormalPredicate, unreachable?: Unreachable): NormalPredicate => {
 
     //TODO: temp testing... remove...
-    ++CALL_COUNT_EXTERNAL;
+    // ++CALL_COUNT_EXTERNAL;
 
     // If no `unreachable` callback is given, use a default that indicates all predicates are reachable.
     unreachable = unreachable || alwaysReachable;
@@ -61,9 +61,9 @@ export default intersect;
 
 
 
-// TODO: temp testing...
-let CALL_COUNT_EXTERNAL = 0;
-let CALL_COUNT_INTERNAL = 0;
+//TODO: temp testing...
+// let CALL_COUNT_EXTERNAL = 0;
+// let CALL_COUNT_INTERNAL = 0;
 
 
 
@@ -82,7 +82,7 @@ let getAllIntersections: (commonPrefix: string, a: NormalPredicate, b: NormalPre
 getAllIntersections = memoise((commonPrefix: string, a: NormalPredicate, b: NormalPredicate, unreachable: Unreachable) => {
 
     //TODO: temp testing...
-    ++CALL_COUNT_INTERNAL;
+    // ++CALL_COUNT_INTERNAL;
 
     // Ensure `a` always precedes `b` lexicographically. Intersection is commutative,
     // so sorting `a` and `b` reduces the solution space without affecting the result.

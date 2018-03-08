@@ -12,7 +12,7 @@ export default function checkMethods(methods: Options['methods']) {
     if (methods === undefined) return;
 
     // For method chains, ensure first regular method in chain (if any) comes after last meta-method in chain (if any).
-    Object.keys(methods).forEach(predicate => {
+    Object.keys(methods).forEach((predicate): void => {
         let method = methods[predicate];
         if (!Array.isArray(method)) return;
         let chain = method;
