@@ -1,6 +1,6 @@
 {
   "name": "multimethods",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "multimethods",
   "readmeFilename": "README.md",
   "main": "dist/commonjs/index.js",
