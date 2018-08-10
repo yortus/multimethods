@@ -21,7 +21,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
             arity: 1,
             toDiscriminant: (x: string) => x,
             methods: {
-                '/{thing}': (x, {_thing}, _) => x,
+                '/{thing}': (x, {}, _) => x,
                 '/foo':     (x) => 'foo' + x,
                 '/bar':     (x) => 'bar' + x,
                 '**':      meta((x, _, next) => `---${next(x)}---`),

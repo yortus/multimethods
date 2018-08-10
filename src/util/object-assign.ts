@@ -23,5 +23,5 @@ export default function assign<T extends {[x: string]: any}, S extends {[x: stri
 
 // TODO: doc... See https://github.com/Microsoft/TypeScript/issues/12215
 type Simplify<T> = {[K in keyof T]: T[K]};
-type Overwrite<T, U> = { [P in Diff<keyof T, keyof U>]: T[P] } & U;
+type Overwrite<T, U> = { [P in Diff<Extract<keyof T, string>, Extract<keyof U, string>>]: T[P] } & U;
 type Diff<T extends string, U extends string> = ({ [P in T]: P } & { [P in U]: never } & { [x: string]: never })[T];

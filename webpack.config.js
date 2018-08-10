@@ -8,6 +8,8 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
 
+    mode: 'production',
+
     entry: './dist/commonjs/index.js',
 
     plugins: [

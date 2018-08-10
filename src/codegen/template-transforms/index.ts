@@ -15,7 +15,7 @@ export function transformTemplate<TEnv>(template: Template, name: string, arity:
 
     // Prepare textual substitutions
     let replacements = {} as {[x: string]: string};
-    Object.keys(env).forEach((k: keyof TEnv) => replacements['$.' + k] = env[k].toString());
+    Object.keys(env).forEach((k: Extract<keyof TEnv, string>) => replacements['$.' + k] = env[k].toString());
     replacements.__VARARGS__ = '...__VARARGS__';
     replacements.__FUNCNAME__ = name;
 
