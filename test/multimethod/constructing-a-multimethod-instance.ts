@@ -39,10 +39,10 @@ describe('Constructing a Multimethod instance', () => {
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
             '/baz': () => val('baz'),
-            '/*a*': meta((rq, _, next) => {
+            '/*a*': meta(function (rq) {
                     return calc([
                         '---',
-                        calc(next(rq), rs => rs === CONTINUE ? err('no downstream!') : rs),
+                        calc(this.next(rq), rs => rs === CONTINUE ? err('no downstream!') : rs),
                         '---',
                     ], concat);
             }),
@@ -58,24 +58,24 @@ describe('Constructing a Multimethod instance', () => {
             'api/**': () => val(`fallback`),
             'api/fo*o': () => val(CONTINUE),
             'api/fo*': [
-                meta((rq, _, next) => {
-                    return calc(['fo2-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat);
+                meta(function (rq) {
+                    return calc(['fo2-(', calc(this.next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat);
                 }),
-                meta((rq, _, next) => {
-                    return calc(['fo1-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat);
+                meta(function (rq) {
+                    return calc(['fo1-(', calc(this.next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat);
                 }),
             ],
             'api/foo': [
-                meta((rq, _, next) => calc([calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), '!'], concat)),
+                meta(function (rq) { return calc([calc(this.next(rq), rs => rs === CONTINUE ? val('NONE') : rs), '!'], concat); }),
                 () => val('FOO'),
             ],
             'api/foot': rq => val(`FOOt${rq.address.length}`),
             'api/fooo': () => val('fooo'),
             'api/bar': () => val(CONTINUE),
 
-            'zz/z/{**rest}': meta((_, {rest}, next) => {
-                let moddedReq = {address: rest.split('').reverse().join('')};
-                return calc(next(moddedReq), rs => rs === CONTINUE ? val('NONE') : rs);
+            'zz/z/{**rest}': meta(function () {
+                let moddedReq = {address: this.captures.rest.split('').reverse().join('')};
+                return calc(this.next(moddedReq), rs => rs === CONTINUE ? val('NONE') : rs);
             }),
             'zz/z/b*z': (rq) => val(`${rq.address}`),
             'zz/z/./*': () => val('forty-two'),
@@ -83,22 +83,22 @@ describe('Constructing a Multimethod instance', () => {
             'CHAIN-{x}': [
 
                 // Wrap subsequent results with ()
-                meta((rq, {}, next) => calc(['(', next(rq), ')'], concat)),
+                meta(function (rq) { return calc(['(', this.next(rq), ')'], concat); }),
 
                 // Block any result that starts with '[32'
-                meta((rq, {}, next) => calc(next(rq), rs => rs.startsWith('[32') ? err('blocked') : rs)),
+                meta(function (rq) { return calc(this.next(rq), rs => rs.startsWith('[32') ? err('blocked') : rs); }),
 
                 // Wrap subsequent results with []
-                meta((rq, {}, next) => calc(['[', next(rq), ']'], concat)),
+                meta(function (rq) { return calc(['[', this.next(rq), ']'], concat); }),
 
                 // Return x!x! only if x ends with 'b' , otherwise skip
-                (_, {x}) => val(x.endsWith('b') ? (x + '!').repeat(2) : CONTINUE),
+                function () { return val(this.captures.x.endsWith('b') ? (this.captures.x + '!').repeat(2) : CONTINUE); },
 
                 // Return xxx only if x has length 2, otherwise skip
-                (_, {x}) => val(x.length === 2 ? x.repeat(3) : CONTINUE),
+                function () { return val(this.captures.x.length === 2 ? this.captures.x.repeat(3) : CONTINUE); },
 
                 // Return the string reversed
-                (_, {x}) => val(x.split('').reverse().join('')),
+                function () { return val(this.captures.x.split('').reverse().join('')); },
             ],
         };
 

@@ -13,7 +13,7 @@
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": false,  // TODO: change to `true` and fix resulting errors
         "noImplicitReturns": true,
-        "noImplicitThis": true,
+        "noImplicitThis": false,
         "noImplicitUseStrict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,

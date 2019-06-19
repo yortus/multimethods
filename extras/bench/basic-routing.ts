@@ -11,6 +11,9 @@ import {CONTINUE, create as MM, meta} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
+// 2019-04-02   LAJESTIC    Dispatched 1000000 requests in 0.488 seconds   (~2049000 req/sec)   Passing captures/next through `this`. Approx. 14% slower.
+// 2019-04-01   LAJESTIC    Dispatched 1000000 requests in 0.429 seconds   (~2331000 req/sec)   Coming back after long time. Big perf jump due to V8 improvements I guess? Machine hasn't changed.
+
 // 2017-07-22   LAJESTIC    Dispatched 1000000 requests in 0.741 seconds   (~1350000 req/sec)   general perf checkback after many commits.
 // 2017-06-26   LAJESTIC    Dispatched 1000000 requests in 0.763 seconds   (~1311000 req/sec)   now emits proper dispatch function (with arity adjustments, etc).
 // 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.782 seconds   (~1279000 req/sec)   adjustments after making MMs throw if final result is CONTINUE.
@@ -49,7 +52,7 @@ const mm = MM({
         '/foo': () => 'foo',
         '/bar': () => 'bar',
         '/baz': () => 'baz',
-        '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
+        '/*a*': meta(function ($req) { return `---${ifUnhandled(this.next($req), 'NONE')}---`; }),
 
         'a/*': () => `starts with 'a'`,
         '*/b': () => `ends with 'b'`,
@@ -62,11 +65,11 @@ const mm = MM({
         'api/**': [() => `fallback`, () => `fallback`],
         'api/fo*o': () => CONTINUE,
         'api/fo*': [
-            meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
-            meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
+            meta(function ($req) { return `fo2-(${ifUnhandled(this.next($req), 'NONE')})`; }),
+            meta(function ($req) { return `fo1-(${ifUnhandled(this.next($req), 'NONE')})`; }),
         ],
         'api/foo': [
-            meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
+            meta(function ($req) { return `${ifUnhandled(this.next($req), 'NONE')}!`; }),
             () => 'FOO',
         ],
         'api/foot': () => 'FOOt',
@@ -74,7 +77,7 @@ const mm = MM({
         'api/bar': () => CONTINUE,
 
         // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-        'zz/z/{**rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
+        'zz/z/{**rest}': meta(function () { return `${ifUnhandled(this.next({address: this.captures.rest.split('').reverse().join('')}), 'NONE')}`; }),
         'zz/z/b*z': ($req) => `${$req.address}`,
         'zz/z/./*': () => 'forty-two',
     },

@@ -24,7 +24,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
                 '/{thing}': (x, {}, _) => x,
                 '/foo':     (x) => 'foo' + x,
                 '/bar':     (x) => 'bar' + x,
-                '**':      meta((x, _, next) => `---${next(x)}---`),
+                '**':      meta(function (x) { return `---${this.next(x)}---`; }),
             },
         });
         let result = mm('/foo');
@@ -100,9 +100,9 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
             strict: true,
             toDiscriminant: (a: string) => a,
             methods: {
-                '**':       meta((a, {}, next) => `-${next(a)}-`),
+                '**':       meta(function (a) { return `-${this.next(a)}-`; }),
                 'a*':       _ => 'a*',
-                'aa*':      meta((a, {}, next) => { let r = next(a); return r === CONTINUE ? CONTINUE : `(${r})`; }),
+                'aa*':      meta(function (a) { let r = this.next(a); return r === CONTINUE ? CONTINUE : `(${r})`; }),
             },
         });
 
