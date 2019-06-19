@@ -11,6 +11,8 @@ import {CONTINUE, create as MM, meta} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
+// 2019-06-19   LAJESTIC    Dispatched 1000000 requests in 0.428 seconds   (~2336000 req/sec)   Coming back after long time. Big perf jump due to V8 improvements I guess? Machine hasn't changed.
+
 // 2017-07-22   LAJESTIC    Dispatched 1000000 requests in 0.741 seconds   (~1350000 req/sec)   general perf checkback after many commits.
 // 2017-06-26   LAJESTIC    Dispatched 1000000 requests in 0.763 seconds   (~1311000 req/sec)   now emits proper dispatch function (with arity adjustments, etc).
 // 2017-06-14   LAJESTIC    Dispatched 1000000 requests in 0.782 seconds   (~1279000 req/sec)   adjustments after making MMs throw if final result is CONTINUE.
