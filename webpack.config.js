@@ -1,6 +1,5 @@
 const path = require('path');
-const webpack = require('webpack');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 
 
@@ -12,9 +11,31 @@ module.exports = {
 
     entry: './dist/commonjs/index.js',
 
-    plugins: [
-        new UglifyJSPlugin({
-            uglifyOptions: {
+    output: {
+        filename: 'multimethods.min.js',
+        path: path.resolve(__dirname, 'dist/umd'),
+        library: 'multimethods',
+        libraryTarget: 'umd'
+    },
+
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env']
+                    }
+                }
+            }
+        ],
+    },
+
+    optimization: {
+        minimizer: [new TerserPlugin({
+            terserOptions: {
                 mangle: {
                     reserved: ['__FUNCNAME__', '__VARARGS__']
                 },
@@ -27,13 +48,6 @@ module.exports = {
                 //     join_vars: false
                 // }
             }
-        })
-    ],
-
-    output: {
-        filename: 'multimethods.min.js',
-        path: path.resolve(__dirname, 'dist/umd'),
-        library: 'multimethods',
-        libraryTarget: 'umd'
-    }
+        })],
+    },
 };

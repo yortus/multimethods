@@ -11,7 +11,7 @@ import replaceAll from './replace-all';
 // TODO: explain/doc __FUNCNAME__ convention: allows emitted code to name the function
 // TODO: explain/doc __VARARGS__ convention: prevents tsc build from downleveling `...` to equiv ES5 in templates
 //       - (since we do that better in here)
-export function transformTemplate<TEnv>(template: Template, name: string, arity: number|undefined, env: TEnv) {
+export function transformTemplate<TEnv extends Environment>(template: Template, name: string, arity: number|undefined, env: TEnv) {
 
     // Prepare textual substitutions
     let replacements = {} as {[x: string]: string};
@@ -25,3 +25,9 @@ export function transformTemplate<TEnv>(template: Template, name: string, arity:
     template = downlevelES6RestSpread(template, arity);
     return template;
 }
+
+
+
+
+
+export type Environment = Record<string, string | boolean>;

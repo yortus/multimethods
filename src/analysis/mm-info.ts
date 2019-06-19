@@ -7,7 +7,7 @@ import Configuration from './configuration';
 
 
 // TODO: doc...
-export default class MMInfo<TNode> {
+export default class MMInfo<TNode extends object> {
 
     static fromConfig(config: Configuration) {
         let ed = new EulerDiagram(Object.keys(config.methods), config.unreachable);
@@ -32,12 +32,12 @@ export default class MMInfo<TNode> {
     }
 
     // TODO: doc... modifies this MMInfo's nodes in-place. Returns this MMInfo instance, but with refined node types
-    addProps<U>(callback: (node: TNode, nodes: TNode[], set: EulerSet, sets: EulerSet[]) => U) {
+    addProps<U extends object>(callback: (node: TNode, nodes: TNode[], set: EulerSet, sets: EulerSet[]) => U) {
 
         // Map over all nodes, obtaining the additional properties, and assigning each back into its corresponding node.
         let sets = this.eulerDiagram.allSets;
         let nodes = this.allNodes.map((node, i) => {
-            let newProps = callback(node, this.allNodes, sets[i], sets) || {};
+            let newProps = callback(node, this.allNodes, sets[i], sets); // TODO: was... || {};
             return assign(node, newProps);
         });
 
