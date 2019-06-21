@@ -1,3 +1,4 @@
+export const CONTINUE = Symbol('CONTINUE') as never; // subtype of all types, so always allowed as method return
 
 
 
@@ -96,7 +97,7 @@ type Result<T> =
 
 // let mm2 = mm1.extend({
 //     '/foo': async () => 'hi',
-//     '/bar': async () => '42',
+//     '/bar': async () => CONTINUE,
 // });
 // let x2a = mm2(3, 'asda');
 
@@ -105,7 +106,7 @@ type Result<T> =
 //     '/foo/*': async () => 'hi hi',
 //     '/foo/*/*': () => 'hi hi hi',
 //     async '/{**path}'(a, b) { return `/${a}/${b}${this.captures.path}`; },
-//     async '/thing/{name}'(a, b) { return `/${a}/${b}${this.captures.name}`; },
+//     async '/thing/{name}'(a, b) { return CONTINUE; }, // TODO: was... `/${a}/${b}${this.captures.name}`; },
 // });
 // let x3a = mm3(3, 'asda');
 
@@ -113,6 +114,7 @@ type Result<T> =
 // let mm4a = mm1.extend({foo: () => 'foo'});
 // let mm4b = mm1.extend({foo: () => 42});
 // let mm4c = mm4a.extend({foo: () => 42});
+// let mm4d = mm4c.extend({foo: async () => CONTINUE});
 // mm4a = mm4b;
 // mm4a = mm4c;
 // mm4b = mm4a;
@@ -124,14 +126,14 @@ type Result<T> =
 
 
 // let mm5 = mm2.extend({
-//     '/foo': async () => 42,
-//     '/bar': async () => 0,
+//     '/foo': async () => CONTINUE,
+//     '/bar': async () => 42,
 // });
 // let x5a = mm5(3, 'asda');
 
 
 // let mm6 = mm4b.extend({
-//     '/foo': () => 'blah',
+//     '/foo': () => CONTINUE,
 //     '/bar': () => 'foo',
 // });
 // let x6a = mm6(3, 'asda');
