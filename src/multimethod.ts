@@ -7,49 +7,43 @@ export interface MultimethodStatic {
 
     // Functional-style factory function
     // NB 'never' result: will always throw after construction; no methods yet
-    <TParams extends unknown[]>(options?: MultimethodOptions<TParams>): Multimethod<TParams, never>;
+    <TParams extends unknown[]>(options?: Options<TParams>): Multimethod<TParams, never>;
+    <TParams extends unknown[]>(options?: Options<TParams, 'async'>): AsyncMultimethod<TParams, never>;
 
     // OO-style class constructor
     // NB 'never' result: will always throw after construction; no methods yet
-    new <TParams extends unknown[]>(options?: MultimethodOptions<TParams>): Multimethod<TParams, never>;
+    new <TParams extends unknown[]>(options?: Options<TParams>): Multimethod<TParams, never>;
+    new <TParams extends unknown[]>(options?: Options<TParams, 'async'>): AsyncMultimethod<TParams, never>;
 }
+
+export let Multimethod!: MultimethodStatic; // TODO: initialise this var
+
 export interface Multimethod<TParams extends unknown[], TResult> {
     (...args: TParams): TResult;
     extend<TR>(methods: Methods<TParams, TR>): Multimethod<TParams, Result<TResult | TR>>;
     extend<TR>(methods: Methods<TParams, TR | Promise<TR>>): Multimethod<TParams, Result<TResult | TR | Promise<TR>>>;
 }
-export let Multimethod!: MultimethodStatic; // TODO: initialise this var
 
-
-
-
-export interface AsyncMultimethodStatic {
-
-    // Functional-style factory function
-    // NB 'never' result: will always throw after construction; no methods yet
-    <TParams extends unknown[]>(options?: MultimethodOptions<TParams>): AsyncMultimethod<TParams, never>;
-
-    // OO-style class constructor
-    // NB 'never' result: will always throw after construction; no methods yet
-    new <TParams extends unknown[]>(options?: MultimethodOptions<TParams>): AsyncMultimethod<TParams, never>;
-}
 export interface AsyncMultimethod<TParams extends unknown[], TResult> {
     (...args: TParams): Promise<TResult>;
     extend<TR>(methods: Methods<TParams, TR | Promise<TR>>): AsyncMultimethod<TParams, TResult | TR>;
 }
-export let AsyncMultimethod!: AsyncMultimethodStatic; // TODO: initialise this var
 
 
 
 
-export type MultimethodOptions<TParams extends unknown[]> =
-    | LabelFunction<TParams>
-    | MultimethodOptionsObject<TParams>;
+export type Options<TParams extends unknown[], TAsync extends 'async' = never> =
+    | LabellingFunction<TParams, TAsync>
+    | OptionsObject<TParams, TAsync>;
 
-export type MultimethodOptionsObject<TParams extends unknown[]> =
-    & {label?: LabelFunction<TParams> };
+export interface OptionsObject<TParams extends unknown[], TAsync extends 'async'> {
+    label?: LabellingFunction<TParams, TAsync>;
+}
 
-export type LabelFunction<TParams extends unknown[]> = (...args: TParams) => string;
+export interface LabellingFunction<TParams extends unknown[], TAsync extends 'async'> {
+    (...args: TParams): 'async' extends TAsync ? Promise<string> : string;
+}
+
 
 
 
@@ -141,3 +135,8 @@ let x6a = mm6(3, 'asda');
 
 let mm7 = new Multimethod();
 let x7a = mm7.extend({foo: (_, __) => 'bar'})();
+
+
+let mm8 = new Multimethod(async (a: number, b: string) => `/${a}/${b}`);
+let mm9 = mm8.extend({foo: () => 'foo'});
+let x9a = mm9(1, 'sdsd');
