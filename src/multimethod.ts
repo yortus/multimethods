@@ -1,4 +1,4 @@
-export const CONTINUE = Symbol('CONTINUE') as never; // subtype of all types, so always allowed as method return
+export const next = Symbol('next') as never; // subtype of all types, so always allowed as method return
 
 
 
@@ -43,13 +43,13 @@ export let AsyncMultimethod!: AsyncMultimethodStatic; // TODO: initialise this v
 
 
 export type MultimethodOptions<TParams extends unknown[]> =
-    | DiscriminatorFunction<TParams>
+    | LabelFunction<TParams>
     | MultimethodOptionsObject<TParams>;
 
 export type MultimethodOptionsObject<TParams extends unknown[]> =
-    & {discriminant?: DiscriminatorFunction<TParams> };
+    & {label?: LabelFunction<TParams> };
 
-export type DiscriminatorFunction<TParams extends unknown[]> = (...args: TParams) => string;
+export type LabelFunction<TParams extends unknown[]> = (...args: TParams) => string;
 
 
 
@@ -61,7 +61,7 @@ export interface Methods<TParams extends unknown[], TResult> {
 
 
 export interface MethodContext {
-    captures: { [name: string]: string };
+    pattern: { [bindingName: string]: string };
 }
 
 
@@ -89,51 +89,55 @@ type Result<T> =
 
 
 
-// // TODO: temp testing...
-// let mm1 = new Multimethod((a: number, b: string) => `/${a}/${b}`);
-// mm1 = mm1.extend({foo: async () => 'foo'});
-// let x1a = mm1(1, 'sdsd');
+// TODO: temp testing...
+let mm1 = new Multimethod((a: number, b: string) => `/${a}/${b}`);
+mm1 = mm1.extend({foo: async () => 'foo'});
+let x1a = mm1(1, 'sdsd');
 
 
-// let mm2 = mm1.extend({
-//     '/foo': async () => 'hi',
-//     '/bar': async () => CONTINUE,
-// });
-// let x2a = mm2(3, 'asda');
+let mm2 = mm1.extend({
+    '/foo': async () => 'hi',
+    '/bar': async () => next,
+});
+let x2a = mm2(3, 'asda');
 
 
-// let mm3 = mm2.extend({
-//     '/foo/*': async () => 'hi hi',
-//     '/foo/*/*': () => 'hi hi hi',
-//     async '/{**path}'(a, b) { return `/${a}/${b}${this.captures.path}`; },
-//     async '/thing/{name}'(a, b) { return CONTINUE; }, // TODO: was... `/${a}/${b}${this.captures.name}`; },
-// });
-// let x3a = mm3(3, 'asda');
+let mm3 = mm2.extend({
+    '/foo/*': async () => 'hi hi',
+    '/foo/*/*': () => 'hi hi hi',
+    async '/{**path}'(a, b) { return `/${a}/${b}${this.pattern.path}`; },
+    async '/thing/{name}'(a, b) { return next; }, // TODO: was... `/${a}/${b}${this.captures.name}`; },
+});
+let x3a = mm3(3, 'asda');
 
 
-// let mm4a = mm1.extend({foo: () => 'foo'});
-// let mm4b = mm1.extend({foo: () => 42});
-// let mm4c = mm4a.extend({foo: () => 42});
-// let mm4d = mm4c.extend({foo: async () => CONTINUE});
-// mm4a = mm4b;
-// mm4a = mm4c;
-// mm4b = mm4a;
-// mm4b = mm4c;
-// mm4c = mm4a;
-// mm4c = mm4b;
-// let x4a = mm4a(42, 'foo');
-// let x4b = mm4b(42, 'foo');
+let mm4a = mm1.extend({foo: () => 'foo'});
+let mm4b = mm1.extend({foo: () => 42});
+let mm4c = mm4a.extend({foo: () => 42});
+let mm4d = mm4c.extend({foo: async () => next});
+mm4a = mm4b;
+mm4a = mm4c;
+mm4b = mm4a;
+mm4b = mm4c;
+mm4c = mm4a;
+mm4c = mm4b;
+let x4a = mm4a(42, 'foo');
+let x4b = mm4b(42, 'foo');
 
 
-// let mm5 = mm2.extend({
-//     '/foo': async () => CONTINUE,
-//     '/bar': async () => 42,
-// });
-// let x5a = mm5(3, 'asda');
+let mm5 = mm2.extend({
+    '/foo': async () => next,
+    '/bar': async () => 42,
+});
+let x5a = mm5(3, 'asda');
 
 
-// let mm6 = mm4b.extend({
-//     '/foo': () => CONTINUE,
-//     '/bar': () => 'foo',
-// });
-// let x6a = mm6(3, 'asda');
+let mm6 = mm4b.extend({
+    '/foo': () => next,
+    '/bar': () => 'foo',
+});
+let x6a = mm6(3, 'asda');
+
+
+let mm7 = new Multimethod();
+let x7a = mm7.extend({foo: (_, __) => 'bar'})();
