@@ -1,4 +1,8 @@
-# Multimethods
+
+| Left-aligned | Right-aligned |
+| :---         |          ---: |
+| <h1>Multimethods</h1>   | ![logo](./extras/multimethods-logo.png) |
+
 
 
 ## Design Goals
