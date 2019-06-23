@@ -1,7 +1,14 @@
 
-| Left-aligned | Right-aligned |
-| :---         |          ---: |
-| <h1>Multimethods</h1>   | ![logo](./extras/multimethods-logo.png) |
+<table>
+    <tr>
+        <td width="1024px">
+            <h1>Multimethods</h1>
+        </td>
+        <td width="64px">
+            <img width="64px" height="64px" src="./extras/multimethods-logo.png" alt="Logo" />
+        </td>
+    </tr>
+</table>
 
 
 
