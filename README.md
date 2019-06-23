@@ -1,15 +1,6 @@
 
-<table>
-    <tr>
-        <td width="1024px">
-            <h1>Multimethods</h1>
-        </td>
-        <td width="64px">
-            <img width="64px" height="64px" src="./extras/multimethods-logo.png" alt="Logo" />
-        </td>
-    </tr>
-</table>
-
+<!-- <img width="64px" height="64px" src="./extras/multimethods-logo.png" alt="Logo" /> -->
+![Multimethods](./extras/multimethods-title.png)
 
 
 ## Design Goals
