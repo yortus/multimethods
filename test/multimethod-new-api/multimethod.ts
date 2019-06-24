@@ -1,7 +1,6 @@
 import {expect, use as chaiUse} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import 'mocha';
-import {CONTINUE, Multimethod} from 'multimethods';
+import {Multimethod, next} from 'multimethods';
 import defaultLabel from 'multimethods/analysis/configuration/default-discriminator';
 
 
@@ -21,7 +20,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
             '/foo':     (x) => 'foo' + x,
             '/bar':     (x) => 'bar' + x,
         }).decorate({
-            '**':       (next, args) => `---${next(...args)}---`,
+            '**':       (m, args) => `---${m(...args)}---`,
         });
         let result = mm('/foo');
         result = result;
@@ -77,8 +76,8 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
         let mm = Multimethod((a: string) => a).extend({
             'a*':       _ => 'a*',
         }).decorate({
-            '**':       (next, [a]) => `-${next(a)}-`,
-            'aa*':      (next, [a]) => { let r = next(a); return r === CONTINUE ? CONTINUE : `(${r})`; },
+            '**':       (m, [a]) => `-${m(a)}-`,
+            'aa*':      (m, [a]) => { let r = m(a); return r === next ? next : `(${r})`; },
         });
 
         expect(mm('aaa')).to.equal('-a*-');

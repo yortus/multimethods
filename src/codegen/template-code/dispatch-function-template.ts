@@ -11,26 +11,33 @@ import Thunk from '../thunk';
 // tslint:disable:no-var-keyword
 export default function __FUNCNAME__(__VARARGS__: any[]) {
     let discriminant = $.TO_DISCRIMINANT(__VARARGS__);
-    let thunk = $.SELECT_THUNK(discriminant);
-
-    if ($.IS_ASYNC_RESULT_REQUIRED) {
-        try {
-            var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
-            if (!$.IS_PROMISE_LIKE(result)) {
+    if ($.IS_PROMISE_LIKE(discriminant)) {
+        var result: any = discriminant.then(ds => {
+            var thunk = $.SELECT_THUNK(ds);
+            return thunk(discriminant, $.CONTINUE, __VARARGS__);
+        });
+    }
+    else {
+        var thunk = $.SELECT_THUNK(discriminant);
+        if ($.IS_ASYNC_RESULT_REQUIRED) {
+            try {
+                var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
+                if (!$.IS_PROMISE_LIKE(result)) {
+                    result = Promise.resolve().then(() => {
+                        $.ERROR_INVALID_RESULT('$.METHOD', 'a promise', 'a synchronous result');
+                    });
+                }
+            }
+            catch (error) {
                 result = Promise.resolve().then(() => {
-                    $.ERROR_INVALID_RESULT('$.METHOD', 'a promise', 'a synchronous result');
+                    $.ERROR_INVALID_RESULT('$.METHOD', 'a promise', 'an exception');
                 });
             }
         }
-        catch (error) {
-            result = Promise.resolve().then(() => {
-                $.ERROR_INVALID_RESULT('$.METHOD', 'a promise', 'an exception');
-            });
+        else {
+            // TODO: check for async result in strict mode, like above but inverted...
+            var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
         }
-    }
-    else {
-        // TODO: check for async result in strict mode, like above but inverted...
-        var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
     }
 
     if ($.IS_NEVER_ASYNC) {

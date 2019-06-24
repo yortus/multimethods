@@ -7,4 +7,6 @@ export {meta} from './decorators';
 
 
 // TODO: temp testing...
+import {CONTINUE} from './sentinels';
+export const next = CONTINUE as never;
 export {Multimethod} from './multimethod-impl';

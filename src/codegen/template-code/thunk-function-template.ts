@@ -25,7 +25,7 @@ export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}
 
     // TODO: call method in most efficient way...
     if (!$.IS_META_METHOD) {
-        result = $.METHOD(__VARARGS__, captures);
+        result = $.METHOD.bind({pattern: captures})(__VARARGS__);
     }
     else {
         if ($.HAS_DOWNSTREAM) {

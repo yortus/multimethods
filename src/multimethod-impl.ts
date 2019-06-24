@@ -25,7 +25,7 @@ function create(options: types.Options<unknown[], any>) {
 
     function addMethods<T>(mm: T, existingMethods: {[x: string]: Function} = {}) {
         let extend = (methods: any) => {
-            methods = {...existingMethods, ...methods};
+            methods = combine(existingMethods, methods);
             let mm2 = MM({
                 toDiscriminant: label,
                 methods,
@@ -37,16 +37,18 @@ function create(options: types.Options<unknown[], any>) {
             let keys = Object.keys(decorators);
             let metaMethods = keys.reduce(
                 (obj, key) => {
-                    obj[key] = meta((...args: unknown[]) => {
+                    let decsArray: any[] = decorators[key];
+                    decsArray = Array.isArray(decsArray) ? decsArray : [decsArray];
+                    obj[key] = decsArray.map(dec => dec === 'super' ? 'super' : meta((...args: unknown[]) => {
                         let next = args.pop();
                         let pattern = args.pop();
-                        return decorators[key](next, args, {pattern});
-                    });
+                        return dec(next, args, {pattern});
+                    }));
                     return obj;
                 },
                 {} as any
             );
-            let methods = {...existingMethods, ...metaMethods};
+            let methods = combine(existingMethods, metaMethods);
             let mm2 = MM({
                 toDiscriminant: label,
                 methods,
@@ -57,4 +59,33 @@ function create(options: types.Options<unknown[], any>) {
         let result = Object.assign(mm, {extend, decorate});
         return result;
     }
+}
+
+
+
+
+function combine(m1: {[x: string]: any}, m2: {[x: string]: any}) {
+    let k1 = Object.keys(m1);
+    let k2 = Object.keys(m2);
+
+    let result = {} as {[x: string]: any};
+    for (let k of k1) result[k] = m1[k];
+    for (let k of k2) result[k] = m2[k];
+
+    // TODO: shouldn't need to specify 'super' if decorators are being merged into methods with same key
+    let keysInBoth = k1.filter(k => k2.includes(k));
+    for (let k of keysInBoth) {
+        let method1 = m1[k];
+        let method2 = m2[k];
+
+        if (!Array.isArray(method2) || !method2.some(m => m === 'super')) {
+            throw new Error(`Override must be an array including 'super' as an element`);
+        }
+
+        let superIndex = method2.indexOf('super');
+        let pre = method2.slice(0, superIndex);
+        let post = method2.slice(superIndex + 1);
+        result[k] = pre.concat(method1, post);
+    }
+    return result;
 }
