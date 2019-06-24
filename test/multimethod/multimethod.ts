@@ -95,7 +95,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
     it('TEMP5', () => {
 
         let mm = MM<string, any>({
-            arity: 1,
+            // arity: 1,
             async: false,
             strict: true,
             toDiscriminant: (a: string) => a,

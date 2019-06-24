@@ -7,7 +7,8 @@
     "typings": "dist/commonjs/index.d.ts",
     "scripts": {
         "clean": "rimraf dist/",
-        "build": "yarn build:tsc && yarn build:pegjs && yarn build:umd",
+        "build": "yarn build:cjs && yarn build:umd",
+        "build:cjs": "yarn build:tsc && yarn build:pegjs",
         "build:tsc": "tsc -p src && tsc -p test && tsc -p extras",
         "build:pegjs": "pegjs -o dist/commonjs/math/predicates/dsl-grammar.js src/math/predicates/dsl-grammar.pegjs",
         "build:umd": "webpack",

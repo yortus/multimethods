@@ -7,13 +7,13 @@ export interface MultimethodStatic {
 
     // Functional-style factory function
     // NB 'never' result: will always throw after construction; no methods yet
-    <TParams extends unknown[]>(options?: Options<TParams>): Multimethod<TParams, never>;
-    <TParams extends unknown[]>(options?: Options<TParams, 'async'>): AsyncMultimethod<TParams, never>;
+    <P extends unknown[]>(options: Options<P, string>): Multimethod<P, never>;
+    <P extends unknown[]>(options: Options<P, Promise<string>>): AsyncMultimethod<P, never>;
 
     // OO-style class constructor
     // NB 'never' result: will always throw after construction; no methods yet
-    new <TParams extends unknown[]>(options?: Options<TParams>): Multimethod<TParams, never>;
-    new <TParams extends unknown[]>(options?: Options<TParams, 'async'>): AsyncMultimethod<TParams, never>;
+    new <P extends unknown[]>(options: Options<P, string>): Multimethod<P, never>;
+    new <P extends unknown[]>(options: Options<P, Promise<string>>): AsyncMultimethod<P, never>;
 }
 
 export let Multimethod!: MultimethodStatic; // TODO: initialise this var
@@ -34,17 +34,15 @@ export interface AsyncMultimethod<P extends unknown[], R> {
 
 
 
-export type Options<P extends unknown[], TAsync extends 'async' = never> =
-    | LabellingFunction<P, TAsync>
-    | OptionsObject<P, TAsync>;
+export type Options<P extends unknown[], R extends string | Promise<string>> =
+    | LabellingFunction<P, R>
+    | OptionsObject<P, R>;
 
-export interface OptionsObject<P extends unknown[], Opt extends 'async'> {
-    label?: LabellingFunction<P, Opt>;
+export interface OptionsObject<P extends unknown[], R extends string | Promise<string>> {
+    label: LabellingFunction<P, R>;
 }
 
-export type LabellingFunction<P extends unknown[], Opt extends 'async'> = 'async' extends Opt
-    ? (...args: P) => Promise<string>
-    : (...args: P) => string;
+export type LabellingFunction<P extends unknown[], R extends string | Promise<string>> = (...args: P) => R;
 
 
 
@@ -89,69 +87,69 @@ type Result<T> =
 
 
 
-// TODO: temp testing...
-let mm1 = new Multimethod((a: number, b: string) => `/${a}/${b}`);
-mm1 = mm1.extend({foo: async () => 'foo'});
-let x1a = mm1(1, 'sdsd');
+// // TODO: temp testing...
+// let mm1 = new Multimethod((a: number, b: string) => `/${a}/${b}`);
+// mm1 = mm1.extend({foo: async () => 'foo'});
+// let x1a = mm1(1, 'sdsd');
 
 
-let mm2 = mm1.extend({
-    '/foo': async () => 'hi',
-    '/bar': async () => next,
-    '/baz': () => 'baz',
-});
-let mm2b = mm2.decorate({
-    '**': (method, args) => 'asd' || method(...args),
-});
-let x2a = mm2(3, 'asda');
+// let mm2 = mm1.extend({
+//     '/foo': async () => 'hi',
+//     '/bar': async () => next,
+//     '/baz': () => 'baz',
+// });
+// let mm2b = mm2.decorate({
+//     '**': (method, args) => 'asd' || method(...args),
+// });
+// let x2a = mm2(3, 'asda');
 
 
-let mm3 = mm2.extend({
-    '/foo/*': async () => 'hi hi',
-    '/foo/*/*': [() => 'hi hi hi'],
-    async '/{**path}'(a, b) { return `/${a}/${b}${this.pattern.path}`; },
-    async '/thing/{name}'(a, b) { return next; }, // TODO: was... `/${a}/${b}${this.captures.name}`; },
-});
-let x3a = mm3(3, 'asda');
+// let mm3 = mm2.extend({
+//     '/foo/*': async () => 'hi hi',
+//     '/foo/*/*': [() => 'hi hi hi'],
+//     async '/{**path}'(a, b) { return `/${a}/${b}${this.pattern.path}`; },
+//     async '/thing/{name}'(a, b) { return next; }, // TODO: was... `/${a}/${b}${this.captures.name}`; },
+// });
+// let x3a = mm3(3, 'asda');
 
 
-let mm4a = mm1.extend({foo: () => 'foo'});
-let mm4b = mm1.extend({foo: () => 42});
-let mm4c = mm4a.extend({foo: () => 42});
-let mm4d = mm4c.extend({foo: async () => next});
-mm4a = mm4b;
-mm4a = mm4c;
-mm4b = mm4a;
-mm4b = mm4c;
-mm4c = mm4a;
-mm4c = mm4b;
-let x4a = mm4a(42, 'foo');
-let x4b = mm4b(42, 'foo');
+// let mm4a = mm1.extend({foo: () => 'foo'});
+// let mm4b = mm1.extend({foo: () => 42});
+// let mm4c = mm4a.extend({foo: () => 42});
+// let mm4d = mm4c.extend({foo: async () => next});
+// mm4a = mm4b;
+// mm4a = mm4c;
+// mm4b = mm4a;
+// mm4b = mm4c;
+// mm4c = mm4a;
+// mm4c = mm4b;
+// let x4a = mm4a(42, 'foo');
+// let x4b = mm4b(42, 'foo');
 
 
-let mm5 = mm2.extend({
-    '/foo': async () => next,
-    '/bar': async () => 42,
-});
-let x5a = mm5(3, 'asda');
+// let mm5 = mm2.extend({
+//     '/foo': async () => next,
+//     '/bar': async () => 42,
+// });
+// let x5a = mm5(3, 'asda');
 
 
-let mm6 = mm4b.extend({
-    '/foo': () => next,
-    '/bar': () => 'foo',
-});
-let x6a = mm6(3, 'asda');
+// let mm6 = mm4b.extend({
+//     '/foo': () => next,
+//     '/bar': () => 'foo',
+// });
+// let x6a = mm6(3, 'asda');
 
 
-let mm7 = new Multimethod();
-let x7a = mm7.extend({foo: [
-    (a, b) => 'bar',
-    (a, b) => 'baz',
-    'super',
-]})();
+// let mm7 = new Multimethod();
+// let x7a = mm7.extend({foo: [
+//     (a, b) => 'bar',
+//     (a, b) => 'baz',
+//     'super',
+// ]})();
 
 
-let mm8a = new Multimethod(async (a: number, b: string) => `/${a}/${b}`);
-let mm8b = mm8a.extend({'/foo/*': () => 'foo'});
-let mm8c = mm8a.extend({'/bar/*': () => 'bar'}).decorate({'**': () => 'foo'});
-let x8b1 = mm8b(1, 'sdsd');
+// let mm8a = new Multimethod(async (a: number, b: string) => `/${a}/${b}`);
+// let mm8b = mm8a.extend({'/foo/*': () => 'foo'});
+// let mm8c = mm8a.extend({'/bar/*': () => 'bar'}).decorate({'**': () => 'foo'});
+// let x8b1 = mm8b(1, 'sdsd');
