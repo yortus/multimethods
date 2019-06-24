@@ -20,13 +20,17 @@ export let Multimethod!: MultimethodStatic; // TODO: initialise this var
 
 export interface Multimethod<TParams extends unknown[], TResult> {
     (...args: TParams): TResult;
-    extend<TR>(methods: Methods<TParams, TR>): Multimethod<TParams, Result<TResult | TR>>;
-    extend<TR>(methods: Methods<TParams, TR | Promise<TR>>): Multimethod<TParams, Result<TResult | TR | Promise<TR>>>;
+    extend<TR>(methods: MethodsObject<TParams, TR>): Multimethod<TParams, Result<TResult | TR>>;
+    extend<TR>(
+        methods: MethodsObject<TParams, TR | Promise<TR>>
+    ): Multimethod<TParams, Result<TResult | TR | Promise<TR>>>;
+    decorate(decorators: DecoratorsObject<TParams, TResult>): Multimethod<TParams, TResult>;
 }
 
 export interface AsyncMultimethod<TParams extends unknown[], TResult> {
     (...args: TParams): Promise<TResult>;
-    extend<TR>(methods: Methods<TParams, TR | Promise<TR>>): AsyncMultimethod<TParams, TResult | TR>;
+    extend<TR>(methods: MethodsObject<TParams, TR | Promise<TR>>): AsyncMultimethod<TParams, TResult | TR>;
+    decorate(decorators: DecoratorsObject<TParams, TResult | Promise<TResult>>): AsyncMultimethod<TParams, TResult>;
 }
 
 
@@ -47,16 +51,32 @@ export interface LabellingFunction<TParams extends unknown[], TAsync extends 'as
 
 
 
-export interface Methods<TParams extends unknown[], TResult> {
-    [pattern: string]: (this: MethodContext, ...args: TParams) => TResult;
+export interface MethodsObject<TParams extends unknown[], TResult> {
+    [pattern: string]: Method<TParams, TResult> | MethodsArray<TParams, TResult>;
 }
 
+export type MethodsArray<TParams extends unknown[], TResult> = Array<Method<TParams, TResult> | 'super'>;
 
+export type Method<TParams extends unknown[], TResult> = (this: Context, ...args: TParams) => TResult;
 
-
-export interface MethodContext {
+export interface Context {
     pattern: { [bindingName: string]: string };
 }
+
+
+
+
+export interface DecoratorsObject<TParams extends unknown[], TResult> {
+    [pattern: string]: Decorator<TParams, TResult> | DecoratorsArray<TParams, TResult>;
+}
+
+export type DecoratorsArray<TParams extends unknown[], TResult> = Array<Decorator<TParams, TResult> | 'super'>;
+
+export type Decorator<TParams extends unknown[], TResult> = (
+    method: (...args: TParams) => TResult,
+    args: TParams,
+    context: Context
+) => TResult;
 
 
 
@@ -92,13 +112,17 @@ let x1a = mm1(1, 'sdsd');
 let mm2 = mm1.extend({
     '/foo': async () => 'hi',
     '/bar': async () => next,
+    '/baz': () => 'baz',
+});
+let mm2b = mm2.decorate({
+    '**': (method, args) => 'asd' || method(...args),
 });
 let x2a = mm2(3, 'asda');
 
 
 let mm3 = mm2.extend({
     '/foo/*': async () => 'hi hi',
-    '/foo/*/*': () => 'hi hi hi',
+    '/foo/*/*': [() => 'hi hi hi'],
     async '/{**path}'(a, b) { return `/${a}/${b}${this.pattern.path}`; },
     async '/thing/{name}'(a, b) { return next; }, // TODO: was... `/${a}/${b}${this.captures.name}`; },
 });
@@ -134,9 +158,14 @@ let x6a = mm6(3, 'asda');
 
 
 let mm7 = new Multimethod();
-let x7a = mm7.extend({foo: (_, __) => 'bar'})();
+let x7a = mm7.extend({foo: [
+    (a, b) => 'bar',
+    (a, b) => 'baz',
+    'super',
+]})();
 
 
-let mm8 = new Multimethod(async (a: number, b: string) => `/${a}/${b}`);
-let mm9 = mm8.extend({foo: () => 'foo'});
-let x9a = mm9(1, 'sdsd');
+let mm8a = new Multimethod(async (a: number, b: string) => `/${a}/${b}`);
+let mm8b = mm8a.extend({'/foo/*': () => 'foo'});
+let mm8c = mm8a.extend({'/bar/*': () => 'bar'}).decorate({'**': () => 'foo'});
+let x8b1 = mm8b(1, 'sdsd');
