@@ -18,65 +18,51 @@ export interface MultimethodStatic {
 
 export let Multimethod!: MultimethodStatic; // TODO: initialise this var
 
-export interface Multimethod<TParams extends unknown[], TResult> {
-    (...args: TParams): TResult;
-    extend<TR>(methods: MethodsObject<TParams, TR>): Multimethod<TParams, Result<TResult | TR>>;
-    extend<TR>(
-        methods: MethodsObject<TParams, TR | Promise<TR>>
-    ): Multimethod<TParams, Result<TResult | TR | Promise<TR>>>;
-    decorate(decorators: DecoratorsObject<TParams, TResult>): Multimethod<TParams, TResult>;
+export interface Multimethod<P extends unknown[], R> {
+    (...args: P): R;
+    extend<MR>(methods: MethodsObject<P, MR>): Multimethod<P, Result<R | MR>>;
+    extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): Multimethod<P, Result<R | MR | Promise<MR>>>;
+    decorate(decorators: DecoratorsObject<P, R>): Multimethod<P, R>;
 }
 
-export interface AsyncMultimethod<TParams extends unknown[], TResult> {
-    (...args: TParams): Promise<TResult>;
-    extend<TR>(methods: MethodsObject<TParams, TR | Promise<TR>>): AsyncMultimethod<TParams, TResult | TR>;
-    decorate(decorators: DecoratorsObject<TParams, TResult | Promise<TResult>>): AsyncMultimethod<TParams, TResult>;
-}
-
-
-
-
-export type Options<TParams extends unknown[], TAsync extends 'async' = never> =
-    | LabellingFunction<TParams, TAsync>
-    | OptionsObject<TParams, TAsync>;
-
-export interface OptionsObject<TParams extends unknown[], TAsync extends 'async'> {
-    label?: LabellingFunction<TParams, TAsync>;
-}
-
-export interface LabellingFunction<TParams extends unknown[], TAsync extends 'async'> {
-    (...args: TParams): 'async' extends TAsync ? Promise<string> : string;
+export interface AsyncMultimethod<P extends unknown[], R> {
+    (...args: P): Promise<R>;
+    extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): AsyncMultimethod<P, R | MR>;
+    decorate(decorators: DecoratorsObject<P, R | Promise<R>>): AsyncMultimethod<P, R>;
 }
 
 
 
 
-export interface MethodsObject<TParams extends unknown[], TResult> {
-    [pattern: string]: Method<TParams, TResult> | MethodsArray<TParams, TResult>;
+export type Options<P extends unknown[], TAsync extends 'async' = never> =
+    | LabellingFunction<P, TAsync>
+    | OptionsObject<P, TAsync>;
+
+export interface OptionsObject<P extends unknown[], Opt extends 'async'> {
+    label?: LabellingFunction<P, Opt>;
 }
 
-export type MethodsArray<TParams extends unknown[], TResult> = Array<Method<TParams, TResult> | 'super'>;
+export type LabellingFunction<P extends unknown[], Opt extends 'async'> = 'async' extends Opt
+    ? (...args: P) => Promise<string>
+    : (...args: P) => string;
 
-export type Method<TParams extends unknown[], TResult> = (this: Context, ...args: TParams) => TResult;
 
-export interface Context {
-    pattern: { [bindingName: string]: string };
+
+
+export interface MethodsObject<P extends unknown[], R> {
+    [pattern: string]: Method<P, R> | Array<Method<P, R> | 'super'>;
 }
+export type Method<P extends unknown[], R> = (this: MethodContext, ...args: P) => R;
+export interface MethodContext { pattern: { [bindingName: string]: string }; }
 
 
 
 
-export interface DecoratorsObject<TParams extends unknown[], TResult> {
-    [pattern: string]: Decorator<TParams, TResult> | DecoratorsArray<TParams, TResult>;
+export interface DecoratorsObject<P extends unknown[], R> {
+    [pattern: string]: Decorator<P, R> | Array<Decorator<P, R> | 'super'>;
 }
-
-export type DecoratorsArray<TParams extends unknown[], TResult> = Array<Decorator<TParams, TResult> | 'super'>;
-
-export type Decorator<TParams extends unknown[], TResult> = (
-    method: (...args: TParams) => TResult,
-    args: TParams,
-    context: Context
-) => TResult;
+export type Decorator<P extends unknown[], R> = (method: (...args: P) => R, args: P, context: DecoratorContext) => R;
+export interface DecoratorContext { pattern: { [bindingName: string]: string }; }
 
 
 
