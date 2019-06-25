@@ -1,6 +1,6 @@
 // tslint:disable:max-line-length
 import * as assert from 'assert';
-import {CONTINUE, create as MM, meta} from 'multimethods';
+import {Multimethod, next} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -44,45 +44,43 @@ const COUNT = 1000000;
 
 
 // Declare the test multimethod
-const mm = MM({
-    toDiscriminant: (r: {address: string}) => r.address,
-    methods: {
-        '**': () => 'UNHANDLED',
-        '/foo': () => 'foo',
-        '/bar': () => 'bar',
-        '/baz': () => 'baz',
-        '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
+const mm = Multimethod((r: {address: string}) => r.address).extend({
+    '**': () => 'UNHANDLED',
+    '/foo': () => 'foo',
+    '/bar': () => 'bar',
+    '/baz': () => 'baz',
 
-        'a/*': () => `starts with 'a'`,
-        '*/b': () => `ends with 'b'`,
-        'a/b': () => `starts with 'a' AND ends with 'b'`,
+    'a/*': () => `starts with 'a'`,
+    '*/b': () => `ends with 'b'`,
+    'a/b': () => `starts with 'a' AND ends with 'b'`,
 
-        'c/*': () => `starts with 'c'`,
-        '*/d': () => `ends with 'd'`,
-        'c/d': () => CONTINUE,
+    'c/*': () => `starts with 'c'`,
+    '*/d': () => `ends with 'd'`,
+    'c/d': () => next,
 
-        'api/**': [() => `fallback`, () => `fallback`],
-        'api/fo*o': () => CONTINUE,
-        'api/fo*': [
-            meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
-            meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
-        ],
-        'api/foo': [
-            meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
-            () => 'FOO',
-        ],
-        'api/foot': () => 'FOOt',
-        'api/fooo': () => 'fooo',
-        'api/bar': () => CONTINUE,
+    'api/**': [() => `fallback`, () => `fallback`],
+    'api/fo*o': () => next,
+    'api/foo': [
+        () => 'FOO',
+    ],
+    'api/foot': () => 'FOOt',
+    'api/fooo': () => 'fooo',
+    'api/bar': () => next,
 
-        // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-        'zz/z/{**rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
-        'zz/z/b*z': ($req) => `${$req.address}`,
-        'zz/z/./*': () => 'forty-two',
-    },
-    arity: 1,
-    async: false,
-    strict: false,
+    'zz/z/b*z': ($req) => `${$req.address}`,
+    'zz/z/./*': () => 'forty-two',
+}).decorate({
+    '/*a*': (m, [$req]) => `---${ifUnhandled(m($req), 'NONE')}---`,
+    'api/fo*': [
+        (m, [$req]) => `fo2-(${ifUnhandled(m($req), 'NONE')})`,
+        (m, [$req]) => `fo1-(${ifUnhandled(m($req), 'NONE')})`,
+    ],
+    'api/foo': [
+        (m, [$req]) => `${ifUnhandled(m($req), 'NONE')}!`,
+        'super',
+    ],
+    // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
+    'zz/z/{**rest}': (m, _, {pattern}) => `${ifUnhandled(m({address: pattern.rest.split('').reverse().join('')}), 'NONE')}`,
 });
 
 
@@ -151,5 +149,5 @@ console.log(`Dispatched ${COUNT} requests in ${sec} seconds   (~${rate} req/sec)
 
 // TODO: doc helper...
 function ifUnhandled(lhs, rhs) {
-    return lhs === CONTINUE ? rhs : lhs;
+    return lhs === next ? rhs : lhs;
 }
