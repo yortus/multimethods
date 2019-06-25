@@ -46,7 +46,7 @@ export default function emitThunkFunction(emit: Emitter,
         // Statically known strings for substitution into the template
         IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
         CONTINUE: names.CONTINUE,
-        EMPTY_OBJECT: names.EMPTY_OBJECT,
+        EMPTY_CONTEXT: names.EMPTY_CONTEXT,
         ERROR_INVALID_RESULT: names.ERROR_INVALID_RESULT,
         GET_CAPTURES: `${names.GET_CAPTURES}ː${fromNode.identifier}`,
         METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', methodIndex)}`,

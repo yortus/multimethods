@@ -17,19 +17,21 @@ export default function __FUNCNAME__(discriminant: string, result: any, __ARGS__
     }
 
     if ($.HAS_CAPTURES) {
-        var captures = $.GET_CAPTURES(discriminant);
+        var context = {
+            pattern: $.GET_CAPTURES(discriminant),
+        };
     }
     else {
-        var captures = $.EMPTY_OBJECT;
+        var context = $.EMPTY_CONTEXT;
     }
 
     // TODO: call method in most efficient way...
     if (!$.IS_META_METHOD) {
         if (args === undefined) {
-            result = $.METHOD.call({pattern: captures}, __ARGS__);
+            result = $.METHOD.call(context, __ARGS__);
         }
         else {
-            result = $.METHOD.apply({pattern: captures}, args);
+            result = $.METHOD.apply(context, args);
         }
     }
     else {
@@ -51,10 +53,10 @@ export default function __FUNCNAME__(discriminant: string, result: any, __ARGS__
         }
 
         if (args === undefined) {
-            result = $.METHOD(forward, [__ARGS__], {pattern: captures});
+            result = $.METHOD(forward, [__ARGS__], context);
         }
         else {
-            result = $.METHOD(forward, args, {pattern: captures});
+            result = $.METHOD(forward, args, context);
         }
     }
 
@@ -119,7 +121,7 @@ declare const $: VarsInScope & StaticConds;
 export interface VarsInScope {
     IS_PROMISE_LIKE: (x: any) => x is Promise<any>;
     CONTINUE: any;
-    EMPTY_OBJECT: {};
+    EMPTY_CONTEXT: {pattern: {}};
     ERROR_INVALID_RESULT: typeof INVALID_METHOD_RESULT;
 
     // TODO: revise comment...
