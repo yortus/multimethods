@@ -39,11 +39,7 @@ function create(options: types.Options<unknown[], any>) {
                 (obj, key) => {
                     let decsArray: any[] = decorators[key];
                     decsArray = Array.isArray(decsArray) ? decsArray : [decsArray];
-                    obj[key] = decsArray.map(dec => dec === 'super' ? 'super' : meta((...args: unknown[]) => {
-                        let next = args.pop();
-                        let pattern = args.pop();
-                        return dec(next, args, {pattern});
-                    }));
+                    obj[key] = decsArray.map(dec => dec === 'super' ? 'super' : meta(dec));
                     return obj;
                 },
                 {} as any

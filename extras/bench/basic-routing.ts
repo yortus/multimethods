@@ -131,7 +131,7 @@ let start = new Date().getTime();
 // Loop over the tests.
 for (let i = 0; i < COUNT; ++i) {
     let index = Math.floor(Math.random() * tests.length);
-    let res = mm(requests[index], 3);
+    let res = mm(requests[index]);
     let actualResponse = res;
     assert.equal(actualResponse, responses[index]);
 }

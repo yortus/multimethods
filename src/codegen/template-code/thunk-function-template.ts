@@ -51,11 +51,10 @@ export default function __FUNCNAME__(discriminant: string, result: any, __ARGS__
         }
 
         if (args === undefined) {
-            result = $.METHOD(__ARGS__, captures, forward);
+            result = $.METHOD(forward, [__ARGS__], {pattern: captures});
         }
         else {
-            // TODO: temp testing... BROKEN... needs updating to new calling convention
-            result = $.METHOD(args[0], captures, forward);
+            result = $.METHOD(forward, args, {pattern: captures});
         }
     }
 
