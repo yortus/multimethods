@@ -39,7 +39,6 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     emit(`var ${names.IS_PROMISE_LIKE} = ${names.ENV}.${names.IS_PROMISE_LIKE};`);
     emit(`var ${names.CONTINUE} = ${names.ENV}.${names.CONTINUE};`);
     emit(`var ${names.ERROR_UNHANDLED} = ${names.ENV}.${names.ERROR_UNHANDLED};`);
-    emit(`var ${names.ERROR_INVALID_RESULT} = ${names.ENV}.${names.ERROR_INVALID_RESULT};`);
     emit(`var ${names.TO_DISCRIMINANT} = ${names.ENV}.${names.CONFIG}.${names.TO_DISCRIMINANT};`);
     emit(`var ${names.EMPTY_CONTEXT} = Object.freeze({pattern: Object.freeze({})});`);
     env.allNodes.forEach((node, i) => {
@@ -72,7 +71,6 @@ function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
     result.isPromiseLike = isPromiseLike;
     result.CONTINUE = CONTINUE;
     result.unhandledError = fatalError.UNHANDLED;
-    result.invalidResultError = fatalError.INVALID_METHOD_RESULT;
     return result;
 }
 

@@ -1,5 +1,5 @@
 import {MMInfo, MMNode} from '../analysis';
-import {INVALID_METHOD_RESULT, UNHANDLED} from '../util/fatal-error';
+import {UNHANDLED} from '../util/fatal-error';
 
 
 
@@ -21,7 +21,6 @@ export interface EmitEnvironment extends MMInfo<EmitNode> {
     isPromiseLike: (value: any) => boolean;
     CONTINUE: any;
     unhandledError: typeof UNHANDLED;
-    invalidResultError: typeof INVALID_METHOD_RESULT;
 }
 
 
@@ -79,7 +78,6 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     [EnvNames.IS_PROMISE_LIKE] as Array<keyof typeof envProps>;
     [EnvNames.CONTINUE] as Array<keyof typeof envProps>;
     [EnvNames.ERROR_UNHANDLED] as Array<keyof typeof envProps>;
-    [EnvNames.ERROR_INVALID_RESULT] as Array<keyof typeof envProps>;
     [EnvNames.CONFIG] as Array<keyof typeof envProps>;
     [EnvNames.ALL_NODES] as Array<keyof typeof envProps>;
     [EnvNames.TO_DISCRIMINANT] as Array<keyof typeof cfgProps>;
@@ -111,7 +109,6 @@ export enum EnvNames {
     IS_PROMISE_LIKE = 'isPromiseLike',
     CONTINUE = 'CONTINUE',
     ERROR_UNHANDLED = 'unhandledError',
-    ERROR_INVALID_RESULT = 'invalidResultError',
     CONFIG = 'config',
     ALL_NODES = 'allNodes',
     TO_DISCRIMINANT = 'toDiscriminant',

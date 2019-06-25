@@ -15,7 +15,6 @@ export default function emitDispatchFunction(emit: Emitter, mminfo: MMInfo<MMNod
         IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
         CONTINUE: names.CONTINUE,
         ERROR_UNHANDLED: names.ERROR_UNHANDLED,
-        ERROR_INVALID_RESULT: names.ERROR_INVALID_RESULT,
         TO_DISCRIMINANT: names.TO_DISCRIMINANT,
         SELECT_THUNK: names.SELECT_THUNK,
         ARITY: `${mminfo.config.arity || 1}`,

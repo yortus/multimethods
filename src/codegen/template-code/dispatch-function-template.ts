@@ -59,7 +59,6 @@ export interface VarsInScope {
     IS_PROMISE_LIKE: (x: any) => x is Promise<any>;
     CONTINUE: any;
     ERROR_UNHANDLED: typeof fatalError.UNHANDLED;
-    ERROR_INVALID_RESULT: typeof fatalError.INVALID_METHOD_RESULT;
     TO_DISCRIMINANT: (...args: any[]) => string;
     SELECT_THUNK: (discriminant: string) => Thunk;
     ARITY: number;

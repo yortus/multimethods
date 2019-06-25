@@ -1,4 +1,3 @@
-import {INVALID_METHOD_RESULT} from '../../util/fatal-error';
 import Thunk from '../thunk';
 
 
@@ -91,7 +90,6 @@ export interface VarsInScope {
     IS_PROMISE_LIKE: (x: any) => x is Promise<any>;
     CONTINUE: any;
     EMPTY_CONTEXT: {pattern: {}};
-    ERROR_INVALID_RESULT: typeof INVALID_METHOD_RESULT;
 
     // TODO: revise comment...
     /*

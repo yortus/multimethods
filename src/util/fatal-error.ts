@@ -42,11 +42,6 @@ export function INVALID_UNREACHABLE_OPTION() {
     return error(format(fmt));
 }
 
-export function INVALID_METHOD_RESULT(methodName: string, expectedResult: string, actualResult: string) {
-    let fmt = `Expected method %s to return %s, but received %s`;
-    return error(format(fmt, methodName, expectedResult, actualResult));
-}
-
 export function MIXED_CHAIN(predicate: string) {
     let fmt = `Chain for predicate '%s' has meta-method(s) to the right`
             + ` of regular method(s). Meta-methods must be leftmost in the chain.`;
