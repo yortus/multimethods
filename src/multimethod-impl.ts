@@ -19,7 +19,7 @@ function create<P extends unknown[]>(options?: types.Options<P, 'async'>): types
 function create(options: types.Options<unknown[], any>) {
     let label = typeof options === 'function' ? options : options.label;
 
-    let mm = MM({ toDiscriminant: label });
+    let mm = MM({ toDiscriminant: label, arity: label.length || 1 });
     let result: types.Multimethod<unknown[], unknown> = addMethods(mm);
     return result;
 

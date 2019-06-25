@@ -18,8 +18,6 @@ export default function emitDispatchFunction(emit: Emitter, mminfo: MMInfo<MMNod
         ERROR_INVALID_RESULT: names.ERROR_INVALID_RESULT,
         TO_DISCRIMINANT: names.TO_DISCRIMINANT,
         SELECT_THUNK: names.SELECT_THUNK,
-        IS_NEVER_ASYNC: mminfo.config.async === false,
-        IS_ASYNC_RESULT_REQUIRED: mminfo.config.strict && mminfo.config.async === true,
         ARITY: `${mminfo.config.arity || 1}`,
     });
 }

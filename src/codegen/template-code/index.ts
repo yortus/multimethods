@@ -1,4 +1,4 @@
-import dispatchFunction, {StaticConds as DBooleans, VarsInScope as DStrings} from './dispatch-function-template';
+import dispatchFunction, {VarsInScope as DStrings} from './dispatch-function-template';
 import Template from './template';
 import thunkFunction, {StaticConds as TBooleans, VarsInScope as TStrings} from './thunk-function-template';
 
@@ -27,7 +27,7 @@ export {Template};
 
 // TODO: doc...
 const dispatchFunctionTemplate = getNormalisedFunctionSource(dispatchFunction) as Template;
-type DispatchFunctionSubstitutions = {[K in keyof DStrings]: string} & {[K in keyof DBooleans]: boolean};
+type DispatchFunctionSubstitutions = {[K in keyof DStrings]: string};
 export {dispatchFunctionTemplate, DispatchFunctionSubstitutions};
 
 

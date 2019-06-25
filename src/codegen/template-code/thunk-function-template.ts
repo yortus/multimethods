@@ -38,10 +38,10 @@ export default function __FUNCNAME__(discriminant: string, result: any, __ARGS__
         if ($.HAS_DOWNSTREAM) {
             // tslint:disable-next-line:no-shadowed-variable
             var forward = function (__ARGS__: any[]) {
-                var args: any[] | undefined;
                 if (arguments.length > $.ARITY) {
-                    args = [];
-                    for (var len = arguments.length, i = 0; i < len; ++i) args.push(arguments[i]);
+                    for (var len = arguments.length, args: any = new Array(len), i = 0; i < len; ++i) {
+                        args[i] = arguments[i];
+                    }
                 }
                 return $.DOWNSTREAM_THUNK(discriminant, $.CONTINUE, __ARGS__, args);
             };
@@ -60,45 +60,14 @@ export default function __FUNCNAME__(discriminant: string, result: any, __ARGS__
         }
     }
 
-    // TODO: do extra checks on method result in strict mode
-    if ($.IS_STRICT_MODE) {
-        if ($.IS_NEVER_ASYNC) {
-            if ($.IS_PROMISE_LIKE(result)) {
-                $.ERROR_INVALID_RESULT('$.METHOD', 'an immediate value', 'a promise');
-            }
-        }
-        if ($.IS_ALWAYS_ASYNC) {
-            if (!$.IS_PROMISE_LIKE(result)) {
-                result = Promise.resolve().then(() => {
-                    $.ERROR_INVALID_RESULT('$.METHOD', 'a promise', 'an immediate value');
-                });
-            }
-        }
-    }
-
     // TODO: cascade result...
     if (!$.ENDS_PARTITION) {
-        if ($.IS_NEVER_ASYNC) {
-
-            // All methods in this MM are synchronous
-            result = $.FALLBACK_THUNK(discriminant, result, __ARGS__, args);
+        // Methods may be sync or async, and we must differentiate at runtime
+        if ($.IS_PROMISE_LIKE(result)) {
+            result = result.then(rs => $.FALLBACK_THUNK(discriminant, rs, __ARGS__, args));
         }
         else {
-            if ($.IS_ALWAYS_ASYNC) {
-
-                // All methods in this MM are asynchronous
-                result = (result as Promise<any>).then(rs => $.FALLBACK_THUNK(discriminant, rs, __ARGS__, args));
-            }
-            else {
-
-                // Methods may be sync or async, and we must differentiate at runtime
-                if ($.IS_PROMISE_LIKE(result)) {
-                    result = result.then(rs => $.FALLBACK_THUNK(discriminant, rs, __ARGS__, args));
-                }
-                else {
-                    result = $.FALLBACK_THUNK(discriminant, result, __ARGS__, args);
-                }
-            }
+            result = $.FALLBACK_THUNK(discriminant, result, __ARGS__, args);
         }
     }
     return result;
@@ -142,11 +111,8 @@ export interface VarsInScope {
 // TODO: these are statically known conditions that facilitate dead code elimination
 // TODO: explain each of these in turn...
 export interface StaticConds {
-    IS_STRICT_MODE: boolean;
     ENDS_PARTITION: boolean;
     HAS_CAPTURES: boolean;
     IS_META_METHOD: boolean;
-    IS_ALWAYS_ASYNC: boolean;
-    IS_NEVER_ASYNC: boolean;
     HAS_DOWNSTREAM: boolean;
 }
