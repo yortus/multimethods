@@ -13,7 +13,7 @@ import thunkFunction, {StaticConds as TBooleans, VarsInScope as TStrings} from '
 //       d) therefore we must 'rehydrate' the possibly-minified templates to make them suitable for transformation
 //       e) as a bonus we also prefer the codegen to emit human-readable code, even from minified templates
 // TODO: doc... template guarantees...: 4-space indents, no blank lines, '\n' line endings, ...
-// TODO: doc... special `__FUNCNAME__` and `__VARARGS__` strings in templates
+// TODO: doc... special `__FUNCNAME__` and `__ARGS__` strings in templates
 
 
 
@@ -80,7 +80,7 @@ function minify(source: string) {
     source = source.replace(/^\s+/gm, '');
 
     // Normalise if/else blocks. Ensure consequent/alternative stmts always have curlies.
-    const SINGLE_LINE_IF_OR_ELSE = /((?:if\s*\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)\s*)|else\s*)(?!\s*\{)([^;]*;)/;
+    const SINGLE_LINE_IF_OR_ELSE = /^((?:if\s*\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)\s*)|else\s*)(?!\s*\{)([^;]*;)/;
     while (SINGLE_LINE_IF_OR_ELSE.test(source)) {
         // Do these one at a time, since they may be nested.
         source = source.replace(SINGLE_LINE_IF_OR_ELSE, (_, cond, stmt) => `${cond}{${stmt}}`);

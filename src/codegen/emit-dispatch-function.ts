@@ -11,7 +11,7 @@ import {transformTemplate} from './template-transforms';
 export default function emitDispatchFunction(emit: Emitter, mminfo: MMInfo<MMNode>, names: typeof EnvNames) {
 
     // TODO: temp testing...
-    emitDispatchFunctionFromTemplate(emit, mminfo.config.name, mminfo.config.arity, {
+    emitDispatchFunctionFromTemplate(emit, mminfo.config.name, mminfo.config.arity || 1, {
         IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
         CONTINUE: names.CONTINUE,
         ERROR_UNHANDLED: names.ERROR_UNHANDLED,
@@ -20,6 +20,7 @@ export default function emitDispatchFunction(emit: Emitter, mminfo: MMInfo<MMNod
         SELECT_THUNK: names.SELECT_THUNK,
         IS_NEVER_ASYNC: mminfo.config.async === false,
         IS_ASYNC_RESULT_REQUIRED: mminfo.config.strict && mminfo.config.async === true,
+        ARITY: `${mminfo.config.arity || 1}`,
     });
 }
 

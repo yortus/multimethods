@@ -6,22 +6,31 @@ import Thunk from '../thunk';
 
 
 // TODO: ========== The actual template ==========
-// TODO: explain important norms in the template function... eg '$', __VARARGS__, __FUNCNAME__
+// TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
 // tslint:disable:no-var-keyword
-export default function __FUNCNAME__(__VARARGS__: any[]) {
-    let discriminant = $.TO_DISCRIMINANT(__VARARGS__);
+export default function __FUNCNAME__(__ARGS__: any) {
+    var args: any[] | undefined;
+    if (arguments.length > $.ARITY) {
+        args = [];
+        for (var len = arguments.length, i = 0; i < len; ++i) args.push(arguments[i]);
+        var discriminant: string = $.TO_DISCRIMINANT.apply(null, args);
+    }
+    else {
+        var discriminant = $.TO_DISCRIMINANT(__ARGS__);
+    }
+
     if ($.IS_PROMISE_LIKE(discriminant)) {
         var result: any = discriminant.then(ds => {
             var thunk = $.SELECT_THUNK(ds);
-            return thunk(discriminant, $.CONTINUE, __VARARGS__);
+            return thunk(discriminant, $.CONTINUE, __ARGS__, args);
         });
     }
     else {
         var thunk = $.SELECT_THUNK(discriminant);
         if ($.IS_ASYNC_RESULT_REQUIRED) {
             try {
-                var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
+                var result = thunk(discriminant, $.CONTINUE, __ARGS__, args);
                 if (!$.IS_PROMISE_LIKE(result)) {
                     result = Promise.resolve().then(() => {
                         $.ERROR_INVALID_RESULT('$.METHOD', 'a promise', 'a synchronous result');
@@ -36,7 +45,7 @@ export default function __FUNCNAME__(__VARARGS__: any[]) {
         }
         else {
             // TODO: check for async result in strict mode, like above but inverted...
-            var result = thunk(discriminant, $.CONTINUE, __VARARGS__);
+            var result = thunk(discriminant, $.CONTINUE, __ARGS__, args);
         }
     }
 
@@ -76,6 +85,7 @@ export interface VarsInScope {
     ERROR_INVALID_RESULT: typeof fatalError.INVALID_METHOD_RESULT;
     TO_DISCRIMINANT: (...args: any[]) => string;
     SELECT_THUNK: (discriminant: string) => Thunk;
+    ARITY: number;
 }
 
 

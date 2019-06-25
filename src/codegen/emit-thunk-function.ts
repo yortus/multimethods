@@ -41,7 +41,7 @@ export default function emitThunkFunction(emit: Emitter,
     let downstream = seq.filter((entry, j) => (j === 0 || entry.isMeta) && j < index).pop();
 
     // TODO: temp testing...
-    emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.config.arity, {
+    emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.config.arity || 1, {
 
         // Statically known strings for substitution into the template
         IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
@@ -52,6 +52,7 @@ export default function emitThunkFunction(emit: Emitter,
         METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', methodIndex)}`,
         DOWNSTREAM_THUNK: downstream ? `${names.THUNK}ː${downstream.identifier}` : '',
         FALLBACK_THUNK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[index + 1].identifier}`,
+        ARITY: `${mminfo.config.arity || 1}`,
 
         // Statically known booleans for dead code elimination
         IS_STRICT_MODE: mminfo.config.strict,

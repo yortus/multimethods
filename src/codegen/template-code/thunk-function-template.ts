@@ -6,10 +6,10 @@ import Thunk from '../thunk';
 
 
 // TODO: ========== The actual template ==========
-// TODO: explain important norms in the template function... eg '$', __VARARGS__, __FUNCNAME__
+// TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
 // tslint:disable:no-var-keyword
-export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}>, __VARARGS__: any[]) {
+export default function __FUNCNAME__(discriminant: string, result: any, __ARGS__: any[], args: any[] | undefined) {
 
     // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
     if (result !== $.CONTINUE) {
@@ -25,13 +25,23 @@ export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}
 
     // TODO: call method in most efficient way...
     if (!$.IS_META_METHOD) {
-        result = $.METHOD.bind({pattern: captures})(__VARARGS__);
+        if (args === undefined) {
+            result = $.METHOD.call({pattern: captures}, __ARGS__);
+        }
+        else {
+            result = $.METHOD.apply({pattern: captures}, args);
+        }
     }
     else {
         if ($.HAS_DOWNSTREAM) {
             // tslint:disable-next-line:no-shadowed-variable
-            var forward = (__VARARGS__: any[]) => {
-                return $.DOWNSTREAM_THUNK(discriminant, $.CONTINUE, __VARARGS__);
+            var forward = function (__ARGS__: any[]) {
+                var args: any[] | undefined;
+                if (arguments.length > $.ARITY) {
+                    args = [];
+                    for (var len = arguments.length, i = 0; i < len; ++i) args.push(arguments[i]);
+                }
+                return $.DOWNSTREAM_THUNK(discriminant, $.CONTINUE, __ARGS__, args);
             };
         }
         else {
@@ -39,7 +49,14 @@ export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}
                 return $.CONTINUE;
             };
         }
-        result = $.METHOD(__VARARGS__, captures, forward);
+
+        if (args === undefined) {
+            result = $.METHOD(__ARGS__, captures, forward);
+        }
+        else {
+            // TODO: temp testing... BROKEN... needs updating to new calling convention
+            result = $.METHOD(args[0], captures, forward);
+        }
     }
 
     // TODO: do extra checks on method result in strict mode
@@ -63,22 +80,22 @@ export default function __FUNCNAME__(discriminant: string, result: {}|Promise<{}
         if ($.IS_NEVER_ASYNC) {
 
             // All methods in this MM are synchronous
-            result = $.FALLBACK_THUNK(discriminant, result, __VARARGS__);
+            result = $.FALLBACK_THUNK(discriminant, result, __ARGS__, args);
         }
         else {
             if ($.IS_ALWAYS_ASYNC) {
 
                 // All methods in this MM are asynchronous
-                result = (result as Promise<any>).then(rs => $.FALLBACK_THUNK(discriminant, rs, __VARARGS__));
+                result = (result as Promise<any>).then(rs => $.FALLBACK_THUNK(discriminant, rs, __ARGS__, args));
             }
             else {
 
                 // Methods may be sync or async, and we must differentiate at runtime
                 if ($.IS_PROMISE_LIKE(result)) {
-                    result = result.then(rs => $.FALLBACK_THUNK(discriminant, rs, __VARARGS__));
+                    result = result.then(rs => $.FALLBACK_THUNK(discriminant, rs, __ARGS__, args));
                 }
                 else {
-                    result = $.FALLBACK_THUNK(discriminant, result, __VARARGS__);
+                    result = $.FALLBACK_THUNK(discriminant, result, __ARGS__, args);
                 }
             }
         }
@@ -118,6 +135,7 @@ export interface VarsInScope {
 
     GET_CAPTURES: (discriminant: string) => {};
     METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
+    ARITY: number;
 }
 
 // TODO: these are statically known conditions that facilitate dead code elimination

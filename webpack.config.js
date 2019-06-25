@@ -37,7 +37,7 @@ module.exports = {
         minimizer: [new TerserPlugin({
             terserOptions: {
                 mangle: {
-                    reserved: ['__FUNCNAME__', '__VARARGS__']
+                    reserved: ['__FUNCNAME__', '__ARGS__']
                 },
                 compress: false,
                 // TODO: compression still causes errors in UMD build. `test-page.html` fails if compression is enabled.
