@@ -45,13 +45,14 @@ export default function emitThunkFunction(emit: Emitter,
 
         // Statically known strings for substitution into the template
         IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
-        CONTINUE: names.CONTINUE,
+        NEXT: names.NEXT,
         EMPTY_CONTEXT: names.EMPTY_CONTEXT,
         GET_CAPTURES: `${names.GET_CAPTURES}ː${fromNode.identifier}`,
         METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', methodIndex)}`,
         DOWNSTREAM_THUNK: downstream ? `${names.THUNK}ː${downstream.identifier}` : '',
         FALLBACK_THUNK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[index + 1].identifier}`,
         ARITY: `${mminfo.config.arity || 1}`,
+        COPY_ARRAY: names.COPY_ARRAY,
 
         // Statically known booleans for dead code elimination
         ENDS_PARTITION: isLeastSpecificMethod || seq[index + 1].isMeta,

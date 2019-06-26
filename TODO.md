@@ -43,7 +43,7 @@
   - [ ] Further Details
     - [ ] predicates
     - [ ] options / configuration
-    - [ ] method table: specificity, chains, CONTINUE, meta-methods, etc
+    - [ ] method table: specificity, chains, NEXT, meta-methods, etc
 - [ ] Improve unit test coverage
   - [ ] add basic tests for correct arg passing for variadic, nullary, unary, binary and ternary MMs
   - [ ] Early MM validation errors:
@@ -108,7 +108,7 @@
 - [ ] Multimethods are immutable.
   - [ ] document that multimethods are immutable and why. e.g. can emit fast code for them.
   - [ ] check code - ensure no mutating operations on multimethods
-- [ ] doc/explain CONTINUE - this is an imperative return value of what MM should do next, not a declaration of what just happened in current handler.
+- [ ] doc/explain NEXT - this is an imperative return value of what MM should do next, not a declaration of what just happened in current handler.
 - [ ] Fix terminology in code and comments
   - [ ] executor --> implementation, behaviour, case, effective handler, override, overload, subfunction, method, form, shape, mode
   - [ ] no such thing as a metarule, only a meta-handler

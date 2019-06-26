@@ -13,11 +13,12 @@ export default function emitDispatchFunction(emit: Emitter, mminfo: MMInfo<MMNod
     // TODO: temp testing...
     emitDispatchFunctionFromTemplate(emit, mminfo.config.name, mminfo.config.arity || 1, {
         IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
-        CONTINUE: names.CONTINUE,
+        NEXT: names.NEXT,
         ERROR_UNHANDLED: names.ERROR_UNHANDLED,
-        TO_DISCRIMINANT: names.TO_DISCRIMINANT,
+        DISCRIMINATOR: names.DISCRIMINATOR,
         SELECT_THUNK: names.SELECT_THUNK,
         ARITY: `${mminfo.config.arity || 1}`,
+        COPY_ARRAY: names.COPY_ARRAY,
     });
 }
 

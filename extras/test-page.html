@@ -9,7 +9,7 @@
 
             let assert = { equal: (a, b) => { if (a !== b) throw new Error(`Assertion failed: ${a} === ${b}`); }};
             let MM = multimethods.create;
-            let CONTINUE = multimethods.CONTINUE;
+            let NEXT = multimethods.NEXT;
             let meta = multimethods.meta;
 
             // Declare test configuration.
@@ -31,10 +31,10 @@
 
                     'c/*': () => `starts with 'c'`,
                     '*/d': () => `ends with 'd'`,
-                    'c/d': () => CONTINUE,
+                    'c/d': () => NEXT,
 
                     'api/**': [() => `fallback`, () => `fallback`],
-                    'api/fo*o': () => CONTINUE,
+                    'api/fo*o': () => NEXT,
                     'api/fo*': [
                         meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
                         meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
@@ -45,7 +45,7 @@
                     ],
                     'api/foot': () => 'FOOt',
                     'api/fooo': () => 'fooo',
-                    'api/bar': () => CONTINUE,
+                    'api/bar': () => NEXT,
 
                     // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
                     'zz/z/{**rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
@@ -115,7 +115,7 @@
 
             // TODO: doc helper...
             function ifUnhandled(lhs, rhs) {
-                return lhs === CONTINUE ? rhs : lhs;
+                return lhs === NEXT ? rhs : lhs;
             }
         </script>
     </head>

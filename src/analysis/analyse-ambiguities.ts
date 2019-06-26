@@ -1,5 +1,5 @@
 import {EulerDiagram} from '../math/sets';
-import {CONTINUE} from '../sentinels';
+import {NEXT} from '../sentinels';
 import * as fatalError from '../util/fatal-error';
 import getLongestCommonPrefix from '../util/get-longest-common-prefix';
 import getLongestCommonSuffix from '../util/get-longest-common-suffix';
@@ -15,11 +15,11 @@ import {MethodTableEntry} from './mm-node';
 export default function analyseAmbiguities<T extends MethodTableEntry>(mminfo: MMInfo<T>) {
     return mminfo.addProps((node, nodes, set, sets) => {
 
-        // If this is the root node, synthesize an additional regular method that always returns CONTINUE. Adding
+        // If this is the root node, synthesize an additional regular method that always returns NEXT. Adding
         // this method ensures graceful dispatch behaviour in the case that method table provides no handling for the
         // universal predicate. In particular, it guarantees every possible dispatch has a non-empty method sequence.
         if (set.supersets.length === 0) {
-            let method = function _unhandled() { return CONTINUE; };
+            let method = function _unhandled() { return NEXT; };
             insertAsLeastSpecificRegularMethod(node.exactMethods, method);
         }
 

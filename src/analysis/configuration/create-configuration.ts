@@ -12,11 +12,11 @@ export default function createConfiguration(options: Options) {
     let arity = options.arity;
     let async = options.async;
     let strict = options.strict || false;
-    let toDiscriminant = options.toDiscriminant || defaultDiscriminator;
+    let discriminator = options.discriminator || defaultDiscriminator;
     let methods = getNormalisedMethods(options.methods);
     let unreachable = options.unreachable || alwaysReachable;
 
-    return {name, arity, async, strict, toDiscriminant, methods, unreachable} as Configuration;
+    return {name, arity, async, strict, discriminator, methods, unreachable} as Configuration;
 }
 
 

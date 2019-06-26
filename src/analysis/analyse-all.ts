@@ -32,7 +32,7 @@ export default function analyseAll(options: Options) {
     // tslint:disable:max-line-length
 // (1):
     // Every route begins with the universal predicate. It matches all discriminants,
-    // and its method simply returns the `CONTINUE` sentinel value.
+    // and its method simply returns the `NEXT` sentinel value.
 
 // (2):
     // Every set in the euler diagram represents the best-matching pattern for some set of discriminants. Therefore, the set

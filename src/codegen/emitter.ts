@@ -19,8 +19,8 @@ export default interface Emitter {
 // TODO: doc...
 export interface EmitEnvironment extends MMInfo<EmitNode> {
     isPromiseLike: (value: any) => boolean;
-    CONTINUE: any;
-    unhandledError: typeof UNHANDLED;
+    NEXT: any;
+    unhandled: typeof UNHANDLED;
 }
 
 
@@ -76,11 +76,11 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     // tslint:disable:no-unused-expression
     [EnvNames.ENV] as Array<keyof typeof globProps>;
     [EnvNames.IS_PROMISE_LIKE] as Array<keyof typeof envProps>;
-    [EnvNames.CONTINUE] as Array<keyof typeof envProps>;
+    [EnvNames.NEXT] as Array<keyof typeof envProps>;
     [EnvNames.ERROR_UNHANDLED] as Array<keyof typeof envProps>;
     [EnvNames.CONFIG] as Array<keyof typeof envProps>;
     [EnvNames.ALL_NODES] as Array<keyof typeof envProps>;
-    [EnvNames.TO_DISCRIMINANT] as Array<keyof typeof cfgProps>;
+    [EnvNames.DISCRIMINATOR] as Array<keyof typeof cfgProps>;
     [EnvNames.IS_MATCH] as Array<keyof typeof nodeProps>;
     [EnvNames.GET_CAPTURES] as Array<keyof typeof nodeProps>;
     [EnvNames.EXACT_METHODS] as Array<keyof typeof nodeProps>;
@@ -107,15 +107,16 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
 export enum EnvNames {
     ENV = 'env',
     IS_PROMISE_LIKE = 'isPromiseLike',
-    CONTINUE = 'CONTINUE',
-    ERROR_UNHANDLED = 'unhandledError',
+    NEXT = 'NEXT',
+    ERROR_UNHANDLED = 'unhandled',
     CONFIG = 'config',
     ALL_NODES = 'allNodes',
-    TO_DISCRIMINANT = 'toDiscriminant',
+    DISCRIMINATOR = 'discriminator',
     IS_MATCH = 'isMatch',
     GET_CAPTURES = 'getCaptures',
     EXACT_METHODS = 'exactMethods',
     EMPTY_CONTEXT = 'EMPTY_CONTEXT',
+    COPY_ARRAY = 'copy',
     SELECT_THUNK = 'selectThunk',
     THUNK = 'thunk',
     METHOD = 'method',

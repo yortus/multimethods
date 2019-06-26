@@ -1,7 +1,7 @@
 import {expect, use as chaiUse} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import {Multimethod, next} from 'multimethods';
-import defaultLabel from 'multimethods/analysis/configuration/default-discriminator';
+import defaultDiscriminator from 'multimethods/analysis/configuration/default-discriminator';
 
 
 
@@ -28,7 +28,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
 
     // TODO: temp testing...
     it('TEMP2', () => {
-        let mm = Multimethod(defaultLabel).extend({
+        let mm = Multimethod(defaultDiscriminator).extend({
             '**':               (a: any, b: any) => `${a}:${b}`,
             '/String**':        (_: string, __: any) => `first is string`,
             '/Number**':        (_: number, __: any) => `first is number`,
@@ -43,7 +43,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
 
     // TODO: temp testing... strict+sync - ensure method result is checked properly
     it('TEMP3', () => {
-        let mm = Multimethod(defaultLabel).extend({
+        let mm = Multimethod(defaultDiscriminator).extend({
             '**':               (a: any, b: any) => `${a}:${b}`,
             '/String**':        (_: string, __: any) => Promise.resolve(`first is string`),
             '/Number**':        (_: number, __: any) => `first is number`,
@@ -59,7 +59,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
     // TODO: temp testing... strict+async - ensure method result is checked properly
     it('TEMP4', async () => {
 
-        let mm = Multimethod(async (...args: any[]) => defaultLabel(...args)).extend({
+        let mm = Multimethod(async (...args: any[]) => defaultDiscriminator(...args)).extend({
             '**':              (a: any, b: any) => Promise.resolve(`${a}:${b}`),
             '/String**':       (_: string, __: any) => Promise.resolve(`first is string`),
             '/Number**':       (_: number, __: any) => { throw new Error('oops'); },

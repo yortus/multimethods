@@ -12,7 +12,7 @@ export default function instrumentDispatchFunction(mminfo: MMInfo<MMNode>, mm: F
     function instrumentedDispatch(...args: any[]) {
         debug(
             `${DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`,
-            mminfo.config.toDiscriminant(...args),
+            mminfo.config.discriminator(...args),
             args
         );
         let getResult = () => mm(...args);

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {CONTINUE, create as MM, meta} from 'multimethods';
+import {NEXT, create as MM, meta} from 'multimethods';
 import isPromiseLike from 'multimethods/util/is-promise-like';
 // TODO: rename these tests in filename and describe()?
 // - this is more about invoking the Multimethod, not constructing it...
@@ -42,7 +42,7 @@ describe('Constructing a Multimethod instance', () => {
             '/*a*': meta((rq, _, next) => {
                     return calc([
                         '---',
-                        calc(next(rq), rs => rs === CONTINUE ? err('no downstream!') : rs),
+                        calc(next(rq), rs => rs === NEXT ? err('no downstream!') : rs),
                         '---',
                     ], concat);
             }),
@@ -53,29 +53,29 @@ describe('Constructing a Multimethod instance', () => {
 
             'c/*': () => val(`starts with 'c'`),
             '*/d': () => err(`don't end with 'd'!`),
-            'c/d': () => val(CONTINUE),
+            'c/d': () => val(NEXT),
 
             'api/**': () => val(`fallback`),
-            'api/fo*o': () => val(CONTINUE),
+            'api/fo*o': () => val(NEXT),
             'api/fo*': [
                 meta((rq, _, next) => {
-                    return calc(['fo2-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat);
+                    return calc(['fo2-(', calc(next(rq), rs => rs === NEXT ? val('NONE') : rs), ')'], concat);
                 }),
                 meta((rq, _, next) => {
-                    return calc(['fo1-(', calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), ')'], concat);
+                    return calc(['fo1-(', calc(next(rq), rs => rs === NEXT ? val('NONE') : rs), ')'], concat);
                 }),
             ],
             'api/foo': [
-                meta((rq, _, next) => calc([calc(next(rq), rs => rs === CONTINUE ? val('NONE') : rs), '!'], concat)),
+                meta((rq, _, next) => calc([calc(next(rq), rs => rs === NEXT ? val('NONE') : rs), '!'], concat)),
                 () => val('FOO'),
             ],
             'api/foot': rq => val(`FOOt${rq.address.length}`),
             'api/fooo': () => val('fooo'),
-            'api/bar': () => val(CONTINUE),
+            'api/bar': () => val(NEXT),
 
             'zz/z/{**rest}': meta((_, {rest}, next) => {
                 let moddedReq = {address: rest.split('').reverse().join('')};
-                return calc(next(moddedReq), rs => rs === CONTINUE ? val('NONE') : rs);
+                return calc(next(moddedReq), rs => rs === NEXT ? val('NONE') : rs);
             }),
             'zz/z/b*z': (rq) => val(`${rq.address}`),
             'zz/z/./*': () => val('forty-two'),
@@ -92,10 +92,10 @@ describe('Constructing a Multimethod instance', () => {
                 meta((rq, {}, next) => calc(['[', next(rq), ']'], concat)),
 
                 // Return x!x! only if x ends with 'b' , otherwise skip
-                (_, {x}) => val(x.endsWith('b') ? (x + '!').repeat(2) : CONTINUE),
+                (_, {x}) => val(x.endsWith('b') ? (x + '!').repeat(2) : NEXT),
 
                 // Return xxx only if x has length 2, otherwise skip
-                (_, {x}) => val(x.length === 2 ? x.repeat(3) : CONTINUE),
+                (_, {x}) => val(x.length === 2 ? x.repeat(3) : NEXT),
 
                 // Return the string reversed
                 (_, {x}) => val(x.split('').reverse().join('')),
@@ -148,7 +148,7 @@ describe('Constructing a Multimethod instance', () => {
         // TODO: doc...
         let multimethod = MM({
             arity: 1,
-            toDiscriminant: (r: any) => r.address,
+            discriminator: (r: any) => val(r.address),
             async,
             methods,
         });

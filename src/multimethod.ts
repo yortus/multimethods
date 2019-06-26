@@ -35,14 +35,14 @@ export interface AsyncMultimethod<P extends unknown[], R> {
 
 
 export type Options<P extends unknown[], R extends string | Promise<string>> =
-    | LabellingFunction<P, R>
+    | DiscriminatorFunction<P, R>
     | OptionsObject<P, R>;
 
 export interface OptionsObject<P extends unknown[], R extends string | Promise<string>> {
-    label: LabellingFunction<P, R>;
+    discriminator: DiscriminatorFunction<P, R>;
 }
 
-export type LabellingFunction<P extends unknown[], R extends string | Promise<string>> = (...args: P) => R;
+export type DiscriminatorFunction<P extends unknown[], R extends string | Promise<string>> = (...args: P) => R;
 
 
 

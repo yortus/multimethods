@@ -39,9 +39,9 @@ export default function checkOptions(options: Options): void {
     }
 
     // `toDiscriminant` must be either undefined, or else a function.
-    if (options.toDiscriminant !== undefined) {
-        let isValid = typeof options.toDiscriminant === 'function';
-        if (!isValid) return fatalError.INVALID_TO_DISCRIMINANT_OPTION();
+    if (options.discriminator !== undefined) {
+        let isValid = typeof options.discriminator === 'function';
+        if (!isValid) return fatalError.INVALID_DISCRIMINATOR_OPTION();
     }
 
     // `methods` must be either undefined, or else a methods hash. Delegate this check.

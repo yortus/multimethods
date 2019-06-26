@@ -1,6 +1,6 @@
 import {MMInfo, MMNode} from '../analysis';
 import {hasNamedCaptures, toMatchFunction, toNormalPredicate} from '../math/predicates';
-import {CONTINUE} from '../sentinels';
+import {NEXT} from '../sentinels';
 import * as fatalError from '../util/fatal-error';
 import isPromiseLike from '../util/is-promise-like';
 import repeat from '../util/string-repeat';
@@ -37,10 +37,11 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
 
     emitBanner(emit, 'ENVIRONMENT');
     emit(`var ${names.IS_PROMISE_LIKE} = ${names.ENV}.${names.IS_PROMISE_LIKE};`);
-    emit(`var ${names.CONTINUE} = ${names.ENV}.${names.CONTINUE};`);
+    emit(`var ${names.NEXT} = ${names.ENV}.${names.NEXT};`);
     emit(`var ${names.ERROR_UNHANDLED} = ${names.ENV}.${names.ERROR_UNHANDLED};`);
-    emit(`var ${names.TO_DISCRIMINANT} = ${names.ENV}.${names.CONFIG}.${names.TO_DISCRIMINANT};`);
+    emit(`var ${names.DISCRIMINATOR} = ${names.ENV}.${names.CONFIG}.${names.DISCRIMINATOR};`);
     emit(`var ${names.EMPTY_CONTEXT} = Object.freeze({pattern: Object.freeze({})});`);
+    emit(`var ${names.COPY_ARRAY} = function (els) { return Array.prototype.slice.call(els); };`);
     env.allNodes.forEach((node, i) => {
         const NODE_REF = `${names.ENV}.${names.ALL_NODES}[${i}]`;
         emit(`\n// -------------------- ${node.exactPredicate} --------------------`);
@@ -69,8 +70,8 @@ function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
         return {isMatch, hasCaptures: hasCapts, getCaptures};
     }) as EmitEnvironment;
     result.isPromiseLike = isPromiseLike;
-    result.CONTINUE = CONTINUE;
-    result.unhandledError = fatalError.UNHANDLED;
+    result.NEXT = NEXT;
+    result.unhandled = fatalError.UNHANDLED;
     return result;
 }
 

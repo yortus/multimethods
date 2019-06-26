@@ -105,7 +105,7 @@ function beautify(minifiedSource: string) {
     for (let i = 0; i < minifiedSource.length; ++i) {
         let c = minifiedSource.charAt(i);
         if (c === '{') {
-            indent += '    ';
+            indent += '\t';
             out += '{\n' + indent;
         }
         else if (c === ';') {
@@ -116,7 +116,7 @@ function beautify(minifiedSource: string) {
             // If so, remove that last newline so we don't end up with blank lines.
             out = out.replace(/\n\s*$/g, '');
 
-            indent = indent.slice(0, -4);
+            indent = indent.slice(0, -1);
             out += '\n' + indent + '}';
 
             // The '}' may *not* be a block terminator, it may be the end of a function expression.

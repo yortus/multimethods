@@ -1,6 +1,6 @@
 import {expect, use as chaiUse} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import {CONTINUE, create as MM, meta} from 'multimethods';
+import {NEXT, create as MM, meta} from 'multimethods';
 
 
 
@@ -19,7 +19,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
 
         let mm = MM({
             arity: 1,
-            toDiscriminant: (x: string) => x,
+            discriminator: (x: string) => x,
             methods: {
                 '/{thing}': (x, {}, _) => x,
                 '/foo':     (x) => 'foo' + x,
@@ -98,11 +98,11 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
             // arity: 1,
             async: false,
             strict: true,
-            toDiscriminant: (a: string) => a,
+            discriminator: (a: string) => a,
             methods: {
                 '**':       meta((a, {}, next) => `-${next(a)}-`),
                 'a*':       _ => 'a*',
-                'aa*':      meta((a, {}, next) => { let r = next(a); return r === CONTINUE ? CONTINUE : `(${r})`; }),
+                'aa*':      meta((a, {}, next) => { let r = next(a); return r === NEXT ? NEXT : `(${r})`; }),
             },
         });
 

@@ -10,7 +10,7 @@ export default interface Configuration {
     arity: number | undefined;
     async: boolean | undefined;
     strict: boolean;
-    toDiscriminant: Function;
+    discriminator: Function;
     methods: {[predicate: string]: Function[]};
     unreachable: Unreachable;
 }

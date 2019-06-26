@@ -4,8 +4,8 @@
 
 
 // TODO: doc...
-const CONTINUE = Object.freeze({}) as any;
-export {CONTINUE};
+const NEXT = Object.freeze({}) as any;
+export {NEXT};
 
 
 

@@ -17,7 +17,7 @@
 
 ## Future Work
 - the `strictChecks` option may be changed to `true | false | { <specific checks...> }`
-- diagnostics: early detection of potential runtime error on CONTINUE when multiple possible fallbacks exist
+- diagnostics: early detection of potential runtime error on NEXT when multiple possible fallbacks exist
 - generator MMs - iterable functions ala ES6 generators, but with MM dispatch
 - 'adding' two multimethods to get a new multimethod
 
@@ -53,10 +53,10 @@
 - eager or lazy?
 
 
-## The CONTINUE sentinel
-- When a handler returns `CONTINUE` (or a `Promise` thereof), it instructs the library to call the next-best matching handler for the same inputs. And so on until either a handler returns a non-`CONTINUE` value (which becomes the return value of the MM call), or the last matching handler returns `CONTINUE`, which causes an 'unhandled' error to be thrown.
-- lib provides a default for this, which is exported as `CONTINUE`
-- clients can provide their own `CONTINUE` value via MM options
+## The NEXT sentinel
+- When a handler returns `NEXT` (or a `Promise` thereof), it instructs the library to call the next-best matching handler for the same inputs. And so on until either a handler returns a non-`NEXT` value (which becomes the return value of the MM call), or the last matching handler returns `NEXT`, which causes an 'unhandled' error to be thrown.
+- lib provides a default for this, which is exported as `NEXT`
+- clients can provide their own `NEXT` value via MM options
 
 
 ## Strict mode (`options.strict`)

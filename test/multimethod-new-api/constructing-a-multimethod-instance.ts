@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import isPromiseLike from 'multimethods/util/is-promise-like';
 
 import {Multimethod, next} from 'multimethods';
-// import defaultLabel from 'multimethods/analysis/configuration/default-discriminator';
+// import defaultDiscrininator from 'multimethods/analysis/configuration/default-discriminator';
 
 
 // TODO: rename these tests in filename and describe()?
@@ -163,7 +163,7 @@ describe('Constructing a Multimethod instance', () => {
         ];
 
         // TODO: doc...
-        let multimethod = Multimethod((r: any) => r.address).extend(methods).decorate(decorators);
+        let multimethod = Multimethod((r: any) => val(r.address)).extend(methods).decorate(decorators);
 
         tests.forEach(test => it(test, async () => {
             let address = test.split(' ==> ')[0];

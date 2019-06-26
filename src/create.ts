@@ -42,7 +42,7 @@ export type AsyncUnaryOptions<T0, TR> = {async: true} & BaseUnaryOptions<T0, TR|
 export type UnaryOptions<T0, TR> = BaseUnaryOptions<T0, TR|Promise<TR>>;
 export interface BaseUnaryOptions<T0, TR> extends Options {
     arity: 1;
-    toDiscriminant?: ($0: T0) => string;
+    discriminator?: ($0: T0) => string;
     methods?: Methods<($0: T0, captures: Captures, forward: ($0: T0) => TR) => TR>;
 }
 
@@ -55,7 +55,7 @@ export type AsyncBinaryOptions<T0, T1, TR> = {async: true} & BaseBinaryOptions<T
 export type BinaryOptions<T0, T1, TR> = BaseBinaryOptions<T0, T1, TR|Promise<TR>>;
 export interface BaseBinaryOptions<T0, T1, TR> extends Options {
     arity: 2;
-    toDiscriminant?: ($0: T0, $1: T1) => string;
+    discriminator?: ($0: T0, $1: T1) => string;
     methods?: Methods<($0: T0, $1: T1, captures: Captures, forward: ($0: T0, $1: T1) => TR) => TR>;
 }
 
@@ -68,7 +68,7 @@ export type AsyncTernaryOptions<T0, T1, T2, TR> = {async: true} & BaseTernaryOpt
 export type TernaryOptions<T0, T1, T2, TR> = BaseTernaryOptions<T0, T1, T2, TR|Promise<TR>>;
 export interface BaseTernaryOptions<T0, T1, T2, TR> extends Options {
     arity: 3;
-    toDiscriminant?: ($0: T0, $1: T1, $2: T2) => string;
+    discriminator?: ($0: T0, $1: T1, $2: T2) => string;
     methods?: Methods<($0: T0, $1: T1, $2: T2, captures: Captures, forward: ($0: T0, $1: T1, $2: T2) => TR) => TR>;
 }
 
@@ -80,7 +80,7 @@ export type SyncVariadicOptions<T, TR> = {async: false} & BaseVariadicOptions<T,
 export type AsyncVariadicOptions<T, TR> = {async: true} & BaseVariadicOptions<T, TR|Promise<TR>>;
 export type VariadicOptions<T, TR> = BaseVariadicOptions<T, TR|Promise<TR>>;
 export interface BaseVariadicOptions<T, TR> extends Options {
-    toDiscriminant?: (...args: T[]) => string;
+    discriminator?: (...args: T[]) => string;
     methods?: Methods<(...args: Array<T|Captures|((...args: T[]) => TR)>) => TR>;
     // TODO:              ^--- the `...args` type is best effort, but really needs to be:
     //                (...args: T[], captures: {[name: string]: string}, next: Next)

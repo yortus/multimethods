@@ -17,9 +17,9 @@ export {Multimethod};
 function create<P extends unknown[]>(options?: types.Options<P, 'mixed'>): types.Multimethod<P, never>;
 function create<P extends unknown[]>(options?: types.Options<P, 'async'>): types.AsyncMultimethod<P, never>;
 function create(options: types.Options<unknown[], any>) {
-    let label = typeof options === 'function' ? options : options.label;
+    let discriminator = typeof options === 'function' ? options : options.discriminator;
 
-    let mm = MM({ toDiscriminant: label, arity: label.length || 1 });
+    let mm = MM({ discriminator, arity: discriminator.length || 1 });
     let result: types.Multimethod<unknown[], unknown> = addMethods(mm);
     return result;
 
@@ -27,7 +27,7 @@ function create(options: types.Options<unknown[], any>) {
         let extend = (methods: any) => {
             methods = combine(existingMethods, methods);
             let mm2 = MM({
-                toDiscriminant: label,
+                discriminator,
                 methods,
             });
             return addMethods(mm2, methods);
@@ -46,7 +46,7 @@ function create(options: types.Options<unknown[], any>) {
             );
             let methods = combine(existingMethods, metaMethods);
             let mm2 = MM({
-                toDiscriminant: label,
+                discriminator,
                 methods,
             });
             return addMethods(mm2, methods);

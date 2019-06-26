@@ -43,7 +43,7 @@ export default function eliminateDeadCode(template: Template) {
         while (true) {
             inLine = inLines.shift()!;
             if (inLine === blockClose) break;
-            blockLines.push(inLine.slice(4));
+            blockLines.push(inLine.slice(1)); // remove an indent
         }
 
         if (isTrueCond) {

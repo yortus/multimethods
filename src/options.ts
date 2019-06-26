@@ -28,7 +28,7 @@ export default interface Options {
     // TODO: code up additional strict mode checks in thunks for what methods return when async='always|never'
     strict?: boolean;
 
-    toDiscriminant?: Function;
+    discriminator?: Function;
 
     // TODO: doc... this is the Method Table...
     methods?: {

@@ -32,8 +32,8 @@ export function INVALID_STRICT_OPTION(value: any) {
     return error(format(fmt, value));
 }
 
-export function INVALID_TO_DISCRIMINANT_OPTION() {
-    let fmt = `Expected a function or undefined value for options.toDiscriminant.`;
+export function INVALID_DISCRIMINATOR_OPTION() {
+    let fmt = `Expected a function or undefined value for options.discriminator.`;
     return error(format(fmt));
 }
 
