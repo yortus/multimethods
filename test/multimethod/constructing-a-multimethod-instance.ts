@@ -42,7 +42,7 @@
 //             '/*a*': meta((rq, _, next) => {
 //                     return calc([
 //                         '---',
-//                         calc(next(rq), rs => rs === NEXT ? err('no downstream!') : rs),
+//                         calc(next(rq), rs => rs === NEXT ? err('no inner method!') : rs),
 //                         '---',
 //                     ], concat);
 //             }),
@@ -108,8 +108,8 @@
 //             `/baz ==> ---baz---`,
 //             `/quux ==> ERROR: nothing matches!`,
 //             `quux ==> ERROR: Multimethod dispatch failure...`,
-//             `/qaax ==> ERROR: no downstream!`,
-//             `/a ==> ERROR: no downstream!`,
+//             `/qaax ==> ERROR: no inner method!`,
+//             `/a ==> ERROR: no inner method!`,
 //             `a ==> ERROR: Multimethod dispatch failure...`,
 //             `/ ==> ERROR: nothing matches!`,
 //             ` ==> ERROR: Multimethod dispatch failure...`,

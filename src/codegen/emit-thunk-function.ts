@@ -38,7 +38,7 @@ export default function emitThunkFunction(emit: Emitter,
 
     // TODO: temp testing... explain these calcs!!
     let isLeastSpecificMethod = index === seq.length - 1;
-    let downstream = seq.filter((entry, j) => (j === 0 || entry.isMeta) && j < index).pop();
+    let innerMethod = seq.filter((entry, j) => (j === 0 || entry.isMeta) && j < index).pop();
 
     // TODO: temp testing...
     emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.config.arity || 1, {
@@ -48,16 +48,15 @@ export default function emitThunkFunction(emit: Emitter,
         EMPTY_CONTEXT: names.EMPTY_CONTEXT,
         GET_CAPTURES: `${names.GET_CAPTURES}ː${fromNode.identifier}`,
         METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', methodIndex)}`,
-        DOWNSTREAM_THUNK: downstream ? `${names.THUNK}ː${downstream.identifier}` : '',
-        FALLBACK_THUNK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[index + 1].identifier}`,
+        INNER_THUNK: innerMethod ? `${names.THUNK}ː${innerMethod.identifier}` : '',
+        OUTER_THUNK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[index + 1].identifier}`,
         ARITY: `${mminfo.config.arity || 1}`,
         COPY_ARRAY: names.COPY_ARRAY,
 
         // Statically known booleans for dead code elimination
-        ENDS_PARTITION: isLeastSpecificMethod || seq[index + 1].isMeta,
         HAS_CAPTURES: hasNamedCaptures(fromNode.exactPredicate),
-        IS_META_METHOD: isMeta,
-        HAS_DOWNSTREAM: downstream != null,
+        HAS_INNER_METHOD: innerMethod != null,
+        HAS_OUTER_METHOD: !isLeastSpecificMethod && !seq[index + 1].isMeta,
     });
 }
 

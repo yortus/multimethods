@@ -18,29 +18,22 @@ import Thunk from '../thunk';
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
 export default function __FUNCNAME__(dsc: string, __ARGS__: any[], args: any[] | undefined) {
 
-    if ($.ENDS_PARTITION) {
+    if ($.HAS_OUTER_METHOD) {
         var outer = function () {
-            return $.ERROR_UNHANDLED(dsc) as any;
+            return $.OUTER_THUNK(dsc, __ARGS__, args);
         };
     }
     else {
         var outer = function () {
-            return $.FALLBACK_THUNK(dsc, __ARGS__, args);
+            return $.ERROR_UNHANDLED(dsc) as any;
         };
     }
 
-    if ($.IS_META_METHOD) {
-        if ($.HAS_DOWNSTREAM) {
-            var inner = function (__ARGS__: any[]) {
-                var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
-                return $.DOWNSTREAM_THUNK(dsc, __ARGS__, args);
-            };
-        }
-        else {
-            var inner: typeof inner = function () {
-                return $.ERROR_UNHANDLED(dsc);
-            };
-        }
+    if ($.HAS_INNER_METHOD) {
+        var inner = function (__ARGS__: any[]) {
+            var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
+            return $.INNER_THUNK(dsc, __ARGS__, args);
+        };
     }
     else {
         var inner: typeof inner = function () {
@@ -89,10 +82,11 @@ export interface VarsInScope {
         refers to the first method in the next more-specific partition (see JSDoc notes at top
         of this file). It is substituted in as the value of `forward` when a meta-method is called.
     */
-    DOWNSTREAM_THUNK: Thunk;
+    INNER_THUNK: Thunk;
 
+    // TODO: revise comment...
     /* used for cascading evaluation, i.e. when the thunk's corresponding method signals it went unhandled. */
-    FALLBACK_THUNK: Thunk;
+    OUTER_THUNK: Thunk;
 
     GET_CAPTURES: (discriminant: string) => {};
     METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
@@ -103,8 +97,7 @@ export interface VarsInScope {
 // TODO: these are statically known conditions that facilitate dead code elimination
 // TODO: explain each of these in turn...
 export interface StaticConds {
-    ENDS_PARTITION: boolean;
     HAS_CAPTURES: boolean;
-    IS_META_METHOD: boolean;
-    HAS_DOWNSTREAM: boolean;
+    HAS_INNER_METHOD: boolean;
+    HAS_OUTER_METHOD: boolean;
 }
