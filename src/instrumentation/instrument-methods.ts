@@ -1,9 +1,9 @@
 import {MMInfo, MMNode} from '../analysis';
+import {Method} from '../multimethod';
 import andThen from '../util/and-then';
 import debug, {DISPATCH} from '../util/debug';
 import isMetaMethod from '../util/is-meta-method';
 import repeatString from '../util/string-repeat';
-
 
 
 
@@ -23,22 +23,18 @@ export default function instrumentMethods(mminfo: MMInfo<MMNode>) {
 
 
 
-
 // TODO: doc...
 function instrumentMethod(method: Function, name: string) {
     let isMeta = isMetaMethod(method);
-    let methodInfo = `method=${name}   type=${isMeta ? 'meta' : 'regular'}`;
-    function instrumentedMethod(...args: any[]) {
-        let next = isMeta ? args.pop() : null;
-        let captures = args.pop();
-        debug(`${DISPATCH} |-->| %s${captures ? '   captures=%o' : ''}`, methodInfo, captures);
-        let getResult = () => isMeta ? method(...args, captures, next) : method(...args, captures);
-        return andThen(getResult, (result, error, isAsync) => {
+    let methodInfo = `${isMeta ? 'decorator' : 'method'}=${name}`;
+    let instrumentedMethod: Method<unknown[], unknown> = function (...args: any[]) {
+        debug(`${DISPATCH} |-->| %s   pattern bindings=%o`, methodInfo, this.pattern);
+        return andThen(() => method.apply(this, args), (result, error, isAsync) => {
             let resultInfo = error ? 'result=ERROR' : '';
             debug(`${DISPATCH} |<--| %s   %s   %s`, methodInfo, isAsync ? 'async' : 'sync', resultInfo);
             if (error) throw error; else return result;
         });
-    }
+    };
     if (isMeta) isMetaMethod(instrumentedMethod, true);
     return instrumentedMethod;
 }
