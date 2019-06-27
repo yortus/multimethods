@@ -30,8 +30,7 @@ export default function __FUNCNAME__(disc: string, __ARGS__: any[], args: any[] 
 
         if ($.HAS_INNER_METHOD) {
             var inner = function (__ARGS__: any[]) {
-                var arity = arguments.length;
-                return $.INNER_THUNK(disc, __ARGS__, arity ? arity > $.ARITY && $.COPY_ARRAY(arguments) : args);
+                return $.INNER_THUNK(disc, __ARGS__, arguments.length > $.ARITY && $.COPY_ARRAY(arguments));
             };
         }
         else {

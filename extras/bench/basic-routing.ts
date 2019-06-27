@@ -11,7 +11,8 @@ import {Multimethod} from 'multimethods';
 // ====================================================================================================================
 // DATE         MACHINE     RESULT                                                              NOTES
 // --------------------------------------------------------------------------------------------------------------------
-// 2019-06-27   LAJESTIC    Dispatched 1000000 requests in 0.535 seconds   (~1869000 req/sec)   pattern bindings and inner/outer functions now passed to methods/decorators as `this`. Optionless arity optimisation.
+// 2019-06-27   LAJESTIC    Dispatched 1000000 requests in 0.514 seconds   (~1946000 req/sec)   Micro-optimisations.
+// 2019-06-27   LAJESTIC    Dispatched 1000000 requests in 0.535 seconds   (~1869000 req/sec)   Pattern bindings and inner/outer functions now passed to methods/decorators as `this`. Optionless arity optimisation.
 // 2019-06-19   LAJESTIC    Dispatched 1000000 requests in 0.428 seconds   (~2336000 req/sec)   Coming back after long time. Big perf jump due to V8 improvements I guess? Machine hasn't changed.
 
 // 2017-07-22   LAJESTIC    Dispatched 1000000 requests in 0.741 seconds   (~1350000 req/sec)   general perf checkback after many commits.
