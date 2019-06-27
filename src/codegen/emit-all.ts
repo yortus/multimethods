@@ -36,7 +36,7 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     emitBanner(emit, 'ENVIRONMENT');
     emit(`var ${names.ERROR_UNHANDLED} = ${names.ENV}.${names.ERROR_UNHANDLED};`);
     emit(`var ${names.DISCRIMINATOR} = ${names.ENV}.${names.CONFIG}.${names.DISCRIMINATOR};`);
-    emit(`var ${names.EMPTY_CONTEXT} = Object.freeze({pattern: Object.freeze({})});`);
+    emit(`var ${names.EMPTY_OBJECT} = Object.freeze({});`);
     emit(`var ${names.COPY_ARRAY} = function (els) { return Array.prototype.slice.call(els); };`);
     env.allNodes.forEach((node, i) => {
         const NODE_REF = `${names.ENV}.${names.ALL_NODES}[${i}]`;

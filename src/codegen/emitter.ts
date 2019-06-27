@@ -108,7 +108,7 @@ export enum EnvNames {
     IS_MATCH = 'isMatch',
     GET_CAPTURES = 'getCaptures',
     EXACT_METHODS = 'exactMethods',
-    EMPTY_CONTEXT = 'EMPTY_CONTEXT',
+    EMPTY_OBJECT = 'EMPTY_OBJECT',
     COPY_ARRAY = 'copy',
     SELECT_THUNK = 'selectThunk',
     THUNK = 'thunk',

@@ -18,47 +18,50 @@ import Thunk from '../thunk';
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
 export default function __FUNCNAME__(dsc: string, __ARGS__: any[], args: any[] | undefined) {
 
-    if ($.HAS_OUTER_METHOD) {
-        var outer = function () {
-            return $.OUTER_THUNK(dsc, __ARGS__, args);
-        };
+    if ($.NO_THIS_REFERENCE_IN_METHOD) {
+        return args === undefined ? $.METHOD(__ARGS__) : $.METHOD.apply(undefined, args);
     }
     else {
-        var outer = function () {
-            return $.ERROR_UNHANDLED(dsc) as any;
-        };
-    }
+        if ($.HAS_OUTER_METHOD) {
+            var outer = function () {
+                return $.OUTER_THUNK(dsc, __ARGS__, args);
+            };
+        }
+        else {
+            var outer = function () {
+                return $.ERROR_UNHANDLED(dsc) as any;
+            };
+        }
 
-    if ($.HAS_INNER_METHOD) {
-        var inner = function (__ARGS__: any[]) {
-            var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
-            return $.INNER_THUNK(dsc, __ARGS__, args);
-        };
-    }
-    else {
-        var inner: typeof inner = function () {
-            return $.ERROR_UNHANDLED(dsc);
-        };
-    }
+        if ($.HAS_INNER_METHOD) {
+            var inner = function (__ARGS__: any[]) {
+                var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
+                return $.INNER_THUNK(dsc, __ARGS__, args);
+            };
+        }
+        else {
+            var inner: typeof inner = function () {
+                return $.ERROR_UNHANDLED(dsc);
+            };
+        }
 
-    if ($.HAS_CAPTURES) {
-        var ctx = {
-            pattern: $.GET_CAPTURES(dsc),
-            inner: inner,
-            outer: outer,
-        };
-    }
-    else {
-        var ctx = {
-            pattern: {},
-            inner: inner,
-            outer: outer,
-        };
-    }
+        if ($.HAS_CAPTURES) {
+            var ctx = {
+                pattern: $.GET_CAPTURES(dsc),
+                inner: inner,
+                outer: outer,
+            };
+        }
+        else {
+            var ctx = {
+                pattern: $.EMPTY_OBJECT,
+                inner: inner,
+                outer: outer,
+            };
+        }
 
-    // TODO: call method in most efficient way...
-    var res = args === undefined ? $.METHOD.call(ctx, __ARGS__) : $.METHOD.apply(ctx, args);
-    return res;
+        return args === undefined ? $.METHOD.call(ctx, __ARGS__) : $.METHOD.apply(ctx, args);
+    }
 }
 
 
@@ -75,7 +78,7 @@ declare const $: VarsInScope & StaticConds;
 // TODO: explain each of these in turn...
 export interface VarsInScope {
     ERROR_UNHANDLED: typeof fatalError.UNHANDLED;
-    EMPTY_CONTEXT: {pattern: {}};
+    EMPTY_OBJECT: {};
 
     // TODO: revise comment...
     /*
@@ -100,4 +103,5 @@ export interface StaticConds {
     HAS_CAPTURES: boolean;
     HAS_INNER_METHOD: boolean;
     HAS_OUTER_METHOD: boolean;
+    NO_THIS_REFERENCE_IN_METHOD: boolean;
 }

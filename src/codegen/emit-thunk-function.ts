@@ -45,7 +45,7 @@ export default function emitThunkFunction(emit: Emitter,
 
         // Statically known strings for substitution into the template
         ERROR_UNHANDLED: names.ERROR_UNHANDLED,
-        EMPTY_CONTEXT: names.EMPTY_CONTEXT,
+        EMPTY_OBJECT: names.EMPTY_OBJECT,
         GET_CAPTURES: `${names.GET_CAPTURES}ː${fromNode.identifier}`,
         METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', methodIndex)}`,
         INNER_THUNK: innerMethod ? `${names.THUNK}ː${innerMethod.identifier}` : '',
@@ -57,6 +57,7 @@ export default function emitThunkFunction(emit: Emitter,
         HAS_CAPTURES: hasNamedCaptures(fromNode.exactPredicate),
         HAS_INNER_METHOD: innerMethod != null,
         HAS_OUTER_METHOD: !isLeastSpecificMethod && !seq[index + 1].isMeta,
+        NO_THIS_REFERENCE_IN_METHOD: !/\bthis\b/g.test(fromNode.exactMethods[methodIndex].toString()),
     });
 }
 
