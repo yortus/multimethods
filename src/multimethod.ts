@@ -17,28 +17,28 @@ export interface Multimethod<P extends unknown[], R> {
     (...args: P): R;
     extend<MR>(methods: MethodsObject<P, MR>): Multimethod<P, Result<R | MR>>;
     extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): Multimethod<P, Result<R | MR | Promise<MR>>>;
-    decorate(decorators: DecoratorsObject<P, R>): Multimethod<P, R>;
+    decorate(decorators: MethodsObject<P, R>): Multimethod<P, R>;
 }
 
 export interface AsyncMultimethod<P extends unknown[], R> {
     (...args: P): Promise<R>;
     extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): AsyncMultimethod<P, R | MR>;
-    decorate(decorators: DecoratorsObject<P, R | Promise<R>>): AsyncMultimethod<P, R>;
+    decorate(decorators: MethodsObject<P, R | Promise<R>>): AsyncMultimethod<P, R>;
 }
 
 
 
 
-export type Options<P extends unknown[], R extends string | Promise<string>> =
-    | DiscriminatorFunction<P, R>
-    | OptionsObject<P, R>;
+export type Options<P extends unknown[], D extends string | Promise<string>> =
+    | DiscriminatorFunction<P, D>
+    | OptionsObject<P, D>;
 
-export interface OptionsObject<P extends unknown[], R extends string | Promise<string>> {
-    discriminator: DiscriminatorFunction<P, R>;
+export interface OptionsObject<P extends unknown[], D extends string | Promise<string>> {
+    discriminator: DiscriminatorFunction<P, D>;
     unhandled?: (discriminant: string) => unknown;
 }
 
-export type DiscriminatorFunction<P extends unknown[], R extends string | Promise<string>> = (...args: P) => R;
+export type DiscriminatorFunction<P extends unknown[], D extends string | Promise<string>> = (...args: P) => D;
 
 
 
@@ -46,22 +46,13 @@ export type DiscriminatorFunction<P extends unknown[], R extends string | Promis
 export interface MethodsObject<P extends unknown[], R> {
     [pattern: string]: Method<P, R> | Array<Method<P, R> | 'super'>;
 }
-export type Method<P extends unknown[], R> = (this: MethodContext<R>, ...args: P) => R;
-export interface MethodContext<R> {
+
+export type Method<P extends unknown[], R> = (this: Context<P, R>, ...args: P) => R;
+
+export interface Context<P extends unknown[], R> {
     pattern: { [bindingName: string]: string };
-    super: () => R;
-}
-
-
-
-
-export interface DecoratorsObject<P extends unknown[], R> {
-    [pattern: string]: Decorator<P, R> | Array<Decorator<P, R> | 'super'>;
-}
-export type Decorator<P extends unknown[], R> = (method: (...args: P) => R, args: P, context: DecoratorContext<R>) => R;
-export interface DecoratorContext<R> {
-    pattern: { [bindingName: string]: string };
-    super: () => R;
+    inner: (...args: P) => R;
+    outer: () => R;
 }
 
 

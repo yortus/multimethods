@@ -4,9 +4,10 @@ import Thunk from '../thunk';
 
 
 
-// tslint:disable: max-line-length
+// TODO: explain - template source can only include constructs that are supported by all target runtimes. So no ES6.
 // tslint:disable: no-shadowed-variable
 // tslint:disable: no-var-keyword
+// tslint:disable: object-literal-shorthand
 // tslint:disable: only-arrow-functions
 
 
@@ -17,15 +18,32 @@ import Thunk from '../thunk';
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
 export default function __FUNCNAME__(dsc: string, __ARGS__: any[], args: any[] | undefined) {
 
-    var res;
-
-    if (!$.ENDS_PARTITION) {
-        var callNextInChain = function () {
-            return $.FALLBACK_THUNK(dsc, __ARGS__, args);
+    if ($.ENDS_PARTITION) {
+        var outer = function () {
+            return $.ERROR_UNHANDLED(dsc) as any;
         };
     }
     else {
-        var callNextInChain: typeof callNextInChain = function () {
+        var outer = function () {
+            return $.FALLBACK_THUNK(dsc, __ARGS__, args);
+        };
+    }
+
+    if ($.IS_META_METHOD) {
+        if ($.HAS_DOWNSTREAM) {
+            var inner = function (__ARGS__: any[]) {
+                var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
+                return $.DOWNSTREAM_THUNK(dsc, __ARGS__, args);
+            };
+        }
+        else {
+            var inner: typeof inner = function () {
+                return $.ERROR_UNHANDLED(dsc);
+            };
+        }
+    }
+    else {
+        var inner: typeof inner = function () {
             return $.ERROR_UNHANDLED(dsc);
         };
     }
@@ -33,36 +51,20 @@ export default function __FUNCNAME__(dsc: string, __ARGS__: any[], args: any[] |
     if ($.HAS_CAPTURES) {
         var ctx = {
             pattern: $.GET_CAPTURES(dsc),
-            super: callNextInChain,
+            inner: inner,
+            outer: outer,
         };
     }
     else {
         var ctx = {
             pattern: {},
-            super: callNextInChain,
+            inner: inner,
+            outer: outer,
         };
     }
 
     // TODO: call method in most efficient way...
-    if (!$.IS_META_METHOD) {
-        res = args === undefined ? $.METHOD.call(ctx, __ARGS__) : $.METHOD.apply(ctx, args);
-    }
-    else {
-        if ($.HAS_DOWNSTREAM) {
-            var fwd = function (__ARGS__: any[]) {
-                var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
-                return $.DOWNSTREAM_THUNK(dsc, __ARGS__, args);
-            };
-        }
-        else {
-            var fwd: typeof fwd = function () {
-                return $.ERROR_UNHANDLED(dsc);
-            };
-        }
-
-        res = $.METHOD(fwd, args || [__ARGS__], ctx);
-    }
-
+    var res = args === undefined ? $.METHOD.call(ctx, __ARGS__) : $.METHOD.apply(ctx, args);
     return res;
 }
 

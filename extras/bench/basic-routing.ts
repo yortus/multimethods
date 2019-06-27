@@ -61,31 +61,31 @@ const mm = Multimethod({
 
     'c/*': () => `starts with 'c'`,
     '*/d': () => `ends with 'd'`,
-    'c/d'() { return this.super(); },
+    'c/d'() { return this.outer(); },
 
     'api/**': [() => `fallback`, () => `fallback`],
-    'api/fo*o'() { return this.super(); },
+    'api/fo*o'() { return this.outer(); },
     'api/foo': [
         () => 'FOO',
     ],
     'api/foot': () => 'FOOt',
     'api/fooo': () => 'fooo',
-    'api/bar'() { return this.super(); },
+    'api/bar'() { return this.outer(); },
 
     'zz/z/b*z': ($req) => `${$req.address}`,
     'zz/z/./*': () => 'forty-two',
 }).decorate({
-    '/*a*': (m, [$req]) => `---${ifUnhandled(m($req), 'NONE')}---`,
+    '/*a*'($req) { return `---${ifUnhandled(this.inner($req), 'NONE')}---`; },
     'api/fo*': [
-        (m, [$req]) => `fo2-(${ifUnhandled(m($req), 'NONE')})`,
-        (m, [$req]) => `fo1-(${ifUnhandled(m($req), 'NONE')})`,
+        function ($req) { return `fo2-(${ifUnhandled(this.inner($req), 'NONE')})`; },
+        function ($req) { return `fo1-(${ifUnhandled(this.inner($req), 'NONE')})`; },
     ],
     'api/foo': [
-        (m, [$req]) => `${ifUnhandled(m($req), 'NONE')}!`,
+        function ($req) { return `${ifUnhandled(this.inner($req), 'NONE')}!`; },
         'super',
     ],
     // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-    'zz/z/{**rest}': (m, _, {pattern}) => `${ifUnhandled(m({address: pattern.rest.split('').reverse().join('')}), 'NONE')}`,
+    'zz/z/{**rest}'() { return `${ifUnhandled(this.inner({address: this.pattern.rest.split('').reverse().join('')}), 'NONE')}`; },
 });
 
 

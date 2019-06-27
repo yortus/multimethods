@@ -20,7 +20,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
             '/foo':     (x) => 'foo' + x,
             '/bar':     (x) => 'bar' + x,
         }).decorate({
-            '**':       (m, args) => `---${m(...args)}---`,
+            '**'(...args) { return `---${this.inner(...args)}---`; },
         });
         let result = mm('/foo');
         result = result;
@@ -76,15 +76,15 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
         let mm = Multimethod((a: string) => a).extend({
             'a*':       _ => 'a*',
         }).decorate({
-            '**'(m, [a]) { return `-${m(a)}-`; },
-            'aa*'(m, [a], context) {
+            '**'(a) { return `-${this.inner(a)}-`; },
+            'aa*'(a) {
                 try {
-                    let res = m(a);
+                    let res = this.inner(a);
                     return `(${res})`;
                 }
                 catch (err) {
                     if (!isUnhandled(err)) throw err;
-                    return context.super();
+                    return this.outer(); // fall-through
                 }
             },
         });

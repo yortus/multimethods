@@ -52,16 +52,16 @@ describe('Constructing a Multimethod instance', () => {
 
             'c/*': () => val(`starts with 'c'`),
             '*/d': () => err(`don't end with 'd'!`),
-            'c/d'() { return val(this.super()); },
+            'c/d'() { return val(this.outer()); },
 
             'api/**': () => val(`fallback`),
-            'api/fo*o'() { return val(this.super()); },
+            'api/fo*o'() { return val(this.outer()); },
             'api/foo': [
                 () => val('FOO'),
             ],
             'api/foot': rq => val(`FOOt${rq.address.length}`),
             'api/fooo': () => val('fooo'),
-            'api/bar'() { return val(this.super()); },
+            'api/bar'() { return val(this.outer()); },
 
             'zz/z/b*z': (rq) => val(`${rq.address}`),
             'zz/z/./*': () => val('forty-two'),
@@ -70,12 +70,12 @@ describe('Constructing a Multimethod instance', () => {
 
                 // Return x!x! only if x ends with 'b' , otherwise skip
                 function () {
-                    return val((this.pattern.x.endsWith('b') ? (this.pattern.x + '!').repeat(2) : this.super()));
+                    return val((this.pattern.x.endsWith('b') ? (this.pattern.x + '!').repeat(2) : this.outer()));
                 },
 
                 // Return xxx only if x has length 2, otherwise skip
                 function () {
-                    return val(this.pattern.x.length === 2 ? this.pattern.x.repeat(3) : this.super());
+                    return val(this.pattern.x.length === 2 ? this.pattern.x.repeat(3) : this.outer());
                 },
 
                 // Return the string reversed
@@ -84,44 +84,47 @@ describe('Constructing a Multimethod instance', () => {
                 },
             ] as Array<(this: any) => any>,
         }).decorate({
-            '/*a*': (m, [rq]) => calc([
+            '/*a*'(rq) { return calc([
                 '---',
-                calc(() => m(rq), (rs, er) => isUnhandled(er) ? err('no downstream!') : rs),
+                calc(() => this.inner(rq), (rs, er) => isUnhandled(er) ? err('no downstream!') : rs),
                 '---',
-            ], concat),
+            ], concat); },
 
             'api/fo*': [
-                (m, [rq]) => calc([
+                function (rq) { return calc([
                     'fo2-(',
-                    calc(() => m(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
+                    calc(() => this.inner(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
                     ')',
-                ], concat),
-                (m, [rq]) => calc([
+                ], concat); },
+                function (rq) { return calc([
                     'fo1-(',
-                    calc(() => m(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
+                    calc(() => this.inner(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
                     ')',
-                ], concat),
+                ], concat); },
             ],
             'api/foo': [
-                (m, [rq]) => calc([calc(() => m(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs), '!'], concat),
+                function (rq) {return calc([
+                    calc(() => this.inner(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
+                    '!',
+                ], concat); },
                 'super' as const,
             ],
 
-            'zz/z/{**rest}': (m, _, {pattern}) => {
-                let moddedReq = {address: pattern.rest.split('').reverse().join('')};
-                return calc(() => m(moddedReq), (rs, er) => isUnhandled(er) ? val('NONE') : rs);
+            'zz/z/{**rest}'() {
+                let moddedReq = {address: this.pattern.rest.split('').reverse().join('')};
+                return calc(() => this.inner(moddedReq), (rs, er) => isUnhandled(er) ? val('NONE') : rs);
             },
 
             'CHAIN-{x}': [
 
                 // Wrap subsequent results with ()
-                (m, [rq]) => calc(['(', m(rq), ')'], concat),
+                function (rq) { return calc(['(', this.inner(rq), ')'], concat); },
 
                 // Block any result that starts with '[32'
-                (m, [rq]) => calc(m(rq), rs => rs.startsWith('[32') ? err('blocked') : rs),
+                function (rq) { return calc(this.inner(rq), rs => rs.startsWith('[32') ? err('blocked') : rs); },
 
                 // Wrap subsequent results with []
-                (m, [rq]) => calc(['[', m(rq), ']'], concat),
+                function (rq) { return calc(['[', this.inner(rq), ']'], concat); },
 
                 'super' as const,
             ],
