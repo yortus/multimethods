@@ -15,8 +15,8 @@ import Thunk from '../thunk';
 // TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
 export default function __FUNCNAME__(__ARGS__: any) {
-    var args: any;
-    var disc = arguments.length <= $.ARITY ? $.DISCRIMINATOR(__ARGS__) : $.DISCRIMINATOR.apply(null, args = $.COPY_ARRAY(arguments));
+    var args = arguments.length <= $.ARITY ? false : $.COPY_ARRAY(arguments);
+    var disc = args ? $.DISCRIMINATOR.apply(undefined, args) : $.DISCRIMINATOR(__ARGS__);
 
     if (typeof disc === 'string') {
         var thunk = $.SELECT_THUNK(disc);

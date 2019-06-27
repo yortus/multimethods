@@ -15,29 +15,27 @@ import Thunk from '../thunk';
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
-export default function __FUNCNAME__(disc: string, __ARGS__: any[], args: any[] | undefined) {
+export default function __FUNCNAME__(disc: string, __ARGS__: any[], args: any[] | false) {
 
     if ($.NO_THIS_REFERENCE_IN_METHOD) {
-        return args === undefined ? $.METHOD(__ARGS__) : $.METHOD.apply(undefined, args);
+        return args ? $.METHOD.apply(undefined, args) : $.METHOD(__ARGS__);
     }
     else {
         if ($.HAS_OUTER_METHOD) {
-            var outer: any = function () {
-                return $.OUTER_THUNK(disc, __ARGS__, args);
-            };
+            var outer = function () { return $.OUTER_THUNK(disc, __ARGS__, args); };
         }
         else {
-            var outer = $.UNHANDLED.bind(undefined, disc);
+            var outer = function () { return $.UNHANDLED(disc) as any; };
         }
 
         if ($.HAS_INNER_METHOD) {
-            var inner: any = function (__ARGS__: any[]) {
-                var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
-                return $.INNER_THUNK(disc, __ARGS__, args);
+            var inner = function (__ARGS__: any[]) {
+                var arity = arguments.length;
+                return $.INNER_THUNK(disc, __ARGS__, arity ? arity > $.ARITY && $.COPY_ARRAY(arguments) : args);
             };
         }
         else {
-            var inner = $.UNHANDLED.bind(undefined, disc);
+            var inner: typeof inner = function () { return $.UNHANDLED(disc); };
         }
 
         if ($.HAS_PATTERN_BINDINGS) {
@@ -49,7 +47,7 @@ export default function __FUNCNAME__(disc: string, __ARGS__: any[], args: any[] 
         }
 
         var context = { pattern: pattern, inner: inner, outer: outer };
-        return args === undefined ? $.METHOD.call(context, __ARGS__) : $.METHOD.apply(context, args);
+        return args ? $.METHOD.apply(context, args) : $.METHOD.call(context, __ARGS__);
     }
 }
 
