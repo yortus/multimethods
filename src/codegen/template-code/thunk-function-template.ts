@@ -15,51 +15,41 @@ import Thunk from '../thunk';
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
-export default function __FUNCNAME__(dsc: string, __ARGS__: any[], args: any[] | undefined) {
+export default function __FUNCNAME__(disc: string, __ARGS__: any[], args: any[] | undefined) {
 
     if ($.NO_THIS_REFERENCE_IN_METHOD) {
         return args === undefined ? $.METHOD(__ARGS__) : $.METHOD.apply(undefined, args);
     }
     else {
         if ($.HAS_OUTER_METHOD) {
-            var outer = function () {
-                return $.OUTER_THUNK(dsc, __ARGS__, args);
+            var outer: any = function () {
+                return $.OUTER_THUNK(disc, __ARGS__, args);
             };
         }
         else {
-            var outer = function () {
-                return $.UNHANDLED(dsc) as any;
-            };
+            var outer = $.UNHANDLED.bind(undefined, disc);
         }
 
         if ($.HAS_INNER_METHOD) {
-            var inner = function (__ARGS__: any[]) {
+            var inner: any = function (__ARGS__: any[]) {
                 var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
-                return $.INNER_THUNK(dsc, __ARGS__, args);
+                return $.INNER_THUNK(disc, __ARGS__, args);
             };
         }
         else {
-            var inner: typeof inner = function () {
-                return $.UNHANDLED(dsc);
-            };
+            var inner = $.UNHANDLED.bind(undefined, disc);
         }
 
         if ($.HAS_PATTERN_BINDINGS) {
-            var ctx = {
-                pattern: $.GET_PATTERN_BINDINGS(dsc),
-                inner: inner,
-                outer: outer,
-            };
+            var pattern = $.GET_PATTERN_BINDINGS(disc);
         }
         else {
-            var ctx = {
-                pattern: $.EMPTY_OBJECT,
-                inner: inner,
-                outer: outer,
-            };
+            var pattern = $.EMPTY_OBJECT;
+
         }
 
-        return args === undefined ? $.METHOD.call(ctx, __ARGS__) : $.METHOD.apply(ctx, args);
+        var context = { pattern: pattern, inner: inner, outer: outer };
+        return args === undefined ? $.METHOD.call(context, __ARGS__) : $.METHOD.apply(context, args);
     }
 }
 
