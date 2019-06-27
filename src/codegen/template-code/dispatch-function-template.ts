@@ -19,10 +19,14 @@ export default function __FUNCNAME__(__ARGS__: any) {
     var disc = arguments.length <= $.ARITY ? $.DISCRIMINATOR(__ARGS__) : $.DISCRIMINATOR.apply(null, args = $.COPY_ARRAY(arguments));
 
     if (typeof disc === 'string') {
-        var res = $.SELECT_THUNK(disc)(disc, __ARGS__, args);
+        var thunk = $.SELECT_THUNK(disc);
+        var res = thunk(disc, __ARGS__, args);
     }
     else {
-        var res: any = (disc as Promise<string>).then(dsc => $.SELECT_THUNK(dsc)(dsc, __ARGS__, args));
+        var res: any = (disc as Promise<string>).then(disc => {
+            var thunk = $.SELECT_THUNK(disc);
+            return thunk(disc, __ARGS__, args);
+        });
     }
     return res;
 }

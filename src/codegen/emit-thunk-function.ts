@@ -44,9 +44,9 @@ export default function emitThunkFunction(emit: Emitter,
     emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.config.arity || 1, {
 
         // Statically known strings for substitution into the template
-        ERROR_UNHANDLED: names.ERROR_UNHANDLED,
+        UNHANDLED: names.UNHANDLED,
         EMPTY_OBJECT: names.EMPTY_OBJECT,
-        GET_CAPTURES: `${names.GET_CAPTURES}ː${fromNode.identifier}`,
+        GET_PATTERN_BINDINGS: `${names.GET_PATTERN_BINDINGS}ː${fromNode.identifier}`,
         METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', methodIndex)}`,
         INNER_THUNK: innerMethod ? `${names.THUNK}ː${innerMethod.identifier}` : '',
         OUTER_THUNK: isLeastSpecificMethod ? '' : `${names.THUNK}ː${seq[index + 1].identifier}`,
@@ -54,7 +54,7 @@ export default function emitThunkFunction(emit: Emitter,
         COPY_ARRAY: names.COPY_ARRAY,
 
         // Statically known booleans for dead code elimination
-        HAS_CAPTURES: hasNamedCaptures(fromNode.exactPredicate),
+        HAS_PATTERN_BINDINGS: hasNamedCaptures(fromNode.exactPredicate),
         HAS_INNER_METHOD: innerMethod != null,
         HAS_OUTER_METHOD: !isLeastSpecificMethod && !seq[index + 1].isMeta,
         NO_THIS_REFERENCE_IN_METHOD: !/\bthis\b/g.test(fromNode.exactMethods[methodIndex].toString()),

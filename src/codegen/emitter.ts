@@ -27,8 +27,8 @@ export interface EmitEnvironment extends MMInfo<EmitNode> {
 // TODO: doc...
 export interface EmitNode extends MMNode {
     isMatch: (discriminant: string) => {} | null;
-    hasCaptures: boolean;
-    getCaptures: (discriminant: string) => {[captureName: string]: string};
+    hasPatternBindings: boolean;
+    getPatternBindings: (discriminant: string) => {[bindingName: string]: string};
 }
 
 
@@ -72,12 +72,12 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     const {...nodeProps} = env.allNodes[0];
     // tslint:disable:no-unused-expression
     [EnvNames.ENV] as Array<keyof typeof globProps>;
-    [EnvNames.ERROR_UNHANDLED] as Array<keyof typeof envProps>;
+    [EnvNames.UNHANDLED] as Array<keyof typeof envProps>;
     [EnvNames.CONFIG] as Array<keyof typeof envProps>;
     [EnvNames.ALL_NODES] as Array<keyof typeof envProps>;
     [EnvNames.DISCRIMINATOR] as Array<keyof typeof cfgProps>;
     [EnvNames.IS_MATCH] as Array<keyof typeof nodeProps>;
-    [EnvNames.GET_CAPTURES] as Array<keyof typeof nodeProps>;
+    [EnvNames.GET_PATTERN_BINDINGS] as Array<keyof typeof nodeProps>;
     [EnvNames.EXACT_METHODS] as Array<keyof typeof nodeProps>;
     // tslint:enable:no-unused-expression
 
@@ -101,12 +101,12 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
 //              define each once and ref multiple times. These must be consistently named throughout emitted code
 export enum EnvNames {
     ENV = 'env',
-    ERROR_UNHANDLED = 'unhandled',
+    UNHANDLED = 'unhandled',
     CONFIG = 'config',
     ALL_NODES = 'allNodes',
     DISCRIMINATOR = 'discriminator',
     IS_MATCH = 'isMatch',
-    GET_CAPTURES = 'getCaptures',
+    GET_PATTERN_BINDINGS = 'getPatternBindings',
     EXACT_METHODS = 'exactMethods',
     EMPTY_OBJECT = 'EMPTY_OBJECT',
     COPY_ARRAY = 'copy',

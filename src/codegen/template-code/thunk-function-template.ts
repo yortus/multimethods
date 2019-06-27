@@ -1,4 +1,3 @@
-import * as fatalError from '../../util/fatal-error';
 import Thunk from '../thunk';
 
 
@@ -29,7 +28,7 @@ export default function __FUNCNAME__(dsc: string, __ARGS__: any[], args: any[] |
         }
         else {
             var outer = function () {
-                return $.ERROR_UNHANDLED(dsc) as any;
+                return $.UNHANDLED(dsc) as any;
             };
         }
 
@@ -41,13 +40,13 @@ export default function __FUNCNAME__(dsc: string, __ARGS__: any[], args: any[] |
         }
         else {
             var inner: typeof inner = function () {
-                return $.ERROR_UNHANDLED(dsc);
+                return $.UNHANDLED(dsc);
             };
         }
 
-        if ($.HAS_CAPTURES) {
+        if ($.HAS_PATTERN_BINDINGS) {
             var ctx = {
-                pattern: $.GET_CAPTURES(dsc),
+                pattern: $.GET_PATTERN_BINDINGS(dsc),
                 inner: inner,
                 outer: outer,
             };
@@ -77,7 +76,7 @@ declare const $: VarsInScope & StaticConds;
 // TODO: these must be in the lexical environment when the template is eval'd:
 // TODO: explain each of these in turn...
 export interface VarsInScope {
-    ERROR_UNHANDLED: typeof fatalError.UNHANDLED;
+    UNHANDLED: (discriminant: string) => unknown;
     EMPTY_OBJECT: {};
 
     // TODO: revise comment...
@@ -91,7 +90,7 @@ export interface VarsInScope {
     /* used for cascading evaluation, i.e. when the thunk's corresponding method signals it went unhandled. */
     OUTER_THUNK: Thunk;
 
-    GET_CAPTURES: (discriminant: string) => {};
+    GET_PATTERN_BINDINGS: (discriminant: string) => {};
     METHOD: (...args: any[]) => any; // Method signature, NB: context is passed last!
     ARITY: number;
     COPY_ARRAY: (els: any) => any[];
@@ -100,7 +99,7 @@ export interface VarsInScope {
 // TODO: these are statically known conditions that facilitate dead code elimination
 // TODO: explain each of these in turn...
 export interface StaticConds {
-    HAS_CAPTURES: boolean;
+    HAS_PATTERN_BINDINGS: boolean;
     HAS_INNER_METHOD: boolean;
     HAS_OUTER_METHOD: boolean;
     NO_THIS_REFERENCE_IN_METHOD: boolean;

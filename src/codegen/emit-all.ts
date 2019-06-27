@@ -34,7 +34,7 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     });
 
     emitBanner(emit, 'ENVIRONMENT');
-    emit(`var ${names.ERROR_UNHANDLED} = ${names.ENV}.${names.ERROR_UNHANDLED};`);
+    emit(`var ${names.UNHANDLED} = ${names.ENV}.${names.UNHANDLED};`);
     emit(`var ${names.DISCRIMINATOR} = ${names.ENV}.${names.CONFIG}.${names.DISCRIMINATOR};`);
     emit(`var ${names.EMPTY_OBJECT} = Object.freeze({});`);
     emit(`var ${names.COPY_ARRAY} = function (els) { return Array.prototype.slice.call(els); };`);
@@ -42,8 +42,8 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
         const NODE_REF = `${names.ENV}.${names.ALL_NODES}[${i}]`;
         emit(`\n// -------------------- ${node.exactPredicate} --------------------`);
         emit(`var ${names.IS_MATCH}ː${node.identifier} = ${NODE_REF}.${names.IS_MATCH};`);
-        if (node.hasCaptures) {
-            emit(`var ${names.GET_CAPTURES}ː${node.identifier} = ${NODE_REF}.${names.GET_CAPTURES};`);
+        if (node.hasPatternBindings) {
+            emit(`var ${names.GET_PATTERN_BINDINGS}ː${node.identifier} = ${NODE_REF}.${names.GET_PATTERN_BINDINGS};`);
         }
         node.exactMethods.forEach((_, j) => {
             emit(`var ${names.METHOD}ː${node.identifier}${repeat('ᐟ', j)} = ${NODE_REF}.${names.EXACT_METHODS}[${j}];`);
@@ -61,9 +61,9 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
 function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
     let result = mminfo.addProps((node) => {
         let isMatch = toMatchFunction(toNormalPredicate(node.exactPredicate));
-        let hasCapts = hasNamedCaptures(node.exactPredicate);
-        let getCaptures = toMatchFunction(node.exactPredicate) as EmitNode['getCaptures'];
-        return {isMatch, hasCaptures: hasCapts, getCaptures};
+        let hasPatternBindings = hasNamedCaptures(node.exactPredicate);
+        let getPatternBindings = toMatchFunction(node.exactPredicate) as EmitNode['getPatternBindings'];
+        return {isMatch, hasPatternBindings, getPatternBindings};
     }) as EmitEnvironment;
     result.unhandled = mminfo.config.unhandled || fatalError.UNHANDLED;
     return result;
