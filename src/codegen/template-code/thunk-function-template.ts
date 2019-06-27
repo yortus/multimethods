@@ -1,3 +1,4 @@
+import * as fatalError from '../../util/fatal-error';
 import Thunk from '../thunk';
 
 
@@ -14,20 +15,32 @@ import Thunk from '../thunk';
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
-export default function __FUNCNAME__(dsc: string, res: any, __ARGS__: any[], args: any[] | undefined) {
+export default function __FUNCNAME__(dsc: string, __ARGS__: any[], args: any[] | undefined) {
 
-    // TODO: explain why result is passed in and checked here (hint: unified code for sync/async handling)
-    if (res !== $.NEXT) {
-        return res;
+    var res;
+
+    if (!$.ENDS_PARTITION) {
+        var callNextInChain = function () {
+            return $.FALLBACK_THUNK(dsc, __ARGS__, args);
+        };
+    }
+    else {
+        var callNextInChain: typeof callNextInChain = function () {
+            return $.ERROR_UNHANDLED(dsc);
+        };
     }
 
     if ($.HAS_CAPTURES) {
         var ctx = {
             pattern: $.GET_CAPTURES(dsc),
+            super: callNextInChain,
         };
     }
     else {
-        var ctx = $.EMPTY_CONTEXT;
+        var ctx = {
+            pattern: {},
+            super: callNextInChain,
+        };
     }
 
     // TODO: call method in most efficient way...
@@ -38,28 +51,18 @@ export default function __FUNCNAME__(dsc: string, res: any, __ARGS__: any[], arg
         if ($.HAS_DOWNSTREAM) {
             var fwd = function (__ARGS__: any[]) {
                 var args = arguments.length <= $.ARITY ? undefined : $.COPY_ARRAY(arguments);
-                return $.DOWNSTREAM_THUNK(dsc, $.NEXT, __ARGS__, args);
+                return $.DOWNSTREAM_THUNK(dsc, __ARGS__, args);
             };
         }
         else {
             var fwd: typeof fwd = function () {
-                return $.NEXT;
+                return $.ERROR_UNHANDLED(dsc);
             };
         }
 
         res = $.METHOD(fwd, args || [__ARGS__], ctx);
     }
 
-    // TODO: cascade result...
-    if (!$.ENDS_PARTITION) {
-        // Methods may be sync or async, and we must differentiate at runtime
-        if ($.IS_PROMISE_LIKE(res)) {
-            res = res.then(rs => $.FALLBACK_THUNK(dsc, rs, __ARGS__, args));
-        }
-        else {
-            res = $.FALLBACK_THUNK(dsc, res, __ARGS__, args);
-        }
-    }
     return res;
 }
 
@@ -76,8 +79,7 @@ declare const $: VarsInScope & StaticConds;
 // TODO: these must be in the lexical environment when the template is eval'd:
 // TODO: explain each of these in turn...
 export interface VarsInScope {
-    IS_PROMISE_LIKE: (x: any) => x is Promise<any>;
-    NEXT: any;
+    ERROR_UNHANDLED: typeof fatalError.UNHANDLED;
     EMPTY_CONTEXT: {pattern: {}};
 
     // TODO: revise comment...
@@ -87,7 +89,7 @@ export interface VarsInScope {
     */
     DOWNSTREAM_THUNK: Thunk;
 
-    /* used for cascading evaluation, i.e. when the thunk's corresponding method returns NEXT. */
+    /* used for cascading evaluation, i.e. when the thunk's corresponding method signals it went unhandled. */
     FALLBACK_THUNK: Thunk;
 
     GET_CAPTURES: (discriminant: string) => {};

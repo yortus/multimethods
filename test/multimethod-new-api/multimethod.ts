@@ -1,6 +1,6 @@
 import {expect, use as chaiUse} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import {Multimethod, next} from 'multimethods';
+import {isUnhandled, Multimethod} from 'multimethods';
 import defaultDiscriminator from 'multimethods/analysis/configuration/default-discriminator';
 
 
@@ -76,8 +76,17 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
         let mm = Multimethod((a: string) => a).extend({
             'a*':       _ => 'a*',
         }).decorate({
-            '**':       (m, [a]) => `-${m(a)}-`,
-            'aa*':      (m, [a]) => { let r = m(a); return r === next ? next : `(${r})`; },
+            '**'(m, [a]) { return `-${m(a)}-`; },
+            'aa*'(m, [a], context) {
+                try {
+                    let res = m(a);
+                    return `(${res})`;
+                }
+                catch (err) {
+                    if (!isUnhandled(err)) throw err;
+                    return context.super();
+                }
+            },
         });
 
         expect(mm('aaa')).to.equal('-a*-');

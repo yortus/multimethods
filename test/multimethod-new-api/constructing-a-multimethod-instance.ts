@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import isPromiseLike from 'multimethods/util/is-promise-like';
 
-import {Multimethod, next} from 'multimethods';
+import {isUnhandled, Multimethod} from 'multimethods';
 // import defaultDiscrininator from 'multimethods/analysis/configuration/default-discriminator';
 
 
@@ -38,7 +38,9 @@ describe('Constructing a Multimethod instance', () => {
     ];
 
     variants.forEach(({vname, async, val, err}) => describe(`(${vname})`, () => {
-        let methods = {
+
+        // TODO: doc...
+        let multimethod = Multimethod((r: any) => val(r.address)).extend({
             '/**': () => err('nothing matches!'),
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
@@ -50,16 +52,16 @@ describe('Constructing a Multimethod instance', () => {
 
             'c/*': () => val(`starts with 'c'`),
             '*/d': () => err(`don't end with 'd'!`),
-            'c/d': () => val(next),
+            'c/d'() { return val(this.super()); },
 
             'api/**': () => val(`fallback`),
-            'api/fo*o': () => val(next),
+            'api/fo*o'() { return val(this.super()); },
             'api/foo': [
                 () => val('FOO'),
             ],
             'api/foot': rq => val(`FOOt${rq.address.length}`),
             'api/fooo': () => val('fooo'),
-            'api/bar': () => val(next),
+            'api/bar'() { return val(this.super()); },
 
             'zz/z/b*z': (rq) => val(`${rq.address}`),
             'zz/z/./*': () => val('forty-two'),
@@ -67,41 +69,47 @@ describe('Constructing a Multimethod instance', () => {
             'CHAIN-{x}': [
 
                 // Return x!x! only if x ends with 'b' , otherwise skip
-                function () { return val((this.pattern.x.endsWith('b') ? (this.pattern.x + '!').repeat(2) : next)); },
+                function () {
+                    return val((this.pattern.x.endsWith('b') ? (this.pattern.x + '!').repeat(2) : this.super()));
+                },
 
                 // Return xxx only if x has length 2, otherwise skip
-                function () { return val(this.pattern.x.length === 2 ? this.pattern.x.repeat(3) : next); },
+                function () {
+                    return val(this.pattern.x.length === 2 ? this.pattern.x.repeat(3) : this.super());
+                },
 
                 // Return the string reversed
-                function () { return val(this.pattern.x.split('').reverse().join('')); },
+                function () {
+                    return val(this.pattern.x.split('').reverse().join(''));
+                },
             ] as Array<(this: any) => any>,
-        };
-
-        let decorators = {
-            '/*a*': (m, [rq]) => {
-                    return calc([
-                        '---',
-                        calc(m(rq), rs => rs === next ? err('no downstream!') : rs),
-                        '---',
-                    ], concat);
-            },
+        }).decorate({
+            '/*a*': (m, [rq]) => calc([
+                '---',
+                calc(() => m(rq), (rs, er) => isUnhandled(er) ? err('no downstream!') : rs),
+                '---',
+            ], concat),
 
             'api/fo*': [
-                (m, [rq]) => {
-                    return calc(['fo2-(', calc(m(rq), rs => rs === next ? val('NONE') : rs), ')'], concat);
-                },
-                (m, [rq]) => {
-                    return calc(['fo1-(', calc(m(rq), rs => rs === next ? val('NONE') : rs), ')'], concat);
-                },
+                (m, [rq]) => calc([
+                    'fo2-(',
+                    calc(() => m(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
+                    ')',
+                ], concat),
+                (m, [rq]) => calc([
+                    'fo1-(',
+                    calc(() => m(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
+                    ')',
+                ], concat),
             ],
             'api/foo': [
-                (m, [rq]) => calc([calc(m(rq), rs => rs === next ? val('NONE') : rs), '!'], concat),
+                (m, [rq]) => calc([calc(() => m(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs), '!'], concat),
                 'super' as const,
             ],
 
             'zz/z/{**rest}': (m, _, {pattern}) => {
                 let moddedReq = {address: pattern.rest.split('').reverse().join('')};
-                return calc(m(moddedReq), rs => rs === next ? val('NONE') : rs);
+                return calc(() => m(moddedReq), (rs, er) => isUnhandled(er) ? val('NONE') : rs);
             },
 
             'CHAIN-{x}': [
@@ -117,7 +125,7 @@ describe('Constructing a Multimethod instance', () => {
 
                 'super' as const,
             ],
-        };
+        });
 
         let tests = [
             `/foo ==> foo`,
@@ -162,9 +170,6 @@ describe('Constructing a Multimethod instance', () => {
             `CHAIN-a1b2c3 ==> ([3c2b1a])`,
         ];
 
-        // TODO: doc...
-        let multimethod = Multimethod((r: any) => val(r.address)).extend(methods).decorate(decorators);
-
         tests.forEach(test => it(test, async () => {
             let address = test.split(' ==> ')[0];
             let request = {address};
@@ -192,12 +197,24 @@ describe('Constructing a Multimethod instance', () => {
 
 
 // TODO: doc helpers...
-function calc(arg: any, cb: (arg: any) => any) {
-    if (Array.isArray(arg)) {
-        if (!arg.some(isPromiseLike)) return cb(arg);
-        return Promise.all(arg.map(el => Promise.resolve(el))).then(cb);
+function calc(arg: any, cb: (res: any, err: any) => any) {
+    if (typeof arg === 'function') {
+        try {
+            let res = arg();
+            if (!isPromiseLike(res)) return cb(res, null);
+            return res.then(res => cb(res, null), err => cb(null, err));
+        }
+        catch (err) {
+            return cb(null, err);
+        }
     }
-    return isPromiseLike(arg) ? arg.then(cb) : cb(arg);
+    else if (Array.isArray(arg)) {
+        if (!arg.some(isPromiseLike)) return cb(arg, null);
+        return Promise.all(arg.map(el => Promise.resolve(el))).then(rs => cb(rs, null));
+    }
+    else {
+        return isPromiseLike(arg) ? arg.then(res => cb(res, null)) : cb(arg, null);
+    }
 }
 function concat(strs: string[]) {
     return strs.join('');

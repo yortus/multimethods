@@ -15,8 +15,9 @@ export default function createConfiguration(options: Options) {
     let discriminator = options.discriminator || defaultDiscriminator;
     let methods = getNormalisedMethods(options.methods);
     let unreachable = options.unreachable || alwaysReachable;
+    let unhandled = options.unhandled;
 
-    return {name, arity, async, strict, discriminator, methods, unreachable} as Configuration;
+    return {name, arity, async, strict, discriminator, methods, unreachable, unhandled} as Configuration;
 }
 
 

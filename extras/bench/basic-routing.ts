@@ -1,6 +1,6 @@
 // tslint:disable:max-line-length
 import * as assert from 'assert';
-import {Multimethod, next} from 'multimethods';
+import {Multimethod} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -38,13 +38,18 @@ import {Multimethod, next} from 'multimethods';
 
 
 
-
 // Declare test configuration.
 const COUNT = 1000000;
+const UNHANDLED = {} as any;
+
+
 
 
 // Declare the test multimethod
-const mm = Multimethod((r: {address: string}) => r.address).extend({
+const mm = Multimethod({
+    discriminator: (r: {address: string}) => r.address,
+    unhandled: () => UNHANDLED,
+}).extend({
     '**': () => 'UNHANDLED',
     '/foo': () => 'foo',
     '/bar': () => 'bar',
@@ -56,16 +61,16 @@ const mm = Multimethod((r: {address: string}) => r.address).extend({
 
     'c/*': () => `starts with 'c'`,
     '*/d': () => `ends with 'd'`,
-    'c/d': () => next,
+    'c/d'() { return this.super(); },
 
     'api/**': [() => `fallback`, () => `fallback`],
-    'api/fo*o': () => next,
+    'api/fo*o'() { return this.super(); },
     'api/foo': [
         () => 'FOO',
     ],
     'api/foot': () => 'FOOt',
     'api/fooo': () => 'fooo',
-    'api/bar': () => next,
+    'api/bar'() { return this.super(); },
 
     'zz/z/b*z': ($req) => `${$req.address}`,
     'zz/z/./*': () => 'forty-two',
@@ -149,5 +154,5 @@ console.log(`Dispatched ${COUNT} requests in ${sec} seconds   (~${rate} req/sec)
 
 // TODO: doc helper...
 function ifUnhandled(lhs, rhs) {
-    return lhs === next ? rhs : lhs;
+    return lhs === UNHANDLED ? rhs : lhs;
 }

@@ -13,4 +13,7 @@ export default interface Configuration {
     discriminator: Function;
     methods: {[predicate: string]: Function[]};
     unreachable: Unreachable;
+
+    // TODO: temp testing...
+    unhandled?: (discriminant: string) => unknown;
 }

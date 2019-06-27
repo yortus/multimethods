@@ -44,8 +44,7 @@ export default function emitThunkFunction(emit: Emitter,
     emitThunkFromTemplate(emit, `${names.THUNK}ː${seq[index].identifier}`, mminfo.config.arity || 1, {
 
         // Statically known strings for substitution into the template
-        IS_PROMISE_LIKE: names.IS_PROMISE_LIKE,
-        NEXT: names.NEXT,
+        ERROR_UNHANDLED: names.ERROR_UNHANDLED,
         EMPTY_CONTEXT: names.EMPTY_CONTEXT,
         GET_CAPTURES: `${names.GET_CAPTURES}ː${fromNode.identifier}`,
         METHOD: `${names.METHOD}ː${fromNode.identifier}${repeatString('ᐟ', methodIndex)}`,

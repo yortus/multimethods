@@ -1,8 +1,6 @@
 import {MMInfo, MMNode} from '../analysis';
 import {hasNamedCaptures, toMatchFunction, toNormalPredicate} from '../math/predicates';
-import {NEXT} from '../sentinels';
 import * as fatalError from '../util/fatal-error';
-import isPromiseLike from '../util/is-promise-like';
 import repeat from '../util/string-repeat';
 import emitDispatchFunction from './emit-dispatch-function';
 import emitSelectorFunction from './emit-selector-function';
@@ -36,8 +34,6 @@ export default function emitAll(mminfo: MMInfo<MMNode>) {
     });
 
     emitBanner(emit, 'ENVIRONMENT');
-    emit(`var ${names.IS_PROMISE_LIKE} = ${names.ENV}.${names.IS_PROMISE_LIKE};`);
-    emit(`var ${names.NEXT} = ${names.ENV}.${names.NEXT};`);
     emit(`var ${names.ERROR_UNHANDLED} = ${names.ENV}.${names.ERROR_UNHANDLED};`);
     emit(`var ${names.DISCRIMINATOR} = ${names.ENV}.${names.CONFIG}.${names.DISCRIMINATOR};`);
     emit(`var ${names.EMPTY_CONTEXT} = Object.freeze({pattern: Object.freeze({})});`);
@@ -69,9 +65,7 @@ function createEmitEnvironment(mminfo: MMInfo<MMNode>): EmitEnvironment {
         let getCaptures = toMatchFunction(node.exactPredicate) as EmitNode['getCaptures'];
         return {isMatch, hasCaptures: hasCapts, getCaptures};
     }) as EmitEnvironment;
-    result.isPromiseLike = isPromiseLike;
-    result.NEXT = NEXT;
-    result.unhandled = fatalError.UNHANDLED;
+    result.unhandled = mminfo.config.unhandled || fatalError.UNHANDLED;
     return result;
 }
 

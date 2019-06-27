@@ -1,5 +1,4 @@
 import {MMInfo, MMNode} from '../analysis';
-import {NEXT} from '../sentinels';
 import andThen from '../util/and-then';
 import debug, {DISPATCH} from '../util/debug';
 import isMetaMethod from '../util/is-meta-method';
@@ -35,7 +34,7 @@ function instrumentMethod(method: Function, name: string) {
         debug(`${DISPATCH} |-->| %s${captures ? '   captures=%o' : ''}`, methodInfo, captures);
         let getResult = () => isMeta ? method(...args, captures, next) : method(...args, captures);
         return andThen(getResult, (result, error, isAsync) => {
-            let resultInfo = error ? 'result=ERROR' : result === NEXT ? 'result=NEXT' : '';
+            let resultInfo = error ? 'result=ERROR' : '';
             debug(`${DISPATCH} |<--| %s   %s   %s`, methodInfo, isAsync ? 'async' : 'sync', resultInfo);
             if (error) throw error; else return result;
         });

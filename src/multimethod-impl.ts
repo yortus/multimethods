@@ -1,6 +1,7 @@
 import {default as MM} from './create';
 import {meta} from './decorators';
 import * as types from './multimethod';
+import {UNHANDLED_DISPATCH} from './sentinels';
 
 
 
@@ -13,13 +14,25 @@ export {Multimethod};
 
 
 
+export function isUnhandled(err: {code?: unknown}) {
+    return err instanceof Error && err.code === UNHANDLED_DISPATCH;
+}
+
+
+
+
 // TODO: ...
 function create<P extends unknown[]>(options?: types.Options<P, 'mixed'>): types.Multimethod<P, never>;
 function create<P extends unknown[]>(options?: types.Options<P, 'async'>): types.AsyncMultimethod<P, never>;
 function create(options: types.Options<unknown[], any>) {
     let discriminator = typeof options === 'function' ? options : options.discriminator;
+    let unhandled = typeof options === 'object' ? options.unhandled : undefined;
 
-    let mm = MM({ discriminator, arity: discriminator.length || 1 });
+    let mm = MM({
+        discriminator,
+        arity: discriminator.length || 1,
+        unhandled,
+    });
     let result: types.Multimethod<unknown[], unknown> = addMethods(mm);
     return result;
 
@@ -29,6 +42,7 @@ function create(options: types.Options<unknown[], any>) {
             let mm2 = MM({
                 discriminator,
                 methods,
+                unhandled,
             });
             return addMethods(mm2, methods);
         };
@@ -48,6 +62,7 @@ function create(options: types.Options<unknown[], any>) {
             let mm2 = MM({
                 discriminator,
                 methods,
+                unhandled,
             });
             return addMethods(mm2, methods);
         };

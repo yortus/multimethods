@@ -1,5 +1,4 @@
 import {MMInfo, MMNode} from '../analysis';
-import {UNHANDLED} from '../util/fatal-error';
 
 
 
@@ -18,9 +17,7 @@ export default interface Emitter {
 
 // TODO: doc...
 export interface EmitEnvironment extends MMInfo<EmitNode> {
-    isPromiseLike: (value: any) => boolean;
-    NEXT: any;
-    unhandled: typeof UNHANDLED;
+    unhandled: (discriminant: string) => unknown;
 }
 
 
@@ -75,8 +72,6 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
     const {...nodeProps} = env.allNodes[0];
     // tslint:disable:no-unused-expression
     [EnvNames.ENV] as Array<keyof typeof globProps>;
-    [EnvNames.IS_PROMISE_LIKE] as Array<keyof typeof envProps>;
-    [EnvNames.NEXT] as Array<keyof typeof envProps>;
     [EnvNames.ERROR_UNHANDLED] as Array<keyof typeof envProps>;
     [EnvNames.CONFIG] as Array<keyof typeof envProps>;
     [EnvNames.ALL_NODES] as Array<keyof typeof envProps>;
@@ -106,8 +101,6 @@ function evalMultimethodFromSource(env: EmitEnvironment, source: string) {
 //              define each once and ref multiple times. These must be consistently named throughout emitted code
 export enum EnvNames {
     ENV = 'env',
-    IS_PROMISE_LIKE = 'isPromiseLike',
-    NEXT = 'NEXT',
     ERROR_UNHANDLED = 'unhandled',
     CONFIG = 'config',
     ALL_NODES = 'allNodes',

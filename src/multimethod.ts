@@ -1,8 +1,3 @@
-export const next = Symbol('next') as never; // subtype of all types, so always allowed as method return
-
-
-
-
 export interface MultimethodStatic {
 
     // Functional-style factory function
@@ -40,6 +35,7 @@ export type Options<P extends unknown[], R extends string | Promise<string>> =
 
 export interface OptionsObject<P extends unknown[], R extends string | Promise<string>> {
     discriminator: DiscriminatorFunction<P, R>;
+    unhandled?: (discriminant: string) => unknown;
 }
 
 export type DiscriminatorFunction<P extends unknown[], R extends string | Promise<string>> = (...args: P) => R;
@@ -50,8 +46,11 @@ export type DiscriminatorFunction<P extends unknown[], R extends string | Promis
 export interface MethodsObject<P extends unknown[], R> {
     [pattern: string]: Method<P, R> | Array<Method<P, R> | 'super'>;
 }
-export type Method<P extends unknown[], R> = (this: MethodContext, ...args: P) => R;
-export interface MethodContext { pattern: { [bindingName: string]: string }; }
+export type Method<P extends unknown[], R> = (this: MethodContext<R>, ...args: P) => R;
+export interface MethodContext<R> {
+    pattern: { [bindingName: string]: string };
+    super: () => R;
+}
 
 
 
@@ -59,8 +58,11 @@ export interface MethodContext { pattern: { [bindingName: string]: string }; }
 export interface DecoratorsObject<P extends unknown[], R> {
     [pattern: string]: Decorator<P, R> | Array<Decorator<P, R> | 'super'>;
 }
-export type Decorator<P extends unknown[], R> = (method: (...args: P) => R, args: P, context: DecoratorContext) => R;
-export interface DecoratorContext { pattern: { [bindingName: string]: string }; }
+export type Decorator<P extends unknown[], R> = (method: (...args: P) => R, args: P, context: DecoratorContext<R>) => R;
+export interface DecoratorContext<R> {
+    pattern: { [bindingName: string]: string };
+    super: () => R;
+}
 
 
 

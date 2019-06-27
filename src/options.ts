@@ -37,4 +37,9 @@ export default interface Options {
 
     // TODO: doc... advanced option...
     unreachable?: Unreachable;
+
+
+
+    // TODO: temp testing...
+    unhandled?: (discriminant: string) => unknown;
 }
