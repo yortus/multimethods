@@ -1,25 +1,20 @@
 import {MMInfo, MMNode} from '../../analysis';
-import {hasNamedCaptures, toMatchFunction, toNormalPredicate} from '../../math/predicates';
 import repeat from '../../util/string-repeat';
 import {eliminateDeadCode} from '../eliminate-dead-code';
-import {EmitNode} from './emit-node';
-import {getMethodSubstitutions, getMultimethodSubstitutions, getNodeSubstitutions, getThunkName, getThunkSubstitutions} from './helpers';
 import {replaceAll} from './replace-all';
+import * as substitutions from './substitutions';
 import {SectionName, template} from './template';
 
 
 
 
-export function emit(mminfoPre: MMInfo<MMNode>) {
-
-    let mminfo = createEmitEnvironment(mminfoPre);
+export function emit(mminfo: MMInfo<MMNode>) {
     let source = template.toString();
-
     source = minify(source);
     source = beautify(source);
 
     // do mm-wide replacements
-    let MM = getMultimethodSubstitutions(mminfo);
+    let MM = substitutions.forMultimethod(mminfo);
     source = replaceAll(source, 'MM', MM);
 
     // dispatch function: substitute __MM_NAME__, __MM_PARAMS__ and __MM_ARITY__
@@ -38,12 +33,12 @@ export function emit(mminfoPre: MMInfo<MMNode>) {
 
             // Recursively generate the conditional logic block to select among the given predicates.
             result += node.childNodes.map(childNode => {
-                let nodeSubs = getNodeSubstitutions(childNode);
+                let nodeSubs = substitutions.forNode(childNode);
 
                 let condition = `${indent}if (${nodeSubs.NAMEOF_IS_MATCH}(discriminant)) `;
                 if (childNode.childNodes.length === 0) {
                     // One-liner if-statement
-                    return `${condition}return ${getThunkName([childNode.entryPoint], 0)};\n`;
+                    return `${condition}return ${nodeSubs.NAMEOF_ENTRYPOINT_THUNK};\n`;
                 }
                 else {
                     // Compound if-statement with nested block of conditions
@@ -53,7 +48,7 @@ export function emit(mminfoPre: MMInfo<MMNode>) {
             }).join('');
 
             // Add a line to select the base predicate if none of the more specialised predicates matched the discriminant.
-            result += `${indent}return ${getThunkName([node.entryPoint], 0)};\n`;
+            result += `${indent}return ${substitutions.forNode(node).NAMEOF_ENTRYPOINT_THUNK};\n`;
             return result;
         }
 
@@ -70,10 +65,10 @@ export function emit(mminfoPre: MMInfo<MMNode>) {
                 // specific that the set's predicate, since these will be handled in their own set.
                 if (!seq[index].isMeta && seq[index].fromNode !== seq[0].fromNode) return '';
 
-                let nodeSubs = getNodeSubstitutions(seq[index].fromNode);
+                let nodeSubs = substitutions.forNode(seq[index].fromNode);
                 let result = content;
                 result = replaceAll(result, 'NODE', nodeSubs);
-                result = replaceAll(result, 'MATCH', getThunkSubstitutions(seq, index));
+                result = replaceAll(result, 'MATCH', substitutions.forMatch(seq, index));
                 return result;
             }).join('');
         }).join('');
@@ -85,18 +80,18 @@ export function emit(mminfoPre: MMInfo<MMNode>) {
     source = replaceSection(source, 'FOREACH_NODE', content => {
         return mminfo.allNodes.map((node, nodeIndex) => {
             // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
-            return replaceAll(content, 'NODE', getNodeSubstitutions(node, nodeIndex));
+            return replaceAll(content, 'NODE', substitutions.forNode(node, nodeIndex));
         }).join('');
     });
 
     source = replaceSection(source, 'FOREACH_METHOD', content => {
         return mminfo.allNodes.map((node, nodeIndex) => {
             // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
-            let nodeSubs = getNodeSubstitutions(node, nodeIndex);
+            let nodeSubs = substitutions.forNode(node, nodeIndex);
             return node.exactMethods.map((_, methodIndex) => {
                 let result = content;
                 result = replaceAll(result, 'NODE', nodeSubs);
-                result = replaceAll(result, 'METHOD', getMethodSubstitutions(node, methodIndex));
+                result = replaceAll(result, 'METHOD', substitutions.forMethod(node, methodIndex));
                 return result;
             }).join('');
         }).join('');
@@ -122,19 +117,6 @@ function replaceSection(source: string, sectionName: SectionName, replace: (str:
         return replace($1);
     });
     return result;
-}
-
-
-
-
-// TODO: doc...
-function createEmitEnvironment(mminfo: MMInfo<MMNode>): MMInfo<EmitNode> {
-    return mminfo.addProps((node) => {
-        let isMatch = toMatchFunction(toNormalPredicate(node.exactPredicate));
-        let hasPatternBindings = hasNamedCaptures(node.exactPredicate);
-        let getPatternBindings = toMatchFunction(node.exactPredicate) as EmitNode['getPatternBindings'];
-        return {isMatch, hasPatternBindings, getPatternBindings};
-    });
 }
 
 

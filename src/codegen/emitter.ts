@@ -1,4 +1,5 @@
 import {MMInfo, MMNode} from '../analysis';
+import * as predicates from '../math/predicates';
 
 
 
@@ -88,7 +89,7 @@ function evalMultimethodFromSource(mminfo: EmitEnvironment, source: string) {
     // multimethod dispatch code that is both more readable and more efficient, since it is tailored specifically
     // to the configuration of this multimethod, rather than having to be generalized for all possible cases.
     // tslint:disable-next-line:no-eval
-    let mm = eval(`(${source})`)(mminfo);
+    let mm = eval(`(${source})`)(mminfo, predicates);
 
     // TODO: was... let mm = eval(`(function () { ${source}; return ${mminfo.config.name}; })`)() as Function;
     mm.toString = () => source;

@@ -5,32 +5,8 @@ import {makeParameterList} from '../make-parameter-list';
 
 
 
-// PER MULTIMETHOD:
-// - MM_NAME
-// - MM.ARITY
-// - MM_PARAMS
-//
-// PER NODE:
-// - NODE.IS_MATCH = toMatchFunction(toNormalPredicate(node.exactPredicate));
-// - NODE.HAS_PATTERN_BINDINGS = hasNamedCaptures(node.exactPredicate);
-// - NODE.GET_PATTERN_BINDINGS = toMatchFunction(node.exactPredicate) as EmitNode['getPatternBindings'];
-//
-// PER EXACT_METHOD in a node:
-// - METHOD.NAME
-//
-// PER METHOD_SEQUENCE_ENTRY in a node:
-// - MATCH.THUNK_NAME
-// - MATCH.METHOD_NAME
-// - MATCH.HAS_NO_THIS_REFERENCE_IN_METHOD
-// - MATCH.HAS_OUTER_MATCH
-// - MATCH.OUTER_THUNK_NAME
-// - MATCH.HAS_INNER_MATCH
-// - MATCH.INNER_THUNK_NAME
 
-
-
-
-export function getMultimethodSubstitutions(mminfo: MMInfo<MMNode>) {
+export function forMultimethod(mminfo: MMInfo<MMNode>) {
     return {
         NAME: mminfo.config.name,
         ARITY: String(mminfo.config.arity || 1),
@@ -42,19 +18,20 @@ export function getMultimethodSubstitutions(mminfo: MMInfo<MMNode>) {
 
 
 
-export function getNodeSubstitutions(node: MMNode, nodeIndex?: number) {
+export function forNode(node: MMNode, nodeIndex?: number) {
     return {
         INDEX: nodeIndex,
         NAMEOF_IS_MATCH: `isMatchː${node.identifier}`,
         HAS_PATTERN_BINDINGS: hasNamedCaptures(node.exactPredicate),
         NAMEOF_GET_PATTERN_BINDINGS: `getPatternBindingsː${node.identifier}`,
+        NAMEOF_ENTRYPOINT_THUNK: getThunkName([node.entryPoint], 0),
     };
 }
 
 
 
 
-export function getMethodSubstitutions(node: MMNode, methodIndex: number) {
+export function forMethod(node: MMNode, methodIndex: number) {
     return {
         NAME: getMethodName(node, methodIndex),
         INDEX: methodIndex,
@@ -64,7 +41,7 @@ export function getMethodSubstitutions(node: MMNode, methodIndex: number) {
 
 
 
-export function getThunkSubstitutions(seq: Array<MethodSequenceEntry<MMNode>>, index: number) {
+export function forMatch(seq: Array<MethodSequenceEntry<MMNode>>, index: number) {
     let {fromNode, methodIndex} = seq[index];
 
     // TODO: temp testing... explain these calcs!!
@@ -85,13 +62,13 @@ export function getThunkSubstitutions(seq: Array<MethodSequenceEntry<MMNode>>, i
 
 
 
-export function getThunkName(seq: Array<MethodSequenceEntry<MMNode>>, index: number) {
+function getThunkName(seq: Array<MethodSequenceEntry<MMNode>>, index: number) {
     return `thunkː${seq[index].identifier}`;
 }
 
 
 
 
-export function getMethodName(node: MMNode, methodIndex: number) {
+function getMethodName(node: MMNode, methodIndex: number) {
     return `methodː${node.identifier}${repeatString('ᐟ', methodIndex)}`;
 }

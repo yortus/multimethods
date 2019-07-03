@@ -1,6 +1,5 @@
-import {MMInfo} from '../../analysis';
-import {EmitNode} from './emit-node';
-import {getMultimethodSubstitutions, getNodeSubstitutions, getThunkSubstitutions, getMethodSubstitutions} from './helpers';
+import {MMInfo, MMNode} from '../../analysis';
+import * as substitutions from './substitutions';
 
 
 
@@ -8,7 +7,7 @@ import {getMultimethodSubstitutions, getNodeSubstitutions, getThunkSubstitutions
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
-export function template(mminfo: MMInfo<EmitNode>) {
+export function template(mminfo: MMInfo<MMNode>, ℙ: typeof import('../../math/predicates')) {
 
     // TODO: explain - template source can only include constructs that are supported by all target runtimes. So no ES6.
     // tslint:disable: no-var-keyword
@@ -113,9 +112,9 @@ export function template(mminfo: MMInfo<EmitNode>) {
     var copyArray = function (els: any) { return Array.prototype.slice.call(els); };
 
     BEGIN_SECTION('FOREACH_NODE');
-    var NODE$NAMEOF_IS_MATCH = mminfo.allNodes[NODE.INDEX].isMatch;
+    var NODE$NAMEOF_IS_MATCH = ℙ.toMatchFunction(ℙ.toNormalPredicate(mminfo.allNodes[NODE.INDEX].exactPredicate));
     if (NODE.HAS_PATTERN_BINDINGS) {
-        var NODE$NAMEOF_GET_PATTERN_BINDINGS: any = mminfo.allNodes[NODE.INDEX].getPatternBindings;
+        var NODE$NAMEOF_GET_PATTERN_BINDINGS: any = ℙ.toMatchFunction(mminfo.allNodes[NODE.INDEX].exactPredicate);
     }
     END_SECTION('FOREACH_NODE');
 
@@ -146,7 +145,7 @@ export type SectionName = 'SELECT_THUNK' | 'FOREACH_MATCH' | 'FOREACH_NODE' | 'F
 
 
 
-declare const MM: Record<keyof ReturnType<typeof getMultimethodSubstitutions>, any>;
-declare const NODE: Record<keyof ReturnType<typeof getNodeSubstitutions>, any>;
-declare const METHOD: Record<keyof ReturnType<typeof getMethodSubstitutions>, any>;
-declare const MATCH: Record<keyof ReturnType<typeof getThunkSubstitutions>, any>;
+declare const MM: Record<keyof ReturnType<typeof substitutions.forMultimethod>, any>;
+declare const NODE: Record<keyof ReturnType<typeof substitutions.forNode>, any>;
+declare const METHOD: Record<keyof ReturnType<typeof substitutions.forMethod>, any>;
+declare const MATCH: Record<keyof ReturnType<typeof substitutions.forMatch>, any>;
