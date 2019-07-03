@@ -1,12 +1,11 @@
-import {Template} from '../template-code';
-
+import * as placeholders from './eval-placeholders';
 
 
 
 
 // TODO: ... explain idpaths eg 'obj', 'obj.x', 'obj.x.y', etc
-export default function replaceAll(template: Template, replacements: {[idPath: string]: string}) {
-    let idPaths = Object.keys(replacements);
+export function replaceAll(template: string, replacements: Replacements) {
+    let idPaths = Object.keys(replacements) as Array<keyof Replacements>;
 
     // NB: any '$' or '.' chars in IdPaths must be escaped in the RexExp.
     let regexs = idPaths.map(id => new RegExp(id.replace(/([$.])/g, '\\$1'), 'g'));
@@ -15,7 +14,12 @@ export default function replaceAll(template: Template, replacements: {[idPath: s
         let id = idPaths[i];
         let regex = regexs[i];
         let replacement = replacements[id];
-        template = template.replace(regex, replacement) as Template;
+        template = template.replace(regex, String(replacement));
     }
     return template;
 }
+
+
+
+
+export type Replacements = Partial<Record<keyof typeof placeholders, string | boolean>>;

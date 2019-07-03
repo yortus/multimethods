@@ -1,7 +1,7 @@
 import Options from '../../options';
+import {UNHANDLED} from '../../util/fatal-error';
 import Configuration from './configuration';
 import defaultDiscriminator from './default-discriminator';
-
 
 
 
@@ -15,11 +15,9 @@ export default function createConfiguration(options: Options) {
     let discriminator = options.discriminator || defaultDiscriminator;
     let methods = getNormalisedMethods(options.methods);
     let unreachable = options.unreachable || alwaysReachable;
-    let unhandled = options.unhandled;
-
+    let unhandled = options.unhandled || UNHANDLED;
     return {name, arity, async, strict, discriminator, methods, unreachable, unhandled} as Configuration;
 }
-
 
 
 
@@ -40,12 +38,10 @@ function getNormalisedMethods(methods: Options['methods']) {
 
 
 
-
 // TODO: doc...
 function alwaysReachable() {
     return false;
 }
-
 
 
 

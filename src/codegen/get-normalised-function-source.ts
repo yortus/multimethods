@@ -1,7 +1,3 @@
-import dispatchFunction, {VarsInScope as DStrings} from './dispatch-function-template';
-import Template from './template';
-import thunkFunction, {StaticConds as TBooleans, VarsInScope as TStrings} from './thunk-function-template';
-
 
 
 
@@ -18,31 +14,6 @@ import thunkFunction, {StaticConds as TBooleans, VarsInScope as TStrings} from '
 
 
 
-
-export {Template};
-
-
-
-
-
-// TODO: doc...
-const dispatchFunctionTemplate = getNormalisedFunctionSource(dispatchFunction) as Template;
-type DispatchFunctionSubstitutions = {[K in keyof DStrings]: string};
-export {dispatchFunctionTemplate, DispatchFunctionSubstitutions};
-
-
-
-
-
-// TODO: doc...
-const thunkFunctionTemplate = getNormalisedFunctionSource(thunkFunction) as Template;
-type ThunkFunctionSubstitutions = {[K in keyof TStrings]: string} & {[K in keyof TBooleans]: boolean};
-export {thunkFunctionTemplate, ThunkFunctionSubstitutions};
-
-
-
-
-
 // TODO: doc normalisation... source transformers may rely on these
 // - consistent block indenting with 4 spaces per block
 // - comments and blank lines removed
@@ -54,14 +25,12 @@ export {thunkFunctionTemplate, ThunkFunctionSubstitutions};
 // - all blocks must be `{` and `}` delimited. i.e. no one-line `if` stmts, etc
 // - '{' and '}' are assumed to *only* appear as block or funcbody delimiters (eg never appears in a string literal)
 // - no *complex* `if` condition exprs. Max one nested level of `(` and `)` in cond expr, so simple func call is ok.
-function getNormalisedFunctionSource(fn: Function): string {
-
+export function getNormalisedFunctionSource(fn: Function | string): string {
     // TODO: explain... the template may or may not have been minified already. Regardless of that, we want
     // readable codegen, and also the source transform functions assume normalised formatting (see those funcs).
     let source = beautify(minify(fn.toString()));
     return source;
 }
-
 
 
 

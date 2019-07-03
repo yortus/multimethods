@@ -10,10 +10,8 @@ export default interface Configuration {
     arity: number | undefined;
     async: boolean | undefined;
     strict: boolean;
-    discriminator: Function;
+    discriminator: (...args: any[]) => string | Promise<string>;
     methods: {[predicate: string]: Function[]};
     unreachable: Unreachable;
-
-    // TODO: temp testing...
-    unhandled?: (discriminant: string) => unknown;
+    unhandled: (discriminant: string) => unknown;
 }

@@ -1,9 +1,3 @@
-import {Template} from '../template-code';
-
-
-
-
-
 // TODO: explain... removes dead code by simplistic transforms of if/else blocks
 // TODO: explain limited circumstances where this works:
 // - if (true) {\n[...]} [else {\n[...]}]
@@ -19,7 +13,7 @@ import {Template} from '../template-code';
 //   - `if (!false) {\n`
 //   - `else {\n`
 // - if/else keyword must be first thing on its line
-export default function eliminateDeadCode(template: Template) {
+export function eliminateDeadCode(template: string) {
     const MATCH_IF = /^(\s*)if\s*\((\!?)((?:true)|(?:false))\)\s*{$/;
     const MATCH_ELSE = /^(\s*)else\s*{$/;
     let inLines = template.split('\n');
@@ -47,7 +41,7 @@ export default function eliminateDeadCode(template: Template) {
         }
 
         if (isTrueCond) {
-            outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n') as Template));
+            outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n')));
         }
 
         // TODO: handle 'else' blocks...
@@ -56,5 +50,5 @@ export default function eliminateDeadCode(template: Template) {
         }
     }
 
-    return outLines.join('\n') as Template;
+    return outLines.join('\n');
 }

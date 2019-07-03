@@ -1,8 +1,2 @@
-
-
-
-
-
 // TODO: explain calling convention...
-type Thunk = (discriminant: string, resultSoFar: any, ...mmargs: any[]) => any;
-export default Thunk;
+export type Thunk = (disc: string, __MM_PARAMS__: any[], args: any[] | false) => unknown;
