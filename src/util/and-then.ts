@@ -5,7 +5,7 @@ import isPromiseLike from './is-promise-like';
 
 
 // TODO: doc...
-export default function andThen(getValue: () => any, cb: (value: any, error: any, isAsync: boolean) => any) {
+export function andThen(getValue: () => unknown, cb: (value: unknown, error: unknown, isAsync: boolean) => unknown) {
     let value: any;
     try {
         value = getValue();

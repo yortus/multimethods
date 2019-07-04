@@ -1,7 +1,6 @@
-import {MethodSequenceEntry, MMInfo, MMNode} from '../../analysis';
-import {hasNamedCaptures} from '../../math/predicates';
-import repeatString from '../../util/string-repeat';
-import {makeParameterList} from '../make-parameter-list';
+import {MethodSequenceEntry, MMInfo, MMNode} from '../analysis';
+import {hasNamedCaptures} from '../math/predicates';
+import repeatString from '../util/string-repeat';
 
 
 
@@ -72,4 +71,16 @@ function getThunkName(seq: Array<MethodSequenceEntry<MMNode>>, index: number) {
 
 function getMethodName(node: MMNode, methodIndex: number) {
     return `methodː${node.identifier}${repeatString('ᐟ', methodIndex)}`;
+}
+
+
+
+
+// TODO: doc
+// replaces rest/spread forms `...XXX` with something like `$0, $1`
+// use when there is a known fixed arity
+function makeParameterList(arity: number, prefix = '$') {
+    let paramNames = [] as string[];
+    for (let i = 0; i < arity; ++i) paramNames.push(prefix + i);
+    return paramNames.join(', ');
 }

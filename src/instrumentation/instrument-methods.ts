@@ -1,6 +1,6 @@
 import {MMInfo, MMNode} from '../analysis';
 import {Method} from '../multimethod';
-import andThen from '../util/and-then';
+import {andThen} from '../util/and-then';
 import debug, {DISPATCH} from '../util/debug';
 import isMetaMethod from '../util/is-meta-method';
 import repeatString from '../util/string-repeat';
@@ -9,7 +9,7 @@ import repeatString from '../util/string-repeat';
 
 
 // TODO: doc...
-export default function instrumentMethods(mminfo: MMInfo<MMNode>) {
+export function instrumentMethods(mminfo: MMInfo<MMNode>) {
 
     // Update all `exactMethods` elements in-place.
     mminfo.allNodes.forEach(node => {

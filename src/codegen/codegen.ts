@@ -1,14 +1,32 @@
-import {MMInfo, MMNode} from '../../analysis';
-import repeat from '../../util/string-repeat';
-import {eliminateDeadCode} from '../eliminate-dead-code';
+import {MMInfo, MMNode} from '../analysis';
+import * as predicates from '../math/predicates';
+import repeat from '../util/string-repeat';
 import {multimethodTemplate} from './multimethod-template';
 import * as substitutions from './substitutions';
-import {beautify, getIndentDepth, minify, replaceAll, replaceSection, substituteHeadings} from './template-utilities';
+import {beautify, eliminateDeadCode, getIndentDepth, minify, replaceAll, replaceSection} from './template-utilities';
 
 
 
 
-export function emit(mminfo: MMInfo<MMNode>) {
+export function codegen(mminfo: MMInfo<MMNode>) {
+    let multimethodSourceCode = generateMultimethodSourceCode(mminfo);
+
+    // Evaluate the multimethod's entire source code to obtain the multimethod function. The use of eval here is safe.
+    // There are no untrusted inputs substituted into the source. The client-provided methods can do anything (so may
+    // be considered untrusted), but that has nothing to do with the use of 'eval' here, since they would need to be
+    // called by the dispatcher whether or not eval was used. More importantly, the use of eval here allows for
+    // multimethod dispatch code that is both more readable and more efficient, since it is tailored specifically
+    // to the configuration of this multimethod, rather than having to be generalized for all possible cases.
+    // tslint:disable-next-line:no-eval
+    let multimethod = eval(`(${multimethodSourceCode})`)(mminfo, predicates);
+    multimethod.toString = () => multimethodSourceCode;
+    return multimethod;
+}
+
+
+
+
+function generateMultimethodSourceCode(mminfo: MMInfo<MMNode>) {
     let source = multimethodTemplate.toString();
     source = minify(source);
     source = beautify(source);
@@ -89,6 +107,5 @@ export function emit(mminfo: MMInfo<MMNode>) {
     let mmSubs = substitutions.forMultimethod(mminfo);
     source = replaceAll(source, 'MM', mmSubs);
     source = eliminateDeadCode(source);
-    source = substituteHeadings(source);
     return source;
 }

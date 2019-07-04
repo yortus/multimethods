@@ -1,4 +1,4 @@
-import repeat from '../../util/string-repeat';
+import repeat from '../util/string-repeat';
 
 
 
@@ -49,6 +49,33 @@ export function replaceSection(sourceCode: string, sectionName: SectionName, rep
 
     return result;
 }
+
+
+
+
+// TODO: explain that a lot of the extra care around normalisation in here is due to the following factors:
+//       a) to avoid depending on full JS parsing, template transformations rely on a simpler regex-based approach
+//       b) the templates relied on for codegen *may* have gone through a minifier during the build process.
+//       c) the regex-based transforms rely on certain syntax assumptions about the templates they are transforming
+//       d) therefore we must 'rehydrate' the possibly-minified templates to make them suitable for transformation
+//       e) as a bonus we also prefer the codegen to emit human-readable code, even from minified templates
+// TODO: doc... template guarantees...: 4-space indents, no blank lines, '\n' line endings, ...
+// TODO: doc... special `__FUNCNAME__` and `__ARGS__` strings in templates
+
+
+
+
+// TODO: doc normalisation... source transformers may rely on these
+// - consistent block indenting with 4 spaces per block
+// - comments and blank lines removed
+// - strict use of `\n` for newlines (no `\r` chars)
+// TODO: doc assumptions made here... template functions must abide by these:
+// - no single-line comments after code on same line
+// - all stmts must be ';' terminated
+// - ';' is assumed to *only* appear as a statement terminator (eg never appears in a string literal)
+// - all blocks must be `{` and `}` delimited. i.e. no one-line `if` stmts, etc
+// - '{' and '}' are assumed to *only* appear as block or funcbody delimiters (eg never appears in a string literal)
+// - no *complex* `if` condition exprs. Max one nested level of `(` and `)` in cond expr, so simple func call is ok.
 
 
 
@@ -122,32 +149,65 @@ export function beautify(minifiedSource: string) {
 
 
 
-export function substituteHeadings(sourceCode: string) {
-    return sourceCode;
-    // // H1 headings
-    // let re = new RegExp(`(\\t*)${H1.name}\\('(.*?)'\\);[^\\n]*\\n`, 'g');
-    // return sourceCode.replace(re, (_, indent, title) => {
-    //     return [
-    //         `\n`,
-    //         `${indent}/*====================${repeat('=', title.length)}====================*\n`,
-    //         `${indent} *                    ${title}                    *\n`,
-    //         `${indent} *====================${repeat('=', title.length)}====================*/\n`,
-    //     ].join('');
-    // });
-
-    // TODO: H2 headings
-
+// TODO: doc... assumes tabs
+export function getIndentDepth(sourceCodeFragment: string) {
+    return /^\t*/.exec(sourceCodeFragment)![0].length;
 }
 
 
 
 
-export function H1(title: string) { return title; }
+// TODO: explain... removes dead code by simplistic transforms of if/else blocks
+// TODO: explain limited circumstances where this works:
+// - if (true) {\n[...]} [else {\n[...]}]
+// - if (false) {\n[...]} [else {\n[...]}]
+// - if (!true) {\n[...]} [else {\n[...]}]
+// - if (!false) {\n[...]} [else {\n[...]}]
+// TODO: doc (or relax) assumptions ie normalisation of code:
+// - consistent 4-space block indents
+// - simple static conditions with compound consequent/alternative:
+//   - `if (true) {\n`
+//   - `if (!true) {\n`
+//   - `if (false) {\n`
+//   - `if (!false) {\n`
+//   - `else {\n`
+// - if/else keyword must be first thing on its line
+export function eliminateDeadCode(template: string) {
+    const MATCH_IF = /^(\s*)if\s*\((\!?)((?:true)|(?:false))\)\s*{$/;
+    const MATCH_ELSE = /^(\s*)else\s*{$/;
+    let inLines = template.split('\n');
+    let outLines: string[] = [];
+    while (inLines.length > 0) {
+        let inLine = inLines.shift()!;
 
+        let matches = MATCH_IF.exec(inLine);
+        if (!matches) {
+            outLines.push(inLine);
+            continue;
+        }
 
+        let indent = matches[1];
+        let isNegated = matches[2] === '!';
+        let isTrueLiteral = matches[3] === 'true';
+        let isTrueCond = (!isNegated && isTrueLiteral) || (isNegated && !isTrueLiteral);
+        let blockLines: string[] = [];
+        let blockClose = indent + '}';
 
+        while (true) {
+            inLine = inLines.shift()!;
+            if (inLine === blockClose) break;
+            blockLines.push(inLine.slice(1)); // remove an indent
+        }
 
-// TODO: doc... assumes tabs
-export function getIndentDepth(sourceCodeFragment: string) {
-    return /^\t*/.exec(sourceCodeFragment)![0].length;
+        if (isTrueCond) {
+            outLines = outLines.concat(eliminateDeadCode(blockLines.join('\n')));
+        }
+
+        // TODO: handle 'else' blocks...
+        if (inLines.length > 0 && MATCH_ELSE.test(inLines[0])) {
+            inLines[0] = `${indent}if (${isTrueCond ? 'false' : 'true'}) {`;
+        }
+    }
+
+    return outLines.join('\n');
 }

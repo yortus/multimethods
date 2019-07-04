@@ -1,4 +1,4 @@
-import {MMInfo, MMNode} from '../../analysis';
+import {MMInfo, MMNode} from '../analysis';
 import * as substitutions from './substitutions';
 import * as utils from './template-utilities';
 
@@ -8,6 +8,17 @@ import * as utils from './template-utilities';
 // TODO: explain why this way - otherwise TSC will emit utils.BEGIN_SECTION instead of just BEGIN_SECTION
 // TODO: -or- account for that in the regex
 const {BEGIN_SECTION, END_SECTION} = utils;
+
+
+
+
+// TODO: reuse this comment?
+// Static sanity check that the names and structures assumed in emitted code match those statically declared in the
+// EmitEnvironment var. A mismatch could arise for instance if IDE-based rename/refactor tools are used to change
+// property names, etc. Such tools won't pick up the references in emitted code, which would lead to ReferenceError
+// exceptions at runtime when the emitted code is evaluated. The following statements don't do anything, but they
+// will cause static checking errors if refactorings have occured, and they indicate which names/structures assumed
+// in the emitted code will need to be updated to agree with the refactored code.
 
 
 
@@ -23,7 +34,7 @@ const {BEGIN_SECTION, END_SECTION} = utils;
  * stringified to its source code, and that source code undergoes substitutions to produce the source code for an actual
  * multimethod. The resulting source code is evaluated to produce a multimethod function that is both fast and readable.
  */
-export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('../../math/predicates')) {
+export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('../math/predicates')) {
 
     /** The multimethod's discriminator function. */
     let discriminator = mminfo.config.discriminator;
@@ -60,6 +71,12 @@ export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('
 
     /* -------------------------------------------------------------------------------- */
     BEGIN_SECTION('THUNK SELECTOR');
+    // TODO: rewrite doc...
+    /**
+     * Generates a function that, given a discriminant, returns the best-matching route executor from the given list of
+     * candidates. The returned selector function is generated for maximum readability and efficiency, using conditional
+     * constructs that follow the branches of the given `eulerDiagram`.
+     */
     function MM$NAMEOF_SELECT_THUNK(discriminant: string): any {
         // This is a dummy body that will be substituted for real code. The regex to replace this body
         // simply looks for the opening and closing brace, so don't put *any* braces in this dummy body.
@@ -78,6 +95,19 @@ export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('
 
     /* -------------------------------------------------------------------------------- */
     BEGIN_SECTION('THUNKS');
+    // TODO: rewrite comments. Esp signature of route executor matches signature of multimethod (as per provided Options)
+    /**
+     * Generates the virtual method, called a 'thunk', for the given node.
+     * In the absence of meta-methods, the logic for the virtual method is straightforward: execute each matching method
+     * in turn, from the most- to the least-specific, until one produces a result. With meta-methods, the logic becomes more
+     * complex, because a meta-method must run *before* more-specific regular methods, with those more specific
+     * methods being wrapped into a callback function and passed to the meta-method. To account for this, we perform
+     * an order-preserving partitioning of all matching methods for the node, with each meta-method starting a new
+     * partition. Within each partition, we use the straightforward cascading logic outlined above.
+     * However, each partition as a whole is executed in reverse-order (least to most specific), with the next
+     * (more-specific) partition being passed as the `next` parameter to the meta-method starting the previous
+     * (less-specific) partition.
+     */
     function MATCH$NAMEOF_THUNK(discriminant: string, MM$PARAMS: any[], args: any[] | false) {
         if (MATCH.HAS_NO_THIS_REFERENCE_IN_METHOD) {
             return args ? MATCH.NAMEOF_METHOD.apply(undefined, args) : MATCH.NAMEOF_METHOD(MM$PARAMS);

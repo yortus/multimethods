@@ -1,6 +1,6 @@
 import analyse from './analysis';
-import codegen from './codegen';
-import instrument from './instrumentation';
+import {codegen} from './codegen';
+import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import Options from './options';
 import debug from './util/debug';
 import validate from './validation';
@@ -26,9 +26,9 @@ function create(options?: Options) {
     options = options || {};
     validate(options); // NB: may throw
     let mminfo = analyse(options);
-    let emit = codegen(mminfo);
-    if (debug.enabled) instrument(emit);
-    let multimethod = emit.generate();
+    if (debug.enabled) instrumentMethods(mminfo);
+    let multimethod = codegen(mminfo);
+    if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);
     return multimethod;
 }
 export default create;
