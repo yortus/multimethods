@@ -19,19 +19,15 @@ export function emit(mminfo: MMInfo<MMNode>) {
     });
 
     // thunk selector - generate the code for it
-    source = replaceSection(source, 'SELECT_THUNK', placeholderContent => {
-        return codegenThunkSelectorBlock(mminfo.rootNode, getIndentDepth(placeholderContent));
+    source = replaceSection(source, 'THUNK SELECTOR', placeholderContent => {
+        let bodyIndent = repeat('\t', getIndentDepth(placeholderContent) + 1);
+        let bodyRegex = /{\n[\s\S]*?(?=\t*})/; // matches the substring between the opening and closing braces
+        return placeholderContent.replace(bodyRegex, () => `{\n${block(mminfo.rootNode, bodyIndent)}`);
 
-        function codegenThunkSelectorBlock(node: MMNode, indentDepth: number) {
-            let result = '';
-
-            // Make the indenting string corresponding to the given `nestDepth`.
-            let indent = repeat('\t', indentDepth);
-
-            // Recursively generate the conditional logic block to select among the given predicates.
-            result += node.childNodes.map(childNode => {
+        // Recursively generate the conditional logic block to select among the given predicates.
+        function block(node: MMNode, indent: string): string {
+            let result = node.childNodes.map(childNode => {
                 let nodeSubs = substitutions.forNode(childNode);
-
                 let condition = `${indent}if (${nodeSubs.NAMEOF_IS_MATCH}(discriminant)) `;
                 if (childNode.childNodes.length === 0) {
                     // One-liner if-statement
@@ -39,7 +35,7 @@ export function emit(mminfo: MMInfo<MMNode>) {
                 }
                 else {
                     // Compound if-statement with nested block of conditions
-                    let nestedBlock = codegenThunkSelectorBlock(childNode, indentDepth + 1); // NB: recursive
+                    let nestedBlock = block(childNode, indent + '\t'); // NB: recursive
                     return `${condition}{\n${nestedBlock}${indent}}\n`;
                 }
             }).join('');
@@ -48,11 +44,17 @@ export function emit(mminfo: MMInfo<MMNode>) {
             result += `${indent}return ${substitutions.forNode(node).NAMEOF_ENTRYPOINT_THUNK};\n`;
             return result;
         }
+    });
 
+    source = replaceSection(source, 'PATTERN MATCHING', placeholderContent => {
+        return mminfo.allNodes.map((node, nodeIndex) => {
+            // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
+            return replaceAll(placeholderContent, 'NODE', substitutions.forNode(node, nodeIndex));
+        }).join('');
     });
 
     // thunk functions - codegen foreach thunk
-    source = replaceSection(source, 'FOREACH_MATCH', placeholderContent => {
+    source = replaceSection(source, 'THUNKS', placeholderContent => {
         return mminfo.allNodes.map(node => {
             // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
             return node.methodSequence.map((_, index, seq) => {
@@ -70,14 +72,7 @@ export function emit(mminfo: MMInfo<MMNode>) {
         }).join('');
     });
 
-    source = replaceSection(source, 'FOREACH_NODE', placeholderContent => {
-        return mminfo.allNodes.map((node, nodeIndex) => {
-            // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
-            return replaceAll(placeholderContent, 'NODE', substitutions.forNode(node, nodeIndex));
-        }).join('');
-    });
-
-    source = replaceSection(source, 'FOREACH_METHOD', placeholderContent => {
+    source = replaceSection(source, 'METHODS', placeholderContent => {
         return mminfo.allNodes.map((node, nodeIndex) => {
             // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
             let nodeSubs = substitutions.forNode(node, nodeIndex);
@@ -89,9 +84,6 @@ export function emit(mminfo: MMInfo<MMNode>) {
             }).join('');
         }).join('');
     });
-
-    // TODO: ...
-    source = replaceSection(source, 'TO_REMOVE', () => '');
 
     // do mm-wide replacements & stuff
     let mmSubs = substitutions.forMultimethod(mminfo);

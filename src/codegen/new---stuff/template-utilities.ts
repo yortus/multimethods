@@ -20,14 +20,12 @@ export function replaceAll(sourceCode: string, objName: string, replacements: {[
 
 export function BEGIN_SECTION(sectionName: SectionName) { return sectionName; }
 export function END_SECTION(sectionName: SectionName) { return sectionName; }
-export type SectionName =
-    | 'ENTRY POINT' | 'SELECT_THUNK' | 'FOREACH_MATCH'
-    | 'FOREACH_NODE' | 'FOREACH_METHOD' | 'TO_REMOVE';
+export type SectionName = 'ENTRY POINT' | 'THUNK SELECTOR' | 'PATTERN MATCHING' | 'THUNKS' | 'METHODS';
 
 
 
 
-export function replaceSection(sourceCode: string, sectionName: SectionName, replace: (s: string) => string) {
+export function replaceSection(sourceCode: string, sectionName: SectionName, replacer: (s: string) => string) {
     let opening = `[ \\t]*${BEGIN_SECTION.name}\\('${sectionName}'\\);[^\\n]*\\n`;
     let content = `([\\s\\S]*?)`;
     let closing = `[ \\t]*${END_SECTION.name}\\('${sectionName}'\\)[^\\n]*\\n`;
@@ -36,9 +34,19 @@ export function replaceSection(sourceCode: string, sectionName: SectionName, rep
     let replacedCount = 0;
     let result = sourceCode.replace(re, (_, $1) => {
         ++replacedCount;
-        return replace($1);
+
+        let indent = repeat('\t', getIndentDepth($1));
+        return [
+            `\n`,
+            `${indent}/*====================${repeat('=', sectionName.length)}====================*\n`,
+            `${indent} *                    ${sectionName}                    *\n`,
+            `${indent} *====================${repeat('=', sectionName.length)}====================*/\n`,
+            replacer($1),
+        ].join('');
     });
-    if (replacedCount === 0) throw new Error(`codegen internal error`); // TODO: doc this sanity check
+
+    if (replacedCount !== 1) throw new Error(`codegen internal error`); // TODO: doc this sanity check
+
     return result;
 }
 
@@ -115,17 +123,17 @@ export function beautify(minifiedSource: string) {
 
 
 export function substituteHeadings(sourceCode: string) {
-
-    // H1 headings
-    let re = new RegExp(`(\\t*)${H1.name}\\('(.*?)'\\);[^\\n]*\\n`, 'g');
-    return sourceCode.replace(re, (_, indent, title) => {
-        return [
-            `\n`,
-            `${indent}/*====================${repeat('=', title.length)}====================*\n`,
-            `${indent} *                    ${title}                    *\n`,
-            `${indent} *====================${repeat('=', title.length)}====================*/\n`,
-        ].join('');
-    });
+    return sourceCode;
+    // // H1 headings
+    // let re = new RegExp(`(\\t*)${H1.name}\\('(.*?)'\\);[^\\n]*\\n`, 'g');
+    // return sourceCode.replace(re, (_, indent, title) => {
+    //     return [
+    //         `\n`,
+    //         `${indent}/*====================${repeat('=', title.length)}====================*\n`,
+    //         `${indent} *                    ${title}                    *\n`,
+    //         `${indent} *====================${repeat('=', title.length)}====================*/\n`,
+    //     ].join('');
+    // });
 
     // TODO: H2 headings
 

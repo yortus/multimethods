@@ -7,7 +7,7 @@ import * as utils from './template-utilities';
 
 // TODO: explain why this way - otherwise TSC will emit utils.BEGIN_SECTION instead of just BEGIN_SECTION
 // TODO: -or- account for that in the regex
-const {BEGIN_SECTION, END_SECTION, H1} = utils;
+const {BEGIN_SECTION, END_SECTION} = utils;
 
 
 
@@ -15,6 +15,14 @@ const {BEGIN_SECTION, END_SECTION, H1} = utils;
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
+
+
+
+/**
+ * Contains multimethod implementation code in template form. This function is not called as-is. Rather it is
+ * stringified to its source code, and that source code undergoes substitutions to produce the source code for an actual
+ * multimethod. The resulting source code is evaluated to produce a multimethod function that is both fast and readable.
+ */
 export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('../../math/predicates')) {
 
     /** The multimethod's discriminator function. */
@@ -30,20 +38,20 @@ export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('
     let copy = (els: any) => Array.prototype.slice.call(els);
 
     /* -------------------------------------------------------------------------------- */
-    H1('ENTRY POINT');
     BEGIN_SECTION('ENTRY POINT');
     function MM$NAME(MM$PARAMS: any) {
         let args = arguments.length <= MM.ARITY ? false as const : copy(arguments);
         let discriminant: string | Promise<string>;
         discriminant = args ? discriminator.apply(undefined, args) : discriminator(MM$PARAMS);
 
+        let thunk: (discriminant: string, MM$PARAMS: any, args: any[]) => any;
         if (typeof discriminant === 'string') {
-            let thunk = MM$NAMEOF_SELECT_THUNK(discriminant);
+            thunk = MM$NAMEOF_SELECT_THUNK(discriminant);
             return thunk(discriminant, MM$PARAMS, args);
         }
         else {
             return discriminant.then(disc => {
-                let thunk = MM$NAMEOF_SELECT_THUNK(disc);
+                thunk = MM$NAMEOF_SELECT_THUNK(disc);
                 return thunk(disc, MM$PARAMS, args);
             });
         }
@@ -51,29 +59,25 @@ export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('
     END_SECTION('ENTRY POINT');
 
     /* -------------------------------------------------------------------------------- */
-    H1('THUNK SELECTOR');
-    function MM$NAMEOF_SELECT_THUNK(discriminant: string): (disc: string, MM$PARAMS: any, args: any[]) => any {
-        BEGIN_SECTION('SELECT_THUNK');
-        // NB: the following placeholder content will be discarded
-        [] = [discriminant]; // prevent TS6133
-        return null!; // prevent TS2355
-        // @ts-ignore - prevent TS7027
-        END_SECTION('SELECT_THUNK');
+    BEGIN_SECTION('THUNK SELECTOR');
+    function MM$NAMEOF_SELECT_THUNK(discriminant: string): any {
+        // This is a dummy body that will be substituted for real code. The regex to replace this body
+        // simply looks for the opening and closing brace, so don't put *any* braces in this dummy body.
+        if (discriminant) return;
     }
+    END_SECTION('THUNK SELECTOR');
 
     /* -------------------------------------------------------------------------------- */
-    H1('PATTERN MATCHING');
-    BEGIN_SECTION('FOREACH_NODE');
+    BEGIN_SECTION('PATTERN MATCHING');
     let NODE$NAMEOF_IS_MATCH = ℙ.toMatchFunction(ℙ.toNormalPredicate(mminfo.allNodes[NODE.INDEX].exactPredicate));
     if (NODE.HAS_PATTERN_BINDINGS) {
         // tslint:disable-next-line: no-var-keyword
         var NODE$NAMEOF_GET_PATTERN_BINDINGS: any = ℙ.toMatchFunction(mminfo.allNodes[NODE.INDEX].exactPredicate);
     }
-    END_SECTION('FOREACH_NODE');
+    END_SECTION('PATTERN MATCHING');
 
     /* -------------------------------------------------------------------------------- */
-    H1('THUNKS');
-    BEGIN_SECTION('FOREACH_MATCH');
+    BEGIN_SECTION('THUNKS');
     function MATCH$NAMEOF_THUNK(discriminant: string, MM$PARAMS: any[], args: any[] | false) {
         if (MATCH.HAS_NO_THIS_REFERENCE_IN_METHOD) {
             return args ? MATCH.NAMEOF_METHOD.apply(undefined, args) : MATCH.NAMEOF_METHOD(MM$PARAMS);
@@ -112,24 +116,21 @@ export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('
             return args ? MATCH.NAMEOF_METHOD.apply(context, args) : MATCH.NAMEOF_METHOD.call(context, MM$PARAMS);
         }
     }
-    END_SECTION('FOREACH_MATCH');
+    END_SECTION('THUNKS');
 
     /* -------------------------------------------------------------------------------- */
-    H1('METHODS');
-    BEGIN_SECTION('FOREACH_METHOD');
+    BEGIN_SECTION('METHODS');
     let METHOD$NAME = mminfo.allNodes[NODE.INDEX].exactMethods[METHOD.INDEX];
-    END_SECTION('FOREACH_METHOD');
+    END_SECTION('METHODS');
 
-    /* -------------------------------------------------------------------------------- */
-    BEGIN_SECTION('TO_REMOVE');
-    [] = [
-        MM$NAMEOF_SELECT_THUNK,
-        MATCH$NAMEOF_THUNK,
-        NODE$NAMEOF_IS_MATCH,
-        NODE$NAMEOF_GET_PATTERN_BINDINGS,
-        METHOD$NAME,
-    ];
-    END_SECTION('TO_REMOVE');
+    if (MM.DUMMY_CODE) {
+        [] = [
+            MATCH$NAMEOF_THUNK,
+            NODE$NAMEOF_IS_MATCH,
+            NODE$NAMEOF_GET_PATTERN_BINDINGS,
+            METHOD$NAME,
+        ];
+    }
 
     return MM$NAME;
 }

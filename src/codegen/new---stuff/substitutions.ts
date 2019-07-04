@@ -12,6 +12,7 @@ export function forMultimethod(mminfo: MMInfo<MMNode>) {
         ARITY: String(mminfo.config.arity || 1),
         PARAMS: makeParameterList(mminfo.config.arity || 1),
         NAMEOF_SELECT_THUNK: 'selectThunk',
+        DUMMY_CODE: false, // use with if statements to elide dummy code from the template
     };
 }
 
