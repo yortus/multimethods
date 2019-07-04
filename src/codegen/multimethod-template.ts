@@ -71,8 +71,8 @@ export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('
 
     /* -------------------------------------------------------------------------------- */
     BEGIN_SECTION('THUNK SELECTOR');
-    // TODO: rewrite doc...
-    /**
+    /*
+     * TODO: rewrite doc...
      * Generates a function that, given a discriminant, returns the best-matching route executor from the given list of
      * candidates. The returned selector function is generated for maximum readability and efficiency, using conditional
      * constructs that follow the branches of the given `eulerDiagram`.
@@ -95,8 +95,8 @@ export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('
 
     /* -------------------------------------------------------------------------------- */
     BEGIN_SECTION('THUNKS');
-    // TODO: rewrite comments. Esp signature of route executor matches signature of multimethod (as per provided Options)
     /**
+     * TODO: rewrite comments. Esp signature of route executor matches signature of multimethod (as per provided Options)
      * Generates the virtual method, called a 'thunk', for the given node.
      * In the absence of meta-methods, the logic for the virtual method is straightforward: execute each matching method
      * in turn, from the most- to the least-specific, until one produces a result. With meta-methods, the logic becomes more
