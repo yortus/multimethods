@@ -1,5 +1,13 @@
 import {MMInfo, MMNode} from '../../analysis';
 import * as substitutions from './substitutions';
+import * as utils from './template-utilities';
+
+
+
+
+// TODO: explain why this way - otherwise TSC will emit utils.BEGIN_SECTION instead of just BEGIN_SECTION
+// TODO: -or- account for that in the regex
+const {BEGIN_SECTION, END_SECTION} = utils;
 
 
 
@@ -7,7 +15,7 @@ import * as substitutions from './substitutions';
 // TODO: ========== The actual template ==========
 // TODO: explain important norms in the template function... eg '$', __ARGS__, __FUNCNAME__
 // TODO: put more explanatory comments inside. They will be stripped out during emit to maximise inlining potential
-export function template(mminfo: MMInfo<MMNode>, ℙ: typeof import('../../math/predicates')) {
+export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('../../math/predicates')) {
 
     // TODO: explain - template source can only include constructs that are supported by all target runtimes. So no ES6.
     // tslint:disable: no-var-keyword
@@ -134,13 +142,6 @@ export function template(mminfo: MMInfo<MMNode>, ℙ: typeof import('../../math/
 
     return MM$NAME;
 }
-
-
-
-
-declare function BEGIN_SECTION(sectionName: SectionName): void;
-declare function END_SECTION(sectionName: SectionName): void;
-export type SectionName = 'SELECT_THUNK' | 'FOREACH_MATCH' | 'FOREACH_NODE' | 'FOREACH_METHOD' | 'TO_REMOVE';
 
 
 
