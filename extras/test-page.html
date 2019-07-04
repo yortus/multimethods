@@ -2,59 +2,58 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html" charset="utf-8">
-        <script type="text/javascript" src="../dist/umd/multimethods.min.js" charset="utf-8"></script>
+        <script type="text/javascript" src="../dist/umd/multimethods.js" charset="utf-8"></script>
         <script type="text/javascript">
 
             // ==========   Adapted from ./bench/basic-routing.ts   ==========
-
             let assert = { equal: (a, b) => { if (a !== b) throw new Error(`Assertion failed: ${a} === ${b}`); }};
-            let MM = multimethods.create;
-            let NEXT = multimethods.NEXT;
-            let meta = multimethods.meta;
+            let Multimethod = multimethods.Multimethod;
 
             // Declare test configuration.
             const COUNT = 1000000;
+            const UNHANDLED = {};
 
             // Declare the test multimethod
-            const mm = MM({
-                toDiscriminant: (r) => r.address,
-                methods: {
-                    '**': () => 'UNHANDLED',
-                    '/foo': () => 'foo',
-                    '/bar': () => 'bar',
-                    '/baz': () => 'baz',
-                    '/*a*': meta(($req, _, next) => `---${ifUnhandled(next($req), 'NONE')}---`),
+            const mm = Multimethod({
+                discriminator: r => r.address,
+                unhandled: () => UNHANDLED,
+            }).extend({
+                '**': () => 'UNHANDLED',
+                '/foo': () => 'foo',
+                '/bar': () => 'bar',
+                '/baz': () => 'baz',
 
-                    'a/*': () => `starts with 'a'`,
-                    '*/b': () => `ends with 'b'`,
-                    'a/b': () => `starts with 'a' AND ends with 'b'`,
+                'a/*': () => `starts with 'a'`,
+                '*/b': () => `ends with 'b'`,
+                'a/b': () => `starts with 'a' AND ends with 'b'`,
 
-                    'c/*': () => `starts with 'c'`,
-                    '*/d': () => `ends with 'd'`,
-                    'c/d': () => NEXT,
+                'c/*': () => `starts with 'c'`,
+                '*/d': () => `ends with 'd'`,
+                'c/d'() { return this.outer(); },
 
-                    'api/**': [() => `fallback`, () => `fallback`],
-                    'api/fo*o': () => NEXT,
-                    'api/fo*': [
-                        meta(($req, _, next) => `fo2-(${ifUnhandled(next($req), 'NONE')})`),
-                        meta(($req, _, next) => `fo1-(${ifUnhandled(next($req), 'NONE')})`),
-                    ],
-                    'api/foo': [
-                        meta(($req, _, next) => `${ifUnhandled(next($req), 'NONE')}!`),
-                        () => 'FOO',
-                    ],
-                    'api/foot': () => 'FOOt',
-                    'api/fooo': () => 'fooo',
-                    'api/bar': () => NEXT,
+                'api/**': [() => `fallback`, () => `fallback`],
+                'api/fo*o'() { return this.outer(); },
+                'api/foo': [
+                    () => 'FOO',
+                ],
+                'api/foot': () => 'FOOt',
+                'api/fooo': () => 'fooo',
+                'api/bar'() { return this.outer(); },
 
-                    // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-                    'zz/z/{**rest}': meta((_, {rest}, next) => `${ifUnhandled(next({address: rest.split('').reverse().join('')}), 'NONE')}`),
-                    'zz/z/b*z': ($req) => `${$req.address}`,
-                    'zz/z/./*': () => 'forty-two',
-                },
-                arity: 1,
-                async: false,
-                strict: false,
+                'zz/z/b*z': ($req) => `${$req.address}`,
+                'zz/z/./*': () => 'forty-two',
+            }).decorate({
+                '/*a*'($req) { return `---${ifUnhandled(this.inner($req), 'NONE')}---`; },
+                'api/fo*': [
+                    function ($req) { return `fo2-(${ifUnhandled(this.inner($req), 'NONE')})`; },
+                    function ($req) { return `fo1-(${ifUnhandled(this.inner($req), 'NONE')})`; },
+                ],
+                'api/foo': [
+                    function ($req) { return `${ifUnhandled(this.inner($req), 'NONE')}!`; },
+                    'super',
+                ],
+                // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
+                'zz/z/{**rest}'() { return `${ifUnhandled(this.inner({address: this.pattern.rest.split('').reverse().join('')}), 'NONE')}`; },
             });
 
             // Encode a battery of requests with their expected responses.
@@ -89,6 +88,7 @@
             ];
 
             // Set up the tests.
+            // tslint:disable:no-console
             console.log(`Running perf test: basic routing...`);
             let addresses = tests.map(test => test.split(' ==> ')[0]);
             let requests = addresses.map(address => ({address}));
@@ -115,7 +115,7 @@
 
             // TODO: doc helper...
             function ifUnhandled(lhs, rhs) {
-                return lhs === NEXT ? rhs : lhs;
+                return lhs === UNHANDLED ? rhs : lhs;
             }
         </script>
     </head>

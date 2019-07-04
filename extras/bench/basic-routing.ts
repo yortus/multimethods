@@ -44,9 +44,6 @@ import {Multimethod} from 'multimethods';
 const COUNT = 1000000;
 const UNHANDLED = {} as any;
 
-
-
-
 // Declare the test multimethod
 const mm = Multimethod({
     discriminator: (r: {address: string}) => r.address,
@@ -90,7 +87,6 @@ const mm = Multimethod({
     'zz/z/{**rest}'() { return `${ifUnhandled(this.inner({address: this.pattern.rest.split('').reverse().join('')}), 'NONE')}`; },
 });
 
-
 // Encode a battery of requests with their expected responses.
 const tests = [
     `/foo ==> foo`,
@@ -122,9 +118,6 @@ const tests = [
     `zz/z/./{whatever} ==> forty-two`,
 ];
 
-
-// TODO: was... (async () => {
-
 // Set up the tests.
 // tslint:disable:no-console
 console.log(`Running perf test: basic routing...`);
@@ -150,9 +143,6 @@ let stop = new Date().getTime();
 let sec = (stop - start) / 1000;
 let rate = Math.round(0.001 * COUNT / sec) * 1000;
 console.log(`Dispatched ${COUNT} requests in ${sec} seconds   (~${rate} req/sec)`);
-
-// TODO: was... })().catch(console.log);
-
 
 // TODO: doc helper...
 function ifUnhandled(lhs, rhs) {

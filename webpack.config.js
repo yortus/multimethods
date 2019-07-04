@@ -1,6 +1,4 @@
 const path = require('path');
-const TerserPlugin = require('terser-webpack-plugin');
-
 
 
 
@@ -12,7 +10,7 @@ module.exports = {
     entry: './dist/commonjs/index.js',
 
     output: {
-        filename: 'multimethods.min.js',
+        filename: 'multimethods.js',
         path: path.resolve(__dirname, 'dist/umd'),
         library: 'multimethods',
         libraryTarget: 'umd'
@@ -32,22 +30,8 @@ module.exports = {
             }
         ],
     },
-
     optimization: {
-        minimizer: [new TerserPlugin({
-            terserOptions: {
-                mangle: {
-                    reserved: ['__FUNCNAME__', '__ARGS__']
-                },
-                compress: false,
-                // TODO: compression still causes errors in UMD build. `test-page.html` fails if compression is enabled.
-                // compress: {
-                //     keep_fnames: true,
-                //     sequences: false,
-                //     conditionals: false,
-                //     join_vars: false
-                // }
-            }
-        })],
-    },
+        // Minimisation messes up multimethod source code templates and codegen, so it is disabled.
+		minimize: false
+	},
 };

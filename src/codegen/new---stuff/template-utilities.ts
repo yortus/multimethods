@@ -1,16 +1,18 @@
+import repeat from '../../util/string-repeat';
 
 
 
 
 // TODO: jsdoc...
-export function replaceAll(template: string, objName: string, replacements: {[propName: string]: unknown}) {
+export function replaceAll(sourceCode: string, objName: string, replacements: {[propName: string]: unknown}) {
     let propNames = Object.keys(replacements);
     for (let propName of propNames) {
         let regex = new RegExp(`${objName}[.$]${propName}(?!\\w)`, 'g');
         let replacement = replacements[propName];
-        template = template.replace(regex, String(replacement));
+        sourceCode = sourceCode.replace(regex, String(replacement));
     }
-    return template;
+    // TODO: sanity checks?
+    return sourceCode;
 }
 
 
@@ -18,20 +20,25 @@ export function replaceAll(template: string, objName: string, replacements: {[pr
 
 export function BEGIN_SECTION(sectionName: SectionName) { return sectionName; }
 export function END_SECTION(sectionName: SectionName) { return sectionName; }
-export type SectionName = 'SELECT_THUNK' | 'FOREACH_MATCH' | 'FOREACH_NODE' | 'FOREACH_METHOD' | 'TO_REMOVE';
+export type SectionName =
+    | 'ENTRY POINT' | 'SELECT_THUNK' | 'FOREACH_MATCH'
+    | 'FOREACH_NODE' | 'FOREACH_METHOD' | 'TO_REMOVE';
 
 
 
 
-export function replaceSection(source: string, sectionName: SectionName, replace: (str: string) => string) {
+export function replaceSection(sourceCode: string, sectionName: SectionName, replace: (s: string) => string) {
     let opening = `[ \\t]*${BEGIN_SECTION.name}\\('${sectionName}'\\);[^\\n]*\\n`;
     let content = `([\\s\\S]*?)`;
     let closing = `[ \\t]*${END_SECTION.name}\\('${sectionName}'\\)[^\\n]*\\n`;
     let re = new RegExp(opening + content + closing);
 
-    let result = source.replace(re, (_, $1) => {
+    let replacedCount = 0;
+    let result = sourceCode.replace(re, (_, $1) => {
+        ++replacedCount;
         return replace($1);
     });
+    if (replacedCount === 0) throw new Error(`codegen internal error`); // TODO: doc this sanity check
     return result;
 }
 
@@ -39,31 +46,31 @@ export function replaceSection(source: string, sectionName: SectionName, replace
 
 
 // TODO: doc...
-export function minify(source: string) {
+export function minify(sourceCode: string) {
 
     // Normalise newlines and remove blank lines.
-    source = source.replace(/[\r\n]+/g, '\n');
+    sourceCode = sourceCode.replace(/[\r\n]+/g, '\n');
 
-    // Remove comments. But preserve special 'tag' comments like // <THING>;
-    source = source.replace(/\/\*((?!\*\/)[\s\S])*\*\//g, '');
-    source = source.replace(/^\s*\/\/((?!\n|$).)*\n?/gm, '');
+    // Remove comments.
+    sourceCode = sourceCode.replace(/\/\*((?!\*\/)[\s\S])*\*\//g, '');
+    sourceCode = sourceCode.replace(/^\s*\/\/((?!\n|$).)*\n?/gm, '');
 
     // Remove leading whitespace on every line.
-    source = source.replace(/^\s+/gm, '');
+    sourceCode = sourceCode.replace(/^\s+/gm, '');
 
     // Normalise if/else blocks. Ensure consequent/alternative stmts always have curlies.
     const SINGLE_LINE_IF_OR_ELSE = /^((?:if\s*\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)\s*)|else\s*)(?!\s*\{)([^;]*;)/;
-    while (SINGLE_LINE_IF_OR_ELSE.test(source)) {
-        // Do these one at a time, since they may be nested.
-        source = source.replace(SINGLE_LINE_IF_OR_ELSE, (_, cond, stmt) => `${cond}{${stmt}}`);
+    while (SINGLE_LINE_IF_OR_ELSE.test(sourceCode)) {
+        // Since these blocks may be nested, do one content-wide replacement at a time until no matches remain.
+        sourceCode = sourceCode.replace(SINGLE_LINE_IF_OR_ELSE, (_, cond, stmt) => `${cond}{${stmt}}`);
     }
-    source = source.replace(/^\}\s*else\s*\{$/gm, '}\nelse {');
+    sourceCode = sourceCode.replace(/^\}\s*else\s*\{$/gm, '}\nelse {');
 
     // Remove newlines.
-    source = source.replace(/\n/g, '');
+    sourceCode = sourceCode.replace(/\n/g, '');
 
     // All done.
-    return source;
+    return sourceCode;
 }
 
 
@@ -102,4 +109,37 @@ export function beautify(minifiedSource: string) {
     }
 
     return out;
+}
+
+
+
+
+export function substituteHeadings(sourceCode: string) {
+
+    // H1 headings
+    let re = new RegExp(`(\\t*)${H1.name}\\('(.*?)'\\);[^\\n]*\\n`, 'g');
+    return sourceCode.replace(re, (_, indent, title) => {
+        return [
+            `\n`,
+            `${indent}/*====================${repeat('=', title.length)}====================*\n`,
+            `${indent} *                    ${title}                    *\n`,
+            `${indent} *====================${repeat('=', title.length)}====================*/\n`,
+        ].join('');
+    });
+
+    // TODO: H2 headings
+
+}
+
+
+
+
+export function H1(title: string) { return title; }
+
+
+
+
+// TODO: doc... assumes tabs
+export function getIndentDepth(sourceCodeFragment: string) {
+    return /^\t*/.exec(sourceCodeFragment)![0].length;
 }

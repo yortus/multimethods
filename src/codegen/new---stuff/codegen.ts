@@ -3,7 +3,7 @@ import repeat from '../../util/string-repeat';
 import {eliminateDeadCode} from '../eliminate-dead-code';
 import {multimethodTemplate} from './multimethod-template';
 import * as substitutions from './substitutions';
-import {beautify, minify, replaceAll, replaceSection} from './template-utilities';
+import {beautify, getIndentDepth, minify, replaceAll, replaceSection, substituteHeadings} from './template-utilities';
 
 
 
@@ -13,23 +13,20 @@ export function emit(mminfo: MMInfo<MMNode>) {
     source = minify(source);
     source = beautify(source);
 
-    // do mm-wide replacements
-    let MM = substitutions.forMultimethod(mminfo);
-    source = replaceAll(source, 'MM', MM);
-
-    // dispatch function: substitute __MM_NAME__, __MM_PARAMS__ and __MM_ARITY__
-    //emitBanner(emit, 'MULTIMETHOD DISPATCHER');
+    // TODO: dispatch function...
+    source = replaceSection(source, 'ENTRY POINT', placeholderContent => {
+        return replaceAll(placeholderContent, 'MM', substitutions.forMultimethod(mminfo));
+    });
 
     // thunk selector - generate the code for it
-    //emitBanner(emit, 'THUNK SELECTOR');
-    source = replaceSection(source, 'SELECT_THUNK', () => {
-        return codegenThunkSelectorBlock(mminfo.rootNode, 1);
+    source = replaceSection(source, 'SELECT_THUNK', placeholderContent => {
+        return codegenThunkSelectorBlock(mminfo.rootNode, getIndentDepth(placeholderContent));
 
-        function codegenThunkSelectorBlock(node: MMNode, nestDepth: number) {
+        function codegenThunkSelectorBlock(node: MMNode, indentDepth: number) {
             let result = '';
 
             // Make the indenting string corresponding to the given `nestDepth`.
-            let indent = repeat('\t', nestDepth);
+            let indent = repeat('\t', indentDepth);
 
             // Recursively generate the conditional logic block to select among the given predicates.
             result += node.childNodes.map(childNode => {
@@ -42,12 +39,12 @@ export function emit(mminfo: MMInfo<MMNode>) {
                 }
                 else {
                     // Compound if-statement with nested block of conditions
-                    let nestedBlock = codegenThunkSelectorBlock(childNode, nestDepth + 1); // NB: recursive
+                    let nestedBlock = codegenThunkSelectorBlock(childNode, indentDepth + 1); // NB: recursive
                     return `${condition}{\n${nestedBlock}${indent}}\n`;
                 }
             }).join('');
 
-            // Add a line to select the base predicate if none of the more specialised predicates matched the discriminant.
+            // Select the base predicate if none of the more specialised predicates matched the discriminant.
             result += `${indent}return ${substitutions.forNode(node).NAMEOF_ENTRYPOINT_THUNK};\n`;
             return result;
         }
@@ -55,8 +52,7 @@ export function emit(mminfo: MMInfo<MMNode>) {
     });
 
     // thunk functions - codegen foreach thunk
-    //emitBanner(emit, 'THUNKS');
-    source = replaceSection(source, 'FOREACH_MATCH', content => {
+    source = replaceSection(source, 'FOREACH_MATCH', placeholderContent => {
         return mminfo.allNodes.map(node => {
             // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
             return node.methodSequence.map((_, index, seq) => {
@@ -66,7 +62,7 @@ export function emit(mminfo: MMInfo<MMNode>) {
                 if (!seq[index].isMeta && seq[index].fromNode !== seq[0].fromNode) return '';
 
                 let nodeSubs = substitutions.forNode(seq[index].fromNode);
-                let result = content;
+                let result = placeholderContent;
                 result = replaceAll(result, 'NODE', nodeSubs);
                 result = replaceAll(result, 'MATCH', substitutions.forMatch(seq, index));
                 return result;
@@ -74,22 +70,19 @@ export function emit(mminfo: MMInfo<MMNode>) {
         }).join('');
     });
 
-    // environment - codegen foreach method
-    //emitBanner(emit, 'ENVIRONMENT');
-
-    source = replaceSection(source, 'FOREACH_NODE', content => {
+    source = replaceSection(source, 'FOREACH_NODE', placeholderContent => {
         return mminfo.allNodes.map((node, nodeIndex) => {
             // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
-            return replaceAll(content, 'NODE', substitutions.forNode(node, nodeIndex));
+            return replaceAll(placeholderContent, 'NODE', substitutions.forNode(node, nodeIndex));
         }).join('');
     });
 
-    source = replaceSection(source, 'FOREACH_METHOD', content => {
+    source = replaceSection(source, 'FOREACH_METHOD', placeholderContent => {
         return mminfo.allNodes.map((node, nodeIndex) => {
             // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
             let nodeSubs = substitutions.forNode(node, nodeIndex);
             return node.exactMethods.map((_, methodIndex) => {
-                let result = content;
+                let result = placeholderContent;
                 result = replaceAll(result, 'NODE', nodeSubs);
                 result = replaceAll(result, 'METHOD', substitutions.forMethod(node, methodIndex));
                 return result;
@@ -100,6 +93,10 @@ export function emit(mminfo: MMInfo<MMNode>) {
     // TODO: ...
     source = replaceSection(source, 'TO_REMOVE', () => '');
 
+    // do mm-wide replacements & stuff
+    let mmSubs = substitutions.forMultimethod(mminfo);
+    source = replaceAll(source, 'MM', mmSubs);
     source = eliminateDeadCode(source);
+    source = substituteHeadings(source);
     return source;
 }
