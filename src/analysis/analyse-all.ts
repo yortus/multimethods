@@ -1,19 +1,19 @@
-import Options from '../options';
-import analyseAmbiguities from './analyse-ambiguities';
-import analyseChildNodes from './analyse-child-nodes';
-import analyseMethodSequences from './analyse-method-sequences';
-import analyseMethodTable from './analyse-method-table';
-import analyseParentNodes from './analyse-parent-nodes';
+import {Options} from '../options';
+import {analyseAmbiguities} from './analyse-ambiguities';
+import {analyseChildNodes} from './analyse-child-nodes';
+import {analyseMethodSequences} from './analyse-method-sequences';
+import {analyseMethodTable} from './analyse-method-table';
+import {analyseParentNodes} from './analyse-parent-nodes';
 import {createConfiguration} from './configuration';
-import MMInfo from './mm-info';
-import MMNode from './mm-node';
+import {MMInfo} from './mm-info';
+import {MMNode} from './mm-node';
 
 
 
 
 
 // TODO: doc...
-export default function analyseAll(options: Options) {
+export function analyseAll(options: Options) {
     let config = createConfiguration(options);
     let mminfo1 = MMInfo.fromConfig(config);
     let mminfo2 = analyseMethodTable(mminfo1);

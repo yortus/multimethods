@@ -1,7 +1,6 @@
 import {toIdentifierParts} from '../math/predicates';
-import isMetaMethod from '../util/is-meta-method';
-import repeatString from '../util/string-repeat';
-import MMInfo from './mm-info';
+import {isMetaMethod, repeat} from '../util';
+import {MMInfo} from './mm-info';
 import {MethodSequence, MethodSequenceEntry, MethodTableEntry, ParentNode} from './mm-node';
 
 
@@ -9,7 +8,7 @@ import {MethodSequence, MethodSequenceEntry, MethodTableEntry, ParentNode} from 
 
 
 // TODO: doc...
-export default function analyseMethodSequences<T extends MethodTableEntry & ParentNode<T>>(mminfo: MMInfo<T>) {
+export function analyseMethodSequences<T extends MethodTableEntry & ParentNode<T>>(mminfo: MMInfo<T>) {
     return mminfo.addProps(startNode => {
         let methodSequence = [] as Array<MethodSequenceEntry<T>>;
 
@@ -21,7 +20,7 @@ export default function analyseMethodSequences<T extends MethodTableEntry & Pare
                 let isMeta = isMetaMethod(method);
 
                 // Make an IdentifierPart for each method that is descriptive and unique accross the multimethod.
-                let identifier = `${toIdentifierParts(ancestorNode!.exactPredicate)}${repeatString('ᐟ', methodIndex)}`;
+                let identifier = `${toIdentifierParts(ancestorNode!.exactPredicate)}${repeat('ᐟ', methodIndex)}`;
                 if (isMeta && (ancestorNode !== startNode || methodIndex > 0)) {
                     identifier = `${toIdentifierParts(startNode.exactPredicate)}ːviaː${identifier}`;
                 }

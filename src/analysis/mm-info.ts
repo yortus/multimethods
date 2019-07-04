@@ -1,13 +1,13 @@
 import {EulerDiagram, EulerSet} from '../math/sets';
-import assign from '../util/object-assign';
-import Configuration from './configuration';
+import {assign} from '../util';
+import {Configuration} from './configuration';
 
 
 
 
 
 // TODO: doc...
-export default class MMInfo<TNode extends object> {
+export class MMInfo<TNode extends object> {
 
     static fromConfig(config: Configuration) {
         let ed = new EulerDiagram(Object.keys(config.methods), config.unreachable);

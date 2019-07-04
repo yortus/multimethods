@@ -1,6 +1,6 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import isPromiseLike from 'multimethods/util/is-promise-like';
+import {isPromiseLike} from 'multimethods/util';
 
 
 

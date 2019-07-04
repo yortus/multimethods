@@ -5,7 +5,7 @@ import {NormalPredicate} from '../predicates';
 
 
 /** Represents a single set contained in an euler diagram. */
-export default interface EulerSet {
+export interface EulerSet {
 
 
     /** The normalised predicate associated with this set. */

@@ -1,4 +1,4 @@
-import {default as MM} from './create';
+import {create as MM} from './create';
 import {meta} from './decorators';
 import * as types from './multimethod';
 import {UNHANDLED_DISPATCH} from './sentinels';

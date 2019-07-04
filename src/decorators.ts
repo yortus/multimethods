@@ -1,4 +1,4 @@
-import isMetaMethod from './util/is-meta-method';
+import {isMetaMethod} from './util';
 
 
 

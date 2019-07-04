@@ -1,1 +1,1 @@
-export {default} from './check-options';
+export {checkOptions} from './check-options';

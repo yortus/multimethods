@@ -6,11 +6,11 @@
 // TODO: automatically clear stored results on a future tick
 // TODO: doc or remove these restrictions:
 // - only works for arities 1-4, detected using fn.length. Generalise?
-function memoise<T0, TR>(fn: ($0: T0) => TR): ($0: T0) => TR;
-function memoise<T0, T1, TR>(fn: ($0: T0, $1: T1) => TR): ($0: T0, $1: T1) => TR;
-function memoise<T0, T1, T2, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR): ($0: T0, $1: T1, $2: T2) => TR;
-function memoise<T0, T1, T2, T3, TR>(fn: ($0: T0, $1: T1, $2: T2, $3: T3) => TR): ($0: T0, $1: T1, $2: T2, $3: T3) => TR;
-function memoise(fn: Function) {
+export function memoise<T0, TR>(fn: ($0: T0) => TR): ($0: T0) => TR;
+export function memoise<T0, T1, TR>(fn: ($0: T0, $1: T1) => TR): ($0: T0, $1: T1) => TR;
+export function memoise<T0, T1, T2, TR>(fn: ($0: T0, $1: T1, $2: T2) => TR): ($0: T0, $1: T1, $2: T2) => TR;
+export function memoise<T0, T1, T2, T3, TR>(fn: ($0: T0, $1: T1, $2: T2, $3: T3) => TR): ($0: T0, $1: T1, $2: T2, $3: T3) => TR;
+export function memoise(fn: Function) {
 
     // This internal util only supports functions with arities of 1-3 at the moment. Sanity check the input accordingly.
     // If the sanity check fails that's an internal error, so we simply throw rather that using `fatalError`.
@@ -22,7 +22,6 @@ function memoise(fn: Function) {
         default: throw new Error(`Internal error: memoise: unsupported arity ${fn.length}`);
     }
 }
-export default memoise;
 
 
 

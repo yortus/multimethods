@@ -15,5 +15,4 @@
  * [2] See ??? TODO...
  * [3] See ??? TODO...
  */
-type Predicate = string & { __predicateBrand: any };
-export default Predicate;
+export type Predicate = string & { __predicateBrand: any };

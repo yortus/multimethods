@@ -1,6 +1,6 @@
 import {MethodSequenceEntry, MMInfo, MMNode} from '../analysis';
 import {hasNamedCaptures} from '../math/predicates';
-import repeatString from '../util/string-repeat';
+import {repeat} from '../util';
 
 
 
@@ -70,7 +70,7 @@ function getThunkName(seq: Array<MethodSequenceEntry<MMNode>>, index: number) {
 
 
 function getMethodName(node: MMNode, methodIndex: number) {
-    return `methodː${node.identifier}${repeatString('ᐟ', methodIndex)}`;
+    return `methodː${node.identifier}${repeat('ᐟ', methodIndex)}`;
 }
 
 

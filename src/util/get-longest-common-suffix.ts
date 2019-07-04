@@ -4,7 +4,7 @@
 
 
 // TODO: doc... add tests...
-export default function getLongestCommonSuffix<T>(arrays: T[][]): T[] {
+export function getLongestCommonSuffix<T>(arrays: T[][]): T[] {
 
     // TODO: stupid case...
     if (arrays.length === 0) return [];

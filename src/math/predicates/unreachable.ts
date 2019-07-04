@@ -1,8 +1,7 @@
-import NormalPredicate from './normal-predicate';
+import {NormalPredicate} from './normal-predicate';
 
 
 
 
 
-type Unreachable = (predicate: NormalPredicate) => (boolean | undefined);
-export default Unreachable;
+export type Unreachable = (predicate: NormalPredicate) => (boolean | undefined);

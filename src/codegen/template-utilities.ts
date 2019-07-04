@@ -1,4 +1,4 @@
-import repeat from '../util/string-repeat';
+import {repeat} from '../util';
 
 
 

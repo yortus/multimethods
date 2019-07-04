@@ -1,6 +1,6 @@
 // import {expect} from 'chai';
 // import {NEXT, create as MM, meta} from 'multimethods';
-// import isPromiseLike from 'multimethods/util/is-promise-like';
+// import {isPromiseLike} from 'multimethods/util';
 // // TODO: rename these tests in filename and describe()?
 // // - this is more about invoking the Multimethod, not constructing it...
 // // TODO: more multimethod tests? for other files?

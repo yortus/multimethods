@@ -1,9 +1,9 @@
-import analyse from './analysis';
+import {analyseAll} from './analysis';
 import {codegen} from './codegen';
 import {instrumentMethods, instrumentMultimethod} from './instrumentation';
-import Options from './options';
-import debug from './util/debug';
-import validate from './validation';
+import {Options} from './options';
+import {debug} from './util';
+import {checkOptions} from './validation';
 
 
 
@@ -24,14 +24,14 @@ function create<T, TR>(options: AsyncVariadicOptions<T, TR>): (...args: T[]) => 
 function create<T, TR>(options?: VariadicOptions<T, TR>): (...args: T[]) => TR | Promise<TR>;
 function create(options?: Options) {
     options = options || {};
-    validate(options); // NB: may throw
-    let mminfo = analyse(options);
+    checkOptions(options); // NB: may throw
+    let mminfo = analyseAll(options);
     if (debug.enabled) instrumentMethods(mminfo);
     let multimethod = codegen(mminfo);
     if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);
     return multimethod;
 }
-export default create;
+export {create};
 
 
 

@@ -1,13 +1,5 @@
 import * as debugFactory from 'debug';
-
-
-
-
-
-const debug = debugFactory('multimethods');
-debug.log = console.error.bind(console);
-export default debug;
-
+import {assign} from './object-assign';
 
 
 
@@ -22,9 +14,14 @@ const RESET = '\x1b[0m';
 
 
 
-
-export const VALIDATE = `${BG_YELLOW}${FG_WHITE}VALIDATE${RESET}`;
-// TODO: remove was... export const EMIT = `${BG_BLUE}${FG_WHITE}EMIT${RESET}`;
-export const DEOPT = `${BG_YELLOW}${FG_WHITE}DEOPT${RESET}`;
-export const DISPATCH = `${BG_CYAN}${FG_WHITE}DISPATCH${RESET}`;
-export const FATAL = `${BG_RED}${FG_WHITE}FATAL${RESET}`;
+export const debug = assign(
+    debugFactory('multimethods'),
+    {
+        // tslint:disable-next-line: no-console
+        log: console.error.bind(console),
+        VALIDATE: `${BG_YELLOW}${FG_WHITE}VALIDATE${RESET}`,
+        DEOPT: `${BG_YELLOW}${FG_WHITE}DEOPT${RESET}`,
+        DISPATCH: `${BG_CYAN}${FG_WHITE}DISPATCH${RESET}`,
+        FATAL: `${BG_RED}${FG_WHITE}FATAL${RESET}`,
+    }
+);

@@ -1,6 +1,6 @@
-import {TOO_COMPLEX} from '../../util/fatal-error';
+import {fatalError} from '../../util';
 import {ALL, intersect, isSubsetOf, NONE, NormalPredicate, toNormalPredicate, Unreachable} from '../predicates';
-import EulerSet from './euler-set';
+import {EulerSet} from './euler-set';
 
 
 
@@ -68,7 +68,7 @@ import EulerSet from './euler-set';
  * In the context of multimethods, it may also be pointed out that EulerDiagram instantiation is not on a critical path.
  * For each multimethod created, a single EulerDiagram is instantiated during the multimethod creation process.
  */
-export default class EulerDiagram {
+export class EulerDiagram {
 
     /** Constructs a new EulerDiagram instance. */
     constructor(predicates: string[], unreachable?: Unreachable) {
@@ -133,7 +133,7 @@ function getSupersetRelationships(principalPredicates: NormalPredicate[], unreac
 
     // Count up the principal predicates. Ensure the count does not exceed the complexity limit (more on this below).
     let principalCount = principalPredicates.length;
-    if (principalCount > MAX_PRINCIPAL_PREDICATES) return TOO_COMPLEX();
+    if (principalCount > MAX_PRINCIPAL_PREDICATES) return fatalError.TOO_COMPLEX();
 
     // Create a list to hold all principal and auxiliary predicates. It always starts with the principal predicates
     // in the order given. Create a separate variable to accumulate auxiliary predicates as they are generated.
@@ -175,7 +175,7 @@ function getSupersetRelationships(principalPredicates: NormalPredicate[], unreac
     // is higher than that for principal predicates, because the `isSubSetOf` checks done in the following passes
     // are significantly less costly than the `intersect` operations in pass 1.
     principalPredicates.forEach(p => auxiliaryPredicates.delete(p));
-    if (auxiliaryPredicates.size > MAX_AUXILIARY_PREDICATES) return TOO_COMPLEX();
+    if (auxiliaryPredicates.size > MAX_AUXILIARY_PREDICATES) return fatalError.TOO_COMPLEX();
 
     // Add the auxiliary predicates to the predicates list, and extend `supersets` to cover the new predicates.
     auxiliaryPredicates.forEach(aux => {

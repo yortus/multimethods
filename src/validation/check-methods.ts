@@ -1,14 +1,13 @@
 import {toNormalPredicate} from '../math/predicates';
-import Options from '../options';
-import * as fatalError from '../util/fatal-error';
-import isMetaMethod from '../util/is-meta-method';
+import {Options} from '../options';
+import {fatalError, isMetaMethod} from '../util';
 
 
 
 
 
 // TODO: doc and cleanup...
-export default function checkMethods(methods: Options['methods']) {
+export function checkMethods(methods: Options['methods']) {
     if (methods === undefined) return;
 
     // For method chains, ensure first regular method in chain (if any) comes after last meta-method in chain (if any).

@@ -1,6 +1,6 @@
 import {MMInfo, MMNode} from '../analysis';
 import * as predicates from '../math/predicates';
-import repeat from '../util/string-repeat';
+import {repeat} from '../util';
 import {multimethodTemplate} from './multimethod-template';
 import * as substitutions from './substitutions';
 import {beautify, eliminateDeadCode, getIndentDepth, minify, replaceAll, replaceSection} from './template-utilities';

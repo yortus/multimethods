@@ -1,6 +1,6 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import getLongestCommonSuffix from 'multimethods/util/get-longest-common-suffix';
+import {getLongestCommonSuffix} from 'multimethods/util';
 
 
 

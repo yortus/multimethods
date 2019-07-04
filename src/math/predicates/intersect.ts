@@ -1,9 +1,9 @@
-import memoise from '../../util/memoise';
-import isSubsetOf from './is-subset-of';
-import NONE from './none';
-import NormalPredicate from './normal-predicate';
-import toNormalPredicate from './to-normal-predicate';
-import Unreachable from './unreachable';
+import {memoise} from '../../util';
+import {isSubsetOf} from './is-subset-of';
+import {NONE} from './none';
+import {NormalPredicate} from './normal-predicate';
+import {toNormalPredicate} from './to-normal-predicate';
+import {Unreachable} from './unreachable';
 
 
 
@@ -26,7 +26,7 @@ import Unreachable from './unreachable';
  * @param {NormalPredicate} b - rhs predicate to be intersected.
  * @returns {NormalPredicate} - The normalized predicate representing the intersection of `a` and `b`.
  */
-let intersect: (a: NormalPredicate, b: NormalPredicate, unreachable?: Unreachable) => NormalPredicate;
+export let intersect: (a: NormalPredicate, b: NormalPredicate, unreachable?: Unreachable) => NormalPredicate;
 intersect = memoise((a: NormalPredicate, b: NormalPredicate, unreachable?: Unreachable): NormalPredicate => {
 
     //TODO: temp testing... remove...
@@ -55,7 +55,6 @@ intersect = memoise((a: NormalPredicate, b: NormalPredicate, unreachable?: Unrea
 
     return result;
 });
-export default intersect;
 
 
 

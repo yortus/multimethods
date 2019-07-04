@@ -1,3 +1,3 @@
-export {default} from './analyse-all';
-export {default as MMInfo} from './mm-info';
-export {default as MMNode, MethodSequence, MethodSequenceEntry} from './mm-node';
+export {analyseAll} from './analyse-all';
+export {MMInfo} from './mm-info';
+export {MMNode, MethodSequence, MethodSequenceEntry} from './mm-node';

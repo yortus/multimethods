@@ -1,15 +1,14 @@
-import Options from '../options';
-import debug, {VALIDATE} from '../util/debug';
-import * as fatalError from '../util/fatal-error';
-import checkMethods from './check-methods';
-import listDiscontinuities from './list-discontinuities';
+import {Options} from '../options';
+import {debug, fatalError} from '../util';
+import {checkMethods} from './check-methods';
+import {listDiscontinuities} from './list-discontinuities';
 
 
 
 
 
 // TODO: doc...
-export default function checkOptions(options: Options): void {
+export function checkOptions(options: Options): void {
 
     // `name` must be either undefined, or conform to [A-Za-z$_][A-Za-z$_0-9]* (ie a simple JS indentifier).
     if (options.name !== undefined) {
@@ -67,6 +66,6 @@ export default function checkOptions(options: Options): void {
         if (problems.length > 0) return fatalError.STRICT_VALIDATION(problems);
     }
     else if (debug.enabled) {
-        problems.forEach(problem => debug(`${VALIDATE} %s`, problem));
+        problems.forEach(problem => debug(`${debug.VALIDATE} %s`, problem));
     }
 }

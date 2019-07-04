@@ -1,7 +1,7 @@
-import memoise from '../../util/memoise';
-import ALL from './all';
-import NONE from './none';
-import NormalPredicate from './normal-predicate';
+import {memoise} from '../../util';
+import {ALL} from './all';
+import {NONE} from './none';
+import {NormalPredicate} from './normal-predicate';
 
 
 
@@ -17,7 +17,7 @@ import NormalPredicate from './normal-predicate';
 
 
 // TODO: doc... does *not* work with alternation in either `sub` or `sup`. Use intersect() for that.
-export default function isSubsetOf(sub: NormalPredicate, sup: NormalPredicate): boolean {
+export function isSubsetOf(sub: NormalPredicate, sup: NormalPredicate): boolean {
 
     // Shortcuts for a few identity cases.
     if (sub === sup) return true;

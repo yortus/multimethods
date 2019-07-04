@@ -1,4 +1,4 @@
-import MMInfo from './mm-info';
+import {MMInfo} from './mm-info';
 import {ChildNodes} from './mm-node';
 
 
@@ -6,7 +6,7 @@ import {ChildNodes} from './mm-node';
 
 
 // TODO: doc...
-export default function analyseChildNodes<T extends object>(mminfo: MMInfo<T>) {
+export function analyseChildNodes<T extends object>(mminfo: MMInfo<T>) {
     return mminfo.addProps((_, nodes, set, sets) => {
         let childNodes = set.subsets.map(subset => nodes[sets.indexOf(subset)]);
         return {childNodes} as ChildNodes<T>;

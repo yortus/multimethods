@@ -1,13 +1,13 @@
-import isSubsetOf from './is-subset-of';
-import NormalPredicate from './normal-predicate';
-import toPredicate from './to-predicate';
+import {isSubsetOf} from './is-subset-of';
+import {NormalPredicate} from './normal-predicate';
+import {toPredicate} from './to-predicate';
 
 
 
 
 
 /** Asserts `source` is a valid predicate string and returns its normalised form. NB: may throw. */
-export default function toNormalPredicate(source: string): NormalPredicate {
+export function toNormalPredicate(source: string): NormalPredicate {
 
     // Ensure we have a valid predicate.
     let predicate = toPredicate(source);

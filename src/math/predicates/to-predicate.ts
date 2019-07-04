@@ -1,6 +1,6 @@
-import * as fatalError from '../../util/fatal-error';
-import hasNamedCaptures from './has-named-captures';
-import Predicate from './predicate';
+import {fatalError} from '../../util';
+import {hasNamedCaptures} from './has-named-captures';
+import {Predicate} from './predicate';
 
 
 
@@ -22,7 +22,7 @@ const grammar: { parse(text: string): string; } = require('./dsl-grammar');
  * @param {string} source - the source string to be parsed as a predicate.
  * @returns {PredicateAST} an object containing details about the successfully parsed predicate.
  */
-export default function toPredicate(source: string): Predicate {
+export function toPredicate(source: string): Predicate {
     try {
         // This is just a pass/fail parser. There is no meaningful result for success. NB: may throw.
         grammar.parse(source);

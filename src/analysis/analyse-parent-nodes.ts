@@ -1,6 +1,6 @@
 import {EulerDiagram} from '../math/sets';
-import getLongestCommonPrefix from '../util/get-longest-common-prefix';
-import MMInfo from './mm-info';
+import {getLongestCommonPrefix} from '../util';
+import {MMInfo} from './mm-info';
 import {MethodTableEntry, ParentNode} from './mm-node';
 
 
@@ -9,7 +9,7 @@ import {MethodTableEntry, ParentNode} from './mm-node';
 
 // TODO: doc... Go back over the nodes and work out the correct parent node.
 //              There must be precisely one (except for the root which has no parent).
-export default function analyseParentNodes<T extends MethodTableEntry>(mminfo: MMInfo<T>) {
+export function analyseParentNodes<T extends MethodTableEntry>(mminfo: MMInfo<T>) {
     return mminfo.addProps((_, nodes, set, sets) => {
         let parentNode: (T & ParentNode<T>) | null;
 

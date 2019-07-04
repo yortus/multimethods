@@ -1,2 +1,2 @@
-export {default} from './configuration';
-export {default as createConfiguration} from './create-configuration';
+export {Configuration} from './configuration';
+export {createConfiguration} from './create-configuration';

@@ -1,5 +1,5 @@
-import Predicate from './predicate';
-import toNormalPredicate from './to-normal-predicate';
+import {Predicate} from './predicate';
+import {toNormalPredicate} from './to-normal-predicate';
 
 
 
@@ -18,7 +18,7 @@ import toNormalPredicate from './to-normal-predicate';
 //  * as per the ECMAScript grammar (http://www.ecma-international.org/ecma-262/6.0/index.html#sec-names-and-keywords).
 //  * Different normalized forms are guaranteed to have different return values from this function.
 //  */
-export default function toIdentifierParts(predicate: Predicate): string {
+export function toIdentifierParts(predicate: Predicate): string {
     let p = toNormalPredicate(predicate) as string;
     Object.keys(MAPPINGS).forEach((sym: keyof typeof MAPPINGS) => {
         while (p.indexOf(sym) !== -1) {

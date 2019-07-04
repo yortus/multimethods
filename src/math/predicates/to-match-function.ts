@@ -1,6 +1,6 @@
-import debug, {DEOPT} from '../../util/debug';
-import Predicate from './predicate';
-import toNormalPredicate from './to-normal-predicate';
+import {debug} from '../../util';
+import {Predicate} from './predicate';
+import {toNormalPredicate} from './to-normal-predicate';
 
 
 
@@ -21,7 +21,7 @@ import toNormalPredicate from './to-normal-predicate';
  * predicate matching may be performed frequently, and possibly on critical paths. As such, the use of optimised `match`
  * implementations may result in substantial overall performance improvements in client code.
  */
-export default function toMatchFunction(predicate: Predicate): MatchFunction {
+export function toMatchFunction(predicate: Predicate): MatchFunction {
 
     // TODO: temp testing... special case...
     if (predicate === '∅') return () => null;
@@ -136,7 +136,7 @@ function toMatchFunctionForOneAlternative(predicate: Predicate): MatchFunction {
 
         default:
             debug(
-                `${DEOPT} Cannot optimise match function for predicate '%s' (%s)`,
+                `${debug.DEOPT} Cannot optimise match function for predicate '%s' (%s)`,
                 predicate,
                 simplifiedPatternSignature
             );

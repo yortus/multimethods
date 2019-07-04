@@ -5,7 +5,7 @@ import {Predicate} from '../math/predicates';
 
 
 // TODO: doc...
-export default interface MMNode
+export interface MMNode
     extends MethodTableEntry, ParentNode<MMNode>, ChildNodes<MMNode>, MethodSequence<MMNode> {
 }
 

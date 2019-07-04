@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import isPromiseLike from 'multimethods/util/is-promise-like';
+import {isPromiseLike} from 'multimethods/util';
 
 import {isUnhandled, Multimethod} from 'multimethods';
 // import defaultDiscrininator from 'multimethods/analysis/configuration/default-discriminator';

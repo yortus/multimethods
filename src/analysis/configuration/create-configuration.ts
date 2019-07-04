@@ -1,13 +1,13 @@
-import Options from '../../options';
-import {UNHANDLED} from '../../util/fatal-error';
-import Configuration from './configuration';
-import defaultDiscriminator from './default-discriminator';
+import {Options} from '../../options';
+import {fatalError} from '../../util';
+import {Configuration} from './configuration';
+import {defaultDiscriminator} from './default-discriminator';
 
 
 
 
 // TODO: doc...
-export default function createConfiguration(options: Options) {
+export function createConfiguration(options: Options) {
     let name = options.name || `Ɱ${++multimethodCounter}`;
     let arity = options.arity;
     let async = options.async;
@@ -15,7 +15,7 @@ export default function createConfiguration(options: Options) {
     let discriminator = options.discriminator || defaultDiscriminator;
     let methods = getNormalisedMethods(options.methods);
     let unreachable = options.unreachable || alwaysReachable;
-    let unhandled = options.unhandled || UNHANDLED;
+    let unhandled = options.unhandled || fatalError.UNHANDLED;
     return {name, arity, async, strict, discriminator, methods, unreachable, unhandled} as Configuration;
 }
 

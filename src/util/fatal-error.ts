@@ -1,6 +1,6 @@
 import {format} from 'util';  // TODO: ensure this node.js dep doesn't prevent clientside use (eg via webpack)
 import {AMBIGUOUS_DISPATCH, UNHANDLED_DISPATCH} from '../sentinels';
-import debug, {FATAL} from './debug';
+import {debug} from './debug';
 
 
 
@@ -83,7 +83,7 @@ export function UNHANDLED(discriminant: string) {
 
 
 function error(message: string, code?: any): never {
-    debug(`${FATAL} %s`, message);
+    debug(`${debug.FATAL} %s`, message);
     throw new MultimethodError(message, code);
 }
 

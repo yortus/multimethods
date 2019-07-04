@@ -1,4 +1,4 @@
-import Predicate from './predicate';
+import {Predicate} from './predicate';
 
 
 
@@ -10,5 +10,4 @@ import Predicate from './predicate';
  * distinct predicates that define the same set of values are guaranteed to have the same normal form.
  * [1] TODO: ...
  */
-type NormalPredicate = Predicate & { __normalPredicateBrand: any };
-export default NormalPredicate;
+export type NormalPredicate = Predicate & { __normalPredicateBrand: any };

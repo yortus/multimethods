@@ -5,7 +5,7 @@ import {Unreachable} from './math/predicates';
 
 
 // TODO: doc...
-export default interface Options {
+export interface Options {
 
     // TODO: doc...
     name?: string;

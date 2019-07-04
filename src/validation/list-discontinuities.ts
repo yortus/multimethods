@@ -1,6 +1,6 @@
 import {ALL, toNormalPredicate} from '../math/predicates';
 import {EulerDiagram} from '../math/sets';
-import Options from '../options';
+import {Options} from '../options';
 
 
 
@@ -17,7 +17,7 @@ import Options from '../options';
 // This often represents a user error, so it's a useful warning to point these patterns out so their intended
 // behaviour can be made explicit by the user.
 // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
-export default function listDiscontinuities(methods: Options['methods']) {
+export function listDiscontinuities(methods: Options['methods']) {
     if (methods === undefined) return [];
 
     let handledPredicates = Object.keys(methods).map(p => toNormalPredicate(p));
