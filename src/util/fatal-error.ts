@@ -12,23 +12,8 @@ export function DUPLICATE_PREDICATE(normalised: string, predicates: string) {
     return error(format(fmt, normalised, predicates));
 }
 
-export function INVALID_ARITY_OPTION(value: any) {
-    let fmt = `Expected a positive integer or undefined value for options.arity, but found %j.`;
-    return error(format(fmt, value));
-}
-
-export function INVALID_ASYNC_OPTION(value: any) {
-    let fmt = `Expected a boolean or undefined value for options.async, but found %j.`;
-    return error(format(fmt, value));
-}
-
 export function INVALID_NAME_OPTION(value: any) {
     let fmt = `Expected a valid identifier or undefined value for options.name, but found %j.`;
-    return error(format(fmt, value));
-}
-
-export function INVALID_STRICT_OPTION(value: any) {
-    let fmt = `Expected a boolean or undefined value for options.strict, but found %j.`;
     return error(format(fmt, value));
 }
 
@@ -61,11 +46,6 @@ export function MULTIPLE_PATHS_TO(predicate: string) {
 export function PREDICATE_SYNTAX(message: string) {
     let fmt = `Predicate syntax error: %s`;
     return error(format(fmt, message));
-}
-
-export function STRICT_VALIDATION(problems: string[]) {
-    let fmt = `Strict validation failed. The following problems were found: %s`;
-    return error(format(fmt, '\n' + problems.map((p, i) => `${i + 1}. ${p}`).join('\n')));
 }
 
 export function TOO_COMPLEX() {

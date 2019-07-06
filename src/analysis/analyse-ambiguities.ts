@@ -1,5 +1,5 @@
 import {EulerDiagram} from '../math/sets';
-import {fatalError, getLongestCommonPrefix, getLongestCommonSuffix, isMetaMethod} from '../util';
+import {fatalError, getLongestCommonPrefix, getLongestCommonSuffix, isDecorator} from '../util';
 import {MMInfo} from './mm-info';
 import {MethodTableEntry} from './mm-node';
 
@@ -34,7 +34,7 @@ export function analyseAmbiguities<T extends MethodTableEntry>(mminfo: MMInfo<T>
             pathsFromRoot.forEach((path): void => {
                 let divergentSets = path.slice(prefix.length, path.length - suffix.length);
                 let divergentNodes = divergentSets.map(s => nodes[sets.indexOf(s)]);
-                let hasMetaMethods = divergentNodes.some(n => n.exactMethods.some(m => isMetaMethod(m)));
+                let hasMetaMethods = divergentNodes.some(n => n.exactMethods.some(m => isDecorator(m)));
                 if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.exactPredicate);
             });
 
@@ -58,6 +58,6 @@ export function analyseAmbiguities<T extends MethodTableEntry>(mminfo: MMInfo<T>
 // TODO: doc...
 function insertAsLeastSpecificRegularMethod(orderedMethods: Function[], method: Function) {
     let i = 0;
-    while (i < orderedMethods.length && !isMetaMethod(orderedMethods[i])) ++i;
+    while (i < orderedMethods.length && !isDecorator(orderedMethods[i])) ++i;
     orderedMethods.splice(i, 0, method);
 }

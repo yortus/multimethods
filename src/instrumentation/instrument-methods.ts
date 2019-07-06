@@ -1,6 +1,6 @@
 import {MMInfo, MMNode} from '../analysis';
 import {Method} from '../multimethod';
-import {andThen, debug, isMetaMethod, repeat} from '../util';
+import {andThen, debug, isDecorator, repeat} from '../util';
 
 
 
@@ -22,7 +22,7 @@ export function instrumentMethods(mminfo: MMInfo<MMNode>) {
 
 // TODO: doc...
 function instrumentMethod(method: Function, name: string) {
-    let isMeta = isMetaMethod(method);
+    let isMeta = isDecorator(method);
     let methodInfo = `${isMeta ? 'decorator' : 'method'}=${name}`;
     let instrumentedMethod: Method<unknown[], unknown> = function (...args: any[]) {
         debug(`${debug.DISPATCH} |-->| %s   pattern bindings=%o`, methodInfo, this.pattern);
@@ -32,6 +32,6 @@ function instrumentMethod(method: Function, name: string) {
             if (error) throw error; else return result;
         });
     };
-    if (isMeta) isMetaMethod(instrumentedMethod, true);
+    if (isMeta) isDecorator(instrumentedMethod, true);
     return instrumentedMethod;
 }

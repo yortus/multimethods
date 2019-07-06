@@ -9,10 +9,11 @@ import {Configuration} from './configuration';
 // TODO: doc...
 export class MMInfo<TNode extends object> {
 
-    static fromConfig(config: Configuration) {
-        let ed = new EulerDiagram(Object.keys(config.methods), config.unreachable);
+    static fromConfig(config: Configuration, methods: Record<string, Function[]>) {
+        let ed = new EulerDiagram(Object.keys(methods), config.unreachable);
         let mminfo = new MMInfo<{}>();
         mminfo.config = config;
+        mminfo.methods = methods;
         mminfo.allNodes = ed.allSets.map(() => ({}));
         mminfo.rootNode = mminfo.allNodes[ed.allSets.indexOf(ed.universalSet)];
         mminfo.eulerDiagram = ed;
@@ -20,6 +21,8 @@ export class MMInfo<TNode extends object> {
     }
 
     config: Configuration;
+
+    methods: Record<string, Function[]>;
 
     allNodes: TNode[];
 

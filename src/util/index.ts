@@ -8,7 +8,7 @@ export {debug} from './debug';
 export {fatalError};
 export {getLongestCommonPrefix} from './get-longest-common-prefix';
 export {getLongestCommonSuffix} from './get-longest-common-suffix';
-export {isMetaMethod} from './is-meta-method';
+export {isDecorator} from './is-decorator';
 export {isPromiseLike} from './is-promise-like';
 export {memoise} from './memoise';
 export {assign} from './object-assign';

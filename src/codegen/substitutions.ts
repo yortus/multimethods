@@ -8,8 +8,8 @@ import {repeat} from '../util';
 export function forMultimethod(mminfo: MMInfo<MMNode>) {
     return {
         NAME: mminfo.config.name,
-        ARITY: String(mminfo.config.arity || 1),
-        PARAMS: makeParameterList(mminfo.config.arity || 1),
+        ARITY: String(mminfo.config.discriminator.length || 1),
+        PARAMS: makeParameterList(mminfo.config.discriminator.length || 1),
         NAMEOF_SELECT_THUNK: 'selectThunk',
         DUMMY_CODE: false, // use with if statements to elide dummy code from the template
     };

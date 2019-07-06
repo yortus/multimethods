@@ -1,7 +1,11 @@
-import {create as MM} from './create';
-import {meta} from './decorators';
+import {analyseAll} from './analysis';
+import {codegen} from './codegen';
+import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import * as types from './multimethod';
+import {Options} from './options';
 import {UNHANDLED_DISPATCH} from './sentinels';
+import {debug, isDecorator} from './util';
+import {checkMethods, checkOptions} from './validation';
 
 
 
@@ -28,22 +32,14 @@ function create(options: types.Options<unknown[], any>) {
     let discriminator = typeof options === 'function' ? options : options.discriminator;
     let unhandled = typeof options === 'object' ? options.unhandled : undefined;
 
-    let mm = MM({
-        discriminator,
-        arity: discriminator.length || 1,
-        unhandled,
-    });
+    let mm = MM({discriminator, unhandled}, {});
     let result: types.Multimethod<unknown[], unknown> = addMethods(mm);
     return result;
 
     function addMethods<T>(mm: T, existingMethods: {[x: string]: Function} = {}) {
         let extend = (methods: any) => {
             methods = combine(existingMethods, methods);
-            let mm2 = MM({
-                discriminator,
-                methods,
-                unhandled,
-            });
+            let mm2 = MM({discriminator, unhandled}, methods);
             return addMethods(mm2, methods);
         };
 
@@ -53,17 +49,13 @@ function create(options: types.Options<unknown[], any>) {
                 (obj, key) => {
                     let decsArray: any[] = decorators[key];
                     decsArray = Array.isArray(decsArray) ? decsArray : [decsArray];
-                    obj[key] = decsArray.map(dec => dec === 'super' ? 'super' : meta(dec));
+                    obj[key] = decsArray.map(dec => dec === 'super' ? 'super' : (isDecorator(dec, true), dec));
                     return obj;
                 },
                 {} as any
             );
             let methods = combine(existingMethods, metaMethods);
-            let mm2 = MM({
-                discriminator,
-                methods,
-                unhandled,
-            });
+            let mm2 = MM({discriminator, unhandled}, methods);
             return addMethods(mm2, methods);
         };
 
@@ -75,6 +67,7 @@ function create(options: types.Options<unknown[], any>) {
 
 
 
+// TODO: combine two method tables
 function combine(m1: {[x: string]: any}, m2: {[x: string]: any}) {
     let k1 = Object.keys(m1);
     let k2 = Object.keys(m2);
@@ -99,4 +92,19 @@ function combine(m1: {[x: string]: any}, m2: {[x: string]: any}) {
         result[k] = pre.concat(method1, post);
     }
     return result;
+}
+
+
+
+
+// TODO: doc...
+function MM(options: Options, methods: Record<string, Function | Function[]>) {
+    options = options || {};
+    checkOptions(options); // NB: may throw
+    checkMethods(methods); // NB: may throw
+    let mminfo = analyseAll(options, methods);
+    if (debug.enabled) instrumentMethods(mminfo);
+    let multimethod = codegen(mminfo);
+    if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);
+    return multimethod;
 }

@@ -1,6 +1,5 @@
 import {NormalPredicate, Predicate, toNormalPredicate, toPredicate} from '../math/predicates';
-import {isMetaMethod} from '../util';
-import {Configuration} from './configuration';
+import {isDecorator} from '../util';
 import {MMInfo} from './mm-info';
 import {MethodTableEntry} from './mm-node';
 
@@ -11,13 +10,13 @@ import {MethodTableEntry} from './mm-node';
 // TODO: doc... Get predicates and exactly-matching methods in most- to least-specific order.
 export function analyseMethodTable<T extends object>(mminfo: MMInfo<T>) {
     return mminfo.addProps((_, __, set) => {
-        let exactPredicate = findExactPredicateInMethodTable(set.predicate, mminfo.config) || set.predicate;
+        let exactPredicate = findExactPredicateInMethodTable(set.predicate, mminfo.methods) || set.predicate;
 
         // Find the index in the chain where meta-methods end and regular methods begin.
-        let chain = mminfo.config.methods[exactPredicate] || [];
+        let chain = mminfo.methods[exactPredicate] || [];
         if (!Array.isArray(chain)) chain = [chain];
         let i = 0;
-        while (i < chain.length && isMetaMethod(chain[i])) ++i;
+        while (i < chain.length && isDecorator(chain[i])) ++i;
         // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
         let exactMethods = chain.slice(i).concat(chain.slice(0, i).reverse());
 
@@ -30,9 +29,9 @@ export function analyseMethodTable<T extends object>(mminfo: MMInfo<T>) {
 
 
 // TODO: doc...
-function findExactPredicateInMethodTable(normalisedPredicate: NormalPredicate, config: Configuration): Predicate|null {
-    for (let key in config.methods) {
-        if (!config.methods.hasOwnProperty(key)) continue;
+function findExactPredicateInMethodTable(normalisedPredicate: NormalPredicate, methods: Record<string, Function[]>): Predicate|null {
+    for (let key in methods) {
+        if (!methods.hasOwnProperty(key)) continue;
         let predicate = toPredicate(key);
 
         // Skip until we find the right predicate.

@@ -13,15 +13,31 @@ import {MMNode} from './mm-node';
 
 
 // TODO: doc...
-export function analyseAll(options: Options) {
+export function analyseAll(options: Options, methods: Record<string, Function | Function[]>) {
     let config = createConfiguration(options);
-    let mminfo1 = MMInfo.fromConfig(config);
+    let nMethods = getNormalisedMethods(methods);
+    let mminfo1 = MMInfo.fromConfig(config, nMethods);
     let mminfo2 = analyseMethodTable(mminfo1);
     let mminfo3 = analyseAmbiguities(mminfo2);
     let mminfo4 = analyseChildNodes(mminfo3);
     let mminfo5 = analyseParentNodes(mminfo4);
     let mminfo6 = analyseMethodSequences(mminfo5);
     return mminfo6 as MMInfo<MMNode>;
+}
+
+
+
+
+// TODO: doc...
+function getNormalisedMethods(methods: Record<string, Function | Function[]>) {
+    methods = methods || {};
+    let result = {} as Record<string, Function[]>;
+    for (let predicate in methods) {
+        if (!methods.hasOwnProperty(predicate)) continue;
+        let chain = methods[predicate];
+        result[predicate] = Array.isArray(chain) ? chain : [chain];
+    }
+    return result;
 }
 
 
