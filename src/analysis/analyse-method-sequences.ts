@@ -1,5 +1,5 @@
 import {toIdentifierParts} from '../math/predicates';
-import {isDecorator, repeat} from '../util';
+import {repeat} from '../util';
 import {MMInfo} from './mm-info';
 import {MethodSequence, MethodSequenceEntry, MethodTableEntry, ParentNode} from './mm-node';
 
@@ -17,7 +17,7 @@ export function analyseMethodSequences<T extends MethodTableEntry & ParentNode<T
         for (let ancestorNode: T | null = startNode; ancestorNode !== null; ancestorNode = ancestorNode.parentNode) {
             ancestorNode.exactMethods.forEach((method, methodIndex) => {
                 let fromNode = ancestorNode as T & MethodSequence<T>;
-                let isMeta = isDecorator(method);
+                let isMeta = mminfo.isDecorator(method);
 
                 // Make an IdentifierPart for each method that is descriptive and unique accross the multimethod.
                 let identifier = `${toIdentifierParts(ancestorNode!.exactPredicate)}${repeat('ᐟ', methodIndex)}`;

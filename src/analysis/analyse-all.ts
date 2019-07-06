@@ -1,10 +1,8 @@
-import {Options} from '../options';
 import {analyseAmbiguities} from './analyse-ambiguities';
 import {analyseChildNodes} from './analyse-child-nodes';
 import {analyseMethodSequences} from './analyse-method-sequences';
 import {analyseMethodTable} from './analyse-method-table';
 import {analyseParentNodes} from './analyse-parent-nodes';
-import {createConfiguration} from './configuration';
 import {MMInfo} from './mm-info';
 import {MMNode} from './mm-node';
 
@@ -13,31 +11,13 @@ import {MMNode} from './mm-node';
 
 
 // TODO: doc...
-export function analyseAll(options: Options, methods: Record<string, Function | Function[]>) {
-    let config = createConfiguration(options);
-    let nMethods = getNormalisedMethods(methods);
-    let mminfo1 = MMInfo.fromConfig(config, nMethods);
-    let mminfo2 = analyseMethodTable(mminfo1);
+export function analyseAll(mminfo: MMInfo) {
+    let mminfo2 = analyseMethodTable(mminfo);
     let mminfo3 = analyseAmbiguities(mminfo2);
     let mminfo4 = analyseChildNodes(mminfo3);
     let mminfo5 = analyseParentNodes(mminfo4);
     let mminfo6 = analyseMethodSequences(mminfo5);
     return mminfo6 as MMInfo<MMNode>;
-}
-
-
-
-
-// TODO: doc...
-function getNormalisedMethods(methods: Record<string, Function | Function[]>) {
-    methods = methods || {};
-    let result = {} as Record<string, Function[]>;
-    for (let predicate in methods) {
-        if (!methods.hasOwnProperty(predicate)) continue;
-        let chain = methods[predicate];
-        result[predicate] = Array.isArray(chain) ? chain : [chain];
-    }
-    return result;
 }
 
 

@@ -1,5 +1,4 @@
 import {NormalPredicate, Predicate, toNormalPredicate, toPredicate} from '../math/predicates';
-import {isDecorator} from '../util';
 import {MMInfo} from './mm-info';
 import {MethodTableEntry} from './mm-node';
 
@@ -10,13 +9,12 @@ import {MethodTableEntry} from './mm-node';
 // TODO: doc... Get predicates and exactly-matching methods in most- to least-specific order.
 export function analyseMethodTable<T extends object>(mminfo: MMInfo<T>) {
     return mminfo.addProps((_, __, set) => {
-        let exactPredicate = findExactPredicateInMethodTable(set.predicate, mminfo.methods) || set.predicate;
+        let exactPredicate = findExactPredicateInMethodTable(set.predicate, mminfo.allMethods) || set.predicate;
 
         // Find the index in the chain where meta-methods end and regular methods begin.
-        let chain = mminfo.methods[exactPredicate] || [];
-        if (!Array.isArray(chain)) chain = [chain];
+        let chain = mminfo.allMethods[exactPredicate] || [];
         let i = 0;
-        while (i < chain.length && isDecorator(chain[i])) ++i;
+        while (i < chain.length && mminfo.isDecorator(chain[i])) ++i;
         // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
         let exactMethods = chain.slice(i).concat(chain.slice(0, i).reverse());
 

@@ -1,6 +1,6 @@
 import {MMInfo, MMNode} from '../analysis';
 import {Method} from '../multimethod';
-import {andThen, debug, isDecorator, repeat} from '../util';
+import {andThen, debug, repeat} from '../util';
 
 
 
@@ -12,7 +12,7 @@ export function instrumentMethods(mminfo: MMInfo<MMNode>) {
     mminfo.allNodes.forEach(node => {
         for (let i = 0; i < node.exactMethods.length; ++i) {
             let name = `${node.identifier}${repeat('ᐟ', i)}`;
-            node.exactMethods[i] = instrumentMethod(node.exactMethods[i], name);
+            node.exactMethods[i] = instrumentMethod(mminfo, node.exactMethods[i], name);
         }
     });
 }
@@ -21,8 +21,8 @@ export function instrumentMethods(mminfo: MMInfo<MMNode>) {
 
 
 // TODO: doc...
-function instrumentMethod(method: Function, name: string) {
-    let isMeta = isDecorator(method);
+function instrumentMethod(mminfo: MMInfo, method: Function, name: string) {
+    let isMeta = mminfo.isDecorator(method);
     let methodInfo = `${isMeta ? 'decorator' : 'method'}=${name}`;
     let instrumentedMethod: Method<unknown[], unknown> = function (...args: any[]) {
         debug(`${debug.DISPATCH} |-->| %s   pattern bindings=%o`, methodInfo, this.pattern);
@@ -32,6 +32,10 @@ function instrumentMethod(method: Function, name: string) {
             if (error) throw error; else return result;
         });
     };
-    if (isMeta) isDecorator(instrumentedMethod, true);
+    if (isMeta) {
+        // TODO: this is rather inefficient... revise...
+        const oldIsDecorator = mminfo.isDecorator;
+        mminfo.isDecorator = m => m === instrumentedMethod || oldIsDecorator(m);
+    }
     return instrumentedMethod;
 }

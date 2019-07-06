@@ -1,19 +1,40 @@
 import {EulerDiagram, EulerSet} from '../math/sets';
+import {Options} from '../options';
 import {assign} from '../util';
 import {Configuration} from './configuration';
+import {createConfiguration} from './configuration';
 
+
+
+
+// TODO: temp testing
+interface Config {
+    options: Options;
+    methods: Record<string, Function | Function[]>;
+    decorators: Record<string, Function | Function[]>;
+}
 
 
 
 
 // TODO: doc...
-export class MMInfo<TNode extends object> {
+export class MMInfo<TNode extends object = {}> {
 
-    static fromConfig(config: Configuration, methods: Record<string, Function[]>) {
-        let ed = new EulerDiagram(Object.keys(methods), config.unreachable);
-        let mminfo = new MMInfo<{}>();
-        mminfo.config = config;
-        mminfo.methods = methods;
+    static create(config: Config) {
+
+        // TODO: temp testing...
+        let cfg = createConfiguration(config.options);
+        let allMethods = combineMethodsAndDecorators(config.methods, config.decorators);
+        let decorators = Object.keys(config.decorators).reduce(
+            (decs, predicate) => decs.concat(config.decorators[predicate]),
+            [] as Function[]
+        );
+
+        let ed = new EulerDiagram(Object.keys(allMethods), cfg.unreachable);
+        let mminfo = new MMInfo();
+        mminfo.config = cfg;
+        mminfo.allMethods = allMethods;
+        mminfo.decorators = new Set(decorators);
         mminfo.allNodes = ed.allSets.map(() => ({}));
         mminfo.rootNode = mminfo.allNodes[ed.allSets.indexOf(ed.universalSet)];
         mminfo.eulerDiagram = ed;
@@ -22,11 +43,15 @@ export class MMInfo<TNode extends object> {
 
     config: Configuration;
 
-    methods: Record<string, Function[]>;
+    allMethods: Record<string, Function[]>; // TODO: doc includes all regular methods and all decorators
 
     allNodes: TNode[];
 
     rootNode: TNode;
+
+    isDecorator(m: Function): boolean {
+        return this.decorators.has(m);
+    }
 
     findNode(predicate: string): TNode | undefined {
         let set = this.eulerDiagram.findSet(predicate);
@@ -52,4 +77,25 @@ export class MMInfo<TNode extends object> {
     private constructor() { }
 
     private eulerDiagram: EulerDiagram;
+
+    private decorators: Set<Function>;
+}
+
+
+
+
+// TODO: doc...
+function combineMethodsAndDecorators(methods: Record<string, Function | Function[]>, decorators: Record<string, Function | Function[]>) {
+    let result = {} as Record<string, Function[]>;
+
+    for (let predicate of Object.keys(decorators)) {
+        let chain = [] as Function[];
+        result[predicate] = chain.concat(decorators[predicate]);
+    }
+
+    for (let predicate of Object.keys(methods)) {
+        let chain = result[predicate] || [];
+        result[predicate] = chain.concat(methods[predicate]);
+    }
+    return result;
 }

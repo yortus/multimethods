@@ -1,11 +1,11 @@
-import {analyseAll} from './analysis';
+import {analyseAll, MMInfo} from './analysis';
 import {codegen} from './codegen';
 import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import * as types from './multimethod';
 import {Options} from './options';
 import {UNHANDLED_DISPATCH} from './sentinels';
-import {debug, isDecorator} from './util';
-import {checkMethods, checkOptions} from './validation';
+import {debug} from './util';
+import {checkMethodsAndDecorators, checkOptions} from './validation';
 
 
 
@@ -32,35 +32,24 @@ function create(options: types.Options<unknown[], any>) {
     let discriminator = typeof options === 'function' ? options : options.discriminator;
     let unhandled = typeof options === 'object' ? options.unhandled : undefined;
 
-    let mm = MM({discriminator, unhandled}, {});
-    let result: types.Multimethod<unknown[], unknown> = addMethods(mm);
+    let mm = MM({discriminator, unhandled}, {}, {});
+    let result = addMethods(mm, {}, {});
     return result;
 
-    function addMethods<T>(mm: T, existingMethods: {[x: string]: Function} = {}) {
-        let extend = (methods: any) => {
-            methods = combine(existingMethods, methods);
-            let mm2 = MM({discriminator, unhandled}, methods);
-            return addMethods(mm2, methods);
+    function addMethods<T>(mm: T, existingMethods: Record<string, Function[]>, existingDecorators: Record<string, Function[]>) {
+        let extend = (methods: Record<string, Function | Array<Function | 'super'>>) => {
+            let combinedMethods = combine(existingMethods, methods);
+            let mm2 = MM({discriminator, unhandled}, combinedMethods, existingDecorators);
+            return addMethods(mm2, combinedMethods, existingDecorators);
         };
 
-        let decorate = (decorators: any) => {
-            let keys = Object.keys(decorators);
-            let metaMethods = keys.reduce(
-                (obj, key) => {
-                    let decsArray: any[] = decorators[key];
-                    decsArray = Array.isArray(decsArray) ? decsArray : [decsArray];
-                    obj[key] = decsArray.map(dec => dec === 'super' ? 'super' : (isDecorator(dec, true), dec));
-                    return obj;
-                },
-                {} as any
-            );
-            let methods = combine(existingMethods, metaMethods);
-            let mm2 = MM({discriminator, unhandled}, methods);
-            return addMethods(mm2, methods);
+        let decorate = (decorators: Record<string, Function | Array<Function | 'super'>>) => {
+            let combinedDecorators = combine(existingDecorators, decorators);
+            let mm2 = MM({discriminator, unhandled}, existingMethods, combinedDecorators);
+            return addMethods(mm2, existingMethods, combinedDecorators);
         };
 
-        let result = Object.assign(mm, {extend, decorate});
-        return result;
+        return Object.assign(mm, {extend, decorate});
     }
 }
 
@@ -68,28 +57,38 @@ function create(options: types.Options<unknown[], any>) {
 
 
 // TODO: combine two method tables
-function combine(m1: {[x: string]: any}, m2: {[x: string]: any}) {
-    let k1 = Object.keys(m1);
-    let k2 = Object.keys(m2);
+function combine(existingMethods: Record<string, Function[]>, additionalMethods: Record<string, Function | Array<Function | 'super'>>) {
+    let existingKeys = Object.keys(existingMethods);
+    let additionalKeys = Object.keys(additionalMethods);
+    let keysInBoth = existingKeys.filter(k => additionalKeys.indexOf(k) !== -1);
+    let existingOnlyKeys = existingKeys.filter(k => keysInBoth.indexOf(k) === -1);
+    let additionalOnlyKeys = additionalKeys.filter(k => keysInBoth.indexOf(k) === -1);
 
-    let result = {} as {[x: string]: any};
-    for (let k of k1) result[k] = m1[k];
-    for (let k of k2) result[k] = m2[k];
+    let result = {} as Record<string, Function[]>;
+    for (let k of existingOnlyKeys) result[k] = existingMethods[k];
+    for (let k of additionalOnlyKeys) {
+        let addition = additionalMethods[k];
+        if (typeof addition === 'function') {
+            result[k] = [addition];
+            continue;
+        }
+        // For this key, there is no existing behaviour to override, so any references to 'super' can simply be elided.
+        result[k] = addition.filter(a => a !== 'super') as Function[];
+    }
 
     // TODO: shouldn't need to specify 'super' if decorators are being merged into methods with same key
-    let keysInBoth = k1.filter(k => k2.includes(k));
     for (let k of keysInBoth) {
-        let method1 = m1[k];
-        let method2 = m2[k];
+        let existing = existingMethods[k];
+        let addition = additionalMethods[k];
 
-        if (!Array.isArray(method2) || !method2.some(m => m === 'super')) {
-            throw new Error(`Override must be an array including 'super' as an element`);
+        if (!Array.isArray(addition) || addition.filter(m => m === 'super').length !== 1) {
+            throw new Error(`Override must be an array with exactly one element containing the value 'super'`);
         }
 
-        let superIndex = method2.indexOf('super');
-        let pre = method2.slice(0, superIndex);
-        let post = method2.slice(superIndex + 1);
-        result[k] = pre.concat(method1, post);
+        let superIndex = addition.indexOf('super');
+        let pre = addition.slice(0, superIndex) as Function[];
+        let post = addition.slice(superIndex + 1) as Function[];
+        result[k] = pre.concat(existing, post);
     }
     return result;
 }
@@ -98,13 +97,14 @@ function combine(m1: {[x: string]: any}, m2: {[x: string]: any}) {
 
 
 // TODO: doc...
-function MM(options: Options, methods: Record<string, Function | Function[]>) {
+function MM(options: Options, methods: Record<string, Function | Function[]>, decorators: Record<string, Function | Function[]>) {
     options = options || {};
     checkOptions(options); // NB: may throw
-    checkMethods(methods); // NB: may throw
-    let mminfo = analyseAll(options, methods);
-    if (debug.enabled) instrumentMethods(mminfo);
-    let multimethod = codegen(mminfo);
-    if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);
+    checkMethodsAndDecorators(methods, decorators); // NB: may throw
+    let mminfo = MMInfo.create({options, methods, decorators});
+    let mminfo2 = analyseAll(mminfo);
+    if (debug.enabled) instrumentMethods(mminfo2);
+    let multimethod = codegen(mminfo2);
+    if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo2);
     return multimethod;
 }

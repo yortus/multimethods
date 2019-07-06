@@ -1,23 +1,35 @@
 import {ALL} from '../math/predicates';
 import {toNormalPredicate} from '../math/predicates';
 import {EulerDiagram} from '../math/sets';
-import {debug, fatalError, isDecorator} from '../util';
+import {debug, fatalError} from '../util';
 
 
 
 
 // TODO: doc and cleanup...
-export function checkMethods(methods: Record<string, Function | Function[]>) {
+export function checkMethodsAndDecorators(methods: Record<string, Function | Function[]>, decorators: Record<string, Function | Function[]>) {
 
-    // For method chains, ensure first regular method in chain (if any) comes after last meta-method in chain (if any).
-    Object.keys(methods).forEach((predicate): void => {
-        let method = methods[predicate];
-        if (!Array.isArray(method)) return;
-        let chain = method;
-        if (chain.some((fn, i) => i < chain.length - 1 && !isDecorator(fn) && isDecorator(chain[i + 1]))) {
-            return fatalError.MIXED_CHAIN(predicate);
-        }
-    });
+    // TODO: new cross-checks needed for decorator and method patterns...
+
+    check(methods);
+    check(decorators);
+}
+
+
+
+
+function check(methods: Record<string, Function | Function[]>) {
+
+    // TODO: was... remove? clients can no longer violate this since meths and decs are kept separate
+    // // For method chains, ensure first regular method in chain (if any) comes after last meta-method in chain (if any).
+    // Object.keys(methods).forEach((predicate): void => {
+    //     let method = methods[predicate];
+    //     if (!Array.isArray(method)) return;
+    //     let chain = method;
+    //     if (chain.some((fn, i) => i < chain.length - 1 && !isDecorator(fn) && isDecorator(chain[i + 1]))) {
+    //         return fatalError.MIXED_CHAIN(predicate);
+    //     }
+    // });
 
     // TODO: still need this?
     // Perform strict validation. If any problems are found:

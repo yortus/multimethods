@@ -1,2 +1,2 @@
-export {checkMethods} from './check-methods';
+export {checkMethodsAndDecorators} from './check-methods-and-decorators';
 export {checkOptions} from './check-options';
