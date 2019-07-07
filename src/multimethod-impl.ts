@@ -1,4 +1,4 @@
-import {analyseAll, MMInfo} from './analysis';
+import {analyseAll, buildMMInfo} from './analysis';
 import {codegen} from './codegen';
 import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import * as types from './multimethod';
@@ -101,7 +101,7 @@ function MM(options: Options, methods: Record<string, Function | Function[]>, de
     options = options || {};
     checkOptions(options); // NB: may throw
     checkMethodsAndDecorators(methods, decorators); // NB: may throw
-    let mminfo = MMInfo.create({options, methods, decorators});
+    let mminfo = buildMMInfo({options, methods, decorators});
     let mminfo2 = analyseAll(mminfo);
     if (debug.enabled) instrumentMethods(mminfo2);
     let multimethod = codegen(mminfo2);

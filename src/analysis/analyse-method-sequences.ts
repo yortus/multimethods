@@ -1,27 +1,26 @@
 import {toIdentifierParts} from '../math/predicates';
-import {repeat} from '../util';
-import {MMInfo} from './mm-info';
-import {MethodSequence, MethodSequenceEntry, MethodTableEntry, ParentNode} from './mm-node';
-
+import {NodeInfo} from '../mm-info';
+import {DeepReplace, repeat} from '../util';
+import {NodeProps, PartialMMInfo} from './build-mm-info';
 
 
 
 
 // TODO: doc...
-export function analyseMethodSequences<T extends MethodTableEntry & ParentNode<T>>(mminfo: MMInfo<T>) {
+export function analyseMethodSequences<P extends NodeProps>(mminfo: PartialMMInfo<P | 'exactPredicate' | 'exactMethods' | 'parentNode'>) {
     return mminfo.addProps(startNode => {
-        let methodSequence = [] as Array<MethodSequenceEntry<T>>;
+        let methodSequence = [] as DeepReplace<NodeInfo['methodSequence'], NodeInfo, typeof startNode>;
 
         // TODO: explain method sequence...
         //       *All* applicable methods for the node's predicate in most- to least- specific order...
-        for (let ancestorNode: T | null = startNode; ancestorNode !== null; ancestorNode = ancestorNode.parentNode) {
-            ancestorNode.exactMethods.forEach((method, methodIndex) => {
-                let fromNode = ancestorNode as T & MethodSequence<T>;
+        for (let n: typeof startNode | null = startNode; n !== null; n = n.parentNode) {
+            let fromNode = n;
+            fromNode.exactMethods.forEach((method, methodIndex) => {
                 let isMeta = mminfo.isDecorator(method);
 
                 // Make an IdentifierPart for each method that is descriptive and unique accross the multimethod.
-                let identifier = `${toIdentifierParts(ancestorNode!.exactPredicate)}${repeat('ᐟ', methodIndex)}`;
-                if (isMeta && (ancestorNode !== startNode || methodIndex > 0)) {
+                let identifier = `${toIdentifierParts(fromNode.exactPredicate)}${repeat('ᐟ', methodIndex)}`;
+                if (isMeta && (fromNode !== startNode || methodIndex > 0)) {
                     identifier = `${toIdentifierParts(startNode.exactPredicate)}ːviaː${identifier}`;
                 }
 
@@ -32,7 +31,8 @@ export function analyseMethodSequences<T extends MethodTableEntry & ParentNode<T
         // The 'entry point' method is the one whose method we call to begin the cascading evaluation for a dispatch. It
         // is the least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
         let entryPoint = methodSequence.filter(entry => entry.isMeta).pop() || methodSequence[0];
+        let entryPointIndex = methodSequence.indexOf(entryPoint);
 
-        return {methodSequence, entryPoint, identifier: methodSequence[0].identifier} as MethodSequence<T>;
+        return {methodSequence, entryPointIndex, identifier: methodSequence[0].identifier};
     });
 }

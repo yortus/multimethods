@@ -1,11 +1,11 @@
-import {MMInfo, MMNode} from '../analysis';
+import {MMInfo} from '../mm-info';
 import {andThen, debug} from '../util';
 
 
 
 
 // TODO: doc...
-export function instrumentMultimethod(multimethod: (...args: unknown[]) => unknown, mminfo: MMInfo<MMNode>) {
+export function instrumentMultimethod(multimethod: (...args: unknown[]) => unknown, mminfo: MMInfo) {
     let mmname = mminfo.config.name;
     function instrumentedDispatch(...args: unknown[]) {
         debug(

@@ -1,13 +1,11 @@
 import {NormalPredicate, Predicate, toNormalPredicate, toPredicate} from '../math/predicates';
-import {MMInfo} from './mm-info';
-import {MethodTableEntry} from './mm-node';
-
+import {NodeProps, PartialMMInfo} from './build-mm-info';
 
 
 
 
 // TODO: doc... Get predicates and exactly-matching methods in most- to least-specific order.
-export function analyseMethodTable<T extends object>(mminfo: MMInfo<T>) {
+export function analyseMethodTable<P extends NodeProps>(mminfo: PartialMMInfo<P>) {
     return mminfo.addProps((_, __, set) => {
         let exactPredicate = findExactPredicateInMethodTable(set.predicate, mminfo.allMethods) || set.predicate;
 
@@ -18,10 +16,9 @@ export function analyseMethodTable<T extends object>(mminfo: MMInfo<T>) {
         // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
         let exactMethods = chain.slice(i).concat(chain.slice(0, i).reverse());
 
-        return {exactPredicate, exactMethods} as MethodTableEntry;
+        return {exactPredicate, exactMethods};
     });
 }
-
 
 
 

@@ -1,14 +1,13 @@
 import {EulerDiagram} from '../math/sets';
 import {fatalError, getLongestCommonPrefix, getLongestCommonSuffix} from '../util';
-import {MMInfo} from './mm-info';
-import {MethodTableEntry} from './mm-node';
+import {NodeProps, PartialMMInfo} from './build-mm-info';
 
 
 
 
 
 // TODO: doc...
-export function analyseAmbiguities<T extends MethodTableEntry>(mminfo: MMInfo<T>) {
+export function analyseAmbiguities<P extends NodeProps>(mminfo: PartialMMInfo<P | 'exactMethods' | 'exactPredicate'>) {
     return mminfo.addProps((node, nodes, set, sets) => {
 
         // If this is the root node, synthesize an additional regular method that always goes unhandled. Adding
@@ -56,7 +55,7 @@ export function analyseAmbiguities<T extends MethodTableEntry>(mminfo: MMInfo<T>
 
 
 // TODO: doc...
-function insertAsLeastSpecificRegularMethod(mminfo: MMInfo, orderedMethods: Function[], method: Function) {
+function insertAsLeastSpecificRegularMethod(mminfo: PartialMMInfo, orderedMethods: Function[], method: Function) {
     let i = 0;
     while (i < orderedMethods.length && !mminfo.isDecorator(orderedMethods[i])) ++i;
     orderedMethods.splice(i, 0, method);

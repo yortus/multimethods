@@ -1,27 +1,24 @@
 import {EulerDiagram} from '../math/sets';
 import {getLongestCommonPrefix} from '../util';
-import {MMInfo} from './mm-info';
-import {MethodTableEntry, ParentNode} from './mm-node';
-
+import {NodeProps, PartialMMInfo} from './build-mm-info';
 
 
 
 
 // TODO: doc... Go back over the nodes and work out the correct parent node.
 //              There must be precisely one (except for the root which has no parent).
-export function analyseParentNodes<T extends MethodTableEntry>(mminfo: MMInfo<T>) {
+export function analyseParentNodes<P extends NodeProps>(mminfo: PartialMMInfo<P>) {
     return mminfo.addProps((_, nodes, set, sets) => {
-        let parentNode: (T & ParentNode<T>) | null;
 
         // The root node has no parent node. Set it to `null`.
         if (set.supersets.length === 0) {
-            parentNode = null;
+            return {parentNode: null};
         }
 
         // If there is only one way into the set, then the parent
         // is the node corresponding to the one-and-only superset.
         else if (set.supersets.length === 1) {
-            parentNode = nodes[sets.indexOf(set.supersets[0])] as T & ParentNode<T>;
+            return {parentNode: nodes[sets.indexOf(set.supersets[0])]};
         }
 
         // If there are multiple ways into the set, the parent node is the last node in the common prefix.
@@ -30,8 +27,7 @@ export function analyseParentNodes<T extends MethodTableEntry>(mminfo: MMInfo<T>
         else {
             let pathsFromRoot = EulerDiagram.findAllPathsFromRootTo(set);
             let prefix = getLongestCommonPrefix(pathsFromRoot);
-            parentNode = nodes[sets.indexOf(prefix[prefix.length - 1])] as T & ParentNode<T>;
+            return {parentNode: nodes[sets.indexOf(prefix[prefix.length - 1])]};
         }
-        return {parentNode} as ParentNode<T>;
     });
 }

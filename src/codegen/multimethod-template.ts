@@ -1,4 +1,4 @@
-import {MMInfo, MMNode} from '../analysis';
+import {MMInfo} from '../mm-info';
 import * as substitutions from './substitutions';
 import * as utils from './template-utilities';
 
@@ -34,7 +34,7 @@ const {BEGIN_SECTION, END_SECTION} = utils;
  * stringified to its source code, and that source code undergoes substitutions to produce the source code for an actual
  * multimethod. The resulting source code is evaluated to produce a multimethod function that is both fast and readable.
  */
-export function multimethodTemplate(mminfo: MMInfo<MMNode>, ℙ: typeof import('../math/predicates')) {
+export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../math/predicates')) {
 
     /** The multimethod's discriminator function. */
     let discriminator = mminfo.config.discriminator;

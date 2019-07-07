@@ -1,11 +1,11 @@
-import {MethodSequenceEntry, MMInfo, MMNode} from '../analysis';
+import {MMInfo, NodeInfo} from '../mm-info';
 import {hasNamedCaptures} from '../math/predicates';
 import {repeat} from '../util';
 
 
 
 
-export function forMultimethod(mminfo: MMInfo<MMNode>) {
+export function forMultimethod(mminfo: MMInfo) {
     return {
         NAME: mminfo.config.name,
         ARITY: String(mminfo.config.discriminator.length || 1),
@@ -18,20 +18,20 @@ export function forMultimethod(mminfo: MMInfo<MMNode>) {
 
 
 
-export function forNode(node: MMNode, nodeIndex?: number) {
+export function forNode(node: NodeInfo, nodeIndex?: number) {
     return {
         INDEX: nodeIndex,
         NAMEOF_IS_MATCH: `isMatchː${node.identifier}`,
         HAS_PATTERN_BINDINGS: hasNamedCaptures(node.exactPredicate),
         NAMEOF_GET_PATTERN_BINDINGS: `getPatternBindingsː${node.identifier}`,
-        NAMEOF_ENTRYPOINT_THUNK: getThunkName([node.entryPoint], 0),
+        NAMEOF_ENTRYPOINT_THUNK: getThunkName(node.methodSequence, node.entryPointIndex),
     };
 }
 
 
 
 
-export function forMethod(node: MMNode, methodIndex: number) {
+export function forMethod(node: NodeInfo, methodIndex: number) {
     return {
         NAME: getMethodName(node, methodIndex),
         INDEX: methodIndex,
@@ -41,7 +41,7 @@ export function forMethod(node: MMNode, methodIndex: number) {
 
 
 
-export function forMatch(seq: Array<MethodSequenceEntry<MMNode>>, index: number) {
+export function forMatch(seq: NodeInfo['methodSequence'], index: number) {
     let {fromNode, methodIndex} = seq[index];
 
     // TODO: temp testing... explain these calcs!!
@@ -62,14 +62,14 @@ export function forMatch(seq: Array<MethodSequenceEntry<MMNode>>, index: number)
 
 
 
-function getThunkName(seq: Array<MethodSequenceEntry<MMNode>>, index: number) {
+function getThunkName(seq: NodeInfo['methodSequence'], index: number) {
     return `thunkː${seq[index].identifier}`;
 }
 
 
 
 
-function getMethodName(node: MMNode, methodIndex: number) {
+function getMethodName(node: NodeInfo, methodIndex: number) {
     return `methodː${node.identifier}${repeat('ᐟ', methodIndex)}`;
 }
 

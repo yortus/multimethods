@@ -1,4 +1,4 @@
-import {MMInfo, MMNode} from '../analysis';
+import {MMInfo} from '../mm-info';
 import {Method} from '../multimethod';
 import {andThen, debug, repeat} from '../util';
 
@@ -6,7 +6,7 @@ import {andThen, debug, repeat} from '../util';
 
 
 // TODO: doc...
-export function instrumentMethods(mminfo: MMInfo<MMNode>) {
+export function instrumentMethods(mminfo: MMInfo) {
 
     // Update all `exactMethods` elements in-place.
     mminfo.allNodes.forEach(node => {

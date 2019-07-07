@@ -1,23 +1,23 @@
+import {MMInfo} from '../mm-info';
 import {analyseAmbiguities} from './analyse-ambiguities';
 import {analyseChildNodes} from './analyse-child-nodes';
 import {analyseMethodSequences} from './analyse-method-sequences';
 import {analyseMethodTable} from './analyse-method-table';
 import {analyseParentNodes} from './analyse-parent-nodes';
-import {MMInfo} from './mm-info';
-import {MMNode} from './mm-node';
+import {PartialMMInfo} from './build-mm-info';
 
 
 
 
 
 // TODO: doc...
-export function analyseAll(mminfo: MMInfo) {
+export function analyseAll(mminfo: PartialMMInfo) {
     let mminfo2 = analyseMethodTable(mminfo);
     let mminfo3 = analyseAmbiguities(mminfo2);
     let mminfo4 = analyseChildNodes(mminfo3);
     let mminfo5 = analyseParentNodes(mminfo4);
     let mminfo6 = analyseMethodSequences(mminfo5);
-    return mminfo6 as MMInfo<MMNode>;
+    return mminfo6 as MMInfo;
 }
 
 

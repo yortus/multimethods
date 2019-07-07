@@ -1,5 +1,5 @@
-import {MMInfo, MMNode} from '../analysis';
 import * as predicates from '../math/predicates';
+import {MMInfo, NodeInfo} from '../mm-info';
 import {repeat} from '../util';
 import {multimethodTemplate} from './multimethod-template';
 import * as substitutions from './substitutions';
@@ -8,7 +8,7 @@ import {beautify, eliminateDeadCode, getIndentDepth, minify, replaceAll, replace
 
 
 
-export function codegen(mminfo: MMInfo<MMNode>) {
+export function codegen(mminfo: MMInfo) {
     let multimethodSourceCode = generateMultimethodSourceCode(mminfo);
 
     // Evaluate the multimethod's entire source code to obtain the multimethod function. The use of eval here is safe.
@@ -26,7 +26,7 @@ export function codegen(mminfo: MMInfo<MMNode>) {
 
 
 
-function generateMultimethodSourceCode(mminfo: MMInfo<MMNode>) {
+function generateMultimethodSourceCode(mminfo: MMInfo) {
     let source = multimethodTemplate.toString();
     source = minify(source);
     source = beautify(source);
@@ -43,7 +43,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo<MMNode>) {
         return placeholderContent.replace(bodyRegex, () => `{\n${block(mminfo.rootNode, bodyIndent)}`);
 
         // Recursively generate the conditional logic block to select among the given predicates.
-        function block(node: MMNode, indent: string): string {
+        function block(node: NodeInfo, indent: string): string {
             let result = node.childNodes.map(childNode => {
                 let nodeSubs = substitutions.forNode(childNode);
                 let condition = `${indent}if (${nodeSubs.NAMEOF_IS_MATCH}(discriminant)) `;
