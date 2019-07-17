@@ -51,7 +51,7 @@ export function pass1(options: Required<OptionsObject>, methods: Dict<Function |
 function combineMethodsAndDecorators(methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
     let result = {} as Record<string, Function[]>;
 
-    // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
+    // TODO: explain ordering: regular methods from left-to-right; then decorators from right-to-left
 
     for (let predicate of Object.keys(methods)) {
         let meths = methods[predicate];

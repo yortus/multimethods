@@ -13,7 +13,7 @@ export function pass3(mminfo: ReturnType<typeof import('./pass-2').pass2>) {
             fromNode: OldNode;
             methodIndex: number; // TODO: doc... index into fromNode.exactMethods array
             identifier: string; // TODO: is this same as fromNode.identifier? need it here? investigate?
-            isMeta: boolean; // TODO: change to isDecorator
+            isDecorator: boolean;
         }>;
         entryPointIndex: number; // TODO: doc... index into node.methodSequence array
         identifier: string;
@@ -33,21 +33,21 @@ export function pass3(mminfo: ReturnType<typeof import('./pass-2').pass2>) {
         for (let n: OldNode | undefined = startNode; n !== undefined; n = n.parentNode) {
             let fromNode = n;
             fromNode.exactMethods.forEach((method, methodIndex) => {
-                let isMeta = mminfo.isDecorator(method);
+                let isDecorator = mminfo.isDecorator(method);
 
                 // Make an IdentifierPart for each method that is descriptive and unique accross the multimethod.
                 let identifier = `${toIdentifierParts(fromNode.exactPredicate)}${repeat('ᐟ', methodIndex)}`;
-                if (isMeta && (fromNode !== startNode || methodIndex > 0)) {
+                if (isDecorator && (fromNode !== startNode || methodIndex > 0)) {
                     identifier = `${toIdentifierParts(startNode.exactPredicate)}ːviaː${identifier}`;
                 }
 
-                methodSequence.push({fromNode, methodIndex, identifier, isMeta});
+                methodSequence.push({fromNode, methodIndex, identifier, isDecorator});
             });
         }
 
         // The 'entry point' method is the one whose method we call to begin the cascading evaluation for a dispatch. It
-        // is the least-specific meta-method, or if there are no meta-methods, it is the most-specific ordinary method.
-        let entryPoint = methodSequence.filter(entry => entry.isMeta).pop() || methodSequence[0];
+        // is the least-specific decorator, or if there are no decorators, it is the most-specific ordinary method.
+        let entryPoint = methodSequence.filter(entry => entry.isDecorator).pop() || methodSequence[0];
         let entryPointIndex = methodSequence.indexOf(entryPoint);
 
 

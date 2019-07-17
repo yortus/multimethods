@@ -84,7 +84,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo) {
 
                 // To avoid unnecessary duplication, skip emit for regular methods that are less
                 // specific that the set's predicate, since these will be handled in their own set.
-                if (!seq[index].isMeta && seq[index].fromNode !== seq[0].fromNode) return '';
+                if (!seq[index].isDecorator && seq[index].fromNode !== seq[0].fromNode) return '';
 
                 let nodeSubs = substitutions.forNode(seq[index].fromNode);
                 let result = placeholderContent;

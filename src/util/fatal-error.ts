@@ -26,8 +26,8 @@ export function INVALID_UNREACHABLE_OPTION() {
 }
 
 export function MIXED_CHAIN(predicate: string) {
-    let fmt = `Chain for predicate '%s' has meta-method(s) to the right`
-            + ` of regular method(s). Meta-methods must be leftmost in the chain.`;
+    let fmt = `Chain for predicate '%s' has decorator(s) to the right`
+            + ` of regular method(s). Decorators must be leftmost in the chain.`;
     return error(format(fmt, predicate));
 }
 
@@ -37,7 +37,7 @@ export function MULTIPLE_FALLBACKS_FROM(predicate: string, fallbacks: string) {
 }
 
 export function MULTIPLE_PATHS_TO(predicate: string) {
-    let fmt = `Multiple paths to '%s' with different meta-methods`;
+    let fmt = `Multiple paths to '%s' with different decorators`;
     return error(format(fmt, predicate));
 }
 

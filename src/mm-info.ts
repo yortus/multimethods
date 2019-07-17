@@ -31,7 +31,7 @@ export interface Node {
         fromNode: Node;
         methodIndex: number; // TODO: doc... index into fromNode.exactMethods array
         identifier: string; // TODO: is this same as fromNode.identifier? need it here? investigate?
-        isMeta: boolean; // TODO: change to isDecorator
+        isDecorator: boolean;
     }>;
     entryPointIndex: number; // TODO: doc... index into node.methodSequence array
     identifier: string;

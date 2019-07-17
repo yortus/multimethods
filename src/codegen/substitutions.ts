@@ -46,13 +46,13 @@ export function forMatch(seq: Node['methodSequence'], index: number) {
 
     // TODO: temp testing... explain these calcs!!
     let isLeastSpecificMethod = index === seq.length - 1;
-    let innerMethod = seq.filter((entry, j) => (j === 0 || entry.isMeta) && j < index).pop();
+    let innerMethod = seq.filter((entry, j) => (j === 0 || entry.isDecorator) && j < index).pop();
 
     return {
         NAMEOF_THUNK: getThunkName(seq, index),
         NAMEOF_METHOD: getMethodName(fromNode, methodIndex),
         HAS_NO_THIS_REFERENCE_IN_METHOD: !/\bthis\b/g.test(fromNode.exactMethods[methodIndex].toString()),
-        HAS_OUTER_MATCH: !isLeastSpecificMethod && !seq[index + 1].isMeta,
+        HAS_OUTER_MATCH: !isLeastSpecificMethod && !seq[index + 1].isDecorator,
         NAMEOF_OUTER_THUNK: isLeastSpecificMethod ? '' : getThunkName(seq, index + 1),
         HAS_INNER_MATCH: innerMethod != null,
         NAMEOF_INNER_THUNK: innerMethod ? getThunkName([innerMethod], 0) : '',

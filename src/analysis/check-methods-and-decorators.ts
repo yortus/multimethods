@@ -1,12 +1,12 @@
 import {ALL, toNormalPredicate} from '../math/predicates';
 import {EulerDiagram} from '../math/sets';
-import {debug, fatalError} from '../util';
+import {debug, Dict, fatalError} from '../util';
 
 
 
 
 // TODO: doc and cleanup...
-export function checkMethodsAndDecorators(methods: Record<string, Function | Function[]>, decorators: Record<string, Function | Function[]>) {
+export function checkMethodsAndDecorators(methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
 
     // TODO: new cross-checks needed for decorator and method patterns...
 
@@ -17,10 +17,10 @@ export function checkMethodsAndDecorators(methods: Record<string, Function | Fun
 
 
 
-function check(methods: Record<string, Function | Function[]>) {
+function check(methods: Dict<Function | Function[]>) {
 
     // TODO: was... remove? clients can no longer violate this since meths and decs are kept separate
-    // // For method chains, ensure first regular method in chain (if any) comes after last meta-method in chain (if any).
+    // // For method chains, ensure first regular method in chain (if any) comes after last decorator in chain (if any).
     // Object.keys(methods).forEach((predicate): void => {
     //     let method = methods[predicate];
     //     if (!Array.isArray(method)) return;
@@ -70,7 +70,7 @@ function check(methods: Record<string, Function | Function[]>) {
 // This often represents a user error, so it's a useful warning to point these patterns out so their intended
 // behaviour can be made explicit by the user.
 // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
-function listDiscontinuities(methods: Record<string, Function | Function[]>) {
+function listDiscontinuities(methods: Dict<Function | Function[]>) {
     if (methods === undefined) return [];
 
     let handledPredicates = Object.keys(methods).map(p => toNormalPredicate(p));

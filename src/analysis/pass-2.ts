@@ -28,12 +28,12 @@ export function pass2(mminfo: ReturnType<typeof import('./pass-1').pass1>) {
             let prefix = getLongestCommonPrefix(pathsFromRoot);
             let suffix = getLongestCommonSuffix(pathsFromRoot);
 
-            // Ensure the divergent sets contain NO meta-methods. Otherwise, fail immediately.
+            // Ensure the divergent sets contain NO decorators. Otherwise, fail immediately.
             // This guarantees the dispatch result is the same regardless of which path is taken through the methods.
             pathsFromRoot.forEach((path): void => {
                 let divergentNodes = path.slice(prefix.length, path.length - suffix.length);
-                let hasMetaMethods = divergentNodes.some(n => n.exactMethods.some(m => mminfo.isDecorator(m)));
-                if (hasMetaMethods) return fatalError.MULTIPLE_PATHS_TO(node.exactPredicate);
+                let hasDecorators = divergentNodes.some(n => n.exactMethods.some(m => mminfo.isDecorator(m)));
+                if (hasDecorators) return fatalError.MULTIPLE_PATHS_TO(node.exactPredicate);
             });
 
             // TODO: explain all below more clearly...

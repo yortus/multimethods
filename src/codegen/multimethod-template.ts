@@ -98,14 +98,14 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../math/
     /**
      * TODO: rewrite comments. Esp signature of route executor matches signature of multimethod (as per provided Options)
      * Generates the virtual method, called a 'thunk', for the given node.
-     * In the absence of meta-methods, the logic for the virtual method is straightforward: execute each matching method
-     * in turn, from the most- to the least-specific, until one produces a result. With meta-methods, the logic becomes more
-     * complex, because a meta-method must run *before* more-specific regular methods, with those more specific
-     * methods being wrapped into a callback function and passed to the meta-method. To account for this, we perform
-     * an order-preserving partitioning of all matching methods for the node, with each meta-method starting a new
+     * In the absence of decoratots, the logic for the virtual method is straightforward: execute each matching method
+     * in turn, from the most- to the least-specific, until one produces a result. With decorators, the logic becomes
+     * more complex, because a decorator must run *before* more-specific regular methods, with those more specific
+     * methods being wrapped into a callback function and passed to the decorator. To account for this, we perform
+     * an order-preserving partitioning of all matching methods for the node, with each decorator starting a new
      * partition. Within each partition, we use the straightforward cascading logic outlined above.
      * However, each partition as a whole is executed in reverse-order (least to most specific), with the next
-     * (more-specific) partition being passed as the `next` parameter to the meta-method starting the previous
+     * (more-specific) partition being passed as the `next` parameter to the decorator starting the previous
      * (less-specific) partition.
      */
     function MATCH$NAMEOF_THUNK(discriminant: string, MM$PARAMS: any[], args: any[] | false) {

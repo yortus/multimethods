@@ -12,10 +12,10 @@ import {Multimethod} from 'multimethods';
 
 // TODO: More coverage:
 // - [ ] multiple regular methods for same predicate
-// - [ ] multiple meta-methods for same predicate
-// - [ ] one meta- and several regular methods for same predicate
-// - [ ] meta-methods along ambiguous paths (same meta-methods on all paths)
-// - [x] meta-methods along ambiguous paths (not same meta-methods on all paths) - c/d
+// - [ ] multiple decorators for same predicate
+// - [ ] one decorator and several regular methods for same predicate
+// - [ ] decorators along ambiguous paths (same decorators on all paths)
+// - [x] decorators along ambiguous paths (not same decorators on all paths) - c/d
 
 
 

@@ -37,7 +37,7 @@ export {analyse} from './analyse';
 // (5):
     // We now have an array of methods whose predicates are all equivalent. To sort these methods from least- to most-
     // specific, we use a comparator that orders any two given 'equivalent' methods according to the following laws:
-    // (i) A meta-method is always less specific than a regular method
+    // (i) A decorator is always less specific than a regular method
     // (ii) For two regular methods in the same chain, the leftmost method is more specific
-    // (iii) For two meta-methods in the same chain, the leftmost method is less specific
+    // (iii) For two decorators in the same chain, the leftmost decorator is less specific
     // (iv) Anything else is ambiguous and results in an error

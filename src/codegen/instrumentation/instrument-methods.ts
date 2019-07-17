@@ -22,8 +22,8 @@ export function instrumentMethods(mminfo: MMInfo) {
 
 // TODO: doc...
 function instrumentMethod(mminfo: MMInfo, method: Function, name: string) {
-    let isMeta = mminfo.isDecorator(method);
-    let methodInfo = `${isMeta ? 'decorator' : 'method'}=${name}`;
+    let isDecorator = mminfo.isDecorator(method);
+    let methodInfo = `${isDecorator ? 'decorator' : 'method'}=${name}`;
     let instrumentedMethod: Method<unknown[], unknown> = function (...args: any[]) {
         debug(`${debug.DISPATCH} |-->| %s   pattern bindings=%o`, methodInfo, this.pattern);
         return andThen(() => method.apply(this, args), (result, error, isAsync) => {
@@ -32,7 +32,7 @@ function instrumentMethod(mminfo: MMInfo, method: Function, name: string) {
             if (error) throw error; else return result;
         });
     };
-    if (isMeta) {
+    if (isDecorator) {
         // TODO: this is rather inefficient... revise...
         const oldIsDecorator = mminfo.isDecorator;
         mminfo.isDecorator = m => m === instrumentedMethod || oldIsDecorator(m);

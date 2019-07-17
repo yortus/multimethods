@@ -26,11 +26,11 @@
 - immutable
 - no this?
 - comprise a list of 'rules', each rule is a {predicate: method} pair
-- rules are either normal rules or meta-rules
+- rules are either normal rules or decorators
 - In a rule, the predicate is a pattern, and the method is a function
 - predicate/pattern extensions: binary tree format... TODO WIP
 - predicates form a taxonomy according to their specificity (the subset of discriminants they 'contain')
-- a rule can be an 'ordinary' rule, or a metarule (whose method has special semantics to call/control 'downstream' methods)
+- a rule can be an 'ordinary' rule, or a decorator (whose method has special semantics to call/control 'downstream' methods)
 - a multimethod may be variadic or fixed arity (for optimisation only)
 - a multimethod may be closed or open (can add methods after construction or not) (also for optimisation only?)
 - each MM call generates a discriminant, according to the 'toDiscriminant()' function supplied to the ctor (default to toString()?)
@@ -73,12 +73,12 @@
 
 ## Handlers
 - regular handlers (functions)
-- metahandlers (specially marked functions)
+- decorator handlers (specially marked functions)
 - chains of handlers (arrays)
-  - may be all regular, all meta, or a mix
-  - if mixed, all metahandlers must be contiguous and leftmost in the chain array. This restriction is to simplify understanding dispatch of chains. It means that the handlers will execute in left-to-right order across the chain array. I.e. in a chain:
-    - (a) the metahandlers are all less specific than the regular handlers (so leftmost executes first)
-    - (b) the metahandlers are increasing order of specificity from left-to-right (so leftmost executes first)
+  - may be all regular, all decorators, or a mix
+  - if mixed, all decorators must be contiguous and leftmost in the chain array. This restriction is to simplify understanding dispatch of chains. It means that the handlers will execute in left-to-right order across the chain array. I.e. in a chain:
+    - (a) the decorators are all less specific than the regular handlers (so leftmost executes first)
+    - (b) the decorators are increasing order of specificity from left-to-right (so leftmost executes first)
     - (c) the regular handlers are decreasing order of specificity from left-to-right (so leftmost executes first)
 
 
