@@ -1,5 +1,5 @@
 import {EulerDiagram} from '../math/sets';
-import {DeepUpdated, fatalError, getLongestCommonPrefix, getLongestCommonSuffix} from '../util';
+import {DeepReplace, fatalError, getLongestCommonPrefix, getLongestCommonSuffix} from '../util';
 
 
 
@@ -65,7 +65,7 @@ export function pass2(mminfo: ReturnType<typeof import('./pass-1').pass1>) {
         Object.assign(node, {parentNode});
     }
 
-    return mminfo as DeepUpdated<typeof mminfo, OldNode, NewNode>;
+    return mminfo as DeepReplace<typeof mminfo, OldNode, NewNode>;
 }
 
 

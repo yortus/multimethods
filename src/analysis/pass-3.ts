@@ -1,5 +1,5 @@
 import {toIdentifierParts} from '../math/predicates';
-import {DeepUpdated, repeat} from '../util';
+import {DeepReplace, repeat} from '../util';
 
 
 
@@ -60,5 +60,5 @@ export function pass3(mminfo: ReturnType<typeof import('./pass-2').pass2>) {
         });
     }
 
-    return mminfo as DeepUpdated<typeof mminfo, OldNode, NewNode>;
+    return mminfo as DeepReplace<typeof mminfo, OldNode, NewNode>;
 }
