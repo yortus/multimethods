@@ -1,10 +1,10 @@
-import {makeMMInfo} from './analysis';
+import {analyse} from './analysis';
 import {codegen} from './codegen';
 import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import * as types from './multimethod';
 import {Options} from './options';
 import {UNHANDLED_DISPATCH} from './sentinels';
-import {debug} from './util';
+import {debug, Dict} from './util';
 
 
 
@@ -35,7 +35,7 @@ function create(options: types.Options<unknown[], any>) {
     let result = addMethods(mm, {}, {});
     return result;
 
-    function addMethods<T>(mm: T, existingMethods: Record<string, Function[]>, existingDecorators: Record<string, Function[]>) {
+    function addMethods<T>(mm: T, existingMethods: Dict<Function[]>, existingDecorators: Dict<Function[]>) {
         let extend = (methods: Record<string, Function | Array<Function | 'super'>>) => {
             let combinedMethods = combine(existingMethods, methods);
             let mm2 = MM({discriminator, unhandled}, combinedMethods, existingDecorators);
@@ -56,7 +56,7 @@ function create(options: types.Options<unknown[], any>) {
 
 
 // TODO: combine two method tables
-function combine(existingMethods: Record<string, Function[]>, additionalMethods: Record<string, Function | Array<Function | 'super'>>) {
+function combine(existingMethods: Dict<Function[]>, additionalMethods: Dict<Function | Array<Function | 'super'>>) {
     let existingKeys = Object.keys(existingMethods);
     let additionalKeys = Object.keys(additionalMethods);
     let keysInBoth = existingKeys.filter(k => additionalKeys.indexOf(k) !== -1);
@@ -96,8 +96,8 @@ function combine(existingMethods: Record<string, Function[]>, additionalMethods:
 
 
 // TODO: doc...
-function MM(options: Options, methods: Record<string, Function | Function[]>, decorators: Record<string, Function | Function[]>) {
-    let mminfo = makeMMInfo(options, methods, decorators);
+function MM(options: Options, methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
+    let mminfo = analyse(options, methods, decorators);
     if (debug.enabled) instrumentMethods(mminfo);
     let multimethod = codegen(mminfo);
     if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);

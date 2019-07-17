@@ -1,4 +1,4 @@
-export {makeMMInfo} from './build-mm-info';
+export {analyse} from './analyse';
 
 
 

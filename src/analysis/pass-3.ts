@@ -1,24 +1,36 @@
 import {toIdentifierParts} from '../math/predicates';
-import {repeat} from '../util';
+import {DeepUpdated, repeat} from '../util';
 
 
 
 
 // TODO: doc...
 export function pass3(mminfo: ReturnType<typeof import('./pass-2').pass2>) {
-    type TNode = typeof mminfo.rootNode;
-
-    return mminfo.map(startNode => {
-        let methodSequence = [] as Array<{
-            fromNode: TNode;
+    type OldNode = typeof mminfo.rootNode;
+    type NewNode = OldNode & {
+        childNodes: NewNode[];
+        methodSequence: Array<{
+            fromNode: OldNode;
             methodIndex: number; // TODO: doc... index into fromNode.exactMethods array
             identifier: string; // TODO: is this same as fromNode.identifier? need it here? investigate?
             isMeta: boolean; // TODO: change to isDecorator
         }>;
+        entryPointIndex: number; // TODO: doc... index into node.methodSequence array
+        identifier: string;
+    };
+
+    for (let node of mminfo.allNodes) {
+
+        // TODO: child nodes...
+        let childNodes = node.subsets;
+
+        // TODO: method sequences...
+        let startNode = node;
+        let methodSequence = [] as NewNode['methodSequence'];
 
         // TODO: explain method sequence...
         //       *All* applicable methods for the node's predicate in most- to least- specific order...
-        for (let n: TNode | undefined = startNode; n !== undefined; n = n.parentNode) {
+        for (let n: OldNode | undefined = startNode; n !== undefined; n = n.parentNode) {
             let fromNode = n;
             fromNode.exactMethods.forEach((method, methodIndex) => {
                 let isMeta = mminfo.isDecorator(method);
@@ -40,6 +52,13 @@ export function pass3(mminfo: ReturnType<typeof import('./pass-2').pass2>) {
 
 
         // TODO: fix...
-        return {...startNode, methodSequence, entryPointIndex, identifier: methodSequence[0].identifier};
-    });
+        Object.assign(node, {
+            childNodes,
+            methodSequence,
+            entryPointIndex,
+            identifier: methodSequence[0].identifier,
+        });
+    }
+
+    return mminfo as DeepUpdated<typeof mminfo, OldNode, NewNode>;
 }

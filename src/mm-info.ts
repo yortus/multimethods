@@ -19,8 +19,6 @@ export interface MMInfo<TNode = NodeInfo> {
     rootNode: TNode;
 
     isDecorator(method: Function): boolean;
-
-    findNode(predicate: string): TNode | undefined;
 }
 
 
@@ -41,9 +39,6 @@ export interface NodeInfo {
     }>;
     entryPointIndex: number; // TODO: doc... index into node.methodSequence array
     identifier: string;
-
-    // from ParentNode<TNode>:
-    //parentNode?: NodeInfo;
 
     // from ChildNodes<TNode>:
     childNodes: NodeInfo[];
