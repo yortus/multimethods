@@ -1,7 +1,5 @@
 import {format} from 'util';  // TODO: ensure this node.js dep doesn't prevent clientside use (eg via webpack)
-import {AMBIGUOUS_DISPATCH, UNHANDLED_DISPATCH} from '../sentinels';
 import {debug} from './debug';
-
 
 
 
@@ -35,7 +33,7 @@ export function MIXED_CHAIN(predicate: string) {
 
 export function MULTIPLE_FALLBACKS_FROM(predicate: string, fallbacks: string) {
     let fmt = `Multiple possible fallbacks from '%s': %s`;
-    return error(format(fmt, predicate, fallbacks), AMBIGUOUS_DISPATCH);
+    return error(format(fmt, predicate, fallbacks));
 }
 
 export function MULTIPLE_PATHS_TO(predicate: string) {
@@ -55,49 +53,13 @@ export function TOO_COMPLEX() {
 
 export function UNHANDLED(discriminant: string) {
     let fmt = `Multimethod dispatch failure: call was unhandled for the given arguments (discriminant = '%s').`;
-    return error(format(fmt, discriminant), UNHANDLED_DISPATCH);
+    return error(format(fmt, discriminant));
 }
 
 
 
 
-
-function error(message: string, code?: any): never {
+function error(message: string): never {
     debug(`${debug.FATAL} %s`, message);
-    throw new MultimethodError(message, code);
-}
-
-
-
-
-
-// TODO: doc...
-class MultimethodError extends Error {
-
-    constructor(message: string, code?: any) {
-        super(message);
-
-        // Workaround for ES5. See:
-        // https://github.com/Microsoft/TypeScript/wiki/FAQ#why-doesnt-extending-built-ins-like-error-array-and-map-work
-        Object.setPrototypeOf(this, MultimethodError.prototype);
-
-        if (code) {
-            this.code = code;
-        }
-    }
-
-    code: any;
-}
-
-
-
-
-
-// The tsc build assumes ES5 libs, but ES6 `setPrototypeOf` is present on all supported platforms (ie node, modern
-// browsers, and IE11). We therefore declare it here so it can be used for the custom error class workaround above.
-// tslint:disable-next-line:no-namespace
-declare global {
-    interface Object {
-        setPrototypeOf(o: any, proto: object | null): any;
-    }
+    throw new Error(message);
 }

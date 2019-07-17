@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {isPromiseLike} from 'multimethods/util';
 
-import {isUnhandled, Multimethod} from 'multimethods';
+import {Multimethod} from 'multimethods';
 // import defaultDiscrininator from 'multimethods/analysis/configuration/default-discriminator';
 
 
@@ -40,7 +40,10 @@ describe('Constructing a Multimethod instance', () => {
     variants.forEach(({vname, async, val, err}) => describe(`(${vname})`, () => {
 
         // TODO: doc...
-        let multimethod = Multimethod((r: any) => val(r.address)).extend({
+        let multimethod = Multimethod({
+            discriminator: (r: any) => val(r.address),
+            unhandled: () => { throw UNHANDLED; },
+        }).extend({
             '/**': () => err('nothing matches!'),
             '/foo': () => val('foo'),
             '/bar': () => val('bar'),
@@ -86,25 +89,25 @@ describe('Constructing a Multimethod instance', () => {
         }).decorate({
             '/*a*'(rq) { return calc([
                 '---',
-                calc(() => this.inner(rq), (rs, er) => isUnhandled(er) ? err('no inner method!') : rs),
+                calc(() => this.inner(rq), (rs, er) => er === UNHANDLED ? err('no inner method!') : rs),
                 '---',
             ], concat); },
 
             'api/fo*': [
                 function (rq) { return calc([
                     'fo2-(',
-                    calc(() => this.inner(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
+                    calc(() => this.inner(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     ')',
                 ], concat); },
                 function (rq) { return calc([
                     'fo1-(',
-                    calc(() => this.inner(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
+                    calc(() => this.inner(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     ')',
                 ], concat); },
             ],
             'api/foo': [
                 function (rq) {return calc([
-                    calc(() => this.inner(rq), (rs, er) => isUnhandled(er) ? val('NONE') : rs),
+                    calc(() => this.inner(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     '!',
                 ], concat); },
                 'super' as const,
@@ -112,7 +115,7 @@ describe('Constructing a Multimethod instance', () => {
 
             'zz/z/{**rest}'() {
                 let moddedReq = {address: this.pattern.rest.split('').reverse().join('')};
-                return calc(() => this.inner(moddedReq), (rs, er) => isUnhandled(er) ? val('NONE') : rs);
+                return calc(() => this.inner(moddedReq), (rs, er) => er === UNHANDLED ? val('NONE') : rs);
             },
 
             'CHAIN-{x}': [
@@ -135,12 +138,12 @@ describe('Constructing a Multimethod instance', () => {
             `/bar ==> ---bar---`,
             `/baz ==> ---baz---`,
             `/quux ==> ERROR: nothing matches!`,
-            `quux ==> ERROR: Multimethod dispatch failure...`,
+            `quux ==> ERROR: Unhandled`,
             `/qaax ==> ERROR: no inner method!`,
             `/a ==> ERROR: no inner method!`,
-            `a ==> ERROR: Multimethod dispatch failure...`,
+            `a ==> ERROR: Unhandled`,
             `/ ==> ERROR: nothing matches!`,
-            ` ==> ERROR: Multimethod dispatch failure...`,
+            ` ==> ERROR: Unhandled`,
 
             `a/foo ==> starts with 'a'`,
             `foo/b ==> ends with 'b'`,
@@ -222,3 +225,9 @@ function calc(arg: any, cb: (res: any, err: any) => any) {
 function concat(strs: string[]) {
     return strs.join('');
 }
+
+
+
+
+// TODO: temp testing...
+const UNHANDLED = new Error('Unhandled');

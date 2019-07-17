@@ -2,7 +2,6 @@ import {analyse} from './analysis';
 import {codegen} from './codegen';
 import * as types from './multimethod';
 import {Options} from './options';
-import {UNHANDLED_DISPATCH} from './sentinels';
 import {Dict} from './util';
 
 
@@ -12,13 +11,6 @@ import {Dict} from './util';
 const Multimethod = create as types.MultimethodStatic;
 type Multimethod<P extends unknown[], R> = types.Multimethod<P, R>;
 export {Multimethod};
-
-
-
-
-export function isUnhandled(err: {code?: unknown}) {
-    return err instanceof Error && err.code === UNHANDLED_DISPATCH;
-}
 
 
 

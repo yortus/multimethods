@@ -1,6 +1,6 @@
 import {expect, use as chaiUse} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import {isUnhandled, Multimethod} from 'multimethods';
+import {Multimethod} from 'multimethods';
 import {defaultDiscriminator} from 'multimethods/analysis/configuration/default-discriminator';
 
 
@@ -73,7 +73,11 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
     });
 
     it('TEMP5', () => {
-        let mm = Multimethod((a: string) => a).extend({
+        const UNHANDLED = new Error();
+        let mm = Multimethod({
+            discriminator: (a: string) => a,
+            unhandled: () => { throw UNHANDLED; },
+        }).extend({
             'a*':       _ => 'a*',
         }).decorate({
             '**'(a) { return `-${this.inner(a)}-`; },
@@ -83,7 +87,7 @@ describe('MULTIMETHOD I: Constructing a Multimethod instance', () => {
                     return `(${res})`;
                 }
                 catch (err) {
-                    if (!isUnhandled(err)) throw err;
+                    if (err !== UNHANDLED) throw err;
                     return this.outer(); // fall-through
                 }
             },
