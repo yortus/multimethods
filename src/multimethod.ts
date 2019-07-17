@@ -1,3 +1,8 @@
+import {Options} from './options';
+
+
+
+
 export interface MultimethodStatic {
 
     // Functional-style factory function
@@ -25,20 +30,6 @@ export interface AsyncMultimethod<P extends unknown[], R> {
     extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): AsyncMultimethod<P, R | MR>;
     decorate(decorators: MethodsObject<P, R | Promise<R>>): AsyncMultimethod<P, R>;
 }
-
-
-
-
-export type Options<P extends unknown[], D extends string | Promise<string>> =
-    | DiscriminatorFunction<P, D>
-    | OptionsObject<P, D>;
-
-export interface OptionsObject<P extends unknown[], D extends string | Promise<string>> {
-    discriminator: DiscriminatorFunction<P, D>;
-    unhandled?: (discriminant: string) => unknown;
-}
-
-export type DiscriminatorFunction<P extends unknown[], D extends string | Promise<string>> = (...args: P) => D;
 
 
 

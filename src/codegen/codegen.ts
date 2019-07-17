@@ -1,5 +1,5 @@
 import * as predicates from '../math/predicates';
-import {MMInfo, NodeInfo} from '../mm-info';
+import {MMInfo, Node} from '../mm-info';
 import {repeat} from '../util';
 import {multimethodTemplate} from './multimethod-template';
 import * as substitutions from './substitutions';
@@ -43,7 +43,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo) {
         return placeholderContent.replace(bodyRegex, () => `{\n${block(mminfo.rootNode, bodyIndent)}`);
 
         // Recursively generate the conditional logic block to select among the given predicates.
-        function block(node: NodeInfo, indent: string): string {
+        function block(node: Node, indent: string): string {
             let result = node.childNodes.map(childNode => {
                 let nodeSubs = substitutions.forNode(childNode);
                 let condition = `${indent}if (${nodeSubs.NAMEOF_IS_MATCH}(discriminant)) `;

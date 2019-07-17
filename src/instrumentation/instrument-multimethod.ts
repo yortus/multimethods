@@ -6,11 +6,11 @@ import {andThen, debug} from '../util';
 
 // TODO: doc...
 export function instrumentMultimethod(multimethod: (...args: unknown[]) => unknown, mminfo: MMInfo) {
-    let mmname = mminfo.config.name;
+    let mmname = mminfo.options.name;
     function instrumentedDispatch(...args: unknown[]) {
         debug(
             `${debug.DISPATCH} |-->| ${mmname}   discriminant='%s'   args=%o`,
-            mminfo.config.discriminator(...args),
+            mminfo.options.discriminator(...args),
             args
         );
         let getResult = () => multimethod(...args);

@@ -1,22 +1,20 @@
 import {Predicate, toNormalPredicate, toPredicate} from '../math/predicates';
 import {EulerDiagram} from '../math/sets';
-import {Options} from '../options';
+import {OptionsObject} from '../options';
 import {Dict} from '../util';
-import {createConfiguration} from './configuration';
 
 
 
 
-export function pass1(opts: Options, methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
+export function pass1(options: Required<OptionsObject>, methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
 
-    let config = createConfiguration(opts);
     let allMethods = combineMethodsAndDecorators(methods, decorators);
     let decoratorLookup = new Set(Object.keys(decorators).reduce(
         (decs, predicate) => decs.concat(decorators[predicate]),
         [] as Function[]
     ));
 
-    let ed = new EulerDiagram(Object.keys(allMethods), config.unreachable);
+    let ed = new EulerDiagram(Object.keys(allMethods), options.unreachable);
     let allNodes = ed.allSets.map(set => {
 
         let exactPredicate = set.predicate as Predicate;
@@ -38,7 +36,7 @@ export function pass1(opts: Options, methods: Dict<Function | Function[]>, decor
     let rootNode = allNodes[ed.allSets.indexOf(ed.universalSet)];
 
     return {
-        config,
+        options,
         allMethods,
         allNodes,
         rootNode,

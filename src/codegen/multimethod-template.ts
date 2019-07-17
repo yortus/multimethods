@@ -37,10 +37,10 @@ const {BEGIN_SECTION, END_SECTION} = utils;
 export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../math/predicates')) {
 
     /** The multimethod's discriminator function. */
-    let discriminator = mminfo.config.discriminator;
+    let discriminator = mminfo.options.discriminator;
 
     /** The multimethod's error-handling function. */
-    let unhandled = mminfo.config.unhandled;
+    let unhandled = mminfo.options.unhandled;
 
     /** A frozen empty object. All empty pattern binding objects alias it in order to avoid unnecessary allocations. */
     let emptyObject = Object.freeze({});

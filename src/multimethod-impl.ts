@@ -25,26 +25,23 @@ export function isUnhandled(err: {code?: unknown}) {
 
 
 // TODO: ...
-function create<P extends unknown[]>(options?: types.Options<P, 'mixed'>): types.Multimethod<P, never>;
-function create<P extends unknown[]>(options?: types.Options<P, 'async'>): types.AsyncMultimethod<P, never>;
-function create(options: types.Options<unknown[], any>) {
-    let discriminator = typeof options === 'function' ? options : options.discriminator;
-    let unhandled = typeof options === 'object' ? options.unhandled : undefined;
-
-    let mm = MM({discriminator, unhandled}, {}, {});
+function create<P extends unknown[]>(options?: Options<P>): types.Multimethod<P, never>;
+function create<P extends unknown[]>(options?: Options<P, Promise<string>>): types.AsyncMultimethod<P, never>;
+function create(options: Options<unknown[], any>) {
+    let mm = MM(options, {}, {});
     let result = addMethods(mm, {}, {});
     return result;
 
     function addMethods<T>(mm: T, existingMethods: Dict<Function[]>, existingDecorators: Dict<Function[]>) {
         let extend = (methods: Record<string, Function | Array<Function | 'super'>>) => {
             let combinedMethods = combine(existingMethods, methods);
-            let mm2 = MM({discriminator, unhandled}, combinedMethods, existingDecorators);
+            let mm2 = MM(options, combinedMethods, existingDecorators);
             return addMethods(mm2, combinedMethods, existingDecorators);
         };
 
         let decorate = (decorators: Record<string, Function | Array<Function | 'super'>>) => {
             let combinedDecorators = combine(existingDecorators, decorators);
-            let mm2 = MM({discriminator, unhandled}, existingMethods, combinedDecorators);
+            let mm2 = MM(options, existingMethods, combinedDecorators);
             return addMethods(mm2, existingMethods, combinedDecorators);
         };
 

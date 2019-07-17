@@ -1,22 +1,18 @@
-import {Predicate, Unreachable} from './math/predicates';
+import {Predicate} from './math/predicates';
+import {OptionsObject} from './options';
 
 
 
 
 // TODO: doc...
-export interface MMInfo<TNode = NodeInfo> {
-    config: {
-        name: string;
-        discriminator: (...args: any[]) => string | Promise<string>;
-        unreachable: Unreachable;
-        unhandled: (discriminant: string) => unknown;
-    };
+export interface MMInfo {
+    options: Required<OptionsObject>;
 
     allMethods: Record<string, Function[]>; // TODO: doc... includes all regular methods and all decorators
 
-    allNodes: TNode[];
+    allNodes: Node[];
 
-    rootNode: TNode;
+    rootNode: Node;
 
     isDecorator(method: Function): boolean;
 }
@@ -24,7 +20,7 @@ export interface MMInfo<TNode = NodeInfo> {
 
 
 
-export interface NodeInfo {
+export interface Node {
 
     // from MethodTableEntry:
     exactPredicate: Predicate;
@@ -32,7 +28,7 @@ export interface NodeInfo {
 
     // from MethodSequence<TNode>:
     methodSequence: Array<{
-        fromNode: NodeInfo;
+        fromNode: Node;
         methodIndex: number; // TODO: doc... index into fromNode.exactMethods array
         identifier: string; // TODO: is this same as fromNode.identifier? need it here? investigate?
         isMeta: boolean; // TODO: change to isDecorator
@@ -41,5 +37,5 @@ export interface NodeInfo {
     identifier: string;
 
     // from ChildNodes<TNode>:
-    childNodes: NodeInfo[];
+    childNodes: Node[];
 }

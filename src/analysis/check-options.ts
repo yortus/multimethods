@@ -1,5 +1,5 @@
-import {Options} from '../../options';
-import {fatalError} from '../../util';
+import {Options} from '../options';
+import {fatalError} from '../util';
 
 
 
@@ -7,6 +7,7 @@ import {fatalError} from '../../util';
 
 // TODO: doc...
 export function checkOptions(options: Options): void {
+    options = typeof options === 'function' ? {discriminator: options} : {...options};
 
     // `name` must be either undefined, or conform to [A-Za-z$_][A-Za-z$_0-9]* (ie a simple JS indentifier).
     if (options.name !== undefined) {

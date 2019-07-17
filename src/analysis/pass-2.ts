@@ -1,5 +1,4 @@
 import {EulerDiagram} from '../math/sets';
-import {MMInfo} from '../mm-info';
 import {DeepUpdated, fatalError, getLongestCommonPrefix, getLongestCommonSuffix} from '../util';
 
 
@@ -16,7 +15,7 @@ export function pass2(mminfo: ReturnType<typeof import('./pass-1').pass1>) {
         // this method ensures graceful dispatch behaviour in the case that method table provides no handling for the
         // universal predicate. In particular, it guarantees every possible dispatch has a non-empty method sequence.
         if (node.supersets.length === 0) {
-            insertAsLeastSpecificRegularMethod(mminfo, node.exactMethods, mminfo.config.unhandled);
+            insertAsLeastSpecificRegularMethod(mminfo, node.exactMethods, mminfo.options.unhandled);
         }
 
         // If there are multiple ways into the set, analyse and mitigate all potential ambiguities...
@@ -73,7 +72,7 @@ export function pass2(mminfo: ReturnType<typeof import('./pass-1').pass1>) {
 
 
 // TODO: doc...
-function insertAsLeastSpecificRegularMethod(mminfo: MMInfo<{}>, orderedMethods: Function[], method: Function) {
+function insertAsLeastSpecificRegularMethod(mminfo: ReturnType<typeof import('./pass-1').pass1>, orderedMethods: Function[], method: Function) {
     let i = 0;
     while (i < orderedMethods.length && !mminfo.isDecorator(orderedMethods[i])) ++i;
     orderedMethods.splice(i, 0, method);
