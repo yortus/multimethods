@@ -1,11 +1,10 @@
-import {analyseAll, buildMMInfo} from './analysis';
+import {makeMMInfo} from './analysis';
 import {codegen} from './codegen';
 import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import * as types from './multimethod';
 import {Options} from './options';
 import {UNHANDLED_DISPATCH} from './sentinels';
 import {debug} from './util';
-import {checkMethodsAndDecorators, checkOptions} from './validation';
 
 
 
@@ -98,13 +97,9 @@ function combine(existingMethods: Record<string, Function[]>, additionalMethods:
 
 // TODO: doc...
 function MM(options: Options, methods: Record<string, Function | Function[]>, decorators: Record<string, Function | Function[]>) {
-    options = options || {};
-    checkOptions(options); // NB: may throw
-    checkMethodsAndDecorators(methods, decorators); // NB: may throw
-    let mminfo = buildMMInfo({options, methods, decorators});
-    let mminfo2 = analyseAll(mminfo);
-    if (debug.enabled) instrumentMethods(mminfo2);
-    let multimethod = codegen(mminfo2);
-    if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo2);
+    let mminfo = makeMMInfo(options, methods, decorators);
+    if (debug.enabled) instrumentMethods(mminfo);
+    let multimethod = codegen(mminfo);
+    if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);
     return multimethod;
 }

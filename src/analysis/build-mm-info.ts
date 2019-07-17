@@ -1,9 +1,12 @@
 import {EulerDiagram, EulerSet} from '../math/sets';
-import {MMInfo, NodeInfo} from '../mm-info';
+import {MMInfo} from '../mm-info';
 import {Options} from '../options';
-import {assign, DeepReplace} from '../util';
-import {Configuration} from './configuration';
+import {DeepUpdated, deepUpdateInPlace} from '../util';
 import {createConfiguration} from './configuration';
+import {checkMethodsAndDecorators, checkOptions} from './validation';
+import {pass1} from './pass-1';
+import {pass2} from './pass-2';
+import {pass3} from './pass-3';
 
 
 
@@ -15,81 +18,106 @@ interface Config {
     decorators: Record<string, Function | Function[]>;
 }
 
-// TODO: temp testing
-export function buildMMInfo(config: Config) {
-    return new PartialMMInfo(config);
+
+
+
+export interface MMInfoEx<TNode extends object = EulerSet> extends MMInfo<TNode> {
+    map<UNode extends object>(callback: (node: TNode) => UNode): MMInfoEx<DeepUpdated<UNode, TNode, UNode>>;
 }
 
 
 
 
-export type NodeProps = keyof NodeInfo;
+// TODO: temp testing
+export function makeMMInfo(options: Options, methods: Record<string, Function | Function[]>, decorators: Record<string, Function | Function[]>) {
+    checkOptions(options); // NB: may throw
+    checkMethodsAndDecorators(methods, decorators); // NB: may throw
+    let mminfo0 = makeMMInfo2({options, methods, decorators});
+
+    let mminfo1 = pass1(mminfo0);
+    let mminfo2 = pass2(mminfo1);
+    let mminfo3 = pass3(mminfo2);
+    return mminfo3;
+}
 
 
 
 
-// TODO: doc...
-export class PartialMMInfo<P extends NodeProps = never> implements MMInfo<{}> {
+// TODO: temp testing
+function makeMMInfo2(config: Config): MMInfoEx {
 
-    constructor(config: Config) {
-        let cfg = createConfiguration(config.options);
-        let allMethods = combineMethodsAndDecorators(config.methods, config.decorators);
-        let decorators = Object.keys(config.decorators).reduce(
-            (decs, predicate) => decs.concat(config.decorators[predicate]),
-            [] as Function[]
+    let cfg = createConfiguration(config.options);
+    let allMethods = combineMethodsAndDecorators(config.methods, config.decorators);
+    let decorators = new Set(Object.keys(config.decorators).reduce(
+        (decs, predicate) => decs.concat(config.decorators[predicate]),
+        [] as Function[]
+    ));
+
+    let ed = new EulerDiagram(Object.keys(allMethods), cfg.unreachable);
+    let allNodes = ed.allSets;
+    let rootNode = allNodes[ed.allSets.indexOf(ed.universalSet)];
+
+    let mminfo: MMInfo<EulerSet> = {
+        config: cfg,
+        allMethods,
+        allNodes,
+        rootNode,
+        isDecorator: m => decorators.has(m),
+        findNode(predicate) {
+            let set = ed.findSet(predicate);
+            let node = !!set ? this.allNodes[ed.allSets.indexOf(set)] : undefined;
+            return node;
+        },
+    };
+
+    let map = makeMapMethod(mminfo);
+    return {...mminfo, map};
+}
+
+
+
+
+function makeMapMethod<TNode extends object>(mminfo: MMInfo<TNode>) {
+    return <UNode extends object>(callback: (node: TNode) => UNode): MMInfoEx<DeepUpdated<UNode, TNode, UNode>> => {
+
+        // 1. map each old node to its new node
+        let oldNodes = mminfo.allNodes;
+        let newNodes = new Set<UNode>();
+        let mapped = oldNodes.reduce(
+            (map, oldNode) => {
+                let newNode = callback(oldNode);
+                newNodes.add(newNode);
+                map.set(oldNode, newNode);
+                return map;
+            },
+            new Map<TNode, UNode>()
         );
 
-        let ed = new EulerDiagram(Object.keys(allMethods), cfg.unreachable);
-        this.config = cfg;
-        this.allMethods = allMethods;
-        this.decorators = new Set(decorators);
-        this.allNodes = ed.allSets.map(() => ({} as any)); // TODO: remove cast to any
-        this.rootNode = this.allNodes[ed.allSets.indexOf(ed.universalSet)];
-        this.eulerDiagram = ed;
-    }
+        // 2. for each new node, deep-replace old node refs with new node refs
+        // TODO: create a NEW mminfo... this just mutates the existing one and returns it...
+        type VNode = DeepUpdated<UNode, TNode, UNode>;
+        let x = {
+            allNodes: oldNodes.map(n => mapped.get(n)! as unknown as VNode),
+            rootNode: mapped.get(mminfo.rootNode)! as unknown as VNode,
+        };
+        deepUpdateInPlace(x, mapped);
 
-    config: Configuration;
 
-    allMethods: Record<string, Function[]>; // TODO: doc includes all regular methods and all decorators
-
-    allNodes: Array<PartialNode<P>>;
-
-    rootNode: PartialNode<P>;
-
-    isDecorator(m: Function): boolean {
-        return this.decorators.has(m);
-    }
-
-    findNode(predicate: string): PartialNode<P> | undefined {
-        let set = this.eulerDiagram.findSet(predicate);
-        let node = !!set ? this.allNodes[this.eulerDiagram.allSets.indexOf(set)] : undefined;
-        return node;
-    }
-
-    // TODO: doc... modifies this MMInfo's nodes in-place. Returns this MMInfo instance, but with refined node types
-    addProps<U extends NodeProps>(callback: (node: PartialNode<P>, nodes: Array<PartialNode<P>>, set: EulerSet, sets: EulerSet[]) => {[K in U]: DeepReplace<NodeInfo[K], NodeInfo, PartialNode<P>>}) {
-
-        // Map over all nodes, obtaining the additional properties, and assigning each back into its corresponding node.
-        let sets = this.eulerDiagram.allSets;
-        this.allNodes.forEach((node, i) => {
-            let newProps = callback(node, this.allNodes, sets[i], sets); // TODO: was... || {};
-            assign(node, newProps);
-        });
-
-        // Return the same instance, but with nodes cast to a more refined type.
-        // The `nodes` variable is only used for type inference.
-        return this as any as PartialMMInfo<P | U>;
-    }
-
-    private eulerDiagram: EulerDiagram;
-
-    private decorators: Set<Function>;
+        let result: MMInfo<VNode> = {
+            config: mminfo.config,
+            allMethods: mminfo.allMethods,
+            allNodes: x.allNodes,
+            rootNode: x.rootNode,
+            isDecorator: mminfo.isDecorator,
+            findNode(predicate) {
+                let old = mminfo.findNode(predicate);
+                let node = !!old ? result.allNodes[mminfo.allNodes.indexOf(old)] : undefined;
+                return node;
+            },
+        };
+        return {...result, map: makeMapMethod(result)};
+    };
 }
-
-
-
-
-export type PartialNode<P extends keyof NodeInfo> = {[K in P]: DeepReplace<NodeInfo[K], NodeInfo, PartialNode<P>>};
 
 
 
@@ -98,14 +126,19 @@ export type PartialNode<P extends keyof NodeInfo> = {[K in P]: DeepReplace<NodeI
 function combineMethodsAndDecorators(methods: Record<string, Function | Function[]>, decorators: Record<string, Function | Function[]>) {
     let result = {} as Record<string, Function[]>;
 
-    for (let predicate of Object.keys(decorators)) {
-        let chain = [] as Function[];
-        result[predicate] = chain.concat(decorators[predicate]);
-    }
+    // TODO: explain ordering: regular methods from left-to-right; then meta-methods from right-to-left
 
     for (let predicate of Object.keys(methods)) {
-        let chain = result[predicate] || [];
-        result[predicate] = chain.concat(methods[predicate]);
+        let meths = methods[predicate];
+        result[predicate] = Array.isArray(meths) ? meths : [meths];
     }
+
+    for (let predicate of Object.keys(decorators)) {
+        let chain = result[predicate] || [];
+        let decs = decorators[predicate];
+        decs = Array.isArray(decs) ? decs.slice() : [decs];
+        result[predicate] = chain.concat(decs.reverse());
+    }
+
     return result;
 }

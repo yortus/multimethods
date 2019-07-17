@@ -43,7 +43,7 @@ export interface NodeInfo {
     identifier: string;
 
     // from ParentNode<TNode>:
-    parentNode: NodeInfo | null; // TODO: make prop optional, don't use null
+    //parentNode?: NodeInfo;
 
     // from ChildNodes<TNode>:
     childNodes: NodeInfo[];

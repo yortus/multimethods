@@ -1,7 +1,6 @@
-import {ALL} from '../math/predicates';
-import {toNormalPredicate} from '../math/predicates';
-import {EulerDiagram} from '../math/sets';
-import {debug, fatalError} from '../util';
+import {ALL, toNormalPredicate} from '../../math/predicates';
+import {EulerDiagram} from '../../math/sets';
+import {debug, fatalError} from '../../util';
 
 
 

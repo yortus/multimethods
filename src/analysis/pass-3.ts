@@ -1,19 +1,24 @@
 import {toIdentifierParts} from '../math/predicates';
-import {NodeInfo} from '../mm-info';
-import {DeepReplace, repeat} from '../util';
-import {NodeProps, PartialMMInfo} from './build-mm-info';
+import {repeat} from '../util';
 
 
 
 
 // TODO: doc...
-export function analyseMethodSequences<P extends NodeProps>(mminfo: PartialMMInfo<P | 'exactPredicate' | 'exactMethods' | 'parentNode'>) {
-    return mminfo.addProps(startNode => {
-        let methodSequence = [] as DeepReplace<NodeInfo['methodSequence'], NodeInfo, typeof startNode>;
+export function pass3(mminfo: ReturnType<typeof import('./pass-2').pass2>) {
+    type TNode = typeof mminfo.rootNode;
+
+    return mminfo.map(startNode => {
+        let methodSequence = [] as Array<{
+            fromNode: TNode;
+            methodIndex: number; // TODO: doc... index into fromNode.exactMethods array
+            identifier: string; // TODO: is this same as fromNode.identifier? need it here? investigate?
+            isMeta: boolean; // TODO: change to isDecorator
+        }>;
 
         // TODO: explain method sequence...
         //       *All* applicable methods for the node's predicate in most- to least- specific order...
-        for (let n: typeof startNode | null = startNode; n !== null; n = n.parentNode) {
+        for (let n: TNode | undefined = startNode; n !== undefined; n = n.parentNode) {
             let fromNode = n;
             fromNode.exactMethods.forEach((method, methodIndex) => {
                 let isMeta = mminfo.isDecorator(method);
@@ -33,6 +38,8 @@ export function analyseMethodSequences<P extends NodeProps>(mminfo: PartialMMInf
         let entryPoint = methodSequence.filter(entry => entry.isMeta).pop() || methodSequence[0];
         let entryPointIndex = methodSequence.indexOf(entryPoint);
 
-        return {methodSequence, entryPointIndex, identifier: methodSequence[0].identifier};
+
+        // TODO: fix...
+        return {...startNode, methodSequence, entryPointIndex, identifier: methodSequence[0].identifier};
     });
 }

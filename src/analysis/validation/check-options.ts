@@ -1,5 +1,5 @@
-import {Options} from '../options';
-import {fatalError} from '../util';
+import {Options} from '../../options';
+import {fatalError} from '../../util';
 
 
 
