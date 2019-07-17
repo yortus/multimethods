@@ -1,10 +1,9 @@
 import {analyse} from './analysis';
 import {codegen} from './codegen';
-import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import * as types from './multimethod';
 import {Options} from './options';
 import {UNHANDLED_DISPATCH} from './sentinels';
-import {debug, Dict} from './util';
+import {Dict} from './util';
 
 
 
@@ -28,20 +27,20 @@ export function isUnhandled(err: {code?: unknown}) {
 function create<P extends unknown[]>(options?: Options<P>): types.Multimethod<P, never>;
 function create<P extends unknown[]>(options?: Options<P, Promise<string>>): types.AsyncMultimethod<P, never>;
 function create(options: Options<unknown[], any>) {
-    let mm = MM(options, {}, {});
+    let mm = codegen(analyse(options, {}, {}));
     let result = addMethods(mm, {}, {});
     return result;
 
     function addMethods<T>(mm: T, existingMethods: Dict<Function[]>, existingDecorators: Dict<Function[]>) {
         let extend = (methods: Record<string, Function | Array<Function | 'super'>>) => {
             let combinedMethods = combine(existingMethods, methods);
-            let mm2 = MM(options, combinedMethods, existingDecorators);
+            let mm2 = codegen(analyse(options, combinedMethods, existingDecorators));
             return addMethods(mm2, combinedMethods, existingDecorators);
         };
 
         let decorate = (decorators: Record<string, Function | Array<Function | 'super'>>) => {
             let combinedDecorators = combine(existingDecorators, decorators);
-            let mm2 = MM(options, existingMethods, combinedDecorators);
+            let mm2 = codegen(analyse(options, existingMethods, combinedDecorators));
             return addMethods(mm2, existingMethods, combinedDecorators);
         };
 
@@ -87,16 +86,4 @@ function combine(existingMethods: Dict<Function[]>, additionalMethods: Dict<Func
         result[k] = pre.concat(existing, post);
     }
     return result;
-}
-
-
-
-
-// TODO: doc...
-function MM(options: Options, methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
-    let mminfo = analyse(options, methods, decorators);
-    if (debug.enabled) instrumentMethods(mminfo);
-    let multimethod = codegen(mminfo);
-    if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);
-    return multimethod;
 }

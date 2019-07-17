@@ -1,6 +1,6 @@
-import {MMInfo} from '../mm-info';
-import {Method} from '../multimethod';
-import {andThen, debug, repeat} from '../util';
+import {MMInfo} from '../../mm-info';
+import {Method} from '../../multimethod';
+import {andThen, debug, repeat} from '../../util';
 
 
 

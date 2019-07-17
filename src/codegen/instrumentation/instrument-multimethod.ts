@@ -1,5 +1,5 @@
-import {MMInfo} from '../mm-info';
-import {andThen, debug} from '../util';
+import {MMInfo} from '../../mm-info';
+import {andThen, debug} from '../../util';
 
 
 

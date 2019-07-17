@@ -1,6 +1,7 @@
 import * as predicates from '../math/predicates';
 import {MMInfo, Node} from '../mm-info';
-import {repeat} from '../util';
+import {debug, repeat} from '../util';
+import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import {multimethodTemplate} from './multimethod-template';
 import * as substitutions from './substitutions';
 import {beautify, eliminateDeadCode, getIndentDepth, minify, replaceAll, replaceSection} from './template-utilities';
@@ -9,6 +10,8 @@ import {beautify, eliminateDeadCode, getIndentDepth, minify, replaceAll, replace
 
 
 export function codegen(mminfo: MMInfo) {
+    if (debug.enabled) instrumentMethods(mminfo);
+
     let multimethodSourceCode = generateMultimethodSourceCode(mminfo);
 
     // Evaluate the multimethod's entire source code to obtain the multimethod function. The use of eval here is safe.
@@ -20,6 +23,8 @@ export function codegen(mminfo: MMInfo) {
     // tslint:disable-next-line:no-eval
     let multimethod = eval(`(${multimethodSourceCode})`)(mminfo, predicates);
     multimethod.toString = () => multimethodSourceCode;
+
+    if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);
     return multimethod;
 }
 
