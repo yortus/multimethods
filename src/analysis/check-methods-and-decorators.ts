@@ -19,17 +19,6 @@ export function checkMethodsAndDecorators(methods: Dict<Function | Function[]>, 
 
 function check(methods: Dict<Function | Function[]>) {
 
-    // TODO: was... remove? clients can no longer violate this since meths and decs are kept separate
-    // // For method chains, ensure first regular method in chain (if any) comes after last decorator in chain (if any).
-    // Object.keys(methods).forEach((predicate): void => {
-    //     let method = methods[predicate];
-    //     if (!Array.isArray(method)) return;
-    //     let chain = method;
-    //     if (chain.some((fn, i) => i < chain.length - 1 && !isDecorator(fn) && isDecorator(chain[i + 1]))) {
-    //         return fatalError.MIXED_CHAIN(predicate);
-    //     }
-    // });
-
     // TODO: still need this?
     // Perform strict validation. If any problems are found:
     // - issue a fatal error if options.strict is true.
