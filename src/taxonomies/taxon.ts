@@ -1,4 +1,4 @@
-import {NormalPattern} from '../patterns';
+import {NormalisedPattern} from '../patterns';
 
 
 
@@ -8,7 +8,7 @@ export interface Taxon {
 
 
     /** The normalised pattern associated with this taxon. */
-    pattern: NormalPattern;
+    pattern: NormalisedPattern;
 
 
     /** Links to this taxon's direct parents (i.e., more generalised or 'wider' patterns). */

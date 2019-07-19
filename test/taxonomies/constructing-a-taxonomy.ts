@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {Taxon, Taxonomy} from 'multimethods/taxonomies';
-import {NormalPattern} from 'multimethods/patterns';
+import {NormalisedPattern} from 'multimethods/patterns';
 
 
 
@@ -487,7 +487,7 @@ function taxonToObj(taxon: Taxon): {} {
 
 
 // TODO: temp testing...
-function isUnreachable(p: NormalPattern) {
+function isUnreachable(p: NormalisedPattern) {
 
     // Only consider the form *A*B*C*...*
     if (p.length < 3) return;

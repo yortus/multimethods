@@ -1,6 +1,6 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import {toMatchFunction, toPattern} from 'multimethods/patterns';
+import {Pattern, toMatchFunction} from 'multimethods/patterns';
 
 
 
@@ -88,7 +88,7 @@ describe('Matching a pattern against a string', () => {
             let rhs = test.split(split)[1];
             let address = rhs.split(' WITH ')[0];
             let expectedCaptures = isMatch ? eval(`(${rhs.split(' WITH ')[1]})`) || {} : null;
-            let pattern = toPattern(patternSource);
+            let pattern = Pattern(patternSource);
             let actualCaptures = toMatchFunction(pattern)(address);
             expect(actualCaptures).to.deep.equal(expectedCaptures);
         });

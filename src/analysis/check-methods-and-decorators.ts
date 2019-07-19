@@ -1,5 +1,5 @@
+import {ALL, NormalisedPattern} from '../patterns';
 import {Taxonomy} from '../taxonomies';
-import {ALL, toNormalPattern} from '../patterns';
 import {debug, Dict, fatalError} from '../util';
 
 
@@ -34,7 +34,7 @@ function check(methods: Dict<Function | Function[]>) {
     // - no two patterns in `methods` have the same normalised pattern (use chains for this scenario)
     let deduped = {} as {[s: string]: string[]};
     Object.keys(methods).forEach(pattern => {
-        let np = toNormalPattern(pattern);
+        let np = NormalisedPattern(pattern);
         deduped[np] = deduped[np] || [];
         deduped[np].push(pattern);
     });
@@ -62,7 +62,7 @@ function check(methods: Dict<Function | Function[]>) {
 function listDiscontinuities(methods: Dict<Function | Function[]>) {
     if (methods === undefined) return [];
 
-    let handledPatterns = Object.keys(methods).map(p => toNormalPattern(p));
+    let handledPatterns = Object.keys(methods).map(p => NormalisedPattern(p));
     let taxonomy = new Taxonomy(handledPatterns);
     let unhandledPatterns = taxonomy.allTaxons.map(t => t.pattern).filter(p => handledPatterns.indexOf(p) === -1);
     let problems = [] as string[];

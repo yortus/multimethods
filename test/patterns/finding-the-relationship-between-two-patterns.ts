@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {intersect, isSubsetOf, NONE, toNormalPattern} from 'multimethods/patterns';
+import {intersect, isSubsetOf, NONE, NormalisedPattern} from 'multimethods/patterns';
 
 
 
@@ -92,7 +92,7 @@ describe('Finding the relationship between two patterns', () => {
     tests.forEach(test => {
         it(test, () => {
             test = test.replace(/⨂/g, '');
-            let [lhs, rhs] = test.split(/ [A-Z]+ /).map(toNormalPattern);
+            let [lhs, rhs] = test.split(/ [A-Z]+ /).map(NormalisedPattern);
             let expected = test.match(/ ([A-Z]+) /)![1];
             let actual = '';
 

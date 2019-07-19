@@ -1,6 +1,6 @@
 import {debug} from '../util';
+import {NormalisedPattern} from './normalised-pattern';
 import {Pattern} from './pattern';
-import {toNormalPattern} from './to-normal-pattern';
 
 
 
@@ -29,7 +29,7 @@ export function toMatchFunction(pattern: Pattern): MatchFunction {
     if (pattern.indexOf('|') === -1) return toMatchFunctionForOneAlternative(pattern);
 
     // TODO: temp testing...
-    let patterns = toNormalPattern(pattern).split('|');
+    let patterns = NormalisedPattern(pattern).split('|');
     let matchFunctions = patterns.map(toMatchFunctionForOneAlternative);
     return s => {
         for (let match of matchFunctions) {
@@ -47,13 +47,13 @@ export function toMatchFunction(pattern: Pattern): MatchFunction {
 function toMatchFunctionForOneAlternative(pattern: Pattern): MatchFunction {
 
     // TODO: temp testing...
-    let normalPredicate = toNormalPattern(pattern);
+    let normalisedPattern = NormalisedPattern(pattern);
 
     // Compute useful invariants for the given pattern.
     // These are used as precomputed values in the closures created below.
     const captureNames = getCaptureNames(pattern).filter(name => name !== '?');
     const firstCaptureName = captureNames[0];
-    const literalChars = normalPredicate.replace(/[*]/g, '');
+    const literalChars = normalisedPattern.replace(/[*]/g, '');
     const literalCharCount = literalChars.length;
 
     // Characterise the given pattern using a simplified 'signature'.
@@ -121,9 +121,9 @@ function toMatchFunctionForOneAlternative(pattern: Pattern): MatchFunction {
             return s => endsWith(s, literalChars) ? {[firstCaptureName]: s.slice(0, -literalCharCount)} : null;
 
         case 'lit*lit':
-            let captureStart = normalPredicate.indexOf('*');
-            let startLit = normalPredicate.slice(0, captureStart);
-            let endLit = normalPredicate.slice(captureStart + 1);
+            let captureStart = normalisedPattern.indexOf('*');
+            let startLit = normalisedPattern.slice(0, captureStart);
+            let endLit = normalisedPattern.slice(captureStart + 1);
             return s => surroundedWith(s, startLit, endLit) ? SUCCESSFUL_MATCH_NO_CAPTURES : null;
 
         // TODO: consider implementing the following cases for a *marginal* performance boost
@@ -161,7 +161,7 @@ export type MatchFunction = (_: string) => {[captureName: string]: string} | nul
  * Each named globstar/wildcard in the pattern corresponds to a capture group in the regular expression.
  */
 function makeRegExpForPattern(pattern: Pattern) {
-    let signature = toNormalPattern(pattern);
+    let signature = NormalisedPattern(pattern);
     let captureNames = getCaptureNames(pattern);
     let captureIndex = 0;
     let re = signature.replace(/\*\*/g, 'ᕯ').split('').map(c => {

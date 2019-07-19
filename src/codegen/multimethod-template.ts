@@ -86,7 +86,7 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../patte
 
     /* -------------------------------------------------------------------------------- */
     BEGIN_SECTION('PATTERN MATCHING');
-    let NODE$NAMEOF_IS_MATCH = ℙ.toMatchFunction(ℙ.toNormalPattern(mminfo.allNodes[NODE.INDEX].exactPattern));
+    let NODE$NAMEOF_IS_MATCH = ℙ.toMatchFunction(ℙ.NormalisedPattern(mminfo.allNodes[NODE.INDEX].exactPattern));
     if (NODE.HAS_PATTERN_BINDINGS) {
         // tslint:disable-next-line: no-var-keyword
         var NODE$NAMEOF_GET_PATTERN_BINDINGS: any = ℙ.toMatchFunction(mminfo.allNodes[NODE.INDEX].exactPattern);

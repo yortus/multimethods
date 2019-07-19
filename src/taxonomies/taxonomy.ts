@@ -1,4 +1,4 @@
-import {ALL, intersect, isSubsetOf, NONE, NormalPattern, toNormalPattern, Unreachable} from '../patterns';
+import {ALL, intersect, isSubsetOf, NONE, NormalisedPattern, Unreachable} from '../patterns';
 import {fatalError} from '../util';
 import {Taxon} from './taxon';
 
@@ -86,7 +86,7 @@ export class Taxonomy {
     // TODO: temp testing... doc... looks up the taxon for the given pattern. returns undefined if not found.
     // algo: exact match using canonical form of given Pattern/string
     findTaxon(pattern: string): Taxon | undefined {
-        let p = toNormalPattern(pattern);
+        let p = NormalisedPattern(pattern);
         let result = this.allTaxons.filter(t => t.pattern === p)[0];
         return result;
     }
@@ -115,7 +115,7 @@ const MAX_AUXILIARY_PATTERNS = 3125;
 
 /** Helper to generate the list of principal patterns. These are normalised, duplicate-free, and exclude '∅'. */
 function getPrincipalPatterns(originalPatterns: string[]) {
-    let result = originalPatterns.map(toNormalPattern);
+    let result = originalPatterns.map(NormalisedPattern);
     result = result.filter((el, i, arr) => arr.indexOf(el) === i); // de-duplicate.
     result = result.filter(p => p !== NONE); // '∅' is always omitted.
     return result;
@@ -125,7 +125,7 @@ function getPrincipalPatterns(originalPatterns: string[]) {
 
 
 /** Helper to obtain all auxiliary patterns, and all superset/subset relationships between patterns. */
-function getSupersetRelationships(principalPatterns: NormalPattern[], unreachable?: Unreachable) {
+function getSupersetRelationships(principalPatterns: NormalisedPattern[], unreachable?: Unreachable) {
 
     // Count up the principal patterns. Ensure the count does not exceed the complexity limit (more on this below).
     let principalCount = principalPatterns.length;
@@ -134,7 +134,7 @@ function getSupersetRelationships(principalPatterns: NormalPattern[], unreachabl
     // Create a list to hold all principal and auxiliary patterns. It always starts with the principal patterns
     // in the order given. Create a separate variable to accumulate auxiliary patterns as they are generated.
     let allPatterns = principalPatterns.slice();
-    let auxiliaryPatterns = new Set<NormalPattern>();
+    let auxiliaryPatterns = new Set<NormalisedPattern>();
 
     // Add an auxiliary pattern for the universal pattern '**' if it is not already a principal pattern.
     if (principalPatterns.indexOf(ALL) === -1) auxiliaryPatterns.add(ALL);
@@ -236,8 +236,8 @@ function getSupersetRelationships(principalPatterns: NormalPattern[], unreachabl
  *
  * [1] see transitive reduction: https://en.wikipedia.org/wiki/Transitive_reduction
  */
-function getMinimumEquivalentDAG(allPatterns: NormalPattern[],
-                                 principalPatterns: NormalPattern[],
+function getMinimumEquivalentDAG(allPatterns: NormalisedPattern[],
+                                 principalPatterns: NormalisedPattern[],
                                  supersets: Array<Set<number>>) {
 
     // Create a node for each principal and auxiliary pattern. Each node has the shape of a Taxon.

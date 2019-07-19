@@ -1,7 +1,7 @@
 import {memoise} from '../util';
 import {ALL} from './all';
 import {NONE} from './none';
-import {NormalPattern} from './normal-pattern';
+import {NormalisedPattern} from './normalised-pattern';
 
 
 
@@ -15,7 +15,7 @@ import {NormalPattern} from './normal-pattern';
 
 
 // TODO: doc... does *not* work with alternation in either `sub` or `sup`. Use intersect() for that.
-export function isSubsetOf(sub: NormalPattern, sup: NormalPattern): boolean {
+export function isSubsetOf(sub: NormalisedPattern, sup: NormalisedPattern): boolean {
 
     // Shortcuts for a few identity cases.
     if (sub === sup) return true;
@@ -26,11 +26,11 @@ export function isSubsetOf(sub: NormalPattern, sup: NormalPattern): boolean {
     // - if `sub` is an alternation, then `sub` ⊂ `sup` iff for every alternative `x` of `sub`, `x` ⊂ `sup`.
     // - if `sup` is an alternation, then `sub` ⊂ `sup` iff there is an alternative `y` of `sup` such that `sub` ⊂ `y`.
     if (sub.indexOf('|') !== -1) {
-        let alts = sub.split('|') as NormalPattern[];
+        let alts = sub.split('|') as NormalisedPattern[];
         return alts.every(alt => isSubsetOf(alt, sup));
     }
     if (sup.indexOf('|') !== -1) {
-        let alts = sup.split('|') as NormalPattern[];
+        let alts = sup.split('|') as NormalisedPattern[];
         return alts.some(alt => isSubsetOf(sub, alt));
     }
 
@@ -48,8 +48,8 @@ export function isSubsetOf(sub: NormalPattern, sup: NormalPattern): boolean {
  * Returns a regex that matches all normalised patterns that are proper or improper subsets of the specified
  * normalised pattern, and rejects everything else. Assumes `pattern` contains no alternations.
  */
-let makeSubsetRecogniser: (pattern: NormalPattern) => RegExp;
-makeSubsetRecogniser = memoise((pattern: NormalPattern) => {
+let makeSubsetRecogniser: (pattern: NormalisedPattern) => RegExp;
+makeSubsetRecogniser = memoise((pattern: NormalisedPattern) => {
     let regexSource = '';
     for (let i = 0; i < pattern.length; ++i) {
         let c = pattern.charAt(i);

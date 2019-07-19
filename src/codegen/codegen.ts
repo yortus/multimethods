@@ -71,7 +71,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo) {
 
     source = replaceSection(source, 'PATTERN MATCHING', placeholderContent => {
         return mminfo.allNodes.map((node, nodeIndex) => {
-            // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
+            // result += `// -------------------- ${node.exactPattern} --------------------\n`;
             return replaceAll(placeholderContent, 'NODE', substitutions.forNode(node, nodeIndex));
         }).join('');
     });
@@ -79,7 +79,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo) {
     // thunk functions - codegen foreach thunk
     source = replaceSection(source, 'THUNKS', placeholderContent => {
         return mminfo.allNodes.map(node => {
-            // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
+            // result += `// -------------------- ${node.exactPattern} --------------------\n`;
             return node.methodSequence.map((_, index, seq) => {
 
                 // To avoid unnecessary duplication, skip emit for regular methods that are less
@@ -97,7 +97,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo) {
 
     source = replaceSection(source, 'METHODS', placeholderContent => {
         return mminfo.allNodes.map((node, nodeIndex) => {
-            // result += `// -------------------- ${node.exactPredicate} --------------------\n`;
+            // result += `// -------------------- ${node.exactPattern} --------------------\n`;
             let nodeSubs = substitutions.forNode(node, nodeIndex);
             return node.exactMethods.map((_, methodIndex) => {
                 let result = placeholderContent;

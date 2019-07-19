@@ -1,7 +1,7 @@
-import {NormalPattern} from './normal-pattern';
+import {NormalisedPattern} from './normalised-pattern';
 
 
 
 
 /** The pattern that matches every string. */
-export const ALL = '**' as NormalPattern;
+export const ALL = '**' as NormalisedPattern;

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {toNormalPattern} from 'multimethods/patterns';
+import {NormalisedPattern} from 'multimethods/patterns';
 
 
 
@@ -32,7 +32,7 @@ describe('Comparing equivalent patterns', () => {
         group.forEach(p1 => {
             group.forEach(p2 => {
                 it(`'${p1}' vs '${p2}'`, () => {
-                    expect(toNormalPattern(p1)).equals(toNormalPattern(p2));
+                    expect(NormalisedPattern(p1)).equals(NormalisedPattern(p2));
                 });
             });
         });

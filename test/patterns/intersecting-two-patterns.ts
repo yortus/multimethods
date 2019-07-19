@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {intersect, toNormalPattern} from 'multimethods/patterns';
+import {intersect, NormalisedPattern} from 'multimethods/patterns';
 
 
 
@@ -102,7 +102,7 @@ describe('Intersecting two patterns', () => {
             let actual: string;
             let expected = rhs;
             try {
-                actual = intersect(toNormalPattern(lhsA), toNormalPattern(lhsB));
+                actual = intersect(NormalisedPattern(lhsA), NormalisedPattern(lhsB));
             }
             catch (ex) {
                 actual = 'ERROR';

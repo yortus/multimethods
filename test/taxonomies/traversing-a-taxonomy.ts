@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {ALL, intersect, NONE, toNormalPattern} from 'multimethods/patterns';
+import {ALL, intersect, NONE, NormalisedPattern} from 'multimethods/patterns';
 import {Taxon, Taxonomy} from 'multimethods/taxonomies';
 
 
@@ -28,9 +28,9 @@ describe('Traversing a taxonomy', () => {
             expect(taxonomy.allTaxons.every(taxon => taxon.pattern !== NONE)).to.equal(true);
 
             // All input patterns are in the taxonomy constructed from them, except `∅`.
-            let normalPatterns = patterns.filter(p => p !== NONE).map(toNormalPattern);
+            let normalisedPatterns = patterns.filter(p => p !== NONE).map(NormalisedPattern);
             let taxonomyPatterns = taxonomy.allTaxons.map(taxon => taxon.pattern).sort();
-            expect(taxonomyPatterns).to.include.members(normalPatterns);
+            expect(taxonomyPatterns).to.include.members(normalisedPatterns);
 
             // Every child taxon's pattern matches a subset of the addresses matched by its parent taxon's pattern.
             let edges = getAllEdges(taxonomy.rootTaxon);

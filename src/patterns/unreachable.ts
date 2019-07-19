@@ -1,6 +1,6 @@
-import {NormalPattern} from './normal-pattern';
+import {NormalisedPattern} from './normalised-pattern';
 
 
 
 
-export type Unreachable = (pattern: NormalPattern) => (boolean | undefined);
+export type Unreachable = (pattern: NormalisedPattern) => (boolean | undefined);

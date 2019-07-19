@@ -1,5 +1,5 @@
+import {NormalisedPattern} from './normalised-pattern';
 import {Pattern} from './pattern';
-import {toNormalPattern} from './to-normal-pattern';
 
 
 
@@ -17,7 +17,7 @@ import {toNormalPattern} from './to-normal-pattern';
 //  * Different normalized forms are guaranteed to have different return values from this function.
 //  */
 export function toIdentifierParts(pattern: Pattern): string {
-    let p = toNormalPattern(pattern) as string;
+    let p = NormalisedPattern(pattern) as string;
     Object.keys(MAPPINGS).forEach((sym: keyof typeof MAPPINGS) => {
         while (p.indexOf(sym) !== -1) {
             p = p.replace(sym, MAPPINGS[sym]);

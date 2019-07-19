@@ -1,6 +1,6 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import {toNormalPattern, toPattern} from 'multimethods/patterns';
+import {NormalisedPattern} from 'multimethods/patterns';
 
 
 
@@ -137,7 +137,7 @@ describe('Parsing and normalising a pattern', () => {
             let [source, expected] = test.split(' ==> ');
             let actual: string;
             try {
-                actual = toNormalPattern(toPattern(source));
+                actual = NormalisedPattern(source);
             }
             catch (ex) {
                 actual = 'ERROR';

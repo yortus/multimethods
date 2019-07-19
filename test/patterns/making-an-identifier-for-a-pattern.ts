@@ -1,6 +1,6 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import {toIdentifierParts, toPattern} from 'multimethods/patterns';
+import {Pattern, toIdentifierParts} from 'multimethods/patterns';
 
 
 
@@ -109,7 +109,7 @@ describe('Making an identifier for a pattern', () => {
             let [source, expected] = test.split(' ==> ');
             let actual: string;
             try {
-                actual = toIdentifierParts(toPattern(source));
+                actual = toIdentifierParts(Pattern(source));
             }
             catch (ex) {
                 actual = 'ERROR';

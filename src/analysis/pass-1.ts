@@ -1,6 +1,6 @@
 import {OptionsObject} from '../options';
+import {NormalisedPattern, Pattern} from '../patterns';
 import {Taxonomy} from '../taxonomies';
-import {Pattern, toNormalPattern, toPattern} from '../patterns';
 import {Dict} from '../util';
 
 
@@ -22,10 +22,10 @@ export function pass1(options: Required<OptionsObject>, methods: Dict<Function |
 
         for (let key of Object.keys(allMethods)) {
             // Skip until we find the right pattern.
-            if (toNormalPattern(key) !== taxon.pattern) continue;
+            if (NormalisedPattern(key) !== taxon.pattern) continue;
 
             // Found it!
-            exactPattern = toPattern(key);
+            exactPattern = Pattern(key);
             exactMethods = allMethods[key] || [];
             break;
         }
