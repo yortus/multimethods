@@ -1,5 +1,5 @@
 import {Options, OptionsObject} from '../options';
-import {Dict, fatalError} from '../util';
+import {Dict, panic} from '../util';
 import {checkMethodsAndDecorators} from './check-methods-and-decorators';
 import {checkOptions} from './check-options';
 import {defaultDiscriminator} from './default-discriminator';
@@ -34,7 +34,19 @@ function getCompleteOptions(options: Options): Required<OptionsObject> {
         name: options.name || `Ɱ${++multimethodCounter}`,
         discriminator: options.discriminator || defaultDiscriminator,
         unreachable: options.unreachable || function alwaysReachable() { return false; },
-        unhandled: options.unhandled || fatalError.UNHANDLED,
+        unhandled: options.unhandled || makeDefaultUnhandled(),
+    };
+}
+
+
+
+
+function makeDefaultUnhandled() {
+    return function unhandled(discriminant: string) {
+        return panic(
+            `Multimethod dispatch failure: call was unhandled for` +
+            ` the given arguments (discriminant = '${discriminant}').`
+        );
     };
 }
 

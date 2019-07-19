@@ -1,6 +1,5 @@
 import {Options} from '../options';
-import {fatalError} from '../util';
-
+import {panic} from '../util';
 
 
 
@@ -13,18 +12,20 @@ export function checkOptions(options: Options): void {
     if (options.name !== undefined) {
         let isValid = typeof options.name === 'string';
         isValid = isValid && /[A-Za-z$_][A-Za-z$_0-9]*/.test(options.name);
-        if (!isValid) return fatalError.INVALID_NAME_OPTION(options.name);
+        if (!isValid) {
+            return panic(`Expected a valid identifier or undefined value for options.name, but found ${options.name}.`);
+        }
     }
 
     // `toDiscriminant` must be either undefined, or else a function.
     if (options.discriminator !== undefined) {
         let isValid = typeof options.discriminator === 'function';
-        if (!isValid) return fatalError.INVALID_DISCRIMINATOR_OPTION();
+        if (!isValid) return panic(`Expected a function or undefined value for options.discriminator.`);
     }
 
     // `unreachable` must be either undefined, or else a function.
     if (options.unreachable !== undefined) {
         let isValid = typeof options.unreachable === 'function';
-        if (!isValid) return fatalError.INVALID_UNREACHABLE_OPTION();
+        if (!isValid) return panic(`Expected a function or undefined value for options.unreachable.`);
     }
 }

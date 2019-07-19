@@ -1,6 +1,6 @@
 import {ALL, NormalisedPattern} from '../patterns';
 import {Taxonomy} from '../taxonomies';
-import {debug, Dict, fatalError} from '../util';
+import {debug, Dict, panic} from '../util';
 
 
 
@@ -17,7 +17,7 @@ export function checkMethodsAndDecorators(methods: Dict<Function | Function[]>, 
 
 
 
-function check(methods: Dict<Function | Function[]>) {
+function check(methods: Dict<Function | Function[]>): void {
 
     // TODO: still need this?
     // Perform strict validation. If any problems are found:
@@ -40,7 +40,10 @@ function check(methods: Dict<Function | Function[]>) {
     });
     for (let np in deduped) {
         if (deduped[np].length <= 1) continue;
-        fatalError.DUPLICATE_PATTERN(np, `'${deduped[np].join(`', '`)}'`);
+        return panic(
+            `The pattern '${np}' is duplicated across multiple methods: ${deduped[np].join(`', '`)}.` +
+            ` To resolve this, use a method chain.`
+        );
     }
 
 }

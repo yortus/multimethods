@@ -1,4 +1,4 @@
-import {fatalError} from '../util';
+import {panic} from '../util';
 import {hasNamedCaptures} from './has-named-captures';
 import {parse} from './parse';
 
@@ -50,7 +50,7 @@ export function Pattern(source: string): Pattern {
         let endCol = ex.location ? ex.location.end.column : source.length;
         if (endCol <= startCol) endCol = startCol + 1;
         let indicator = Array(startCol).join(' ') + Array(endCol - startCol + 1).join('^');
-        return fatalError.PATTERN_SYNTAX(`${ex.message}:\n${source}\n${indicator}`);
+        return panic(`Pattern syntax error: ${ex.message}:\n${source}\n${indicator}.`);
     }
 }
 

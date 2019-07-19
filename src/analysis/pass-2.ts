@@ -1,5 +1,5 @@
 import {Taxonomy} from '../taxonomies';
-import {DeepReplace, fatalError, getLongestCommonPrefix, getLongestCommonSuffix} from '../util';
+import {DeepReplace, getLongestCommonPrefix, getLongestCommonSuffix, panic} from '../util';
 
 
 
@@ -33,7 +33,7 @@ export function pass2(mminfo: ReturnType<typeof import('./pass-1').pass1>) {
             pathsFromRoot.forEach((path): void => {
                 let divergentNodes = path.slice(prefix.length, path.length - suffix.length);
                 let hasDecorators = divergentNodes.some(n => n.exactMethods.some(m => mminfo.isDecorator(m)));
-                if (hasDecorators) return fatalError.MULTIPLE_PATHS_TO(node.exactPattern);
+                if (hasDecorators) return panic(`Multiple paths to '${node.exactPattern}' with different decorators.`);
             });
 
             // TODO: explain all below more clearly...
@@ -41,8 +41,8 @@ export function pass2(mminfo: ReturnType<typeof import('./pass-1').pass1>) {
             // TODO: this allows 'lazy' error handling that won't prevent the best-matching methods from handling
             //       the dispatch as long as they don't fall back to the ambiguous part of the sequence.
             let candidates = pathsFromRoot.map(path => path[path.length - suffix.length - 1].pattern).join(', ');
-            let method = function _ambiguous() { fatalError.MULTIPLE_FALLBACKS_FROM(node.exactPattern, candidates); };
-            insertAsLeastSpecificRegularMethod(mminfo, node.exactMethods, method);
+            let ambiguous = () => panic(`Multiple possible fallbacks from '${node.exactPattern}': ${candidates}.`);
+            insertAsLeastSpecificRegularMethod(mminfo, node.exactMethods, ambiguous);
         }
 
 

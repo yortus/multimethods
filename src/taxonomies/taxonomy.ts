@@ -1,5 +1,5 @@
 import {ALL, intersect, isSubsetOf, NONE, NormalisedPattern, Unreachable} from '../patterns';
-import {fatalError} from '../util';
+import {panic} from '../util';
 import {Taxon} from './taxon';
 
 
@@ -129,7 +129,9 @@ function getSupersetRelationships(principalPatterns: NormalisedPattern[], unreac
 
     // Count up the principal patterns. Ensure the count does not exceed the complexity limit (more on this below).
     let principalCount = principalPatterns.length;
-    if (principalCount > MAX_PRINCIPAL_PATTERNS) return fatalError.TOO_COMPLEX();
+    if (principalCount > MAX_PRINCIPAL_PATTERNS) {
+        return panic(`Method table is too complex. Try reducing the number of patterns or their degree of overlap.`);
+    }
 
     // Create a list to hold all principal and auxiliary patterns. It always starts with the principal patterns
     // in the order given. Create a separate variable to accumulate auxiliary patterns as they are generated.
@@ -171,7 +173,9 @@ function getSupersetRelationships(principalPatterns: NormalisedPattern[], unreac
     // is higher than that for principal patterns, because the `isSubSetOf` checks done in the following passes
     // are significantly less costly than the `intersect` operations in pass 1.
     principalPatterns.forEach(p => auxiliaryPatterns.delete(p));
-    if (auxiliaryPatterns.size > MAX_AUXILIARY_PATTERNS) return fatalError.TOO_COMPLEX();
+    if (auxiliaryPatterns.size > MAX_AUXILIARY_PATTERNS) {
+        return panic(`Method table is too complex. Try reducing the number of patterns or their degree of overlap.`);
+    }
 
     // Add the auxiliary patterns to the patterns list, and extend `supersets` to cover the new patterns.
     auxiliaryPatterns.forEach(aux => {
