@@ -1,14 +1,13 @@
 import {expect} from 'chai';
-import {intersect, isSubsetOf, NONE, toNormalPredicate} from 'multimethods/math/predicates';
+import {intersect, isSubsetOf, NONE, toNormalPattern} from 'multimethods/patterns';
 
 
 
 
+describe('Finding the relationship between two patterns', () => {
 
-describe('Finding the relationship between two predicates', () => {
-
-    // NB: For visual clarity, `⨂` is used below to mean the empty predicate. This is not the
-    //     same as the ∅ predicate. ∅ does not match any strings, but ⨂ matches the empty string.
+    // NB: For visual clarity, `⨂` is used below to mean the empty pattern. This is not the
+    //     same as the ∅ pattern. ∅ does not match any strings, but ⨂ matches the empty string.
     let tests = [
         '∅ EQUALS ∅',
         '⨂ EQUALS ⨂',
@@ -93,7 +92,7 @@ describe('Finding the relationship between two predicates', () => {
     tests.forEach(test => {
         it(test, () => {
             test = test.replace(/⨂/g, '');
-            let [lhs, rhs] = test.split(/ [A-Z]+ /).map(toNormalPredicate);
+            let [lhs, rhs] = test.split(/ [A-Z]+ /).map(toNormalPattern);
             let expected = test.match(/ ([A-Z]+) /)![1];
             let actual = '';
 

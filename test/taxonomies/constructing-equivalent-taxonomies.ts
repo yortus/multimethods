@@ -1,12 +1,11 @@
 import {expect} from 'chai';
-import {NormalPredicate} from 'multimethods/math/predicates';
-import {EulerDiagram, EulerSet} from 'multimethods/math/sets';
+import {Taxon, Taxonomy} from 'multimethods/taxonomies';
+import {NormalPattern} from 'multimethods/patterns';
 
 
 
 
-
-describe('Constructing equivalent euler diagrams', () => {
+describe('Constructing equivalent taxonomies', () => {
 
     let tests = [
         ['∅', 'foo', 'bar', 'f{chars}', '*o'],
@@ -83,18 +82,18 @@ describe('Constructing equivalent euler diagrams', () => {
         if (testName.length > 60) testName = testName.slice(0, 60) + '...';
         testName = `${test.length} items (${testName})`;
         it(testName, () => {
-            let predicates = test;
-            let ed1: EulerDiagram;
-            let ed2: EulerDiagram;
+            let patterns = test;
+            let tx1: Taxonomy;
+            let tx2: Taxonomy;
             let attempt = () => {
-                // Construct an ED from the given predicates in the given order and in reverse order.
-                ed1 = new EulerDiagram(predicates, isUnreachable);
-                ed2 = new EulerDiagram(predicates.reverse(), isUnreachable);
+                // Construct an ED from the given patterns in the given order and in reverse order.
+                tx1 = new Taxonomy(patterns, isUnreachable);
+                tx2 = new Taxonomy(patterns.reverse(), isUnreachable);
             };
 
             // The two EDs should represent identical DAGs.
             expect(attempt).not.to.throw();
-            expect(setToObj(ed1!.universalSet)).to.deep.equal(setToObj(ed2!.universalSet));
+            expect(taxonToObj(tx1!.rootTaxon)).to.deep.equal(taxonToObj(tx2!.rootTaxon));
         });
     });
 });
@@ -102,14 +101,13 @@ describe('Constructing equivalent euler diagrams', () => {
 
 
 
-
-/** Helper function that converts an EulerDiagram to a simple nested object with predicate sources for keys */
-function setToObj(set: EulerSet): {} {
-    return set.subsets.reduce(
-        (obj, subset) => {
-            let key = subset.predicate as string;
-            if (!subset.isPrincipal) key = `[${key}]`;
-            obj[key] = setToObj(subset);
+/** Helper function that converts a taxonomy to a simple nested object with pattern sources for keys */
+function taxonToObj(taxon: Taxon): {} {
+    return taxon.specialisations.reduce(
+        (obj, spec) => {
+            let key = spec.pattern as string;
+            if (!spec.isPrincipal) key = `[${key}]`;
+            obj[key] = taxonToObj(spec);
             return obj;
         },
         {}
@@ -119,9 +117,8 @@ function setToObj(set: EulerSet): {} {
 
 
 
-
 // TODO: temp testing...
-function isUnreachable(p: NormalPredicate) {
+function isUnreachable(p: NormalPattern) {
 
     // Only consider the form *A*B*C*...*
     if (p.length < 3) return;

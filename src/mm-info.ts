@@ -1,5 +1,5 @@
-import {Predicate} from './math/predicates';
 import {OptionsObject} from './options';
+import {Pattern} from './patterns';
 
 
 
@@ -23,7 +23,7 @@ export interface MMInfo {
 export interface Node {
 
     // from MethodTableEntry:
-    exactPredicate: Predicate;
+    exactPattern: Pattern;
     exactMethods: Function[];
 
     // from MethodSequence<TNode>:

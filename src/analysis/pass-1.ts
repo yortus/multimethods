@@ -1,6 +1,6 @@
-import {Predicate, toNormalPredicate, toPredicate} from '../math/predicates';
-import {EulerDiagram} from '../math/sets';
 import {OptionsObject} from '../options';
+import {Taxonomy} from '../taxonomies';
+import {Pattern, toNormalPattern, toPattern} from '../patterns';
 import {Dict} from '../util';
 
 
@@ -10,30 +10,30 @@ export function pass1(options: Required<OptionsObject>, methods: Dict<Function |
 
     let allMethods = combineMethodsAndDecorators(methods, decorators);
     let decoratorLookup = new Set(Object.keys(decorators).reduce(
-        (decs, predicate) => decs.concat(decorators[predicate]),
+        (decs, pattern) => decs.concat(decorators[pattern]),
         [] as Function[]
     ));
 
-    let ed = new EulerDiagram(Object.keys(allMethods), options.unreachable);
-    let allNodes = ed.allSets.map(set => {
+    let taxonomy = new Taxonomy(Object.keys(allMethods), options.unreachable);
+    let allNodes = taxonomy.allTaxons.map(taxon => {
 
-        let exactPredicate = set.predicate as Predicate;
+        let exactPattern = taxon.pattern as Pattern;
         let exactMethods = [] as Function[];
 
         for (let key of Object.keys(allMethods)) {
-            // Skip until we find the right predicate.
-            if (toNormalPredicate(key) !== set.predicate) continue;
+            // Skip until we find the right pattern.
+            if (toNormalPattern(key) !== taxon.pattern) continue;
 
             // Found it!
-            exactPredicate = toPredicate(key);
+            exactPattern = toPattern(key);
             exactMethods = allMethods[key] || [];
             break;
         }
 
         // NB: update in-place, with updated type
-        return Object.assign(set, {exactPredicate, exactMethods});
+        return Object.assign(taxon, {exactPattern, exactMethods});
     });
-    let rootNode = allNodes[ed.allSets.indexOf(ed.universalSet)];
+    let rootNode = allNodes[taxonomy.allTaxons.indexOf(taxonomy.rootTaxon)];
 
     return {
         options,
@@ -53,16 +53,16 @@ function combineMethodsAndDecorators(methods: Dict<Function | Function[]>, decor
 
     // TODO: explain ordering: regular methods from left-to-right; then decorators from right-to-left
 
-    for (let predicate of Object.keys(methods)) {
-        let meths = methods[predicate];
-        result[predicate] = Array.isArray(meths) ? meths : [meths];
+    for (let pattern of Object.keys(methods)) {
+        let meths = methods[pattern];
+        result[pattern] = Array.isArray(meths) ? meths : [meths];
     }
 
-    for (let predicate of Object.keys(decorators)) {
-        let chain = result[predicate] || [];
-        let decs = decorators[predicate];
+    for (let pattern of Object.keys(decorators)) {
+        let chain = result[pattern] || [];
+        let decs = decorators[pattern];
         decs = Array.isArray(decs) ? decs.slice() : [decs];
-        result[predicate] = chain.concat(decs.reverse());
+        result[pattern] = chain.concat(decs.reverse());
     }
 
     return result;

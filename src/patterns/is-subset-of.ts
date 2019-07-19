@@ -1,8 +1,7 @@
-import {memoise} from '../../util';
+import {memoise} from '../util';
 import {ALL} from './all';
 import {NONE} from './none';
-import {NormalPredicate} from './normal-predicate';
-
+import {NormalPattern} from './normal-pattern';
 
 
 
@@ -15,24 +14,23 @@ import {NormalPredicate} from './normal-predicate';
 
 
 
-
 // TODO: doc... does *not* work with alternation in either `sub` or `sup`. Use intersect() for that.
-export function isSubsetOf(sub: NormalPredicate, sup: NormalPredicate): boolean {
+export function isSubsetOf(sub: NormalPattern, sup: NormalPattern): boolean {
 
     // Shortcuts for a few identity cases.
     if (sub === sup) return true;
     if (sub === NONE || sup === ALL) return true;
     if (sub === ALL || sup === NONE) return false;
 
-    // Solutions for cases involving alternation, based on these invariants that arise from normalised predicate syntax:
+    // Solutions for cases involving alternation, based on these invariants that arise from normalised pattern syntax:
     // - if `sub` is an alternation, then `sub` ⊂ `sup` iff for every alternative `x` of `sub`, `x` ⊂ `sup`.
     // - if `sup` is an alternation, then `sub` ⊂ `sup` iff there is an alternative `y` of `sup` such that `sub` ⊂ `y`.
     if (sub.indexOf('|') !== -1) {
-        let alts = sub.split('|') as NormalPredicate[];
+        let alts = sub.split('|') as NormalPattern[];
         return alts.every(alt => isSubsetOf(alt, sup));
     }
     if (sup.indexOf('|') !== -1) {
-        let alts = sup.split('|') as NormalPredicate[];
+        let alts = sup.split('|') as NormalPattern[];
         return alts.some(alt => isSubsetOf(sub, alt));
     }
 
@@ -46,17 +44,16 @@ export function isSubsetOf(sub: NormalPredicate, sup: NormalPredicate): boolean 
 
 
 
-
 /*
- * Returns a regex that matches all normalised predicates that are proper or improper subsets of the specified
- * normalised predicate, and rejects everything else. Assumes `predicate` contains no alternations.
+ * Returns a regex that matches all normalised patterns that are proper or improper subsets of the specified
+ * normalised pattern, and rejects everything else. Assumes `pattern` contains no alternations.
  */
-let makeSubsetRecogniser: (predicate: NormalPredicate) => RegExp;
-makeSubsetRecogniser = memoise((predicate: NormalPredicate) => {
+let makeSubsetRecogniser: (pattern: NormalPattern) => RegExp;
+makeSubsetRecogniser = memoise((pattern: NormalPattern) => {
     let regexSource = '';
-    for (let i = 0; i < predicate.length; ++i) {
-        let c = predicate.charAt(i);
-        if (c === '*' && i + 1 < predicate.length && predicate.charAt(i + 1) === '*') {
+    for (let i = 0; i < pattern.length; ++i) {
+        let c = pattern.charAt(i);
+        if (c === '*' && i + 1 < pattern.length && pattern.charAt(i + 1) === '*') {
             c = '**';
             ++i;
         }

@@ -1,16 +1,15 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import {toNormalPredicate, toPredicate} from 'multimethods/math/predicates';
+import {toNormalPattern, toPattern} from 'multimethods/patterns';
 
 
 
 
-
-describe('Parsing and normalising a predicate', () => {
+describe('Parsing and normalising a pattern', () => {
 
     let tests = [
 
-        // Simple predicates consisting of valid characters:
+        // Simple patterns consisting of valid characters:
         'abcdefghijklm ==> abcdefghijklm',
         'nopqrstuvwxyz ==> nopqrstuvwxyz',
         'ABCDEFGHIJKLM ==> ABCDEFGHIJKLM',
@@ -55,8 +54,8 @@ describe('Parsing and normalising a predicate', () => {
         '∫ ==> ERROR',
         '© ==> ERROR',
 
-        // More complex valid predicates:
-        ' ==> ', // NB: empty predicate
+        // More complex valid patterns:
+        ' ==> ', // NB: empty pattern
         '∅ ==> ∅',
         '/ ==> /',
         '* ==> *',
@@ -104,13 +103,13 @@ describe('Parsing and normalising a predicate', () => {
         '   GET /foo ==>    GET /foo',
         '   /    ==>    /   ',
 
-        // Invalid predicates:
+        // Invalid patterns:
         '/∅ ==> ERROR',                 // Can't combine ∅ with anything else
         '∅|abc ==> ERROR',              // "    "
         '/*** ==> ERROR',               // Can't have adjacent wildcards/globstars
         '/foo/{**rest}* ==> ERROR',     // "    "
         '/foo/{name}{ext} ==> ERROR',   // "    "
-        '/$foo ==> ERROR',              // Invalid char in predicate
+        '/$foo ==> ERROR',              // Invalid char in pattern
         '/bar/? ==> ERROR',             // "    "
         '{} ==> ERROR',                 // malformed named capture
         '{a**} ==> ERROR',              // "    "
@@ -138,7 +137,7 @@ describe('Parsing and normalising a predicate', () => {
             let [source, expected] = test.split(' ==> ');
             let actual: string;
             try {
-                actual = toNormalPredicate(toPredicate(source));
+                actual = toNormalPattern(toPattern(source));
             }
             catch (ex) {
                 actual = 'ERROR';

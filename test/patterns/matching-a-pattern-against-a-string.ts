@@ -1,17 +1,16 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import {toMatchFunction, toPredicate} from 'multimethods/math/predicates';
+import {toMatchFunction, toPattern} from 'multimethods/patterns';
 
 
 
 
+describe('Matching a pattern against a string', () => {
 
-describe('Matching a predicate against a string', () => {
-
-    // NB: For visual clarity, `⨂` is used below to mean the empty predicate. This is not the
-    //     same as the ∅ predicate. ∅ does not match any strings, but ⨂ matches the empty string.
+    // NB: For visual clarity, `⨂` is used below to mean the empty pattern. This is not the
+    //     same as the ∅ pattern. ∅ does not match any strings, but ⨂ matches the empty string.
     let tests = [
-        '⨂ MATCHES ⨂', // NB: empty predicate and string
+        '⨂ MATCHES ⨂', // NB: empty pattern and string
         '* MATCHES ⨂', // NB: empty string
         '* MATCHES abc',
         '⨂ DOES NOT MATCH /', // NB: empty string
@@ -85,12 +84,12 @@ describe('Matching a predicate against a string', () => {
             test = test.replace(/⨂/g, '');
             let isMatch = test.indexOf(' MATCHES ') !== -1;
             let split = isMatch ? ' MATCHES ' : ' DOES NOT MATCH ';
-            let predicateSource = test.split(split)[0];
+            let patternSource = test.split(split)[0];
             let rhs = test.split(split)[1];
             let address = rhs.split(' WITH ')[0];
             let expectedCaptures = isMatch ? eval(`(${rhs.split(' WITH ')[1]})`) || {} : null;
-            let predicate = toPredicate(predicateSource);
-            let actualCaptures = toMatchFunction(predicate)(address);
+            let pattern = toPattern(patternSource);
+            let actualCaptures = toMatchFunction(pattern)(address);
             expect(actualCaptures).to.deep.equal(expectedCaptures);
         });
     });

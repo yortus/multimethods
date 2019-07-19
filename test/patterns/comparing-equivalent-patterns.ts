@@ -1,11 +1,10 @@
 import {expect} from 'chai';
-import {toNormalPredicate} from 'multimethods/math/predicates';
+import {toNormalPattern} from 'multimethods/patterns';
 
 
 
 
-
-describe('Comparing equivalent predicates', () => {
+describe('Comparing equivalent patterns', () => {
 
     let equivalenceGroups = [
         [
@@ -33,7 +32,7 @@ describe('Comparing equivalent predicates', () => {
         group.forEach(p1 => {
             group.forEach(p2 => {
                 it(`'${p1}' vs '${p2}'`, () => {
-                    expect(toNormalPredicate(p1)).equals(toNormalPredicate(p2));
+                    expect(toNormalPattern(p1)).equals(toNormalPattern(p2));
                 });
             });
         });

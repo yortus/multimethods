@@ -1,4 +1,4 @@
-import {Unreachable} from './math/predicates';
+import {Unreachable} from './patterns';
 
 
 

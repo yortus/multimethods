@@ -25,16 +25,16 @@
 ## Multimethods
 - immutable
 - no this?
-- comprise a list of 'rules', each rule is a {predicate: method} pair
+- comprise a list of 'rules', each rule is a {pattern: method} pair
 - rules are either normal rules or decorators
-- In a rule, the predicate is a pattern, and the method is a function
-- predicate/pattern extensions: binary tree format... TODO WIP
-- predicates form a taxonomy according to their specificity (the subset of discriminants they 'contain')
+- In a rule, the pattern is a string, and the method is a function
+- pattern extensions: binary tree format... TODO WIP
+- patterns form a taxonomy according to their specificity (the subset of discriminants they 'contain')
 - a rule can be an 'ordinary' rule, or a decorator (whose method has special semantics to call/control 'downstream' methods)
 - a multimethod may be variadic or fixed arity (for optimisation only)
 - a multimethod may be closed or open (can add methods after construction or not) (also for optimisation only?)
 - each MM call generates a discriminant, according to the 'toDiscriminant()' function supplied to the ctor (default to toString()?)
-- discriminant is matched against all method predicates
+- discriminant is matched against all method patterns
 
 
 ## Multimethod Options (chainable)
@@ -49,7 +49,7 @@
 - binary: all methods are assumed to be binary. Affects method signature. Mainly for optimisation.
 - variadic (default): each method may take any number of parameters. Affects method signature.
 - discriminate: function
-- methods: dictionary of predicate/consequent pairs
+- methods: dictionary of pattern/consequent pairs
 - eager or lazy?
 
 

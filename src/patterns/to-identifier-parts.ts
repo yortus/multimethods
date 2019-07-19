@@ -1,25 +1,23 @@
-import {Predicate} from './predicate';
-import {toNormalPredicate} from './to-normal-predicate';
+import {Pattern} from './pattern';
+import {toNormalPattern} from './to-normal-pattern';
 
 
 
 
-
-// TODO: doc... all permitted chars in predicates are *whilelisted* for safety.
+// TODO: doc... all permitted chars in patterns are *whilelisted* for safety.
 //              additionally, they must all have a unique equivalent identifier char.
-
 
 
 
 
 // TODO: revise old comment below...
 // /**
-//  * A string that is visually similar to the normalized form of this predicate, but is a valid `IdentifierPart*`
+//  * A string that is visually similar to the normalized form of this pattern, but is a valid `IdentifierPart*`
 //  * as per the ECMAScript grammar (http://www.ecma-international.org/ecma-262/6.0/index.html#sec-names-and-keywords).
 //  * Different normalized forms are guaranteed to have different return values from this function.
 //  */
-export function toIdentifierParts(predicate: Predicate): string {
-    let p = toNormalPredicate(predicate) as string;
+export function toIdentifierParts(pattern: Pattern): string {
+    let p = toNormalPattern(pattern) as string;
     Object.keys(MAPPINGS).forEach((sym: keyof typeof MAPPINGS) => {
         while (p.indexOf(sym) !== -1) {
             p = p.replace(sym, MAPPINGS[sym]);
@@ -27,7 +25,6 @@ export function toIdentifierParts(predicate: Predicate): string {
     });
     return p;
 }
-
 
 
 

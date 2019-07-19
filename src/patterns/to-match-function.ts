@@ -1,37 +1,36 @@
-import {debug} from '../../util';
-import {Predicate} from './predicate';
-import {toNormalPredicate} from './to-normal-predicate';
-
+import {debug} from '../util';
+import {Pattern} from './pattern';
+import {toNormalPattern} from './to-normal-pattern';
 
 
 
 
 // TODO: revise comments (merge, remove 'internal', ...)
 // /**
-//  * Attempts to recognize the given string by matching it against this predicate. If the match is successful,
+//  * Attempts to recognize the given string by matching it against this pattern. If the match is successful,
 //  * an object is returned containing the name/value pairs for each named capture that unifies the string with this
-//  * predicate. If the match fails, the return value is null.
+//  * pattern. If the match fails, the return value is null.
 //  * @param {string} string - the string to recognize.
-//  * @returns {Object} null if the string is not recognized by the predicate. Otherwise, a hash of captured name/value
-//  *          pairs that unify the string with this predicate.
+//  * @returns {Object} null if the string is not recognized by the pattern. Otherwise, a hash of captured name/value
+//  *          pairs that unify the string with this pattern.
 //  */
 /**
- * Internal function used to generate the Predicate#match method. Although RegExps may be used to implement the `match`
- * method for any predicate, we avoid using RegExps for a number of simpler kinds of predicate pattern. This is because
- * predicate matching may be performed frequently, and possibly on critical paths. As such, the use of optimised `match`
- * implementations may result in substantial overall performance improvements in client code.
+ * Internal function used to generate the Pattern#match method. Although RegExps may be used to implement the `match`
+ * method for any pattern, we avoid using RegExps for a number of simpler kinds of pattern. This is because
+ * pattern matching may be performed frequently, and possibly on critical paths. As such, the use of optimised `match`
+ * implementations may result in substantial overall performance improvements in calling code.
  */
-export function toMatchFunction(predicate: Predicate): MatchFunction {
+export function toMatchFunction(pattern: Pattern): MatchFunction {
 
     // TODO: temp testing... special case...
-    if (predicate === '∅') return () => null;
+    if (pattern === '∅') return () => null;
 
-    // TODO: temp testing... simple case... no alternation in predicate
-    if (predicate.indexOf('|') === -1) return toMatchFunctionForOneAlternative(predicate);
+    // TODO: temp testing... simple case... no alternation in pattern
+    if (pattern.indexOf('|') === -1) return toMatchFunctionForOneAlternative(pattern);
 
     // TODO: temp testing...
-    let predicates = toNormalPredicate(predicate).split('|');
-    let matchFunctions = predicates.map(toMatchFunctionForOneAlternative);
+    let patterns = toNormalPattern(pattern).split('|');
+    let matchFunctions = patterns.map(toMatchFunctionForOneAlternative);
     return s => {
         for (let match of matchFunctions) {
             let result = match(s);
@@ -44,23 +43,22 @@ export function toMatchFunction(predicate: Predicate): MatchFunction {
 
 
 
-
 // TODO: doc...
-function toMatchFunctionForOneAlternative(predicate: Predicate): MatchFunction {
+function toMatchFunctionForOneAlternative(pattern: Pattern): MatchFunction {
 
     // TODO: temp testing...
-    let normalPredicate = toNormalPredicate(predicate);
+    let normalPredicate = toNormalPattern(pattern);
 
-    // Compute useful invariants for the given predicate pattern.
+    // Compute useful invariants for the given pattern.
     // These are used as precomputed values in the closures created below.
-    const captureNames = getCaptureNames(predicate).filter(name => name !== '?');
+    const captureNames = getCaptureNames(pattern).filter(name => name !== '?');
     const firstCaptureName = captureNames[0];
     const literalChars = normalPredicate.replace(/[*]/g, '');
     const literalCharCount = literalChars.length;
 
-    // Characterise the given predicate pattern using a simplified 'signature'.
+    // Characterise the given pattern using a simplified 'signature'.
     // E.g., '/foo/*.js' becomes 'lit*lit', and '/a{b}/{**rest}' becomes 'lit{*}lit{**}'
-    let simplifiedPatternSignature = predicate
+    let simplifiedPatternSignature = pattern
         .replace(/{[^*}]+}/g, '{*}')        // replace '{name}' with '{*}'
         .replace(/{\*\*[^}]+}/g, '{**}')    // replace '{**name}' with '{**}'
         .replace(/[^*{}]+/g, 'lit');        // replace contiguous sequences of literal characters with 'lit'
@@ -136,11 +134,11 @@ function toMatchFunctionForOneAlternative(predicate: Predicate): MatchFunction {
 
         default:
             debug(
-                `${debug.DEOPT} Cannot optimise match function for predicate '%s' (%s)`,
-                predicate,
+                `${debug.DEOPT} Cannot optimise match function for pattern '%s' (%s)`,
+                pattern,
                 simplifiedPatternSignature
             );
-            let regexp = makeRegExpForPredicate(predicate);
+            let regexp = makeRegExpForPattern(pattern);
             return s => {
                 let matches = s.match(regexp);
                 if (!matches) return null;
@@ -152,21 +150,19 @@ function toMatchFunctionForOneAlternative(predicate: Predicate): MatchFunction {
 
 
 
-
-/** The signature of the Predicate#match method. */
+/** The signature of the Pattern#match method. */
 export type MatchFunction = (_: string) => {[captureName: string]: string} | null;
 
 
 
 
-
 /**
- * Constructs a regular expression that matches all strings recognized by the given predicate pattern.
+ * Constructs a regular expression that matches all strings recognized by the given pattern.
  * Each named globstar/wildcard in the pattern corresponds to a capture group in the regular expression.
  */
-function makeRegExpForPredicate(predicate: Predicate) {
-    let signature = toNormalPredicate(predicate);
-    let captureNames = getCaptureNames(predicate);
+function makeRegExpForPattern(pattern: Pattern) {
+    let signature = toNormalPattern(pattern);
+    let captureNames = getCaptureNames(pattern);
     let captureIndex = 0;
     let re = signature.replace(/\*\*/g, 'ᕯ').split('').map(c => {
         if (c === '*') {
@@ -188,14 +184,13 @@ function makeRegExpForPredicate(predicate: Predicate) {
 
 
 
-
 /**
- * Returns an array of strings whose elements correspond, in order, to the captures in the predicate. Each element
+ * Returns an array of strings whose elements correspond, in order, to the captures in the pattern. Each element
  * holds the name of its corresponding capture, or '?' if the corresponding capture is anonymous (i.e. '*' or '**').
- * For example, for the predicate '{**path}/*.{ext}', the return value would be['path', '?', 'ext'].
+ * For example, for the pattern '{**path}/*.{ext}', the return value would be['path', '?', 'ext'].
  */
-function getCaptureNames(predicate: Predicate): string[] {
-    let p = predicate as string;
+function getCaptureNames(pattern: Pattern): string[] {
+    let p = pattern as string;
     p = p.replace(/\{\*\*/g, '{');
     p = p.replace(/\*\*/g, '{}');
     p = p.replace(/\*/g, '{}');
@@ -208,11 +203,9 @@ function getCaptureNames(predicate: Predicate): string[] {
 
 
 
-
 // A singleton match result that may be returned in all cases of a successful match with no named
 // captures. This reduces the number of cases where calls to match() functions create new heap objects.
 const SUCCESSFUL_MATCH_NO_CAPTURES = Object.freeze({}) as {[captureName: string]: string};
-
 
 
 

@@ -11,9 +11,9 @@ import {Multimethod} from 'multimethods';
 
 
 // TODO: More coverage:
-// - [ ] multiple regular methods for same predicate
-// - [ ] multiple decorators for same predicate
-// - [ ] one decorator and several regular methods for same predicate
+// - [ ] multiple regular methods for same pattern
+// - [ ] multiple decorators for same pattern
+// - [ ] one decorator and several regular methods for same pattern
 // - [ ] decorators along ambiguous paths (same decorators on all paths)
 // - [x] decorators along ambiguous paths (not same decorators on all paths) - c/d
 

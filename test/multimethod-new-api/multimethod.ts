@@ -1,7 +1,7 @@
 import {expect, use as chaiUse} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import {Multimethod} from 'multimethods';
-import {defaultDiscriminator} from 'multimethods/analysis/configuration/default-discriminator';
+import {defaultDiscriminator} from 'multimethods/analysis/default-discriminator';
 
 
 

@@ -1,5 +1,5 @@
-import {ALL, toNormalPredicate} from '../math/predicates';
-import {EulerDiagram} from '../math/sets';
+import {Taxonomy} from '../taxonomies';
+import {ALL, toNormalPattern} from '../patterns';
 import {debug, Dict, fatalError} from '../util';
 
 
@@ -30,17 +30,17 @@ function check(methods: Dict<Function | Function[]>) {
 
 
     // TODO: doc these new invariants:
-    // - all predicates in `methods` are valid
-    // - no two predicates in `methods` have the same normalised predicate (use chains for this scenario)
+    // - all patterns in `methods` are valid
+    // - no two patterns in `methods` have the same normalised pattern (use chains for this scenario)
     let deduped = {} as {[s: string]: string[]};
-    Object.keys(methods).forEach(predicate => {
-        let np = toNormalPredicate(predicate);
+    Object.keys(methods).forEach(pattern => {
+        let np = toNormalPattern(pattern);
         deduped[np] = deduped[np] || [];
-        deduped[np].push(predicate);
+        deduped[np].push(pattern);
     });
     for (let np in deduped) {
         if (deduped[np].length <= 1) continue;
-        fatalError.DUPLICATE_PREDICATE(np, `'${deduped[np].join(`', '`)}'`);
+        fatalError.DUPLICATE_PATTERN(np, `'${deduped[np].join(`', '`)}'`);
     }
 
 }
@@ -49,12 +49,12 @@ function check(methods: Dict<Function | Function[]>) {
 
 
 // TODO: doc...
-//      - returns a list of human-readable problem descriptions where the methods statically don't cover some predicates
+//      - returns a list of human-readable problem descriptions where the methods statically don't cover some patterns
 
-// Detect synthesized patterns in the euler diagram, i.e., ones with no exactly-matching predicates in the method table.
+// Detect synthesized patterns in the taxonomy, i.e., ones with no exactly-matching patterns in the method table.
 // They get there in two ways:
-// (i)  the root Predicate.ALL where the raw methods hash doesn't explicitly handle it, and
-// (ii) intersections of non-disjoint predicates that aren't explicitly handled in the methods hash
+// (i)  the root Pattern.ALL where the raw methods hash doesn't explicitly handle it, and
+// (ii) intersections of non-disjoint patterns that aren't explicitly handled in the methods hash
 // Their presence implies that there are possibly inputs for which the multimethod provides no defined behaviour.
 // This often represents a user error, so it's a useful warning to point these patterns out so their intended
 // behaviour can be made explicit by the user.
@@ -62,19 +62,19 @@ function check(methods: Dict<Function | Function[]>) {
 function listDiscontinuities(methods: Dict<Function | Function[]>) {
     if (methods === undefined) return [];
 
-    let handledPredicates = Object.keys(methods).map(p => toNormalPredicate(p));
-    let euler = new EulerDiagram(handledPredicates);
-    let unhandledPredicates = euler.allSets.map(n => n.predicate).filter(p => handledPredicates.indexOf(p) === -1);
+    let handledPatterns = Object.keys(methods).map(p => toNormalPattern(p));
+    let taxonomy = new Taxonomy(handledPatterns);
+    let unhandledPatterns = taxonomy.allTaxons.map(t => t.pattern).filter(p => handledPatterns.indexOf(p) === -1);
     let problems = [] as string[];
 
-    let hasUnhandledCatchall = unhandledPredicates.indexOf(ALL) !== -1;
+    let hasUnhandledCatchall = unhandledPatterns.indexOf(ALL) !== -1;
     if (hasUnhandledCatchall) {
-        problems.push(`No catch-all method. To resolve, add a method for the predicate '**'.`);
+        problems.push(`No catch-all method. To resolve, add a method for the pattern '**'.`);
     }
 
-    let unhandledIntersections = unhandledPredicates.filter(p => p !== ALL);
-    unhandledIntersections.forEach(predicate => {
-        problems.push(`Ambiguous dispatch for predicate '${predicate}'. To resolve, add a method for this predicate.`);
+    let unhandledIntersections = unhandledPatterns.filter(p => p !== ALL);
+    unhandledIntersections.forEach(pattern => {
+        problems.push(`Ambiguous dispatch for pattern '${pattern}'. To resolve, add a method for this pattern.`);
     });
 
     return problems;

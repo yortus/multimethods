@@ -1,5 +1,5 @@
 import {MMInfo, Node} from '../mm-info';
-import {hasNamedCaptures} from '../math/predicates';
+import {hasNamedCaptures} from '../patterns';
 import {repeat} from '../util';
 
 
@@ -22,7 +22,7 @@ export function forNode(node: Node, nodeIndex?: number) {
     return {
         INDEX: nodeIndex,
         NAMEOF_IS_MATCH: `isMatchː${node.identifier}`,
-        HAS_PATTERN_BINDINGS: hasNamedCaptures(node.exactPredicate),
+        HAS_PATTERN_BINDINGS: hasNamedCaptures(node.exactPattern),
         NAMEOF_GET_PATTERN_BINDINGS: `getPatternBindingsː${node.identifier}`,
         NAMEOF_ENTRYPOINT_THUNK: getThunkName(node.methodSequence, node.entryPointIndex),
     };

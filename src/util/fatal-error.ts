@@ -10,9 +10,9 @@ import {debug} from './debug';
 
 
 // check-methods-and-decorators.ts:
-export function DUPLICATE_PREDICATE(normalised: string, predicates: string) {
-    let fmt = `The predicate '%s' is duplicated across multiple methods: %s. To resolve this, use a method chain.`;
-    return error(format(fmt, normalised, predicates));
+export function DUPLICATE_PATTERN(normalised: string, patterns: string) {
+    let fmt = `The pattern '%s' is duplicated across multiple methods: %s. To resolve this, use a method chain.`;
+    return error(format(fmt, normalised, patterns));
 }
 
 
@@ -36,30 +36,30 @@ export function INVALID_UNREACHABLE_OPTION() {
 
 
 // pass-2.ts:
-export function MULTIPLE_FALLBACKS_FROM(predicate: string, fallbacks: string) {
+export function MULTIPLE_FALLBACKS_FROM(pattern: string, fallbacks: string) {
     let fmt = `Multiple possible fallbacks from '%s': %s`;
-    return error(format(fmt, predicate, fallbacks));
+    return error(format(fmt, pattern, fallbacks));
 }
-export function MULTIPLE_PATHS_TO(predicate: string) {
+export function MULTIPLE_PATHS_TO(pattern: string) {
     let fmt = `Multiple paths to '%s' with different decorators`;
-    return error(format(fmt, predicate));
+    return error(format(fmt, pattern));
 }
 
 
 
 
-// to-predicate.ts:
-export function PREDICATE_SYNTAX(message: string) {
-    let fmt = `Predicate syntax error: %s`;
+// to-pattern.ts:
+export function PATTERN_SYNTAX(message: string) {
+    let fmt = `Pattern syntax error: %s`;
     return error(format(fmt, message));
 }
 
 
 
 
-// euler-diagram.ts:
+// pattern-taxonomy.ts:
 export function TOO_COMPLEX() {
-    let fmt = `Method table is too complex. Try reducing the number of predicates or their degree of overlap.`;
+    let fmt = `Method table is too complex. Try reducing the number of patterns or their degree of overlap.`;
     return error(format(fmt));
 }
 

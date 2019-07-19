@@ -12,10 +12,10 @@
       - [ ] which one requires explicit qualifier? Probably cascading since it has more complex behaviour
       - [ ] name? `cascade`, `casc`, `try`, `step`, `option`, bid, best, first, race, partial, part, test, layer, `cont`
 - [ ] memoise: auto-clear on future tick
-- [ ] validation: can a method chain be empty? i.e., a predicate associated with 0 methods?
+- [ ] validation: can a method chain be empty? i.e., a pattern associated with 0 methods?
   - [ ] it might be useful if it effectively works like a no-op.
     - [ ] check if it indeed does work like this at present, or otherwise how it can be made to do so
-    - [ ] example: routist @allow on a pattern (predicate) that exists only for permissions (ir has no handler)
+    - [ ] example: routist @allow on a pattern that exists only for permissions (ir has no handler)
 
 
 ## Todo - Medium Priority
@@ -29,7 +29,7 @@
   - [ ] method chains support explicit relative specificity with `'super'`
   - [ ] explicit method specificity is *required*, otherwise throws an 'ambiguous' error
   - [ ] add tests for all of above
-- [ ] support even more special characters in predicates
+- [ ] support even more special characters in patterns
 - [ ] Address code quality in /src
   - [x] Rationalise file structure under /src
   - [x] Reasonable breakdown of functions
@@ -41,7 +41,7 @@
   - [ ] Installing
   - [ ] Usage example
   - [ ] Further Details
-    - [ ] predicates
+    - [ ] patterns
     - [ ] options / configuration
     - [ ] method table: specificity, chains, NEXT, meta-methods, etc
 - [ ] Improve unit test coverage
@@ -66,14 +66,14 @@
 
 
 ## Todo - Unassigned Priority
-- [ ] predicate `|` operator: determine future pathway for relaxing some/all of the current restrictions
+- [ ] pattern `|` operator: determine future pathway for relaxing some/all of the current restrictions
   - [ ] *can* mix alternation and named captures, however:
-    - [ ] capture names must be unique within a predicate
-    - [ ] upon successfully matching a predicate against a string, some names may be absent in the `captures` hash
-- [ ] document current restrictions w.r.t `|` alternation operator in predicates:
-  - [ ] a predicate cannot have *both* alternation and named captures
-  - [ ] in a normalised predicate, no alternative is a subset of any other alternative (they are removed)
-  - [ ] in a normalised predicate, alternatives are arranged in lexicographical order
+    - [ ] capture names must be unique within a pattern
+    - [ ] upon successfully matching a pattern against a string, some names may be absent in the `captures` hash
+- [ ] document current restrictions w.r.t `|` alternation operator in patterns:
+  - [ ] a pattern cannot have *both* alternation and named captures
+  - [ ] in a normalised pattern, no alternative is a subset of any other alternative (they are removed)
+  - [ ] in a normalised pattern, alternatives are arranged in lexicographical order
     - [ ] describe the ordering in unambiguous/locale-invariant terms. ANS: uses `Array#sort` default comparer
 - [ ] export a `Multimethod` type (or family thereof)
   - [ ] or not, it's just a straightforward function signature, nothing special added
@@ -95,7 +95,7 @@
   - [ ] src code comments
   - [ ] README - glossary, descriptions, etc
 - [ ] revise/revamp method function validation
-  - [ ] MAIN AIM: to ensure predicate captures stay synced with their methods, and error early if not, with opt-outs
+  - [ ] MAIN AIM: to ensure pattern captures stay synced with their methods, and error early if not, with opt-outs
   - [ ] validate method function.length.
   - [ ] the `captures` param:
     - [ ] if object destructuring is used, require 1:1 correspondence to captured names
@@ -118,7 +118,7 @@
   - [ ] executor
   - [ ] next --> forward/fwd
   - [ ] rule
-  - [ ] predicate (rename from `pattern` in code/codegen/comments)
+  - [ ] pattern (rename from `pattern` in code/codegen/comments)
   - [ ] regular handler (rename from `method` in code/codegen/comments)
   - [ ] meta handler (rename from `method` in code/codegen/comments)
   - [ ] ruleset
@@ -135,7 +135,7 @@
 - [ ] all errors and warnings (eg validation, codegen, etc)
 
 
-## Notes on future support for predicate symbols/operators/literals
+## Notes on future support for pattern symbols/operators/literals
 - [ ] use URI ref: https://tools.ietf.org/html/rfc3986
 - [ ] TODO: char pool yet to classify:
 
@@ -144,7 +144,7 @@
                         - [ ] URI reserved chars: `: ? # [ ] @ ! $ & ' ( ) + , ; =`
                         - [ ] Others: `% ^ ~ < > " |`
 
-- [ ] support predicate 'type' indicators - eg binary predicates like `*100*10`, and maybe more future ones
+- [ ] support pattern 'type' indicators - eg binary patterns like `*100*10`, and maybe more future ones
 - [ ] treat the following as literal match characters:
   - [ ] `a-z A-Z 0-9 <space> _ / - . : < > @ !`  (already supported)
   - [ ] `~` (unreserved in URIs - so may commonly appear in URLs)
@@ -168,9 +168,9 @@
 
   - [ ] general reserve: ``    
   
-- [ ] TODO: Reserve the following characters to be always illegal in predicates (unless escaped):
+- [ ] TODO: Reserve the following characters to be always illegal in patterns (unless escaped):
   - [ ] doc why to have this:
-    - [ ] so client have a few special characters for augmenting predicates for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the predicate
+    - [ ] so client have a few special characters for augmenting patterns for their own use. They can safely manipulate/strip out these chars knowing they cannot possibly be part of the pattern
     - [ ] for safely putting other props in same hash as rules, eg `$toDiscriminant` or similar
   - [ ] TODO: `$ ;`
 
@@ -268,7 +268,7 @@ http://app.co/things?item=t[[100]]
 ```
 
 
-Predicate Special Chars:
+Pattern Special Chars:
 - Literal Match:
   - `/ ? ; : @ & = + $ ,`
   - `- _ .`
@@ -284,7 +284,7 @@ Predicate Special Chars:
   - `#`     used for URL fragments
   - `%`     used for encoding
 
-- Likely operators to be added to predicate syntax:
+- Likely operators to be added to pattern syntax:
   union
   mega-sep
   mega-glob
@@ -300,12 +300,12 @@ NB: general idea is to decouple named captures from wildcard/globstar operators
 
 // NB: syntax highlighting would make any of these more acceptable. Write a vscode extension?
 var routes = {
-    // The basic predicate with no captures
+    // The basic pattern with no captures
     '/employees/*/bank-accts/*': staticFiles('path'),
 
     // 'capture' operator, both as prefix and postfix, using various delimiters: <>, {}, ::, "", [], __
     // prefix: clearly states that we are naming the next thing, esp if 'the next thing' is long
-    // postfix: keeps emphasis on the predicate, names are appended and sorta de-emphasised
+    // postfix: keeps emphasis on the pattern, names are appended and sorta de-emphasised
     '/employees/<empId>*/bank-accts/<acctId>*': staticFiles('path'),
     '/employees/*<empId>/bank-accts/*<acctId>': staticFiles('path'),
     '/employees/{empId}*/bank-accts/{acctId}*': staticFiles('path'),
@@ -330,7 +330,7 @@ var routes = {
     '/employees/(*:empId)/bank-accts/(*:acctId)': staticFiles('path'),  // ends because of closing parens
     '/employees/*:empId/bank-accts/*:acctId': staticFiles('path'),      // ends after last alphanum (ie, the next '/')
 
-    // Same ideas, different predicate...
+    // Same ideas, different pattern...
     '/(c*t)<word>': staticFiles('path'), // postfix with both delimiters...
     '/(c*t){word}': staticFiles('path'),
     '/(c*t):word:': staticFiles('path'),
@@ -366,6 +366,9 @@ var routes = {
 
 
 ## Done
+- [x] `EulerDiagram` --> `Taxonomy`
+- [x] `EulerSet` --> `Taxon`
+- [x] `predicate` --> `pattern`
 - [x] minimal doc comments / cleanup in ED
 - [x] surface `unreachable` in mm creation options
 - [x] support `|` alternation operator in predicates

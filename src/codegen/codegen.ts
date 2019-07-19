@@ -1,5 +1,5 @@
-import * as predicates from '../math/predicates';
 import {MMInfo, Node} from '../mm-info';
+import * as patterns from '../patterns';
 import {debug, repeat} from '../util';
 import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import {multimethodTemplate} from './multimethod-template';
@@ -21,7 +21,7 @@ export function codegen(mminfo: MMInfo) {
     // multimethod dispatch code that is both more readable and more efficient, since it is tailored specifically
     // to the configuration of this multimethod, rather than having to be generalized for all possible cases.
     // tslint:disable-next-line:no-eval
-    let multimethod = eval(`(${multimethodSourceCode})`)(mminfo, predicates);
+    let multimethod = eval(`(${multimethodSourceCode})`)(mminfo, patterns);
     multimethod.toString = () => multimethodSourceCode;
 
     if (debug.enabled) multimethod = instrumentMultimethod(multimethod, mminfo);
@@ -47,7 +47,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo) {
         let bodyRegex = /{\n[\s\S]*?(?=\t*})/; // matches the substring between the opening and closing braces
         return placeholderContent.replace(bodyRegex, () => `{\n${block(mminfo.rootNode, bodyIndent)}`);
 
-        // Recursively generate the conditional logic block to select among the given predicates.
+        // Recursively generate the conditional logic block to select among the given patterns.
         function block(node: Node, indent: string): string {
             let result = node.childNodes.map(childNode => {
                 let nodeSubs = substitutions.forNode(childNode);
@@ -63,7 +63,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo) {
                 }
             }).join('');
 
-            // Select the base predicate if none of the more specialised predicates matched the discriminant.
+            // Select the base pattern if none of the more specialised patterns matched the discriminant.
             result += `${indent}return ${substitutions.forNode(node).NAMEOF_ENTRYPOINT_THUNK};\n`;
             return result;
         }
@@ -83,7 +83,7 @@ function generateMultimethodSourceCode(mminfo: MMInfo) {
             return node.methodSequence.map((_, index, seq) => {
 
                 // To avoid unnecessary duplication, skip emit for regular methods that are less
-                // specific that the set's predicate, since these will be handled in their own set.
+                // specific than the taxon's pattern, since these will be handled in their own taxon.
                 if (!seq[index].isDecorator && seq[index].fromNode !== seq[0].fromNode) return '';
 
                 let nodeSubs = substitutions.forNode(seq[index].fromNode);

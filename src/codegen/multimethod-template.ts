@@ -34,7 +34,7 @@ const {BEGIN_SECTION, END_SECTION} = utils;
  * stringified to its source code, and that source code undergoes substitutions to produce the source code for an actual
  * multimethod. The resulting source code is evaluated to produce a multimethod function that is both fast and readable.
  */
-export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../math/predicates')) {
+export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../patterns')) {
 
     /** The multimethod's discriminator function. */
     let discriminator = mminfo.options.discriminator;
@@ -75,7 +75,7 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../math/
      * TODO: rewrite doc...
      * Generates a function that, given a discriminant, returns the best-matching route executor from the given list of
      * candidates. The returned selector function is generated for maximum readability and efficiency, using conditional
-     * constructs that follow the branches of the given `eulerDiagram`.
+     * constructs that follow the branches of the given `taxonomy`.
      */
     function MM$NAMEOF_SELECT_THUNK(discriminant: string): any {
         // This is a dummy body that will be substituted for real code. The regex to replace this body
@@ -86,10 +86,10 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../math/
 
     /* -------------------------------------------------------------------------------- */
     BEGIN_SECTION('PATTERN MATCHING');
-    let NODE$NAMEOF_IS_MATCH = ℙ.toMatchFunction(ℙ.toNormalPredicate(mminfo.allNodes[NODE.INDEX].exactPredicate));
+    let NODE$NAMEOF_IS_MATCH = ℙ.toMatchFunction(ℙ.toNormalPattern(mminfo.allNodes[NODE.INDEX].exactPattern));
     if (NODE.HAS_PATTERN_BINDINGS) {
         // tslint:disable-next-line: no-var-keyword
-        var NODE$NAMEOF_GET_PATTERN_BINDINGS: any = ℙ.toMatchFunction(mminfo.allNodes[NODE.INDEX].exactPredicate);
+        var NODE$NAMEOF_GET_PATTERN_BINDINGS: any = ℙ.toMatchFunction(mminfo.allNodes[NODE.INDEX].exactPattern);
     }
     END_SECTION('PATTERN MATCHING');
 

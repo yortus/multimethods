@@ -1,16 +1,15 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import {toIdentifierParts, toPredicate} from 'multimethods/math/predicates';
+import {toIdentifierParts, toPattern} from 'multimethods/patterns';
 
 
 
 
-
-describe('Making an identifier for a predicate', () => {
+describe('Making an identifier for a pattern', () => {
 
     let tests = [
 
-        // Simple predicates consisting of valid characters:
+        // Simple patterns consisting of valid characters:
         'abcdefghijklm ==> abcdefghijklm',
         'nopqrstuvwxyz ==> nopqrstuvwxyz',
         'ABCDEFGHIJKLM ==> ABCDEFGHIJKLM',
@@ -55,8 +54,8 @@ describe('Making an identifier for a predicate', () => {
         '∫ ==> ERROR',
         '© ==> ERROR',
 
-        // More complex valid predicates:
-        ' ==> ', // NB: empty predicate
+        // More complex valid patterns:
+        ' ==> ', // NB: empty pattern
         '∅ ==> Ø',
         '/ ==> Ⳇ',
         '* ==> ӿ',
@@ -110,7 +109,7 @@ describe('Making an identifier for a predicate', () => {
             let [source, expected] = test.split(' ==> ');
             let actual: string;
             try {
-                actual = toIdentifierParts(toPredicate(source));
+                actual = toIdentifierParts(toPattern(source));
             }
             catch (ex) {
                 actual = 'ERROR';

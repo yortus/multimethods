@@ -7,9 +7,9 @@
 
 
 // // TODO: More coverage:
-// // - [ ] multiple regular methods for same predicate
-// // - [ ] multiple meta-methods for same predicate
-// // - [ ] one meta- and several regular methods for same predicate
+// // - [ ] multiple regular methods for same pattern
+// // - [ ] multiple meta-methods for same pattern
+// // - [ ] one meta- and several regular methods for same pattern
 // // - [ ] meta-methods along ambiguous paths (same meta-methods on all paths)
 // // - [x] meta-methods along ambiguous paths (not same meta-methods on all paths) - c/d
 

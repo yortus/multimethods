@@ -1,6 +1,5 @@
 import {expect} from 'chai';
-import {intersect, toNormalPredicate} from 'multimethods/math/predicates';
-
+import {intersect, toNormalPattern} from 'multimethods/patterns';
 
 
 
@@ -10,11 +9,10 @@ import {intersect, toNormalPredicate} from 'multimethods/math/predicates';
 
 
 
+describe('Intersecting two patterns', () => {
 
-describe('Intersecting two predicates', () => {
-
-    // NB: For visual clarity, `⨂` is used below to mean the empty predicate. This is not the
-    //     same as the ∅ predicate. ∅ does not match any strings, but ⨂ matches the empty string.
+    // NB: For visual clarity, `⨂` is used below to mean the empty pattern. This is not the
+    //     same as the ∅ pattern. ∅ does not match any strings, but ⨂ matches the empty string.
     let tests = [
         '∅ ∩ ∅ = ∅',
         '∅ ∩ ⨂ = ∅',
@@ -104,7 +102,7 @@ describe('Intersecting two predicates', () => {
             let actual: string;
             let expected = rhs;
             try {
-                actual = intersect(toNormalPredicate(lhsA), toNormalPredicate(lhsB));
+                actual = intersect(toNormalPattern(lhsA), toNormalPattern(lhsB));
             }
             catch (ex) {
                 actual = 'ERROR';
