@@ -67,7 +67,7 @@
         "pegjs": "^0.10.0",
         "rimraf": "^2.6.3",
         "tslint": "^5.17.0",
-        "typescript": "^3.5.2",
+        "typescript": "next",
         "webpack": "^4.34.0",
         "webpack-cli": "^3.3.4"
     }
