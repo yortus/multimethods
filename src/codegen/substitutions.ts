@@ -52,7 +52,6 @@ export function forMatch(seq: Node['methodSequence'], index: number) {
         NAMEOF_THUNK: getThunkName(seq, index),
         NAMEOF_METHOD: getMethodName(fromNode, methodIndex),
         IS_DECORATOR: seq[index].isDecorator,
-        HAS_NO_THIS_REFERENCE_IN_METHOD: !/\bthis\b/g.test(fromNode.exactMethods[methodIndex].toString()),
         HAS_OUTER_MATCH: !isLeastSpecificMethod && !seq[index + 1].isDecorator,
         NAMEOF_OUTER_THUNK: isLeastSpecificMethod ? '' : getThunkName(seq, index + 1),
         HAS_INNER_MATCH: innerMethod != null,
