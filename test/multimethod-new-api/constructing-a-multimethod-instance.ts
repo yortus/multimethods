@@ -87,47 +87,47 @@ describe('Constructing a Multimethod instance', () => {
                 },
             ] as Array<(this: any) => any>,
         }).decorate({
-            '/*a*'(rq) { return calc([
+            '/*a*': (method, [rq]) => calc([
                 '---',
-                calc(() => this.inner(rq), (rs, er) => er === UNHANDLED ? err('no inner method!') : rs),
+                calc(() => method(rq), (rs, er) => er === UNHANDLED ? err('no inner method!') : rs),
                 '---',
-            ], concat); },
+            ], concat),
 
             'api/fo*': [
-                function (rq) { return calc([
+                (method, [rq]) => calc([
                     'fo2-(',
-                    calc(() => this.inner(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
+                    calc(() => method(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     ')',
-                ], concat); },
-                function (rq) { return calc([
+                ], concat),
+                (method, [rq]) => calc([
                     'fo1-(',
-                    calc(() => this.inner(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
+                    calc(() => method(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     ')',
-                ], concat); },
+                ], concat),
             ],
             'api/foo': [
-                function (rq) {return calc([
-                    calc(() => this.inner(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
+                (method, [rq]) => calc([
+                    calc(() => method(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     '!',
-                ], concat); },
+                ], concat),
                 'super' as const,
             ],
 
-            'zz/z/{**rest}'() {
+            'zz/z/{**rest}'(method) {
                 let moddedReq = {address: this.pattern.rest.split('').reverse().join('')};
-                return calc(() => this.inner(moddedReq), (rs, er) => er === UNHANDLED ? val('NONE') : rs);
+                return calc(() => method(moddedReq), (rs, er) => er === UNHANDLED ? val('NONE') : rs);
             },
 
             'CHAIN-{x}': [
 
                 // Wrap subsequent results with ()
-                function (rq) { return calc(['(', this.inner(rq), ')'], concat); },
+                (method, [rq]) => calc(['(', method(rq), ')'], concat),
 
                 // Block any result that starts with '[32'
-                function (rq) { return calc(this.inner(rq), rs => rs.startsWith('[32') ? err('blocked') : rs); },
+                (method, [rq]) => calc(method(rq), rs => rs.startsWith('[32') ? err('blocked') : rs),
 
                 // Wrap subsequent results with []
-                function (rq) { return calc(['[', this.inner(rq), ']'], concat); },
+                (method, [rq]) => calc(['[', method(rq), ']'], concat),
 
                 'super' as const,
             ],

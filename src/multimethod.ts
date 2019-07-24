@@ -26,13 +26,13 @@ export interface Multimethod<P extends unknown[], R> {
     (...args: P): R;
     extend<MR>(methods: MethodsObject<P, MR>): Multimethod<P, Result<R | MR>>;
     extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): Multimethod<P, Result<R | MR | Promise<MR>>>;
-    decorate(decorators: MethodsObject<P, R>): Multimethod<P, R>;
+    decorate(decorators: DecoratorsObject<P, R>): Multimethod<P, R>;
 }
 
 export interface AsyncMultimethod<P extends unknown[], R> {
     (...args: P): Promise<R>;
     extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): AsyncMultimethod<P, R | MR>;
-    decorate(decorators: MethodsObject<P, R | Promise<R>>): AsyncMultimethod<P, R>;
+    decorate(decorators: DecoratorsObject<P, R | Promise<R>>): AsyncMultimethod<P, R>;
 }
 
 
@@ -42,11 +42,16 @@ export interface MethodsObject<P extends unknown[], R> {
     [pattern: string]: Method<P, R> | Array<Method<P, R> | 'super'>;
 }
 
-export type Method<P extends unknown[], R> = (this: Context<P, R>, ...args: P) => R;
+export type Method<P extends unknown[], R> = (this: Context<R>, ...args: P) => R;
 
-export interface Context<P extends unknown[], R> {
+export interface DecoratorsObject<P extends unknown[], R> {
+    [pattern: string]: Decorator<P, R> | Array<Decorator<P, R> | 'super'>;
+}
+
+export type Decorator<P extends unknown[], R> = (this: Context<R>, inner: (...args: P) => R, args: P) => R;
+
+export interface Context<R> {
     pattern: { [bindingName: string]: string };
-    inner: (...args: P) => R;
     outer: () => R;
 }
 

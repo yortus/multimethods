@@ -74,17 +74,17 @@ const mm = Multimethod({
     'zz/z/b*z': ($req) => `${$req.address}`,
     'zz/z/./*': () => 'forty-two',
 }).decorate({
-    '/*a*'($req) { return `---${ifUnhandled(this.inner($req), 'NONE')}---`; },
+    '/*a*': (method, [$req]) => `---${ifUnhandled(method($req), 'NONE')}---`,
     'api/fo*': [
-        function ($req) { return `fo2-(${ifUnhandled(this.inner($req), 'NONE')})`; },
-        function ($req) { return `fo1-(${ifUnhandled(this.inner($req), 'NONE')})`; },
+        (method, [$req]) => `fo2-(${ifUnhandled(method($req), 'NONE')})`,
+        (method, [$req]) => `fo1-(${ifUnhandled(method($req), 'NONE')})`,
     ],
     'api/foo': [
-        function ($req) { return `${ifUnhandled(this.inner($req), 'NONE')}!`; },
+        (method, [$req]) => `${ifUnhandled(method($req), 'NONE')}!`,
         'super',
     ],
     // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-    'zz/z/{**rest}'() { return `${ifUnhandled(this.inner({address: this.pattern.rest.split('').reverse().join('')}), 'NONE')}`; },
+    'zz/z/{**rest}'(method) { return `${ifUnhandled(method({address: this.pattern.rest.split('').reverse().join('')}), 'NONE')}`; },
 });
 
 // Encode a battery of requests with their expected responses.

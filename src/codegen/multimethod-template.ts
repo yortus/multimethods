@@ -108,30 +108,19 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../patte
      * (more-specific) partition being passed as the `next` parameter to the decorator starting the previous
      * (less-specific) partition.
      */
-    function MATCH$NAMEOF_THUNK(discriminant: string, MM$PARAMS: any[], args: any[] | false) {
-        if (MATCH.HAS_NO_THIS_REFERENCE_IN_METHOD) {
-            return args ? MATCH.NAMEOF_METHOD.apply(undefined, args) : MATCH.NAMEOF_METHOD(MM$PARAMS);
+    function MATCH$NAMEOF_THUNK(discriminant: string, MM$PARAMS: any[], varargs: any[] | false) {
+        if (1 + 1 === 3 && MATCH.HAS_NO_THIS_REFERENCE_IN_METHOD) {
+            // TODO: fix this clause once `this` is fully removed
+            return varargs ? MATCH.NAMEOF_METHOD.apply(undefined, varargs) : MATCH.NAMEOF_METHOD(MM$PARAMS);
         }
         else {
             let outer: () => any;
-            let inner: (...args: any[]) => any;
             let pattern: any;
             if (MATCH.HAS_OUTER_MATCH) {
-                outer = () => MATCH.NAMEOF_OUTER_THUNK(discriminant, MM$PARAMS, args);
+                outer = () => MATCH.NAMEOF_OUTER_THUNK(discriminant, MM$PARAMS, varargs);
             }
             else {
                 outer = () => unhandled(discriminant) as any;
-            }
-
-            if (MATCH.HAS_INNER_MATCH) {
-                // tslint:disable-next-line: only-arrow-functions no-shadowed-variable
-                inner = function (MM$PARAMS: any[]) {
-                    let varargs = arguments.length > MM.ARITY && copy(arguments);
-                    return MATCH.NAMEOF_INNER_THUNK(discriminant, MM$PARAMS, varargs);
-                };
-            }
-            else {
-                inner = () => unhandled(discriminant);
             }
 
             if (NODE.HAS_PATTERN_BINDINGS) {
@@ -139,11 +128,27 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../patte
             }
             else {
                 pattern = emptyObject as any;
-
             }
 
-            let context = {pattern, inner, outer};
-            return args ? MATCH.NAMEOF_METHOD.apply(context, args) : MATCH.NAMEOF_METHOD.call(context, MM$PARAMS);
+            let context = {pattern, outer};
+            if (MATCH.IS_DECORATOR) {
+                let inner: (...args: any[]) => any;
+                if (MATCH.HAS_INNER_MATCH) {
+                    // tslint:disable-next-line: only-arrow-functions no-shadowed-variable
+                    inner = function (MM$PARAMS: any[]) {
+                        // TODO: move `copy` fn - recent V8 can leak arguments without loss of speed
+                        let varargsᐟ = arguments.length > MM.ARITY && copy(arguments);
+                        return MATCH.NAMEOF_INNER_THUNK(discriminant, MM$PARAMS, varargsᐟ);
+                    };
+                }
+                else {
+                    inner = () => unhandled(discriminant);
+                }
+                return varargs ? MATCH.NAMEOF_METHOD.apply(context, inner, varargs) : MATCH.NAMEOF_METHOD.call(context, inner, [MM$PARAMS]);
+            }
+            else {
+                return varargs ? MATCH.NAMEOF_METHOD.apply(context, varargs) : MATCH.NAMEOF_METHOD.call(context, MM$PARAMS);
+            }
         }
     }
     END_SECTION('THUNKS');
