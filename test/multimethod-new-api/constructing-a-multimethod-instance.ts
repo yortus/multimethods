@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import {isPromiseLike} from 'multimethods/util';
+import {isPromiseLike} from 'multimethods/internals/util';
 
-import {Multimethod} from 'multimethods';
+import {Multimethod, next} from 'multimethods';
 // import defaultDiscrininator from 'multimethods/analysis/configuration/default-discriminator';
 
 
@@ -55,79 +55,73 @@ describe('Constructing a Multimethod instance', () => {
 
             'c/*': () => val(`starts with 'c'`),
             '*/d': () => err(`don't end with 'd'!`),
-            'c/d'() { return val(this.outer()); },
+            'c/d': () => val(next),
 
             'api/**': () => val(`fallback`),
-            'api/fo*o'() { return val(this.outer()); },
+            'api/fo*o': () => val(next),
             'api/foo': [
                 () => val('FOO'),
             ],
-            'api/foot': rq => val(`FOOt${rq.address.length}`),
+            'api/foot': (_, rq) => val(`FOOt${rq.address.length}`),
             'api/fooo': () => val('fooo'),
-            'api/bar'() { return val(this.outer()); },
+            'api/bar': () => val(next),
 
-            'zz/z/b*z': (rq) => val(`${rq.address}`),
+            'zz/z/b*z': (_, rq) => val(`${rq.address}`),
             'zz/z/./*': () => val('forty-two'),
 
             'CHAIN-{x}': [
 
                 // Return x!x! only if x ends with 'b' , otherwise skip
-                function () {
-                    return val((this.pattern.x.endsWith('b') ? (this.pattern.x + '!').repeat(2) : this.outer()));
-                },
+                ({x}) => val((x!.endsWith('b') ? (x + '!').repeat(2) : next)),
 
                 // Return xxx only if x has length 2, otherwise skip
-                function () {
-                    return val(this.pattern.x.length === 2 ? this.pattern.x.repeat(3) : this.outer());
-                },
+                ({x}) => val(x!.length === 2 ? x!.repeat(3) : next),
 
                 // Return the string reversed
-                function () {
-                    return val(this.pattern.x.split('').reverse().join(''));
-                },
-            ] as Array<(this: any) => any>,
+                ({x}) => val(x!.split('').reverse().join('')),
+            ],
         }).decorate({
-            '/*a*': (method, [rq]) => calc([
+            '/*a*': (_, method, [rq]) => calc([
                 '---',
                 calc(() => method(rq), (rs, er) => er === UNHANDLED ? err('no inner method!') : rs),
                 '---',
             ], concat),
 
             'api/fo*': [
-                (method, [rq]) => calc([
+                (_, method, [rq]) => calc([
                     'fo2-(',
                     calc(() => method(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     ')',
                 ], concat),
-                (method, [rq]) => calc([
+                (_, method, [rq]) => calc([
                     'fo1-(',
                     calc(() => method(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     ')',
                 ], concat),
             ],
             'api/foo': [
-                (method, [rq]) => calc([
+                (_, method, [rq]) => calc([
                     calc(() => method(rq), (rs, er) => er === UNHANDLED ? val('NONE') : rs),
                     '!',
                 ], concat),
                 'super' as const,
             ],
 
-            'zz/z/{**rest}'(method) {
-                let moddedReq = {address: this.pattern.rest.split('').reverse().join('')};
+            'zz/z/{**rest}'({rest}, method) {
+                let moddedReq = {address: rest!.split('').reverse().join('')};
                 return calc(() => method(moddedReq), (rs, er) => er === UNHANDLED ? val('NONE') : rs);
             },
 
             'CHAIN-{x}': [
 
                 // Wrap subsequent results with ()
-                (method, [rq]) => calc(['(', method(rq), ')'], concat),
+                (_, method, [rq]) => calc(['(', method(rq), ')'], concat),
 
                 // Block any result that starts with '[32'
-                (method, [rq]) => calc(method(rq), rs => rs.startsWith('[32') ? err('blocked') : rs),
+                (_, method, [rq]) => calc(method(rq), rs => rs.startsWith('[32') ? err('blocked') : rs),
 
                 // Wrap subsequent results with []
-                (method, [rq]) => calc(['[', method(rq), ']'], concat),
+                (_, method, [rq]) => calc(['[', method(rq), ']'], concat),
 
                 'super' as const,
             ],

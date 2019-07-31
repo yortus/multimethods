@@ -1,6 +1,6 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import {Pattern, toMatchFunction} from 'multimethods/patterns';
+import {Pattern, toMatchFunction} from 'multimethods/internals/patterns';
 
 
 

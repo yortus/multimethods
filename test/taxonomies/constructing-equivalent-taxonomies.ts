@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import {Taxon, Taxonomy} from 'multimethods/taxonomies';
-import {NormalisedPattern} from 'multimethods/patterns';
+import {NormalisedPattern} from 'multimethods/internals/patterns';
+import {Taxon, Taxonomy} from 'multimethods/internals/taxonomies';
 
 
 
@@ -121,14 +121,14 @@ function taxonToObj(taxon: Taxon): {} {
 function isUnreachable(p: NormalisedPattern) {
 
     // Only consider the form *A*B*C*...*
-    if (p.length < 3) return;
-    if (p.charAt(0) !== '*' || p.charAt(p.length - 1) !== '*') return;
-    if (p.indexOf('**') !== -1 || p.indexOf('/') !== -1) return;
+    if (p.length < 3) return false;
+    if (p.charAt(0) !== '*' || p.charAt(p.length - 1) !== '*') return false;
+    if (p.indexOf('**') !== -1 || p.indexOf('/') !== -1) return false;
 
     // If the parts aren't strictly ordered, it's unreachable
     let parts = p.slice(1, -1).split('*');
     for (let i = 0, j = 1; j < parts.length; ++i, ++j) {
         if (parts[i] >= parts[j]) return true;
     }
-    return;
+    return false;
 }

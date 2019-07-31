@@ -1,5 +1,5 @@
+import {Method} from '../../../interface/multimethod';
 import {MMInfo} from '../../mm-info';
-import {Method} from '../../multimethod';
 import {andThen, debug, repeat} from '../../util';
 
 
@@ -24,9 +24,9 @@ export function instrumentMethods(mminfo: MMInfo) {
 function instrumentMethod(mminfo: MMInfo, method: Function, name: string) {
     let isDecorator = mminfo.isDecorator(method);
     let methodInfo = `${isDecorator ? 'decorator' : 'method'}=${name}`;
-    let instrumentedMethod: Method<unknown[], unknown> = function (...args: any[]) {
-        debug(`${debug.DISPATCH} |-->| %s   pattern bindings=%o`, methodInfo, this.pattern);
-        return andThen(() => method.apply(this, args), (result, error, isAsync) => {
+    let instrumentedMethod: Method<unknown[], unknown> = (patternBindings, ...args) => {
+        debug(`${debug.DISPATCH} |-->| %s   pattern bindings=%o`, methodInfo, patternBindings);
+        return andThen(() => method(patternBindings, ...args), (result, error, isAsync) => {
             let resultInfo = error ? 'result=ERROR' : '';
             debug(`${debug.DISPATCH} |<--| %s   %s   %s`, methodInfo, isAsync ? 'async' : 'sync', resultInfo);
             if (error) throw error; else return result;

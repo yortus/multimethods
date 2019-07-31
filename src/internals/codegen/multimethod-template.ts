@@ -29,12 +29,30 @@ const {BEGIN_SECTION, END_SECTION} = utils;
 
 
 
+
+// TODO: temp testing...
+export interface Env {
+    mminfo: MMInfo;
+    ℙ: typeof import('../patterns');
+    next: never;
+    isPromiseLike: typeof import('../util').isPromiseLike;
+}
+
+
+
+
 /**
  * Contains multimethod implementation code in template form. This function is not called as-is. Rather it is
  * stringified to its source code, and that source code undergoes substitutions to produce the source code for an actual
  * multimethod. The resulting source code is evaluated to produce a multimethod function that is both fast and readable.
  */
-export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../patterns')) {
+export function multimethodTemplate(env: Env) {
+
+    // TODO: temp testing...
+    let mminfo = env.mminfo;
+    let ℙ = env.ℙ;
+    let next = env.next;
+    let isPromiseLike = env.isPromiseLike;
 
     /** The multimethod's discriminator function. */
     let discriminator = mminfo.options.discriminator;
@@ -110,7 +128,7 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../patte
      */
     function MATCH$NAMEOF_THUNK(discriminant: string, MM$PARAMS: any[], varargs: any[] | false) {
         let outer: () => any;
-        let pattern: any;
+        let patternBindings: any;
         if (MATCH.HAS_OUTER_MATCH) {
             outer = () => MATCH.NAMEOF_OUTER_THUNK(discriminant, MM$PARAMS, varargs);
         }
@@ -119,13 +137,13 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../patte
         }
 
         if (NODE.HAS_PATTERN_BINDINGS) {
-            pattern = NODE.NAMEOF_GET_PATTERN_BINDINGS(discriminant);
+            patternBindings = NODE.NAMEOF_GET_PATTERN_BINDINGS(discriminant);
         }
         else {
-            pattern = emptyObject as any;
+            patternBindings = emptyObject as any;
         }
 
-        let context = {pattern, outer};
+        let result: any;
         if (MATCH.IS_DECORATOR) {
             let inner: (...args: any[]) => any;
             if (MATCH.HAS_INNER_MATCH) {
@@ -139,11 +157,37 @@ export function multimethodTemplate(mminfo: MMInfo, ℙ: typeof import('../patte
             else {
                 inner = () => unhandled(discriminant);
             }
-            return varargs ? MATCH.NAMEOF_METHOD.apply(context, inner, varargs) : MATCH.NAMEOF_METHOD.call(context, inner, [MM$PARAMS]);
+
+            if (varargs) {
+                result = MATCH.NAMEOF_METHOD(patternBindings, inner, varargs);
+            }
+            else {
+                result = MATCH.NAMEOF_METHOD(patternBindings, inner, [MM$PARAMS]);
+            }
         }
         else {
-            return varargs ? MATCH.NAMEOF_METHOD.apply(context, varargs) : MATCH.NAMEOF_METHOD.call(context, MM$PARAMS);
+            if (varargs) {
+                result = MATCH.NAMEOF_METHOD.apply(undefined, [patternBindings].concat(varargs));
+            }
+            else {
+                result = MATCH.NAMEOF_METHOD(patternBindings, MM$PARAMS);
+            }
         }
+
+
+        // TODO: temp testing...
+        if (result === next) {
+            // TODO: temp testing...
+            result = outer();
+        }
+
+        else if (isPromiseLike(result)) {
+            result = result.then(res => {
+                return res === next ? outer() : res;
+            });
+        }
+
+        return result;
     }
     END_SECTION('THUNKS');
 

@@ -1,4 +1,4 @@
-import {Options, OptionsObject} from '../options';
+import {Options, OptionsObject} from '../../interface/options';
 import {Dict, panic} from '../util';
 import {checkMethodsAndDecorators} from './check-methods-and-decorators';
 import {checkOptions} from './check-options';

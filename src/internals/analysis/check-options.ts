@@ -1,4 +1,4 @@
-import {Options} from '../options';
+import {Options} from '../../interface/options';
 import {panic} from '../util';
 
 

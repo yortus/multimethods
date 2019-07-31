@@ -1,4 +1,4 @@
-import {OptionsObject} from './options';
+import {OptionsObject} from '../interface/options';
 import {Pattern} from './patterns';
 
 

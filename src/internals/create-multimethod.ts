@@ -1,85 +1,16 @@
+import {AsyncMultimethod, Multimethod} from '../interface/multimethod';
+import {Options} from '../interface/options';
 import {analyse} from './analysis';
 import {codegen} from './codegen';
-import * as types from './multimethod';
-import {Options} from './options';
 import {Dict} from './util';
 
 
 
 
-export interface MultimethodStatic {
-
-    // Functional-style factory function
-    // NB 'never' result: will always throw after construction; no methods yet
-    <P extends unknown[]>(options: Options<P, string>): Multimethod<P, never>;
-    <P extends unknown[]>(options: Options<P, Promise<string>>): AsyncMultimethod<P, never>;
-
-    // OO-style class constructor
-    // NB 'never' result: will always throw after construction; no methods yet
-    new <P extends unknown[]>(options: Options<P, string>): Multimethod<P, never>;
-    new <P extends unknown[]>(options: Options<P, Promise<string>>): AsyncMultimethod<P, never>;
-}
-
-export let Multimethod = create as MultimethodStatic;
-
-export interface Multimethod<P extends unknown[], R> {
-    (...args: P): R;
-    extend<MR>(methods: MethodsObject<P, MR>): Multimethod<P, Result<R | MR>>;
-    extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): Multimethod<P, Result<R | MR | Promise<MR>>>;
-    decorate(decorators: DecoratorsObject<P, R>): Multimethod<P, R>;
-}
-
-export interface AsyncMultimethod<P extends unknown[], R> {
-    (...args: P): Promise<R>;
-    extend<MR>(methods: MethodsObject<P, MR | Promise<MR>>): AsyncMultimethod<P, R | MR>;
-    decorate(decorators: DecoratorsObject<P, R | Promise<R>>): AsyncMultimethod<P, R>;
-}
-
-
-
-
-export interface MethodsObject<P extends unknown[], R> {
-    [pattern: string]: Method<P, R> | Array<Method<P, R> | 'super'>;
-}
-
-export type Method<P extends unknown[], R> = (this: Context<R>, ...args: P) => R;
-
-export interface DecoratorsObject<P extends unknown[], R> {
-    [pattern: string]: Decorator<P, R> | Array<Decorator<P, R> | 'super'>;
-}
-
-export type Decorator<P extends unknown[], R> = (this: Context<R>, inner: (...args: P) => R, args: P) => R;
-
-export interface Context<R> {
-    pattern: { [bindingName: string]: string };
-    outer: () => R;
-}
-
-
-
-
-/**
- * Type operator that computes the return type of a multimethod, given the
- * union T = T1 | T2 | ... of the return types of the multimethod's methods.
- */
-type Result<T> =
-
-    // If none of the TNs are Promise types, then the result is T.
-    (T extends Promise<any> ? 1 : never) extends never ? T :
-
-    // If all of the TNs are Promise types, then the result is Promise<T1 | T2 | ...>.
-    (T extends Promise<any> ? never : 1) extends never ? Promise<T extends Promise<infer U> ? U : T> :
-
-    // If some TNs are Promise types and some are not, then the result is T1 | T2 | ... | Promise<T1 | T2 | ...>.
-    (T extends Promise<infer U> ? U : T) | Promise<T extends Promise<infer U> ? U : T>;
-
-
-
-
 // TODO: ...
-function create<P extends unknown[]>(options?: Options<P>): types.Multimethod<P, never>;
-function create<P extends unknown[]>(options?: Options<P, Promise<string>>): types.AsyncMultimethod<P, never>;
-function create(options: Options<unknown[], any>) {
+export function createMultimethod<P extends unknown[]>(options?: Options<P>): Multimethod<P>;
+export function createMultimethod<P extends unknown[]>(options?: Options<P, Promise<string>>): AsyncMultimethod<P>;
+export function createMultimethod(options: Options<unknown[], any>) {
     let mm = codegen(analyse(options, {}, {}));
     let result = addMethods(mm, {}, {});
     return result;
@@ -148,7 +79,11 @@ function combine(existingMethods: Dict<Function[]>, additionalMethods: Dict<Func
 
 
 
+
+
 // // TODO: temp testing...
+// declare const next: never;
+
 // let mm1 = new Multimethod((a: number, b: string) => `/${a}/${b}`);
 // mm1 = mm1.extend({foo: async () => 'foo'});
 // let x1a = mm1(1, 'sdsd');
@@ -160,16 +95,16 @@ function combine(existingMethods: Dict<Function[]>, additionalMethods: Dict<Func
 //     '/baz': () => 'baz',
 // });
 // let mm2b = mm2.decorate({
-//     '**': (method, args) => 'asd' || method(...args),
+//     '**': (_, method, args) => 'asd' || method(...args),
 // });
 // let x2a = mm2(3, 'asda');
 
 
 // let mm3 = mm2.extend({
-//     '/foo/*': async () => 'hi hi',
+//     '/foo/*': async (_, a, b) => 'hi hi',
 //     '/foo/*/*': [() => 'hi hi hi'],
-//     async '/{**path}'(a, b) { return `/${a}/${b}${this.pattern.path}`; },
-//     async '/thing/{name}'(a, b) { return next; }, // TODO: was... `/${a}/${b}${this.captures.name}`; },
+//     '/{**path}': ({path}, a, b) => `/${a}/${b}${path}`,
+//     '/thing/{name}': () => next, // TODO: was... `/${a}/${b}${this.captures.name}`; },
 // });
 // let x3a = mm3(3, 'asda');
 
@@ -202,10 +137,10 @@ function combine(existingMethods: Dict<Function[]>, additionalMethods: Dict<Func
 // let x6a = mm6(3, 'asda');
 
 
-// let mm7 = new Multimethod();
+// let mm7 = new Multimethod({});
 // let x7a = mm7.extend({foo: [
-//     (a, b) => 'bar',
-//     (a, b) => 'baz',
+//     (_, a, b) => 'bar',
+//     (_, a, b) => 'baz',
 //     'super',
 // ]})();
 
@@ -214,3 +149,13 @@ function combine(existingMethods: Dict<Function[]>, additionalMethods: Dict<Func
 // let mm8b = mm8a.extend({'/foo/*': () => 'foo'});
 // let mm8c = mm8a.extend({'/bar/*': () => 'bar'}).decorate({'**': () => 'foo'});
 // let x8b1 = mm8b(1, 'sdsd');
+
+
+// let mm9 = mm2.extend({
+//     '/foo/*': async (x, a, b) => 'hi hi',
+//     '/bar/*': async (a, b) => 'hi hi',
+//     '/foo/*/*': [() => 'hi hi hi'],
+//     '/{**path}': ({path}, a, b) => `/${a}/${b}${path}`,
+//     '/thing/{name}': (x, y, z) => next, // TODO: was... `/${a}/${b}${this.captures.name}`; },
+// });
+// let x9a = mm9(3, 'asda');

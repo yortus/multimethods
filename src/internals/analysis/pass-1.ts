@@ -1,4 +1,4 @@
-import {OptionsObject} from '../options';
+import {OptionsObject} from '../../interface/options';
 import {NormalisedPattern, Pattern} from '../patterns';
 import {Taxonomy} from '../taxonomies';
 import {Dict} from '../util';

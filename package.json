@@ -10,7 +10,7 @@
         "build": "yarn build:cjs && yarn build:umd",
         "build:cjs": "yarn build:tsc && yarn build:pegjs",
         "build:tsc": "tsc -p src && tsc -p test && tsc -p extras",
-        "build:pegjs": "pegjs -o dist/commonjs/patterns/parse.js src/patterns/parse.pegjs",
+        "build:pegjs": "pegjs -o dist/commonjs/internals/patterns/parse.js src/internals/patterns/parse.pegjs",
         "build:umd": "webpack",
         "lint": "tslint src/**/*.ts extras/**/*.ts test/**/*.ts",
         "test": "node ./scripts/run-unit-tests",

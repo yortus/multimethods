@@ -1,8 +1,3 @@
-import {Unreachable} from './patterns';
-
-
-
-
 // TODO: doc...
 export type Options<P extends unknown[] = unknown[], D extends Awaitable<string> = Awaitable<string>> =
     | DiscriminatorFunction<P, D>
@@ -20,7 +15,7 @@ export interface OptionsObject<P extends unknown[] = unknown[], D extends Awaita
     discriminator?: DiscriminatorFunction<P, D>;
 
     // TODO: doc... advanced option...
-    unreachable?: Unreachable;
+    unreachable?: (pattern: string) => boolean;
 
     // TODO: temp testing...
     unhandled?: (discriminant: string) => unknown;

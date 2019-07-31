@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import {ALL, intersect, NONE, NormalisedPattern} from 'multimethods/patterns';
-import {Taxon, Taxonomy} from 'multimethods/taxonomies';
+import {ALL, intersect, NONE, NormalisedPattern} from 'multimethods/internals/patterns';
+import {Taxon, Taxonomy} from 'multimethods/internals/taxonomies';
 
 
 

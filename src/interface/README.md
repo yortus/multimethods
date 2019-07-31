@@ -1,0 +1,3 @@
+- This directory holds all public/exported declarations
+- These declarations *may* be referenced from `internals`.
+- These declarations *must not* reference anything in `internals`.

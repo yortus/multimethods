@@ -1,6 +1,6 @@
 // tslint:disable:max-line-length
 import * as assert from 'assert';
-import {Multimethod} from 'multimethods';
+import {Multimethod, next} from 'multimethods';
 // TODO: perf testing... write this up properly.
 
 
@@ -60,31 +60,31 @@ const mm = Multimethod({
 
     'c/*': () => `starts with 'c'`,
     '*/d': () => `ends with 'd'`,
-    'c/d'() { return this.outer(); },
+    'c/d': () => next,
 
     'api/**': [() => `fallback`, () => `fallback`],
-    'api/fo*o'() { return this.outer(); },
+    'api/fo*o': () => next,
     'api/foo': [
         () => 'FOO',
     ],
     'api/foot': () => 'FOOt',
     'api/fooo': () => 'fooo',
-    'api/bar'() { return this.outer(); },
+    'api/bar': () => next,
 
-    'zz/z/b*z': ($req) => `${$req.address}`,
+    'zz/z/b*z': (_, $req) => `${$req.address}`,
     'zz/z/./*': () => 'forty-two',
 }).decorate({
-    '/*a*': (method, [$req]) => `---${ifUnhandled(method($req), 'NONE')}---`,
+    '/*a*': (_, method, [$req]) => `---${ifUnhandled(method($req), 'NONE')}---`,
     'api/fo*': [
-        (method, [$req]) => `fo2-(${ifUnhandled(method($req), 'NONE')})`,
-        (method, [$req]) => `fo1-(${ifUnhandled(method($req), 'NONE')})`,
+        (_, method, [$req]) => `fo2-(${ifUnhandled(method($req), 'NONE')})`,
+        (_, method, [$req]) => `fo1-(${ifUnhandled(method($req), 'NONE')})`,
     ],
     'api/foo': [
-        (method, [$req]) => `${ifUnhandled(method($req), 'NONE')}!`,
+        (_, method, [$req]) => `${ifUnhandled(method($req), 'NONE')}!`,
         'super',
     ],
     // NB: V8 profiling shows the native string functions show up heavy in the perf profile (i.e. more than MM infrastructure!)
-    'zz/z/{**rest}'(method) { return `${ifUnhandled(method({address: this.pattern.rest.split('').reverse().join('')}), 'NONE')}`; },
+    'zz/z/{**rest}': ({rest}, method) => `${ifUnhandled(method({address: rest!.split('').reverse().join('')}), 'NONE')}`,
 });
 
 // Encode a battery of requests with their expected responses.

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {intersect, NormalisedPattern} from 'multimethods/patterns';
+import {intersect, NormalisedPattern} from 'multimethods/internals/patterns';
 
 
 
