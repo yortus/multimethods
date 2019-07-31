@@ -73,21 +73,21 @@ export class Taxonomy {
     constructor(patterns: string[], unreachable?: Unreachable) {
         let principalPatterns = getPrincipalPatterns(patterns);
         let {allPatterns, supersets} = getSupersetRelationships(principalPatterns, unreachable);
-        this.allTaxons = getMinimumEquivalentDAG(allPatterns, principalPatterns, supersets);
-        this.rootTaxon = this.allTaxons.filter(t => t.pattern === ALL)[0];
+        this.taxa = getMinimumEquivalentDAG(allPatterns, principalPatterns, supersets);
+        this.root = this.taxa.filter(t => t.pattern === ALL)[0];
     }
 
     /** The root of the taxonomy, which always represents the universal pattern '**'. */
-    rootTaxon: Taxon;
+    root: Taxon;
 
-    /** Holds a snapshot of all the taxons in the taxonomy at the time of construction. */
-    allTaxons: Taxon[];
+    /** Holds a snapshot of every taxon in the taxonomy at the time of construction. */
+    taxa: Taxon[];
 
     // TODO: temp testing... doc... looks up the taxon for the given pattern. returns undefined if not found.
     // algo: exact match using canonical form of given Pattern/string
-    findTaxon(pattern: string): Taxon | undefined {
+    find(pattern: string): Taxon | undefined {
         let p = NormalisedPattern(pattern);
-        let result = this.allTaxons.filter(t => t.pattern === p)[0];
+        let result = this.taxa.filter(t => t.pattern === p)[0];
         return result;
     }
 

@@ -15,7 +15,7 @@ export function pass1(options: Required<OptionsObject>, methods: Methods, decora
     ));
 
     let taxonomy = new Taxonomy(Object.keys(allMethods), options.unreachable);
-    let allNodes = taxonomy.allTaxons.map(taxon => {
+    let allNodes = taxonomy.taxa.map(taxon => {
 
         let exactPattern = taxon.pattern as Pattern;
         let exactMethods = [] as Function[];
@@ -33,7 +33,7 @@ export function pass1(options: Required<OptionsObject>, methods: Methods, decora
         // NB: update in-place, with updated type
         return Object.assign(taxon, {exactPattern, exactMethods});
     });
-    let rootNode = allNodes[taxonomy.allTaxons.indexOf(taxonomy.rootTaxon)];
+    let rootNode = allNodes[taxonomy.taxa.indexOf(taxonomy.root)];
 
     return {
         options,

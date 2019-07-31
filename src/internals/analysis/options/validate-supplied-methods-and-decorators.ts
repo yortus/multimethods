@@ -68,7 +68,7 @@ function listDiscontinuities(methods: Methods | Decorators) {
 
     let handledPatterns = Object.keys(methods).map(p => NormalisedPattern(p));
     let taxonomy = new Taxonomy(handledPatterns);
-    let unhandledPatterns = taxonomy.allTaxons.map(t => t.pattern).filter(p => handledPatterns.indexOf(p) === -1);
+    let unhandledPatterns = taxonomy.taxa.map(t => t.pattern).filter(p => handledPatterns.indexOf(p) === -1);
     let problems = [] as string[];
 
     let hasUnhandledCatchall = unhandledPatterns.indexOf(ALL) !== -1;
