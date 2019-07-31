@@ -1,16 +1,16 @@
+import {Decorators, Methods} from '../../interface/multimethod';
 import {OptionsObject} from '../../interface/options';
 import {NormalisedPattern, Pattern} from '../patterns';
 import {Taxonomy} from '../taxonomies';
-import {Dict} from '../util';
 
 
 
 
-export function pass1(options: Required<OptionsObject>, methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
+export function pass1(options: Required<OptionsObject>, methods: Methods, decorators: Decorators) {
 
     let allMethods = combineMethodsAndDecorators(methods, decorators);
     let decoratorLookup = new Set(Object.keys(decorators).reduce(
-        (decs, pattern) => decs.concat(decorators[pattern]),
+        (decs, pattern) => decs.concat(decorators[pattern] as Function),
         [] as Function[]
     ));
 
@@ -48,7 +48,7 @@ export function pass1(options: Required<OptionsObject>, methods: Dict<Function |
 
 
 // TODO: doc...
-function combineMethodsAndDecorators(methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
+function combineMethodsAndDecorators(methods: Methods, decorators: Decorators) {
     let result = {} as Record<string, Function[]>;
 
     // TODO: explain ordering: regular methods from left-to-right; then decorators from right-to-left

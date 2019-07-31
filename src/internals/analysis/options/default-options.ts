@@ -1,8 +1,10 @@
+import {Discriminator} from '../../../interface/options';
+import {isPromise, panic} from '../../util';
 
 
 
 
-// TODO: doc...
+// TODO: jsdoc...
 // TODO: revise suitability of this default behaviour in actual usage
 // TODO: better to specialise for MM arity for perf/strict checks?
 export function defaultDiscriminator(...args: unknown[]) {
@@ -12,6 +14,24 @@ export function defaultDiscriminator(...args: unknown[]) {
 
 
 
+// TODO: jsdoc...
+export function makeDefaultUnhandled(discriminator: Discriminator) {
+    let unhandled = (...args: unknown[]) => {
+        let discriminant = discriminator(...args);
+        if (isPromise(discriminant)) {
+            return discriminant.then(dsc => panic(UNHANDLED_MSG.replace('%', dsc)));
+        }
+        else {
+            return panic(UNHANDLED_MSG.replace('%', discriminant));
+        }
+    };
+    return unhandled;
+}
+
+
+
+
+// TODO: doc helper...
 function stringify(value: unknown) {
     if (value === null) return 'null';
     if (value === undefined) return 'undefined';
@@ -23,3 +43,9 @@ function stringify(value: unknown) {
     // if (typeof value === 'string') value = encodeURIComponent(value);
     // return  `${t}:${t === 'object' ? value.constructor.name : value}`;
 }
+
+
+
+
+// TODO: doc...
+const UNHANDLED_MSG = `Multimethod dispatch failure: call was unhandled for  the given arguments (discriminant = '%').`;

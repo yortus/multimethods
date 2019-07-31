@@ -1,3 +1,4 @@
+import {PatternBindings} from '../../interface/multimethod';
 import {MMInfo} from '../mm-info';
 import * as substitutions from './substitutions';
 import * as utils from './template-utilities';
@@ -126,36 +127,46 @@ export function multimethodTemplate(env: Env) {
      * (more-specific) partition being passed as the `next` parameter to the decorator starting the previous
      * (less-specific) partition.
      */
-    function MATCH$NAMEOF_THUNK(discriminant: string, MM$PARAMS: any[], varargs: any[] | false) {
-        let outer: () => any;
-        let patternBindings: any;
+    function MATCH$NAMEOF_THUNK(discriminant: string, MM$PARAMS: unknown[], varargs: unknown[] | false) {
+        let outer: () => unknown;
+        let patternBindings: PatternBindings;
         if (MATCH.HAS_OUTER_MATCH) {
             outer = () => MATCH.NAMEOF_OUTER_THUNK(discriminant, MM$PARAMS, varargs);
         }
         else {
-            outer = () => unhandled(discriminant) as any;
+            if (varargs) {
+                outer = () => unhandled.apply(undefined, varargs);
+            }
+            else {
+                outer = () => unhandled(MM$PARAMS);
+            }
         }
 
         if (NODE.HAS_PATTERN_BINDINGS) {
             patternBindings = NODE.NAMEOF_GET_PATTERN_BINDINGS(discriminant);
         }
         else {
-            patternBindings = emptyObject as any;
+            patternBindings = emptyObject;
         }
 
-        let result: any;
+        let result: unknown;
         if (MATCH.IS_DECORATOR) {
-            let inner: (...args: any[]) => any;
+            let inner: (...args: unknown[]) => unknown;
             if (MATCH.HAS_INNER_MATCH) {
                 // tslint:disable-next-line: only-arrow-functions no-shadowed-variable
-                inner = function (MM$PARAMS: any[]) {
+                inner = function (MM$PARAMS: unknown[]) {
                     // TODO: move `copy` fn - recent V8 can leak arguments without loss of speed
                     let varargsᐟ = arguments.length > MM.ARITY && copy(arguments);
                     return MATCH.NAMEOF_INNER_THUNK(discriminant, MM$PARAMS, varargsᐟ);
                 };
             }
             else {
-                inner = () => unhandled(discriminant);
+                if (varargs) {
+                    inner = () => unhandled.apply(undefined, varargs);
+                }
+                else {
+                    inner = () => unhandled(MM$PARAMS);
+                }
             }
 
             if (varargs) {
@@ -167,7 +178,7 @@ export function multimethodTemplate(env: Env) {
         }
         else {
             if (varargs) {
-                result = MATCH.NAMEOF_METHOD.apply(undefined, [patternBindings].concat(varargs));
+                result = MATCH.NAMEOF_METHOD.apply(undefined, ([patternBindings] as unknown[]).concat(varargs));
             }
             else {
                 result = MATCH.NAMEOF_METHOD(patternBindings, MM$PARAMS);

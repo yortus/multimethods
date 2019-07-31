@@ -1,6 +1,6 @@
 // TODO: doc...
 export type Options<P extends unknown[] = unknown[], D extends Awaitable<string> = Awaitable<string>> =
-    | DiscriminatorFunction<P, D>
+    | Discriminator<P, D>
     | OptionsObject<P, D>;
 
 
@@ -12,23 +12,20 @@ export interface OptionsObject<P extends unknown[] = unknown[], D extends Awaita
     // TODO: doc...
     name?: string;
 
-    discriminator?: DiscriminatorFunction<P, D>;
+    discriminator?: Discriminator<P, D>;
+
+    // TODO: temp testing...
+    unhandled?: (...args: P) => unknown;
 
     // TODO: doc... advanced option...
     unreachable?: (pattern: string) => boolean;
-
-    // TODO: temp testing...
-    unhandled?: (discriminant: string) => unknown;
-
-    // TODO: temp testing...
-//    methods?: 
 }
 
 
 
 
 // TODO: doc...
-export type DiscriminatorFunction<P extends unknown[], D extends Awaitable<string>> = (...args: P) => D;
+export type Discriminator<P extends unknown[] = unknown[], D extends Awaitable<string> = Awaitable<string>> = (...args: P) => D;
 
 
 

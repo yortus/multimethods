@@ -1,7 +1,13 @@
 import {expect, use as chaiUse} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import {Multimethod, next} from 'multimethods';
-import {defaultDiscriminator} from 'multimethods/internals/analysis/default-discriminator';
+import {defaultDiscriminator} from 'multimethods/internals/analysis/options';
+
+
+
+
+// TODO: More coverage:
+// - [ ] custom `unhandled` function receives mm args that were unhandled
 
 
 

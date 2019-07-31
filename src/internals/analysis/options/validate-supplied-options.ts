@@ -1,11 +1,11 @@
-import {Options} from '../../interface/options';
-import {panic} from '../util';
+import {Options} from '../../../interface/options';
+import {panic} from '../../util';
 
 
 
 
 // TODO: doc...
-export function checkOptions(options: Options): void {
+export function validateSuppliedOptions(options: Options): void {
     options = typeof options === 'function' ? {discriminator: options} : {...options};
 
     // `name` must be either undefined, or conform to [A-Za-z$_][A-Za-z$_0-9]* (ie a simple JS indentifier).

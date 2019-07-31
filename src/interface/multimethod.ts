@@ -20,9 +20,9 @@ export interface MultimethodConstructor {
 
 export interface Multimethod<P extends unknown[] = unknown[], R = never> {
     (...args: P): R;
-    extend<MR>(methods: Methods<P, MR>): Multimethod<P, Result<R | MR>>;
-    extend<MR>(methods: Methods<P, Awaitable<MR>>): Multimethod<P, Result<R | MR | Promise<MR>>>;
-    decorate(decorators: Decorators<P, R>): Multimethod<P, R>;
+    extend<MR>(methods: Methods<P, MR, 'super'>): Multimethod<P, Result<R | MR>>;
+    extend<MR>(methods: Methods<P, Awaitable<MR>, 'super'>): Multimethod<P, Result<R | MR | Promise<MR>>>;
+    decorate(decorators: Decorators<P, R, 'super'>): Multimethod<P, R>;
 
 }
 
@@ -31,17 +31,21 @@ export interface Multimethod<P extends unknown[] = unknown[], R = never> {
 
 export interface AsyncMultimethod<P extends unknown[] = unknown[], R = never> {
     (...args: P): Promise<R>;
-    extend<MR>(methods: Methods<P, Awaitable<MR>>): AsyncMultimethod<P, R | MR>;
-    decorate(decorators: Decorators<P, Awaitable<R>>): AsyncMultimethod<P, R>;
+    extend<MR>(methods: Methods<P, Awaitable<MR>, 'super'>): AsyncMultimethod<P, R | MR>;
+    decorate(decorators: Decorators<P, Awaitable<R>, 'super'>): AsyncMultimethod<P, R>;
 }
 
 
 
 
-export type Methods<P extends unknown[], R> = Record<string, Method<P, R> | Array<Method<P, R> | 'super'>>;
-export type Method<P extends unknown[], R> = (bindings: PatternBindings, ...args: P) => R;
-export type Decorators<P extends unknown[], R> = Record<string, Decorator<P, R> | Array<Decorator<P, R> | 'super'>>;
-export type Decorator<P extends unknown[], R> = (bindings: PatternBindings, method: (...args: P) => R, args: P) => R;
+export type Methods<P extends unknown[] = unknown[], R = unknown, Super extends 'super' = never>
+    = Record<string, Method<P, R> | Array<Method<P, R> | Super>>;
+export type Method<P extends unknown[] = unknown[], R = unknown>
+    = (bindings: PatternBindings, ...args: P) => R;
+export type Decorators<P extends unknown[] = unknown[], R = unknown, Super extends 'super' = never>
+    = Record<string, Decorator<P, R> | Array<Decorator<P, R> | Super>>;
+export type Decorator<P extends unknown[] = unknown[], R = unknown>
+    = (bindings: PatternBindings, method: (...args: P) => R, args: P) => R;
 export type PatternBindings = { [name in string]?: string };
 
 

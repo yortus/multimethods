@@ -2,7 +2,6 @@ export {andThen} from './and-then';
 export {assign} from './object-assign';
 export {debug} from './debug';
 export {DeepReplace} from './deep-replace';
-export {Dict} from './dict';
 export {getLongestCommonPrefix} from './get-longest-common-prefix';
 export {getLongestCommonSuffix} from './get-longest-common-suffix';
 export {isPromise} from './is-promise';

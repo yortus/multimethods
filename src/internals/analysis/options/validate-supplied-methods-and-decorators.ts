@@ -1,23 +1,24 @@
-import {ALL, NormalisedPattern} from '../patterns';
-import {Taxonomy} from '../taxonomies';
-import {debug, Dict, panic} from '../util';
+import {Decorators, Methods} from '../../../interface/multimethod';
+import {ALL, NormalisedPattern} from '../../patterns';
+import {Taxonomy} from '../../taxonomies';
+import {debug, panic} from '../../util';
 
 
 
 
 // TODO: doc and cleanup...
-export function checkMethodsAndDecorators(methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
+export function validateSuppliedMethodsAndDecorators(methods: Methods, decorators: Decorators) {
 
     // TODO: new cross-checks needed for decorator and method patterns...
 
-    check(methods);
-    check(decorators);
+    validate(methods);
+    validate(decorators);
 }
 
 
 
 
-function check(methods: Dict<Function | Function[]>): void {
+function validate(methods: Methods | Decorators): void {
 
     // TODO: still need this?
     // Perform strict validation. If any problems are found:
@@ -62,7 +63,7 @@ function check(methods: Dict<Function | Function[]>): void {
 // This often represents a user error, so it's a useful warning to point these patterns out so their intended
 // behaviour can be made explicit by the user.
 // TODO: in explanation, c.f. F# which also issues a warning when a match expression doesn't cover all possible cases...
-function listDiscontinuities(methods: Dict<Function | Function[]>) {
+function listDiscontinuities(methods: Methods | Decorators) {
     if (methods === undefined) return [];
 
     let handledPatterns = Object.keys(methods).map(p => NormalisedPattern(p));

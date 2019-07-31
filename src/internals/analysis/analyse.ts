@@ -1,8 +1,6 @@
-import {Options, OptionsObject} from '../../interface/options';
-import {Dict, panic} from '../util';
-import {checkMethodsAndDecorators} from './check-methods-and-decorators';
-import {checkOptions} from './check-options';
-import {defaultDiscriminator} from './default-discriminator';
+import {Decorators, Methods} from '../../interface/multimethod';
+import {Options} from '../../interface/options';
+import {makeCompleteOptions, validateSuppliedMethodsAndDecorators, validateSuppliedOptions} from './options';
 import {pass1} from './pass-1';
 import {pass2} from './pass-2';
 import {pass3} from './pass-3';
@@ -11,47 +9,15 @@ import {pass3} from './pass-3';
 
 
 // TODO: temp testing
-export function analyse(opts: Options, methods: Dict<Function | Function[]>, decorators: Dict<Function | Function[]>) {
+export function analyse(opts: Options, methods: Methods, decorators: Decorators) {
 
-    checkOptions(opts); // NB: may throw
-    checkMethodsAndDecorators(methods, decorators); // NB: may throw
+    validateSuppliedOptions(opts); // NB: may throw
+    validateSuppliedMethodsAndDecorators(methods, decorators); // NB: may throw
 
-    let options = getCompleteOptions(opts);
+    let options = makeCompleteOptions(opts);
 
     let mminfo1 = pass1(options, methods, decorators);
     let mminfo2 = pass2(mminfo1);
     let mminfo3 = pass3(mminfo2);
     return mminfo3;
 }
-
-
-
-
-function getCompleteOptions(options: Options): Required<OptionsObject> {
-    options = typeof options === 'function' ? {discriminator: options} : {...options};
-
-    return {
-        name: options.name || `Ɱ${++multimethodCounter}`,
-        discriminator: options.discriminator || defaultDiscriminator,
-        unreachable: options.unreachable || function alwaysReachable() { return false; },
-        unhandled: options.unhandled || makeDefaultUnhandled(),
-    };
-}
-
-
-
-
-function makeDefaultUnhandled() {
-    return function unhandled(discriminant: string) {
-        return panic(
-            `Multimethod dispatch failure: call was unhandled for` +
-            ` the given arguments (discriminant = '${discriminant}').`
-        );
-    };
-}
-
-
-
-
-// TODO: doc...
-let multimethodCounter = 0;
