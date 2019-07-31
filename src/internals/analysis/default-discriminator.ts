@@ -2,22 +2,19 @@
 
 
 
-
 // TODO: doc...
 // TODO: revise suitability of this default behaviour in actual usage
 // TODO: better to specialise for MM arity for perf/strict checks?
-export function defaultDiscriminator(...args: any[]) {
-    return args.map(arg => '/' + textify(arg)).join('');
+export function defaultDiscriminator(...args: unknown[]) {
+    return args.map(arg => '/' + stringify(arg)).join('');
 }
 
 
 
 
-
-function textify(value: any) {
+function stringify(value: unknown) {
     if (value === null) return 'null';
     if (value === undefined) return 'undefined';
-
     return Object.getPrototypeOf(value).constructor.name;
 
     // TODO: consider a more sophistocated approach like the following?

@@ -3,15 +3,15 @@ import {Options} from './options';
 
 
 
-export interface MultimethodStatic {
+export interface MultimethodConstructor {
     // Functional-style factory function
     // NB 'never' result: will always throw after construction; no methods yet
-    <P extends unknown[]>(options: Options<P, string>): Multimethod<P>;
+    <P extends unknown[]>(options: Options<P, Awaitable<string>>): Multimethod<P>;
     <P extends unknown[]>(options: Options<P, Promise<string>>): AsyncMultimethod<P>;
 
     // OO-style class constructor
     // NB 'never' result: will always throw after construction; no methods yet
-    new <P extends unknown[]>(options: Options<P, string>): Multimethod<P>;
+    new <P extends unknown[]>(options: Options<P, Awaitable<string>>): Multimethod<P>;
     new <P extends unknown[]>(options: Options<P, Promise<string>>): AsyncMultimethod<P>;
 }
 
@@ -21,7 +21,7 @@ export interface MultimethodStatic {
 export interface Multimethod<P extends unknown[] = unknown[], R = never> {
     (...args: P): R;
     extend<MR>(methods: Methods<P, MR>): Multimethod<P, Result<R | MR>>;
-    extend<MR>(methods: Methods<P, MR | Promise<MR>>): Multimethod<P, Result<R | MR | Promise<MR>>>;
+    extend<MR>(methods: Methods<P, Awaitable<MR>>): Multimethod<P, Result<R | MR | Promise<MR>>>;
     decorate(decorators: Decorators<P, R>): Multimethod<P, R>;
 
 }
@@ -31,8 +31,8 @@ export interface Multimethod<P extends unknown[] = unknown[], R = never> {
 
 export interface AsyncMultimethod<P extends unknown[] = unknown[], R = never> {
     (...args: P): Promise<R>;
-    extend<MR>(methods: Methods<P, MR | Promise<MR>>): AsyncMultimethod<P, R | MR>;
-    decorate(decorators: Decorators<P, R | Promise<R>>): AsyncMultimethod<P, R>;
+    extend<MR>(methods: Methods<P, Awaitable<MR>>): AsyncMultimethod<P, R | MR>;
+    decorate(decorators: Decorators<P, Awaitable<R>>): AsyncMultimethod<P, R>;
 }
 
 
@@ -61,3 +61,8 @@ type Result<T> =
 
     // If some TNs are Promise types and some are not, then the result is T1 | T2 | ... | Promise<T1 | T2 | ...>.
     (T extends Promise<infer U> ? U : T) | Promise<T extends Promise<infer U> ? U : T>;
+
+
+
+
+type Awaitable<T> = T | Promise<T>;

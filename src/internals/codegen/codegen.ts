@@ -1,7 +1,7 @@
 import {next} from '../../interface/next';
 import {MMInfo, Node} from '../mm-info';
 import * as patterns from '../patterns';
-import {debug, isPromiseLike, repeat} from '../util';
+import {debug, isPromise, repeat} from '../util';
 import {instrumentMethods, instrumentMultimethod} from './instrumentation';
 import {Env, multimethodTemplate} from './multimethod-template';
 import * as substitutions from './substitutions';
@@ -21,7 +21,7 @@ export function codegen(mminfo: MMInfo) {
     // called by the dispatcher whether or not eval was used. More importantly, the use of eval here allows for
     // multimethod dispatch code that is both more readable and more efficient, since it is tailored specifically
     // to the configuration of this multimethod, rather than having to be generalized for all possible cases.
-    let env: Env = {mminfo, ℙ: patterns, next, isPromiseLike};
+    let env: Env = {mminfo, ℙ: patterns, next, isPromise};
     // tslint:disable-next-line:no-eval
     let multimethod = eval(`(${multimethodSourceCode})`)(env);
     multimethod.toString = () => multimethodSourceCode;

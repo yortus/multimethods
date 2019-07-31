@@ -19,6 +19,9 @@ export interface OptionsObject<P extends unknown[] = unknown[], D extends Awaita
 
     // TODO: temp testing...
     unhandled?: (discriminant: string) => unknown;
+
+    // TODO: temp testing...
+//    methods?: 
 }
 
 

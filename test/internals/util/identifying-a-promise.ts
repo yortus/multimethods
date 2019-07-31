@@ -1,12 +1,12 @@
 // tslint:disable:no-eval
 import {expect} from 'chai';
-import {isPromiseLike} from 'multimethods/internals/util';
+import {isPromise} from 'multimethods/internals/util';
 
 
 
 
 
-describe('Identifying a Promise-like object', () => {
+describe('Identifying a Promise', () => {
 
     let tests = [
         `T: new Promise(res => {})`,
@@ -31,7 +31,7 @@ describe('Identifying a Promise-like object', () => {
         it(test, () => {
             let testVal = eval(`(${test.slice(3)})`);
             let expected = test[0] === 'T' ? true : false;
-            let actual = isPromiseLike(testVal);
+            let actual = isPromise(testVal);
             expect(actual).equals(expected);
         });
     });

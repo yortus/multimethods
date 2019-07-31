@@ -1,4 +1,4 @@
-import {isPromiseLike} from './is-promise-like';
+import {isPromise} from './is-promise';
 
 
 
@@ -14,7 +14,7 @@ export function andThen(getValue: () => unknown, cb: (value: unknown, error: unk
         // sync error
         return cb(undefined, error, false);
     }
-    if (isPromiseLike(value)) {
+    if (isPromise(value)) {
         // async result or error
         return value.then(val => cb(val, undefined, true), err => cb(undefined, err, true));
     }

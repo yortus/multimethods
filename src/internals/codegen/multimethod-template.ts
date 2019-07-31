@@ -35,7 +35,7 @@ export interface Env {
     mminfo: MMInfo;
     ℙ: typeof import('../patterns');
     next: never;
-    isPromiseLike: typeof import('../util').isPromiseLike;
+    isPromise: typeof import('../util').isPromise;
 }
 
 
@@ -52,7 +52,7 @@ export function multimethodTemplate(env: Env) {
     let mminfo = env.mminfo;
     let ℙ = env.ℙ;
     let next = env.next;
-    let isPromiseLike = env.isPromiseLike;
+    let isPromise = env.isPromise;
 
     /** The multimethod's discriminator function. */
     let discriminator = mminfo.options.discriminator;
@@ -181,7 +181,7 @@ export function multimethodTemplate(env: Env) {
             result = outer();
         }
 
-        else if (isPromiseLike(result)) {
+        else if (isPromise(result)) {
             result = result.then(res => {
                 return res === next ? outer() : res;
             });

@@ -145,6 +145,6 @@ let rate = Math.round(0.001 * COUNT / sec) * 1000;
 console.log(`Dispatched ${COUNT} requests in ${sec} seconds   (~${rate} req/sec)`);
 
 // TODO: doc helper...
-function ifUnhandled(lhs, rhs) {
+function ifUnhandled(lhs: string, rhs: string) {
     return lhs === UNHANDLED ? rhs : lhs;
 }

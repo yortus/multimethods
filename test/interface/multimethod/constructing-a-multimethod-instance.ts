@@ -1,14 +1,13 @@
 import {expect} from 'chai';
-import {isPromiseLike} from 'multimethods/internals/util';
-
 import {Multimethod, next} from 'multimethods';
-// import defaultDiscrininator from 'multimethods/analysis/configuration/default-discriminator';
+import {isPromise} from 'multimethods/internals/util';
+
+
 
 
 // TODO: rename these tests in filename and describe()?
 // - this is more about invoking the Multimethod, not constructing it...
 // TODO: more multimethod tests? for other files?
-
 
 // TODO: More coverage:
 // - [ ] multiple regular methods for same pattern
@@ -20,16 +19,15 @@ import {Multimethod, next} from 'multimethods';
 
 
 
-
 describe('Constructing a Multimethod instance', () => {
 
     // TODO: doc helpers...
-    const immediateValue = val => val;
-    const immediateError = msg => { throw new Error(msg); };
-    const promisedValue = val => new Promise(resolve => setTimeout(() => resolve(val), 5));
-    const promisedError = msg => new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), 5));
-    const randomValue = val => (Math.random() >= 0.5 ? immediateValue : promisedValue)(val);
-    const randomError = msg => (Math.random() >= 0.5 ? immediateError : promisedError)(msg);
+    const immediateValue = (val: string): Awaitable<string> => val;
+    const immediateError = (msg: string): Awaitable<string> => { throw new Error(msg); };
+    const promisedValue = (val: string): Awaitable<string> => new Promise(resolve => setTimeout(() => resolve(val), 5));
+    const promisedError = (msg: string): Awaitable<string> => new Promise((_, rej) => setTimeout(() => rej(new Error(msg)), 5));
+    const randomValue = (val: string): Awaitable<string> => (Math.random() >= 0.5 ? immediateValue : promisedValue)(val);
+    const randomError = (msg: string): Awaitable<string> => (Math.random() >= 0.5 ? immediateError : promisedError)(msg);
 
     let variants = [
         { vname: 'all synchronous', async: false, val: immediateValue, err: immediateError },
@@ -41,7 +39,7 @@ describe('Constructing a Multimethod instance', () => {
 
         // TODO: doc...
         let multimethod = Multimethod({
-            discriminator: (r: any) => val(r.address),
+            discriminator: (r: {address: string}) => val(r.address),
             unhandled: () => { throw UNHANDLED; },
         }).extend({
             '/**': () => err('nothing matches!'),
@@ -107,7 +105,7 @@ describe('Constructing a Multimethod instance', () => {
                 'super' as const,
             ],
 
-            'zz/z/{**rest}'({rest}, method) {
+            'zz/z/{**rest}': ({rest}, method) => {
                 let moddedReq = {address: rest!.split('').reverse().join('')};
                 return calc(() => method(moddedReq), (rs, er) => er === UNHANDLED ? val('NONE') : rs);
             },
@@ -177,9 +175,9 @@ describe('Constructing a Multimethod instance', () => {
             let actual: string;
             try {
                 let res = multimethod(request) as string | Promise<string>;
-                if (async === false) expect(res).to.not.satisfy(isPromiseLike);
-                if (async === true) expect(res).to.satisfy(isPromiseLike);
-                actual = isPromiseLike(res) ? await (res) : res;
+                if (async === false) expect(res).to.not.satisfy(isPromise);
+                if (async === true) expect(res).to.satisfy(isPromise);
+                actual = isPromise(res) ? await (res) : res;
             }
             catch (ex) {
                 actual = 'ERROR: ' +  ex.message;
@@ -195,30 +193,42 @@ describe('Constructing a Multimethod instance', () => {
 
 
 
-
 // TODO: doc helpers...
-function calc(arg: any, cb: (res: any, err: any) => any) {
+function calc<T, R>(arg: Array<Awaitable<T> | (() => Awaitable<T>)>, cb: (res: T[], err: unknown) => R): R;
+function calc<T, R>(arg: Awaitable<T> | (() => Awaitable<T>), cb: (res: T, err: unknown) => R): R;
+function calc<R>(arg: unknown, cb: (res: any, err: unknown) => Awaitable<R>): Awaitable<R> {
     if (typeof arg === 'function') {
         try {
-            let res = arg();
-            if (!isPromiseLike(res)) return cb(res, null);
-            return res.then(res => cb(res, null), err => cb(null, err));
+            let result: unknown = arg();
+            if (!isPromise(result)) return cb(result, null);
+            return result.then(res => cb(res, null), err => cb(null, err));
         }
         catch (err) {
             return cb(null, err);
         }
     }
     else if (Array.isArray(arg)) {
-        if (!arg.some(isPromiseLike)) return cb(arg, null);
+        if (!arg.some(isPromise)) return cb(arg, null);
         return Promise.all(arg.map(el => Promise.resolve(el))).then(rs => cb(rs, null));
     }
     else {
-        return isPromiseLike(arg) ? arg.then(res => cb(res, null)) : cb(arg, null);
+        return isPromise(arg) ? arg.then(res => cb(res, null)) : cb(arg, null);
     }
 }
+
+
+
+
+// TODO: temp testing...
 function concat(strs: string[]) {
     return strs.join('');
 }
+
+
+
+
+// TODO: temp testing...
+type Awaitable<T> = T | Promise<T>;
 
 
 
