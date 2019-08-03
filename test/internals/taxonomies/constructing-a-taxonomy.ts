@@ -454,7 +454,7 @@ describe('Constructing a taxonomy', () => {
             let expected: any = test.taxonomy;
             let actual: any;
             try {
-                actual = taxonToObj(new Taxonomy(test.patterns, test.unreachable).rootTaxon);
+                actual = taxonToObj(new Taxonomy(test.patterns, test.unreachable).root);
             }
             catch (ex) {
                 actual = 'ERROR: ' + ex.message;

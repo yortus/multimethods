@@ -93,7 +93,7 @@ describe('Constructing equivalent taxonomies', () => {
 
             // The two EDs should represent identical DAGs.
             expect(attempt).not.to.throw();
-            expect(taxonToObj(tx1!.rootTaxon)).to.deep.equal(taxonToObj(tx2!.rootTaxon));
+            expect(taxonToObj(tx1!.root)).to.deep.equal(taxonToObj(tx2!.root));
         });
     });
 });

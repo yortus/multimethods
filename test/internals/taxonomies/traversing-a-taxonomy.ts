@@ -22,30 +22,30 @@ describe('Traversing a taxonomy', () => {
             let taxonomy = new Taxonomy(patterns);
 
             // A taxonomy is always rooted at '**'.
-            expect(taxonomy.rootTaxon.pattern).to.equal(ALL);
+            expect(taxonomy.root.pattern).to.equal(ALL);
 
             // A taxonomy is never contains '∅'.
-            expect(taxonomy.allTaxons.every(taxon => taxon.pattern !== NONE)).to.equal(true);
+            expect(taxonomy.taxa.every(taxon => taxon.pattern !== NONE)).to.equal(true);
 
             // All input patterns are in the taxonomy constructed from them, except `∅`.
             let normalisedPatterns = patterns.filter(p => p !== NONE).map(NormalisedPattern);
-            let taxonomyPatterns = taxonomy.allTaxons.map(taxon => taxon.pattern).sort();
+            let taxonomyPatterns = taxonomy.taxa.map(taxon => taxon.pattern).sort();
             expect(taxonomyPatterns).to.include.members(normalisedPatterns);
 
             // Every child taxon's pattern matches a subset of the addresses matched by its parent taxon's pattern.
-            let edges = getAllEdges(taxonomy.rootTaxon);
+            let edges = getAllEdges(taxonomy.root);
             expect(edges.every(edge => {
                 let intersection = intersect(edge.parent.pattern, edge.child.pattern);
                 return intersection === edge.child.pattern;
             })).to.equal(true);
 
             // For each taxon S, all specialisations of S have S as a generalisation.
-            taxonomy.allTaxons.forEach(taxon => {
+            taxonomy.taxa.forEach(taxon => {
                 taxon.specialisations.forEach(subset => expect(subset.generalisations).to.include(taxon));
             });
 
             // For each taxon S, all generalisations of S have S as a specialisation.
-            taxonomy.allTaxons.forEach(taxon => {
+            taxonomy.taxa.forEach(taxon => {
                 taxon.generalisations.forEach(superset => expect(superset.specialisations).to.include(taxon));
             });
         });
