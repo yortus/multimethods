@@ -3,9 +3,9 @@
 ![Multimethods](./extras/multimethods-title.png)
 
 
-Create fast and flexible [multimethod](https://en.wikipedia.org/wiki/Multiple_dispatch) functions in JavaScript.
+Create fast and flexible [multimethod](https://en.wikipedia.org/wiki/Multiple_dispatch) functions in JavaScript. Use them for dynamic dispatch (like virtual methods but more flexible), or for pattern-matched control flow.
 
-A multimethod looks and acts like an ordinary function from the outside. On the inside, a multimethod may contain many different *methods*, each of which provides a different implementation depending on the kinds of arguments passed to the multimethod. When a multimethod is called, the arguments are examined and the call is forwarded to the best-matching method.
+A multimethod looks and acts like an ordinary function from the outside. On the inside, a multimethod consists of any number of alternative *methods*, each of which provides a different implementation depending on the kinds of arguments passed to the multimethod. When a multimethod is called, the arguments are examined and the call is forwarded to the best-matching method.
 
 The multimethod creator specifies how arguments are examined and matched to methods, via a flexible pattern-matching system based on [discriminants and patterns](#discriminants-and-patterns).
 
@@ -13,6 +13,8 @@ Additional features:
 - TypeScript users can take advantage of extensive type checking and type inference when working with multimethods.
 - Multimethods are immutable. When a multimethod is extended with new methods, a new multimethod is created, and the base multimethod remains unchanged.
 - Both synchronous and asynchronous (i.e., `Promise`-returning) multimethods are supported.
+- Dynamically dispatch based on any kind or number of arguments.
+- Dispatch behaviour is guaranteed to be deterministic and unambiguous.
 
 
 
@@ -27,7 +29,8 @@ npm add multimethods
 
 ## Usage
 ```ts
-// TypeScript implementation of the example from the wikipedia page (https://en.wikipedia.org/wiki/Multiple_dispatch):
+// TypeScript implementation of the example from the wikipedia page:
+// (https://en.wikipedia.org/wiki/Multiple_dispatch)
 interface SpaceObject { type: string; }
 interface Asteroid extends SpaceObject { type: 'asteroid', /* ...more props */ }
 interface Spaceship extends SpaceObject { type: 'spaceship', /* ...more props */ }
@@ -37,7 +40,7 @@ const collideWith = Multimethod((x: SpaceObject, y: SpaceObject) => `${x.type}/$
     'asteroid/spaceship': (_, x: Asteroid, y: Spaceship) => { /* deal with asteroid hitting spaceship */ },
     'spaceship/asteroid': (_, x: Spaceship, y: Asteroid) => { /* deal with spaceship hitting asteroid */ },
     'spaceship/spaceship': (_, x: Spaceship, y: Spaceship) => { /* deal with spaceship hitting spaceship */ },
-    '{type1}/{type2}': ({type1, type2}) => { throw new Error(`Don't know how to collide ${type1} with ${type2}`); },
+    '{t1}/{t2}': ({type1, type2}) => { throw new Error(`Don't know how to collide ${t1} with ${t2}`); },
 });
 ```
 
@@ -54,20 +57,20 @@ function Multimethod(discriminator: (...args: ArgTypes) => string | Promise<stri
 // Multimethod instance
 type Multimethod = {
 
-    // Call the multimethod
+    // Call the multimethod like an ordinary function.
     (...args: ArgTypes): Result | Promise<Result>;
 
-    // Create a new multimethod extended with additional methods
+    // Create a new multimethod extended with additional methods.
     extend({
-        'pattern 1': (patternbindings, arg1, arg2, ...) => Result | Promise<Result>,
-        'pattern 2': (patternbindings, arg1, arg2, ...) => Result | Promise<Result>,
+        '<pattern 1>': (patternbindings, arg1, arg2, ...) => Result | Promise<Result>,
+        '<pattern 2>': (patternbindings, arg1, arg2, ...) => Result | Promise<Result>,
         ...
     }): Multimethod;
 
-    // Create a new multimethod extended with additional decorators
+    // Create a new multimethod extended with additional decorators.
     decorate({
-        'pattern 1': (patternbindings, method: Function, args: ArgTypes) => Result | Promise<Result>,
-        'pattern 2': (patternbindings, method: Function, args: ArgTypes) => Result | Promise<Result>,
+        '<pattern 1>': (patternbindings, method: Function, args: ArgTypes) => Result | Promise<Result>,
+        '<pattern 2>': (patternbindings, method: Function, args: ArgTypes) => Result | Promise<Result>,
         ...
     }): Multimethod;
 };
