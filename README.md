@@ -84,6 +84,16 @@ When a multimethod is called, the first thing it does is pass the arguments to t
 
 Once the discriminant string is known, is it matched against all the patterns associated with the multimethod's methods. This matching process is required to be unambiguous. In the simplest case, the best-matching method is chosen, and called with the arguments passed to the multimethod. Whatever this method returns is returned from the multimethod.
 
+A *pattern* is a string that matches a certain subset of discriminants. It is like a regex of glob pattern that matches certain strings. Patterns have a few simple operators and support unambiguous comparisons, such as *more-specific (ie subset)*, *less-specific (ie superset)*, and *disjoint*. Examples:
+- `"abc"` matches *only* the literal string `"abc"`
+- `"a/*"` matches `"a/b"` and `"a/foo"`, but not `"ab"` or `"a/b/c"`
+- `"foo*"` matches `"foo"`, `"foobar"` and `"foot"`, but not `"foo/bar` or `"foos/42"`
+- `"**"` matches *all* strings
+- `"**.ext"` matches all strings ending in `".ext"`
+- `"**blah**"` matches all strings containing `"blah"`
+- The pattern `"*f*"` is a *superset* of the pattern `"*foo*"`, and a subset of the pattern `"*"`
+- The pattern `"**"` is a superset of every other pattern
+
 Various more advanced dispatching behaviours are supported, including:
 - Multiple matching methods, tried from most-specific-match to least-specific-match.
 - *Decorator* methods, which may observe and/or alter the arguments passed in, the value returned, and the control flow.
