@@ -19,7 +19,7 @@ Additional features:
 
 ## Installation
 ```
-<npm|yarn> add multimethods
+npm add multimethods
 ```
 
 

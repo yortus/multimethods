@@ -7,8 +7,8 @@
     "typings": "dist/commonjs/index.d.ts",
     "scripts": {
         "clean": "rimraf dist/",
-        "build": "yarn build:cjs && yarn build:umd",
-        "build:cjs": "yarn build:tsc && yarn build:pegjs",
+        "build": "npm run build:cjs && npm run build:umd",
+        "build:cjs": "npm run build:tsc && npm run build:pegjs",
         "build:tsc": "tsc -p src && tsc -p test && tsc -p extras",
         "build:pegjs": "pegjs -o dist/commonjs/internals/patterns/parse.js src/internals/patterns/parse.pegjs",
         "build:umd": "webpack",
@@ -17,7 +17,7 @@
         "test:debug": "cross-env DEBUG=multimethods node ./scripts/run-unit-tests",
         "bench": "node ./dist/extras/bench/basic-routing.js",
         "bench:debug": "cross-env DEBUG=multimethods node ./dist/extras/bench/basic-routing.js",
-        "prepare": "yarn self-ref && yarn build",
+        "prepare": "npm run self-ref && npm run build",
         "self-ref": "node ./scripts/enable-self-reference"
     },
     "repository": {
@@ -49,7 +49,8 @@
     "license": "MIT",
     "homepage": "https://github.com/yortus/multimethods#readme",
     "dependencies": {
-        "debug": "^4.1.1"
+        "debug": "^4.1.1",
+        "lodash": "4.17.13"
     },
     "devDependencies": {
         "@babel/core": "^7.4.5",
