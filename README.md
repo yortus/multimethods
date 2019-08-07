@@ -40,7 +40,7 @@ const collideWith = Multimethod((x: SpaceObject, y: SpaceObject) => `${x.type}/$
     'asteroid/spaceship': (_, x: Asteroid, y: Spaceship) => { /* deal with asteroid hitting spaceship */ },
     'spaceship/asteroid': (_, x: Spaceship, y: Asteroid) => { /* deal with spaceship hitting asteroid */ },
     'spaceship/spaceship': (_, x: Spaceship, y: Spaceship) => { /* deal with spaceship hitting spaceship */ },
-    '{t1}/{t2}': ({type1, type2}) => { throw new Error(`Don't know how to collide ${t1} with ${t2}`); },
+    '{t1}/{t2}': ({t1, t2}) => { throw new Error(`Don't know how to collide ${t1} with ${t2}`); },
 });
 ```
 
