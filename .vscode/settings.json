@@ -5,7 +5,7 @@
 
 	// Configure glob patterns for excluding files and folders.
 	"files.exclude": {
-        "xnode_modules": true,
+        "node_modules": true,
 		"dist": true,
 		"**/.git": true,
 		"**/.DS_Store": true
