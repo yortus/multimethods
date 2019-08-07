@@ -1,6 +1,6 @@
 {
     "name": "multimethods",
-    "version": "0.8.7",
+    "version": "1.0.0",
     "description": "fast and flexible pattern matching control flow in JavaScript",
     "readmeFilename": "README.md",
     "main": "dist/commonjs/index.js",
