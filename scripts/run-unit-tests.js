@@ -4,8 +4,8 @@
 
 
 // Tell mocha where the test files are.
-// process.argv.push('dist/test/**/*.js');
-process.argv.push('dist/test/interface/**/*.js');
+process.argv.push('dist/test/**/*.js');
+// process.argv.push('dist/test/interface/**/*.js');
 
 // Tell mocha *not* to call process.exit() when tests have finished.
 process.argv.push('--no-exit');

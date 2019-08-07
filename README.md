@@ -3,154 +3,95 @@
 ![Multimethods](./extras/multimethods-title.png)
 
 
-## Design Goals
-- fast dispatch with minimal runtime overhead
-- strong typing
-- support MMs of any arity, including variadic
-- support sync and async use cases
-- Mathematically sound dispatch semantics
-- Straight-forward 'obvious' usage and API
-- Configurability plus sensible defaults
-- Good diagnostics
-- Highly interoperable with other libs and code
+Create fast and flexible [multimethod](https://en.wikipedia.org/wiki/Multiple_dispatch) functions in JavaScript.
 
+A multimethod looks and acts like an ordinary function from the outside. On the inside, a multimethod may contain many different *methods*, each of which provides a different implementation depending on the kinds of arguments passed to the multimethod. When a multimethod is called, the arguments are examined and the call is forwarded to the best-matching method.
 
-## Future Work
-- the `strictChecks` option may be changed to `true | false | { <specific checks...> }`
-- diagnostics: early detection of potential runtime error on NEXT when multiple possible fallbacks exist
-- generator MMs - iterable functions ala ES6 generators, but with MM dispatch
-- 'adding' two multimethods to get a new multimethod
+The multimethod creator specifies how arguments are examined and matched to methods, via a flexible pattern-matching system based on [discriminants and patterns](#discriminants-and-patterns).
 
-
-## Multimethods
-- immutable
-- no this?
-- comprise a list of 'rules', each rule is a {pattern: method} pair
-- rules are either normal rules or decorators
-- In a rule, the pattern is a string, and the method is a function
-- pattern extensions: binary tree format... TODO WIP
-- patterns form a taxonomy according to their specificity (the subset of discriminants they 'contain')
-- a rule can be an 'ordinary' rule, or a decorator (whose method has special semantics to call/control 'downstream' methods)
-- a multimethod may be variadic or fixed arity (for optimisation only)
-- a multimethod may be closed or open (can add methods after construction or not) (also for optimisation only?)
-- each MM call generates a discriminant, according to the 'toDiscriminant()' function supplied to the ctor (default to toString()?)
-- discriminant is matched against all method patterns
-
-
-## Multimethod Options (chainable)
-- checked or strict: no conflicts, capture matching (when to check?)
-- open (default): new methods may be added at any time
-- closed: only a single set of methods is accepted
-- sealed or frozen or final: instead of closed?
-- sync: all methods are assumed to return their result
-- async: all methods are assumed to return a promise of their result
-- mixed sync/async (default): each method may return either its result or a promise of its result
-- unary: all methods are assumed to be unary. Affects method signature. Mainly for ptimisation.
-- binary: all methods are assumed to be binary. Affects method signature. Mainly for optimisation.
-- variadic (default): each method may take any number of parameters. Affects method signature.
-- discriminate: function
-- methods: dictionary of pattern/consequent pairs
-- eager or lazy?
-
-
-## The NEXT sentinel
-- When a handler returns `NEXT` (or a `Promise` thereof), it instructs the library to call the next-best matching handler for the same inputs. And so on until either a handler returns a non-`NEXT` value (which becomes the return value of the MM call), or the last matching handler returns `NEXT`, which causes an 'unhandled' error to be thrown.
-- lib provides a default for this, which is exported as `NEXT`
-- clients can provide their own `NEXT` value via MM options
-
-
-## Strict mode (`options.strict`)
-### `strict: false` behaviour (default)
-- method results are not checked:
-  - for `async: false`, undefined behaviour if any method returns a promise
-  - for `async: true`, undefined behaviour if any method returns a non-promise or throws
-### `strict: true` behaviour
-- method results are checked:
-  - for `async: false`, if result is a promise, throws an error
-  - for `async: true`, if result is a non-promise (including if it throws), multimethod returns a rejected promise
-    - NB: this relies on runtime support for `Promise.resolve()`, where `Promise` is globally defined
-
-
-## Handlers
-- regular handlers (functions)
-- decorator handlers (specially marked functions)
-- chains of handlers (arrays)
-  - may be all regular, all decorators, or a mix
-  - if mixed, all decorators must be contiguous and leftmost in the chain array. This restriction is to simplify understanding dispatch of chains. It means that the handlers will execute in left-to-right order across the chain array. I.e. in a chain:
-    - (a) the decorators are all less specific than the regular handlers (so leftmost executes first)
-    - (b) the decorators are increasing order of specificity from left-to-right (so leftmost executes first)
-    - (c) the regular handlers are decreasing order of specificity from left-to-right (so leftmost executes first)
-
-
-## Compatibility
-- TL;DR: Node.js 6+, recent browsers, IE11
-- Assumes environment supports ES5
-- some ES6 runtime things are used, but only if supported by IE11 (Map, Set, WeakMap)
-- One thing won't work in IE11: Multimethod instanceof Function 
+Additional features:
+- TypeScript users can take advantage of extensive type checking and type inference when working with multimethods.
+- Multimethods are immutable. When a multimethod is extended with new methods, a new multimethod is created, and the base multimethod remains unchanged.
+- Both synchronous and asynchronous (i.e., `Promise`-returning) multimethods are supported.
 
 
 
-## The Pattern DSL
 
-A valid pattern string conforms to the following rules:
-- Patterns are case-sensitive.
-- A pattern consists of an alternating sequence of captures and literals.
-- A literal consists of one or more adjacent characters from the set `[A-Za-z0-9 /._-]`.
-- Literals must exactly match a corresponding portion of an address.
-- A capture represents an operator that matches zero or more characters of an address.
-- There are two types of captures: globstars and wildcards.
-- A globstar greedily matches zero or more adjacent characters in an address.
-- A wildcard greedily matches zero or more adjacent characters in an address, but cannot match `/`.
-- Captures may be named or anonymous. Named captures return their correspoding capture values in the result of a call to `Pattern#match`.
-- An anonymous globstar is designated with `**`.
-- A named globstar is designated with `{**id}` where id is a valid JS identifier.
-- An anonymous wildcard is designated with `*`.
-- A named wildcard is designated with `{id}` where id is a valid JS identifier.
-- Two captures may not occupy adjacent positions in a pattern.
-- Patterns may have trailing whitespace, which is removed. (TODO: not any more? check tests)
-- Whitespace consists of spaces and/or comments. (TODO: not any more? check tests)
-- TODO: a|b alternatives syntax
-#### Deprecated/removed:
-- A comment begins with `#` and continues to the end of the string.
-- The special pattern `∅` is permitted. It represents a pattern that matches no addresses. (TODO: re-instated? check tests)
+## Installation
+```
+<npm|yarn> add multimethods
+```
 
 
-## Pattern DSL Examples
-
-- `/foo` matches only the literal address `/foo` and nothing else
-- `/foo/*` matches `/foo/bar` and `/foo/` but not `/foo` or `/foo/bar/baz`
-- `/foo**` matches `/foo`, `/foo/bar` and `/foo/bar/baz`
-- `{**path}/{name}.{ext}` matches `/api/foo/bar.html` with `{path: '/api/foo', name: 'bar', ext: 'baz' }`
-- `*{**path}` is invalid (two adjacent captures)
-- `**` matches all addresses
-- `*` matches all addresses that do not contain `/`
-- `` matches only the empty string
 
 
-## Glossary
+## Usage
+```ts
+// TypeScript implementation of the example from the wikipedia page (https://en.wikipedia.org/wiki/Multiple_dispatch):
+interface SpaceObject { type: string; }
+interface Asteroid extends SpaceObject { type: 'asteroid', /* ...more props */ }
+interface Spaceship extends SpaceObject { type: 'spaceship', /* ...more props */ }
 
-**Address:** A string designating the specific resource being requested. Part of a Request.
+const collideWith = Multimethod((x: SpaceObject, y: SpaceObject) => `${x.type}/${y.type}`).extend({
+    'asteroid/asteroid': (_, x: Asteroid, y: Asteroid) => { /* deal with asteroid hitting asteroid */ },
+    'asteroid/spaceship': (_, x: Asteroid, y: Spaceship) => { /* deal with asteroid hitting spaceship */ },
+    'spaceship/asteroid': (_, x: Spaceship, y: Asteroid) => { /* deal with spaceship hitting asteroid */ },
+    'spaceship/spaceship': (_, x: Spaceship, y: Spaceship) => { /* deal with spaceship hitting spaceship */ },
+    '{type1}/{type2}': ({type1, type2}) => { throw new Error(`Don't know how to collide ${type1} with ${type2}`); },
+});
+```
 
-**Rule:** A condition and action in the form of a Pattern/Handler pair.
 
-**Rule Set:** TODO...
 
-**Pattern:** A concise regex-like representation that matches a particular set of Addresses.
 
-**[Pattern] Signature:** TODO...
+## API
 
-**Handler:** TODO... A procedure for generating the Response for a particular Request.... capture names as params... $req, $next...
+```ts
 
-**Decorator:** A special Rule... TODO
+// Multimethod constructor / factory function
+function Multimethod(discriminator: (...args: ArgTypes) => string | Promise<string>): Multimethod;
 
-**Priority:** TODO...
+// Multimethod instance
+type Multimethod = {
 
-**Route:** TODO: ??? An ordered list of Rules that all match an Address.
+    // Call the multimethod
+    (...args: ArgTypes): Result | Promise<Result>;
 
-**Request:** A logical representation... TODO
+    // Create a new multimethod extended with additional methods
+    extend({
+        'pattern 1': (patternbindings, arg1, arg2, ...) => Result | Promise<Result>,
+        'pattern 2': (patternbindings, arg1, arg2, ...) => Result | Promise<Result>,
+        ...
+    }): Multimethod;
 
-**Response:** A logical representation... TODO
+    // Create a new multimethod extended with additional decorators
+    decorate({
+        'pattern 1': (patternbindings, method: Function, args: ArgTypes) => Result | Promise<Result>,
+        'pattern 2': (patternbindings, method: Function, args: ArgTypes) => Result | Promise<Result>,
+        ...
+    }): Multimethod;
+};
 
-**Transport:** TODO... listens; maps btw physical<-->logical rq/rs representations
+```
 
-**Router:** TODO... Disptcher. Computes the Route(s?) to a given Address. Needs a set of Rules.
+
+
+## Discriminants and Patterns
+When a multimethod is called, the first thing it does is pass the arguments to the discriminator function to get the *discriminant* string. The discriminator function is the function that was passed to the constructor when the multimethod was created. The discriminator function has complete freedom to map multimethod arguments to a discriminant string in any way it chooses.
+
+Once the discriminant string is known, is it matched against all the patterns associated with the multimethod's methods. This matching process is required to be unambiguous. In the simplest case, the best-matching method is chosen, and called with the arguments passed to the multimethod. Whatever this method returns is returned from the multimethod.
+
+Various more advanced dispatching behaviours are supported, including:
+- Multiple matching methods, tried from most-specific-match to least-specific-match.
+- *Decorator* methods, which may observe and/or alter the arguments passed in, the value returned, and the control flow.
+
+Two kinds of dispatching errors are detected and reported, depending on the set of patterns that match a given discriminant:
+1. **Unhandled cases**: The set of matching patterns is empty - i.e., no method matches the discriminant.
+2. **Ambiguous cases**: The set of matching patterns contains two or more patterns, where the patterns *cannot* be ordered unambiguously from most- to least-specific.
+
+
+
+
+## License
+
+[MIT © Troy Gerwien](./LICENSE)
